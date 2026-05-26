@@ -36,6 +36,28 @@ It does not:
 - Enable RLS.
 - Expose application records through GET.
 
+## Verified Local Endpoint Test
+
+The guarded local/development endpoint has been tested successfully with a fake Zoho report-label payload.
+
+Verified response characteristics:
+
+```text
+ok: true
+application_status: received
+section_count: 7
+```
+
+The successful local response also returned generated Core IDs for:
+
+- buyer
+- family
+- application
+- event
+- audit log
+
+Important: this endpoint test writes records to the local development database. Unlike the SQL smoke tests, the endpoint request is not wrapped in a rollback transaction. Use fake data only and reset or clean the local database when needed.
+
 ## Required Environment Variables
 
 ```text
@@ -117,6 +139,18 @@ Missing or wrong secret returns `401`.
 Non-object JSON returns `400`.
 
 Database/function errors return a non-200 response with a generic intake failure message.
+
+## Local Data Cleanup
+
+Because endpoint tests write to the local development database, use one of these cleanup options when needed:
+
+```bash
+supabase db reset --local
+```
+
+or delete the specific fake endpoint-test records manually in local development only after reviewing related buyer, family, application, section, event, and audit rows.
+
+Do not create production cleanup scripts from local test data patterns.
 
 ## Production Safety Notes
 
