@@ -32,6 +32,13 @@ The following foundation items are present in the repository and have been local
 - Go-home explicit override/precedence correction applies locally.
 - Phone lookup ambiguity read model applies locally.
 - Go-home effective read model applies locally.
+- Static read-only dashboard shell with placeholder data and initial navigation sections exists.
+- Controlled application approval write foundation and rollback-safe SQL test exist.
+- Controlled reservation creation write foundation and rollback-safe SQL test exist.
+- Zoho application field mapping documentation exists.
+- Zoho-shaped application intake function and rollback-safe API-name payload test exist.
+- Zoho report/PDF-label intake compatibility function and rollback-safe test exist.
+- Guarded local/development application intake endpoint exists.
 - `supabase/tests/core_v1_smoke_tests.sql` passes and rolls back.
 - `supabase/tests/core_go_home_effective_view_tests.sql` passes and rolls back.
 - `npm run lint` passes.
@@ -44,6 +51,10 @@ From Git Bash in the repository root:
 supabase db reset --local
 cat supabase/tests/core_v1_smoke_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
 ```
 
@@ -94,6 +105,31 @@ Core now supports:
 
 Phone lookup now supports ambiguity detection. Ambiguous phone matches must not automatically expose buyer, puppy, payment, or go-home context. Ambiguous matches require verification or staff routing before sensitive details are disclosed.
 
+### Read-Only Dashboard Shell
+
+The Next.js app now contains a static read-only dashboard shell with placeholder data, navigation sections, foundation checks, phone ambiguity examples, and intentionally empty/not-connected states. It is not wired to Supabase records or authenticated actions.
+
+### Controlled Write Foundations
+
+The database now contains controlled, audited write functions for:
+
+- Application approval through `core_approve_application`.
+- Reservation creation through `core_create_reservation`.
+
+Their transaction-wrapped SQL tests exist. These are database write-path foundations only; no authenticated dashboard action, live integration, or automatic decision workflow is enabled.
+
+### Application Intake Foundation
+
+Core now contains:
+
+- Documented Zoho application field mapping.
+- A controlled `core_ingest_zoho_application` database intake function for Zoho-shaped payloads.
+- Compatibility for both Zoho API-name payloads and report/PDF-label payloads.
+- Rollback-safe SQL tests for both payload shapes.
+- A guarded Next.js local/development intake endpoint at `src/app/api/intake/zoho-application/route.ts`.
+
+This endpoint is a local/development intake bridge only at this checkpoint. It does not constitute a live Zoho connection.
+
 ## What Is Not Production Ready
 
 The repository is still foundation work only. It is not a finished CRM, portal, payment system, or phone system.
@@ -102,20 +138,34 @@ Not yet production-ready:
 
 - RLS policies are not enabled for live client exposure.
 - No production data has been imported.
-- No live Zoho, Twilio, email, payment, Home Assistant, camera, or smart mirror integrations are connected.
-- No authenticated admin dashboard has been built.
+- No authenticated dashboard actions have been built.
 - No Puppy Portal has been built.
 - No customer-facing website replacement has been built.
-- No write tools have been approved or exposed.
+- No production-exposed write tools have been approved or exposed.
+- No kennel logging write tools have been built.
 - No live document generation or signature workflow exists.
 
-## Next Recommended Work
+## Still Not Connected Live
 
-The next safe milestone is read-only visibility:
+- Zoho is not connected live.
+- Twilio is not connected live.
+- Email is not sending.
+- Payments are not connected.
+- No production import has happened.
+- RLS is not enabled for live client exposure.
+- The dashboard uses placeholder/static data unless it is wired later through an approved read path.
+- Home Assistant and cameras are not connected.
 
-1. Add dashboard-specific read model documentation and acceptance gates.
-2. Build a read-only admin dashboard shell against existing read models or temporary safe mock data.
-3. Keep all writes, RLS, integrations, imports, and customer-facing behavior deferred until the read-only dashboard is stable.
+## Next Recommended Task
+
+Test the guarded local/development application intake endpoint using a local `.env.local` configuration and a `curl` POST with a fake Zoho report-label payload.
+
+Constraints for that task:
+
+- Use fake test data only.
+- Do not paste or commit Supabase service role keys.
+- Do not connect live Zoho yet.
+- Keep endpoint validation local/development only.
 
 ## Hard Rule Going Forward
 

@@ -37,27 +37,36 @@ The reservation contract total is `200000` cents. Decreases total `85000` cents;
 
 ## Run Locally
 
-Start local Supabase and apply the canonical migration:
+Start local Supabase and apply all current local migrations:
 
 ```bash
 supabase start
-supabase migration up --local
+supabase db reset --local
 ```
 
-Run the smoke-test script with local `psql`, if installed:
+Run the current rollback-safe SQL validation scripts from Git Bash:
 
 ```bash
-psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/core_v1_smoke_tests.sql
+cat supabase/tests/core_v1_smoke_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+npm run lint
 ```
 
-On Windows with Docker available and the local Supabase database container running:
+The SQL validation scripts use fake data and are intended to roll their database changes back at the end.
 
-```powershell
-Get-Content -Raw supabase/tests/core_v1_smoke_tests.sql |
-  docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-```
+## Additional Validation Coverage
 
-The script is safe to rerun because its inserts are rolled back at the end.
+| Test Script | Purpose |
+| --- | --- |
+| `core_go_home_effective_view_tests.sql` | Validates resolved group defaults, explicit individual override behavior, and ungrouped go-home appointment values. |
+| `core_application_approval_write_tool_tests.sql` | Validates controlled approval updates plus event/audit records and queued-notification behavior without sending anything. |
+| `core_create_reservation_write_tool_tests.sql` | Validates controlled reservation creation, puppy status transition, event/audit records, and duplicate active reservation rejection. |
+| `core_zoho_application_intake_tests.sql` | Validates fake Zoho API-name payload intake into Core without a live Zoho connection. |
+| `core_zoho_application_report_label_tests.sql` | Validates fake report/PDF-label payload compatibility without a live Zoho connection. |
 
 ## What The Checks Prove
 

@@ -75,16 +75,15 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [ ] Build server-side phone lookup endpoint.
 - [ ] Connect Twilio to Core lookup.
 
-## Read-Only Dashboard Next
+## Read-Only Dashboard Foundation Completed
 
-- [ ] Define dashboard screen list and acceptance criteria.
-- [ ] Confirm dashboard read models are sufficient.
-- [ ] Add missing read-only dashboard views if needed without new tables unless explicitly approved.
-- [ ] Build read-only admin dashboard shell.
-- [ ] Add dashboard navigation sections: overview, applications, buyers, families, dogs, litters, puppies, reservations, payments, go-home, documents, messages, phone lookup, kennel logs, events.
-- [ ] Add loading, empty, and error states.
-- [ ] Add privacy-safe presentation rules.
-- [ ] Keep all dashboard actions read-only until write tools are approved.
+- [x] Read-only dashboard plan and acceptance criteria documented.
+- [x] Static read-only dashboard shell added with placeholder data.
+- [x] Dashboard navigation sections started: dashboard, applications, buyers, families, dogs, litters, puppies, reservations, payments, go-home, documents, messages, phone lookup, kennel logs, events.
+- [x] Placeholder and not-connected/empty-style shell states started.
+- [x] Shell visibly states that production data and live integrations are not connected.
+- [ ] Replace placeholder dashboard data with an approved read-only server-side data path.
+- [ ] Add authenticated dashboard actions.
 
 ## RLS / Security Still To Do
 
@@ -95,10 +94,15 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [ ] Add RLS policy tests.
 - [ ] Verify no sensitive tables/views are exposed to live clients before policies exist.
 
-## Write Tools Still To Do
+## Controlled Write Foundations Completed
 
-- [ ] Define server-side write tool pattern.
-- [ ] Require validation, authorization, audit logging, and structured errors.
+- [x] Application approval write function added: `core_approve_application`.
+- [x] Application approval rollback-safe SQL test added.
+- [x] Reservation creation write function added: `core_create_reservation`.
+- [x] Reservation creation rollback-safe SQL test added.
+- [x] Completed write functions write operational/audit records as documented.
+- [ ] Connect write functions to authenticated and authorized server-side application actions.
+- [ ] Define the broader server-side write-tool authorization/error pattern.
 - [ ] Add low-risk tools first, such as create operational event, record puppy weight, record feeding, record medication, update puppy status.
 - [ ] Add payment recording only after ledger write rules are validated.
 - [ ] Add go-home update tools only after dashboard/read behavior is stable.
@@ -125,17 +129,22 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [ ] Log all generated messages and interactions.
 - [ ] Keep sensitive decisions staff-approved.
 
-## Applications Still To Do
+## Application Intake Foundation Completed
 
-- [ ] Map current Zoho Forms/application fields to Core.
-- [ ] Design application intake endpoint or import process.
-- [ ] Define application status workflow.
+- [x] Zoho application field mapping documentation added.
+- [x] Zoho API-name intake function added.
+- [x] Zoho API-name intake rollback-safe SQL test added.
+- [x] Zoho report/PDF-label intake compatibility added.
+- [x] Zoho report/PDF-label rollback-safe SQL test added.
+- [x] Guarded local/development application intake endpoint added.
+- [x] Controlled application approval workflow documented and implemented as a database write foundation.
+- [ ] Test the guarded endpoint locally with `.env.local` and a fake Zoho report-label `curl` payload.
 - [ ] Define applicant email template workflow.
 - [ ] Do not auto-approve applicants until workflow is reviewed.
 
 ## Zoho / Legacy Migration Still To Do
 
-- [ ] Inventory Zoho modules and field mappings.
+- [~] Inventory Zoho modules and field mappings. Application intake fields are mapped; remaining live/legacy module inventory is incomplete.
 - [ ] Inventory existing Supabase duplicate tables.
 - [ ] Define source precedence for buyers, families, puppies, reservations, payments, documents, and go-home data.
 - [ ] Create migration map with duplicate detection.
@@ -204,6 +213,36 @@ Stop and review before continuing if any task attempts to:
 - Change financial balance semantics.
 - Change go-home cardinality or override semantics.
 
-## Next Safe Task
+## Still Not Connected Live
 
-Build a read-only dashboard plan and then a read-only dashboard shell. Do not add write actions yet.
+- [ ] Production RLS is not enabled.
+- [ ] Zoho is not connected live.
+- [ ] Twilio is not connected live.
+- [ ] Email is not sending.
+- [ ] Payments are not connected.
+- [ ] No production data import has occurred.
+- [ ] Document generation is not implemented.
+- [ ] Signature provider integration is not implemented.
+- [ ] Customer portal and public website replacement are not implemented.
+- [ ] Kennel logging write tools are not implemented.
+- [ ] Authenticated dashboard actions are not implemented.
+- [ ] The dashboard remains placeholder/static until an approved read path is wired later.
+
+## Current Verified Commands
+
+From Git Bash in the repository root:
+
+```bash
+supabase db reset --local
+cat supabase/tests/core_v1_smoke_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+npm run lint
+```
+
+## Next Recommended Task
+
+Test the guarded local/development application intake endpoint using `.env.local` and a fake Zoho report-label `curl` payload. Use fake data only, do not paste or commit service role keys, and do not connect live Zoho.
