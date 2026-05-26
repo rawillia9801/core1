@@ -131,8 +131,8 @@ begin
   from public.core_application_sections
   where application_id = v_application_id;
 
-  if v_section_count <> 6 then
-    raise exception 'Expected 6 application sections, got %.', v_section_count;
+  if v_section_count <> 7 then
+    raise exception 'Expected 7 application sections, got %.', v_section_count;
   end if;
 
   if not exists (
@@ -154,6 +154,15 @@ begin
       and responses ->> 'Has_Other_Pets' = 'true'
   ) then
     raise exception 'Expected household fit section values.';
+  end if;
+
+  if not exists (
+    select 1
+    from public.core_application_sections
+    where application_id = v_application_id
+      and section_key = 'payment_and_readiness'
+  ) then
+    raise exception 'Expected payment/readiness section to exist after report-label compatibility update.';
   end if;
 
   select count(*) into v_event_count
