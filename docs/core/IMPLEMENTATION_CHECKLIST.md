@@ -68,8 +68,10 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] `core_payment_balance_view` updated to calculate balance using `balance_effect`.
 - [x] Smoke tests cover deposit, payment, credit, fee, admin fee, transport fee, finance charge, refund, chargeback, neutral adjustment, invalid balance effect, and negative amount rejection.
 - [x] Financial balance remains reservation/ledger-derived and is not copied onto buyers.
-- [ ] Build a controlled payment/ledger write action for local/dev use.
-- [ ] Add payment recording validation before any staff-facing use.
+- [x] Controlled `core_record_reservation_payment` database RPC added for posted local/dev deposits and payments.
+- [x] Rollback-safe payment recording test covers decreasing balance, event/audit writes, input rejection, and duplicate external-reference rejection.
+- [ ] Add a guarded local/development dashboard action for the controlled payment RPC.
+- [ ] Add further payment recording validation before any staff-facing use.
 - [ ] Define refund/chargeback workflow before live payment operations.
 - [ ] Connect payment processor only after ledger write rules and security are complete.
 

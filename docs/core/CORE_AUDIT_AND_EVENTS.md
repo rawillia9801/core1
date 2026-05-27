@@ -34,6 +34,8 @@ Audit entries must be treated as append-only accountability records; sensitive v
 
 Any future write affecting `core_financial_ledger` must audit both `entry_type` and `balance_effect`. `entry_type` identifies what kind of financial transaction was recorded, while `balance_effect` identifies whether its non-negative `amount_cents` increases, decreases, or does not affect the amount owed. Refunds, fees, chargebacks, credits, and adjustments must not be inferred from amount sign alone.
 
+`core_record_reservation_payment(...)` is the controlled Core V1 deposit/payment write foundation. It permits only posted `deposit` and `payment` entries, forces `balance_effect = 'decrease'`, derives the buyer from the reservation, and creates both an operational event and audit entry. It does not prove external funds were collected and does not support refunds, fees, chargebacks, or live processor reconciliation.
+
 ## Integration Event Rule
 
 Each inbound webhook or outbound sync event must be persisted before processing. Processing should be idempotent using the source system and external event ID when one exists.

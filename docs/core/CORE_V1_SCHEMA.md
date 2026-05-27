@@ -4,7 +4,7 @@
 
 Core V1 defines a new canonical Supabase Postgres model for Cherolee Core. It does not import production records, replace existing workflows, or delete any existing table. Existing Zoho/Supabase duplicates remain possible migration sources until a later approved mapping project.
 
-The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections live in `supabase/migrations/20260526150000_core_financial_ledger_balance_effect.sql`, `supabase/migrations/20260526160000_core_go_home_cardinality.sql`, `supabase/migrations/20260526170000_core_go_home_group_exceptions.sql`, and `supabase/migrations/20260526180000_core_phone_lookup_ambiguity.sql`.
+The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections and controlled write foundations live in the subsequent migrations, including `20260526150000_core_financial_ledger_balance_effect.sql` and `20260526240000_core_record_reservation_payment_write_tool.sql`.
 
 ## Modeling Rules
 
@@ -103,6 +103,10 @@ balance_due_cents =
 Deposits, payments, refunds, credits, fees, and adjustments must never be treated as fields owned by `core_buyers`.
 
 The financial correction migration assigns no `balance_effect` default for future inserts: each new ledger write must state its effect explicitly. For any pre-correction local/development rows, recognized entry types are backfilled according to the table above and unrecognized rows are conservatively marked `neutral` for review.
+
+`core_record_reservation_payment(...)` is the first controlled financial write RPC. It accepts only `deposit` or `payment`, requires a positive cent amount and a valid actor/reservation, derives `buyer_id` from the reservation, and inserts a `posted` ledger entry with `balance_effect = 'decrease'`. The caller cannot select a different status or balance effect. It also writes `core_events` and `core_audit_log` records.
+
+When an external reference is supplied, this RPC rejects a repeated posted row for the same reservation, entry type, amount, and external reference while holding the reservation row lock. This is local/development accidental-repeat protection, not a completed payment-processor idempotency or reconciliation design.
 
 ## Go-Home Cardinality
 

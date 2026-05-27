@@ -51,6 +51,7 @@ cat supabase/tests/core_v1_smoke_tests.sql | docker exec -i supabase_db_core1 ps
 cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
@@ -65,6 +66,7 @@ The SQL validation scripts use fake data and are intended to roll their database
 | `core_go_home_effective_view_tests.sql` | Validates resolved group defaults, explicit individual override behavior, and ungrouped go-home appointment values. |
 | `core_application_approval_write_tool_tests.sql` | Validates controlled approval updates plus event/audit records and queued-notification behavior without sending anything. |
 | `core_create_reservation_write_tool_tests.sql` | Validates controlled reservation creation, puppy status transition, event/audit records, and duplicate active reservation rejection. |
+| `core_record_reservation_payment_tests.sql` | Validates controlled posted deposits/payments, decreasing balance semantics, event/audit records, and duplicate-reference rejection without connecting payments. |
 | `core_zoho_application_intake_tests.sql` | Validates fake Zoho API-name payload intake into Core without a live Zoho connection. |
 | `core_zoho_application_report_label_tests.sql` | Validates fake report/PDF-label payload compatibility without a live Zoho connection. |
 
@@ -126,6 +128,8 @@ Failures generally mean:
 The follow-up ledger migration backfills recognized existing Core entry types using these rules. Any pre-correction entry type that is not recognized, including an adjustment without prior direction, is marked `neutral` for explicit review rather than changing a balance silently.
 
 There is no default `balance_effect` for future inserts; validated financial write tools must always provide it explicitly.
+
+`core_record_reservation_payment(...)` is intentionally narrow: it records only posted `deposit` and `payment` entries and always writes `balance_effect = 'decrease'`. Its rollback-safe test proves a `$500.00` deposit lowers a `$2,000.00` reservation balance to `$1,500.00`, then a `$250.00` payment lowers it to `$1,250.00`; it also rejects `fee`, zero/negative amounts, missing reservation/actor records, and a repeated external reference for an otherwise identical posted deposit.
 
 ## Go-Home Cardinality Rule
 
