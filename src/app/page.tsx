@@ -1,4 +1,4 @@
-import { approveApplication } from "./application-actions";
+import { approveApplication, createReservation } from "./application-actions";
 import { getDashboardData } from "./dashboard-data";
 
 export const dynamic = "force-dynamic";
@@ -69,13 +69,57 @@ function ApprovalResult({ outcome }: { outcome: string | undefined }) {
   return null;
 }
 
+function ReservationResult({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "success") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Reservation created. Puppy status is now reserved; no payment was recorded.
+      </p>
+    );
+  }
+
+  if (outcome === "not_approved") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Reservation creation requires an approved application.
+      </p>
+    );
+  }
+
+  if (outcome === "missing_links") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Reservation creation requires matched buyer and family records.
+      </p>
+    );
+  }
+
+  if (outcome === "puppy_unavailable") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        The selected puppy is no longer available for reservation.
+      </p>
+    );
+  }
+
+  if (outcome === "error") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Reservation creation failed. Check local server logs for details.
+      </p>
+    );
+  }
+
+  return null;
+}
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ approval?: string }>;
+  searchParams: Promise<{ approval?: string; reservation?: string }>;
 }) {
   const dashboard = await getDashboardData();
-  const { approval } = await searchParams;
+  const { approval, reservation } = await searchParams;
   const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 
   return (
@@ -216,6 +260,7 @@ export default async function Home({
                 >
                   <div className="space-y-3">
                     <ApprovalResult outcome={approval} />
+                    <ReservationResult outcome={reservation} />
                     {dashboard.applications.length > 0 ? (
                       dashboard.applications.map((application) => {
                         const canApprove = ["received", "needs_review"].includes(
@@ -263,6 +308,75 @@ export default async function Home({
                                   className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
                                 >
                                   Approve Application
+                                </button>
+                              </form>
+                            ) : null}
+                            {application.status.toLowerCase() === "approved" &&
+                            application.hasReservationContext ? (
+                              <form action={createReservation} className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+                                <input type="hidden" name="applicationId" value={application.id} />
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Available puppy
+                                  <select
+                                    name="puppyId"
+                                    required
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  >
+                                    <option value="">Select a puppy</option>
+                                    {dashboard.availablePuppies.map((puppy) => (
+                                      <option key={puppy.id} value={puppy.id}>
+                                        {puppy.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  <label className="block text-sm font-medium text-slate-700">
+                                    Contract total (cents)
+                                    <input
+                                      type="number"
+                                      name="contractTotalCents"
+                                      min={1}
+                                      step={1}
+                                      required
+                                      className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                    />
+                                  </label>
+                                  <label className="block text-sm font-medium text-slate-700">
+                                    Deposit required (cents, optional)
+                                    <input
+                                      type="number"
+                                      name="depositRequiredCents"
+                                      min={0}
+                                      step={1}
+                                      className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                    />
+                                  </label>
+                                </div>
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Sale type (optional)
+                                  <input
+                                    type="text"
+                                    name="saleType"
+                                    maxLength={100}
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  />
+                                </label>
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Reservation notes (optional)
+                                  <textarea
+                                    name="notes"
+                                    maxLength={1000}
+                                    rows={2}
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  />
+                                </label>
+                                <button
+                                  type="submit"
+                                  disabled={dashboard.availablePuppies.length === 0}
+                                  className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+                                >
+                                  Create Reservation
                                 </button>
                               </form>
                             ) : null}

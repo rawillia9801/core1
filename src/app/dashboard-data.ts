@@ -7,12 +7,18 @@ type DashboardStat = {
 
 type DashboardApplication = {
   id: string;
+  hasReservationContext: boolean;
   applicant: string;
   email: string;
   status: string;
   source: string;
   submitted: string;
   reference: string;
+};
+
+type DashboardAvailablePuppy = {
+  id: string;
+  label: string;
 };
 
 type DashboardApplicationSection = {
@@ -62,6 +68,7 @@ type CountResult = {
 type ApplicationRow = {
   id: string;
   buyer_id: string | null;
+  family_id: string | null;
   external_reference: string | null;
   status: string | null;
   source: string | null;
@@ -90,6 +97,10 @@ type PuppyRow = {
   name: string | null;
   collar_color: string | null;
   sex: string | null;
+};
+
+type AvailablePuppyRow = PuppyRow & {
+  status: string | null;
 };
 
 type ReservationRow = {
@@ -138,6 +149,7 @@ export type DashboardData = {
   navigation: readonly string[];
   applications: DashboardApplication[];
   applicationSections: DashboardApplicationSection[];
+  availablePuppies: DashboardAvailablePuppy[];
   goHomes: DashboardGoHome[];
   reservations: DashboardReservation[];
   phoneLookups: DashboardPhoneLookup[];
@@ -308,6 +320,7 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     navigation,
     applications: [],
     applicationSections: [],
+    availablePuppies: [],
     goHomes: [],
     reservations: [],
     phoneLookups: [],
@@ -420,6 +433,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       applicationsCount,
       receivedApplicationsCount,
       applications,
+      availablePuppies,
+      activePuppyReservations,
       reservationsCount,
       reservations,
       balances,
@@ -432,9 +447,20 @@ export async function getDashboardData(): Promise<DashboardData> {
         status: "eq.received",
       }),
       readRows<ApplicationRow>(restUrl, serviceRoleKey, "core_applications", {
-        select: "id,buyer_id,external_reference,status,source,submitted_at,created_at",
+        select: "id,buyer_id,family_id,external_reference,status,source,submitted_at,created_at",
         order: "created_at.desc",
         limit: "6",
+      }),
+      readRows<AvailablePuppyRow>(restUrl, serviceRoleKey, "core_puppies", {
+        select: "id,name,collar_color,sex,status",
+        status: "eq.available",
+        order: "name.asc.nullslast,collar_color.asc.nullslast",
+        limit: "100",
+      }),
+      readRows<Pick<ReservationRow, "puppy_id">>(restUrl, serviceRoleKey, "core_reservations", {
+        select: "puppy_id",
+        status: "not.in.(cancelled,void,released)",
+        limit: "1000",
       }),
       readCount(restUrl, serviceRoleKey, "core_reservations"),
       readRows<ReservationRow>(restUrl, serviceRoleKey, "core_reservations", {
@@ -512,6 +538,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     const balancesByReservationId = new Map(
       balances.map((balance) => [balance.reservation_id, balance]),
     );
+    const activelyReservedPuppyIds = new Set(
+      activePuppyReservations
+        .map((reservation) => reservation.puppy_id)
+        .filter(Boolean) as string[],
+    );
 
     const totalBalanceDueCents = balances.reduce(
       (sum, balance) => sum + Math.max(balance.balance_due_cents ?? 0, 0),
@@ -554,6 +585,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
         return {
           id: application.id,
+          hasReservationContext: Boolean(application.buyer_id && application.family_id),
           applicant: buyerName(buyer),
           email: buyerEmail(buyer),
           status: application.status || "Unknown",
@@ -582,6 +614,12 @@ export async function getDashboardData(): Promise<DashboardData> {
           })),
         };
       }),
+      availablePuppies: availablePuppies
+        .filter((puppy) => !activelyReservedPuppyIds.has(puppy.id))
+        .map((puppy) => ({
+          id: puppy.id,
+          label: puppyName(puppy),
+        })),
       goHomes: goHomes.map((goHome) => ({
         puppy: puppyName(goHome.puppy_id ? puppiesById.get(goHome.puppy_id) : undefined),
         buyer: buyerName(goHome.buyer_id ? buyersById.get(goHome.buyer_id) : undefined),
