@@ -199,6 +199,15 @@ export async function createReservation(formData: FormData) {
     redirect("/?reservation=error");
   }
 
+  if (deposit.value !== null && deposit.value > contractTotalCents) {
+    logReservationFailure("deposit required exceeds contract total", {
+      applicationId,
+      contractTotalCents,
+      depositRequiredCents: deposit.value,
+    });
+    redirect("/?reservation=invalid_amounts");
+  }
+
   try {
     const { restUrl, serviceRoleKey, actorProfileId } = getLocalApprovalConfig();
     const headers = serverHeaders(serviceRoleKey);

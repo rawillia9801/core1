@@ -102,6 +102,14 @@ function ReservationResult({ outcome }: { outcome: string | undefined }) {
     );
   }
 
+  if (outcome === "invalid_amounts") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Deposit required cannot exceed the contract total.
+      </p>
+    );
+  }
+
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
