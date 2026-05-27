@@ -5,6 +5,15 @@ type DashboardStat = {
   tone: string;
 };
 
+type DashboardApplication = {
+  applicant: string;
+  email: string;
+  status: string;
+  source: string;
+  submitted: string;
+  reference: string;
+};
+
 type DashboardGoHome = {
   puppy: string;
   buyer: string;
@@ -35,6 +44,16 @@ type DashboardEvent = {
 
 type CountResult = {
   count: number;
+};
+
+type ApplicationRow = {
+  id: string;
+  buyer_id: string | null;
+  external_reference: string | null;
+  status: string | null;
+  source: string | null;
+  submitted_at: string | null;
+  created_at: string | null;
 };
 
 type BuyerRow = {
@@ -96,6 +115,7 @@ export type DashboardData = {
   stats: DashboardStat[];
   foundationChecks: readonly string[];
   navigation: readonly string[];
+  applications: DashboardApplication[];
   goHomes: DashboardGoHome[];
   reservations: DashboardReservation[];
   phoneLookups: DashboardPhoneLookup[];
@@ -168,16 +188,24 @@ function formatCurrencyFromCents(value: number | null | undefined) {
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {
-    return "Not scheduled";
+    return "Not available";
   }
 
   const parsed = new Date(value);
 
   if (Number.isNaN(parsed.getTime())) {
-    return "Not scheduled";
+    return "Not available";
   }
 
   return dateTimeFormatter.format(parsed);
+}
+
+function formatScheduledDateTime(value: string | null | undefined) {
+  if (!value) {
+    return "Not scheduled";
+  }
+
+  return formatDateTime(value);
 }
 
 function buyerName(buyer: BuyerRow | undefined) {
@@ -188,6 +216,10 @@ function buyerName(buyer: BuyerRow | undefined) {
   const fullName = [buyer.first_name, buyer.last_name].filter(Boolean).join(" ");
 
   return buyer.preferred_name || fullName || buyer.email_normalized || "Unnamed buyer";
+}
+
+function buyerEmail(buyer: BuyerRow | undefined) {
+  return buyer?.email_normalized || "No email on file";
 }
 
 function puppyName(puppy: PuppyRow | undefined) {
@@ -228,6 +260,7 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     ],
     foundationChecks,
     navigation,
+    applications: [],
     goHomes: [],
     reservations: [],
     phoneLookups: [],
@@ -339,6 +372,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     const [
       applicationsCount,
       receivedApplicationsCount,
+      applications,
       reservationsCount,
       reservations,
       balances,
@@ -349,6 +383,11 @@ export async function getDashboardData(): Promise<DashboardData> {
       readCount(restUrl, serviceRoleKey, "core_applications"),
       readCount(restUrl, serviceRoleKey, "core_applications", {
         status: "eq.received",
+      }),
+      readRows<ApplicationRow>(restUrl, serviceRoleKey, "core_applications", {
+        select: "id,buyer_id,external_reference,status,source,submitted_at,created_at",
+        order: "created_at.desc",
+        limit: "6",
       }),
       readCount(restUrl, serviceRoleKey, "core_reservations"),
       readRows<ReservationRow>(restUrl, serviceRoleKey, "core_reservations", {
@@ -381,6 +420,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     const buyerIds = Array.from(
       new Set(
         [
+          ...applications.map((application) => application.buyer_id),
           ...reservations.map((reservation) => reservation.buyer_id),
           ...goHomes.map((goHome) => goHome.buyer_id),
         ].filter(Boolean) as string[],
@@ -450,10 +490,26 @@ export async function getDashboardData(): Promise<DashboardData> {
       ],
       foundationChecks,
       navigation,
+      applications: applications.map((application) => {
+        const buyer = application.buyer_id
+          ? buyersById.get(application.buyer_id)
+          : undefined;
+
+        return {
+          applicant: buyerName(buyer),
+          email: buyerEmail(buyer),
+          status: application.status || "Unknown",
+          source: application.source || "Unknown source",
+          submitted: formatDateTime(application.submitted_at ?? application.created_at),
+          reference: application.external_reference || application.id.slice(0, 8),
+        };
+      }),
       goHomes: goHomes.map((goHome) => ({
         puppy: puppyName(goHome.puppy_id ? puppiesById.get(goHome.puppy_id) : undefined),
         buyer: buyerName(goHome.buyer_id ? buyersById.get(goHome.buyer_id) : undefined),
-        time: formatDateTime(goHome.effective_scheduled_at ?? goHome.effective_window_start),
+        time: formatScheduledDateTime(
+          goHome.effective_scheduled_at ?? goHome.effective_window_start,
+        ),
         source:
           goHome.source_of_schedule ||
           (goHome.has_individual_override ? "Individual override" : "Group/default"),
