@@ -469,7 +469,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       ? await readRows<ApplicationSectionRow>(restUrl, serviceRoleKey, "core_application_sections", {
           select: "application_id,section_key,section_label,status,responses",
           application_id: `eq.${latestApplicationId}`,
-          order: "created_at.asc",
+          order: "section_label.asc.nullslast,section_key.asc.nullslast",
         })
       : [];
 
