@@ -1,3 +1,4 @@
+import { approveApplication } from "./application-actions";
 import { getDashboardData } from "./dashboard-data";
 
 export const dynamic = "force-dynamic";
@@ -40,8 +41,41 @@ function EmptyList({ text }: { text: string }) {
   );
 }
 
-export default async function Home() {
+function ApprovalResult({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "success") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Application approved. No email was sent.
+      </p>
+    );
+  }
+
+  if (outcome === "not_eligible") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Only received or needs review applications can be approved.
+      </p>
+    );
+  }
+
+  if (outcome === "error") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Application approval failed. Check local approval configuration and try again.
+      </p>
+    );
+  }
+
+  return null;
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ approval?: string }>;
+}) {
   const dashboard = await getDashboardData();
+  const { approval } = await searchParams;
   const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 
   return (
@@ -181,31 +215,60 @@ export default async function Home() {
                   description="Latest local Core applications imported from guarded intake or smoke data."
                 >
                   <div className="space-y-3">
+                    <ApprovalResult outcome={approval} />
                     {dashboard.applications.length > 0 ? (
-                      dashboard.applications.map((application) => (
-                        <div
-                          key={application.id}
-                          className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_auto] lg:items-center"
-                        >
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="font-semibold text-slate-950">
-                                {application.applicant}
-                              </p>
-                              <StatusBadge>{application.status}</StatusBadge>
+                      dashboard.applications.map((application) => {
+                        const canApprove = ["received", "needs_review"].includes(
+                          application.status.toLowerCase(),
+                        );
+
+                        return (
+                          <div
+                            key={application.id}
+                            className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                          >
+                            <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="font-semibold text-slate-950">
+                                    {application.applicant}
+                                  </p>
+                                  <StatusBadge>{application.status}</StatusBadge>
+                                </div>
+                                <p className="mt-1 text-sm text-slate-600">
+                                  {application.email}
+                                </p>
+                                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                  {application.source} · {application.reference}
+                                </p>
+                              </div>
+                              <div className="text-sm font-semibold text-slate-500 lg:text-right">
+                                {application.submitted}
+                              </div>
                             </div>
-                            <p className="mt-1 text-sm text-slate-600">
-                              {application.email}
-                            </p>
-                            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                              {application.source} · {application.reference}
-                            </p>
+                            {canApprove ? (
+                              <form action={approveApplication} className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+                                <input type="hidden" name="applicationId" value={application.id} />
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Decision notes (optional)
+                                  <textarea
+                                    name="decisionNotes"
+                                    maxLength={1000}
+                                    rows={2}
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  />
+                                </label>
+                                <button
+                                  type="submit"
+                                  className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
+                                >
+                                  Approve Application
+                                </button>
+                              </form>
+                            ) : null}
                           </div>
-                          <div className="text-sm font-semibold text-slate-500 lg:text-right">
-                            {application.submitted}
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <EmptyList text="No application rows found in local Supabase." />
                     )}
