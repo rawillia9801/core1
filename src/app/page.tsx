@@ -42,6 +42,7 @@ function EmptyList({ text }: { text: string }) {
 
 export default async function Home() {
   const dashboard = await getDashboardData();
+  const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
@@ -183,7 +184,7 @@ export default async function Home() {
                     {dashboard.applications.length > 0 ? (
                       dashboard.applications.map((application) => (
                         <div
-                          key={application.reference}
+                          key={application.id}
                           className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_auto] lg:items-center"
                         >
                           <div>
@@ -207,6 +208,59 @@ export default async function Home() {
                       ))
                     ) : (
                       <EmptyList text="No application rows found in local Supabase." />
+                    )}
+                  </div>
+                </SectionCard>
+
+                <SectionCard
+                  title="Latest Application Detail"
+                  description={
+                    latestApplicationReference
+                      ? `Read-only section responses for ${latestApplicationReference}.`
+                      : "Read-only section responses for the latest imported application."
+                  }
+                >
+                  <div className="space-y-4">
+                    {dashboard.applicationSections.length > 0 ? (
+                      dashboard.applicationSections.map((section) => (
+                        <div
+                          key={`${section.applicationId}-${section.sectionKey}`}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                        >
+                          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-slate-950">
+                                {section.sectionLabel}
+                              </p>
+                              <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                {section.sectionKey}
+                              </p>
+                            </div>
+                            <StatusBadge>{section.status}</StatusBadge>
+                          </div>
+                          {section.responses.length > 0 ? (
+                            <dl className="grid gap-2 sm:grid-cols-2">
+                              {section.responses.map((response) => (
+                                <div
+                                  key={`${section.sectionKey}-${response.label}`}
+                                  className="rounded-xl border border-slate-200 bg-white p-3"
+                                >
+                                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    {response.label}
+                                  </dt>
+                                  <dd className="mt-1 text-sm leading-6 text-slate-700">
+                                    {response.value}
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                          ) : (
+                            <EmptyList text="This section has no stored responses." />
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyList text="No application section responses found for the latest local application." />
                     )}
                   </div>
                 </SectionCard>
