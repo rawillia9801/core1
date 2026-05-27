@@ -11,6 +11,12 @@ type ApplicationStatusRow = {
   status: string | null;
 };
 
+function logApprovalFailure(reason: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error("[core approval]", reason, details ?? {});
+  }
+}
+
 function getLocalApprovalConfig() {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Approval actions are disabled outside local/development use.");
@@ -21,6 +27,11 @@ function getLocalApprovalConfig() {
   const actorProfileId = process.env.CORE_APPROVAL_ACTOR_PROFILE_ID;
 
   if (!supabaseUrl || !serviceRoleKey || !actorProfileId || !UUID_PATTERN.test(actorProfileId)) {
+    logApprovalFailure("missing or invalid local approval configuration", {
+      hasSupabaseUrl: Boolean(supabaseUrl),
+      hasServiceRoleKey: Boolean(serviceRoleKey),
+      hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
+    });
     throw new Error("Local approval configuration is incomplete.");
   }
 
@@ -44,7 +55,9 @@ export async function approveApplication(formData: FormData) {
   const decisionNotes = String(formData.get("decisionNotes") ?? "").trim().slice(0, 1000);
   let outcome = "error";
 
-  if (UUID_PATTERN.test(applicationId)) {
+  if (!UUID_PATTERN.test(applicationId)) {
+    logApprovalFailure("invalid application id submitted", { applicationId });
+  } else {
     try {
       const { restUrl, serviceRoleKey, actorProfileId } = getLocalApprovalConfig();
       const applicationResponse = await fetch(
@@ -55,11 +68,26 @@ export async function approveApplication(formData: FormData) {
         },
       );
 
-      if (applicationResponse.ok) {
+      if (!applicationResponse.ok) {
+        const responseBody = await applicationResponse.text().catch(() => "");
+        logApprovalFailure("application status lookup failed", {
+          applicationId,
+          httpStatus: applicationResponse.status,
+          responseBody,
+        });
+      } else {
         const applicationRows = (await applicationResponse.json()) as ApplicationStatusRow[];
-        const status = applicationRows[0]?.status?.toLowerCase();
+        const applicationRow = applicationRows[0];
+        const status = applicationRow?.status?.toLowerCase();
 
-        if (!status || !APPROVABLE_STATUSES.has(status)) {
+        if (!applicationRow) {
+          logApprovalFailure("application status lookup returned no row", { applicationId });
+          outcome = "error";
+        } else if (!status || !APPROVABLE_STATUSES.has(status)) {
+          logApprovalFailure("application is not eligible for approval", {
+            applicationId,
+            status: applicationRow.status,
+          });
           outcome = "not_eligible";
         } else {
           const approvalResponse = await fetch(`${restUrl}/rpc/core_approve_application`, {
@@ -77,10 +105,21 @@ export async function approveApplication(formData: FormData) {
           if (approvalResponse.ok) {
             revalidatePath("/");
             outcome = "success";
+          } else {
+            const responseBody = await approvalResponse.text().catch(() => "");
+            logApprovalFailure("approval RPC failed", {
+              applicationId,
+              httpStatus: approvalResponse.status,
+              responseBody,
+            });
           }
         }
       }
-    } catch {
+    } catch (error) {
+      logApprovalFailure("approval action threw an error", {
+        applicationId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
       outcome = "error";
     }
   }
