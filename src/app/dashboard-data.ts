@@ -42,10 +42,17 @@ type DashboardGoHome = {
 };
 
 type DashboardReservation = {
+  id: string;
+  applicationReference: string;
   puppy: string;
+  puppyStatus: string;
   buyer: string;
+  buyerEmail: string;
   status: string;
+  contractTotal: string;
+  depositRequired: string;
   balance: string;
+  reservedAt: string;
 };
 
 type DashboardPhoneLookup = {
@@ -109,6 +116,22 @@ type ReservationRow = {
   reserved_at: string | null;
   buyer_id: string | null;
   puppy_id: string | null;
+};
+
+type ReservationSummaryRow = {
+  reservation_id: string;
+  reservation_status: string | null;
+  reserved_at: string | null;
+  buyer_id: string | null;
+  buyer_name: string | null;
+  buyer_email: string | null;
+  puppy_id: string | null;
+  puppy_name: string | null;
+  puppy_status: string | null;
+  application_id: string | null;
+  contract_total_cents: number | null;
+  deposit_required_cents: number | null;
+  balance_due_cents: number | null;
 };
 
 type PaymentBalanceRow = {
@@ -218,6 +241,10 @@ export const emptyStates = [
 
 function formatCurrencyFromCents(value: number | null | undefined) {
   return currencyFormatter.format((value ?? 0) / 100);
+}
+
+function formatOptionalCurrencyFromCents(value: number | null | undefined) {
+  return value === null || value === undefined ? "Not available" : formatCurrencyFromCents(value);
 }
 
 function formatDateTime(value: string | null | undefined) {
@@ -463,8 +490,9 @@ export async function getDashboardData(): Promise<DashboardData> {
         limit: "1000",
       }),
       readCount(restUrl, serviceRoleKey, "core_reservations"),
-      readRows<ReservationRow>(restUrl, serviceRoleKey, "core_reservations", {
-        select: "id,status,reserved_at,buyer_id,puppy_id",
+      readRows<ReservationSummaryRow>(restUrl, serviceRoleKey, "core_reservation_summary_view", {
+        select:
+          "reservation_id,reservation_status,reserved_at,buyer_id,buyer_name,buyer_email,puppy_id,puppy_name,puppy_status,application_id,contract_total_cents,deposit_required_cents,balance_due_cents",
         order: "reserved_at.desc.nullslast",
         limit: "5",
       }),
@@ -516,8 +544,11 @@ export async function getDashboardData(): Promise<DashboardData> {
         ].filter(Boolean) as string[],
       ),
     );
+    const reservationApplicationIds = Array.from(
+      new Set(reservations.map((reservation) => reservation.application_id).filter(Boolean) as string[]),
+    );
 
-    const [buyers, puppies] = await Promise.all([
+    const [buyers, puppies, reservationApplications] = await Promise.all([
       buyerIds.length > 0
         ? readRows<BuyerRow>(restUrl, serviceRoleKey, "core_buyers", {
             select: "id,first_name,last_name,preferred_name,email_normalized",
@@ -530,13 +561,24 @@ export async function getDashboardData(): Promise<DashboardData> {
             id: `in.(${puppyIds.join(",")})`,
           })
         : Promise.resolve([]),
+      reservationApplicationIds.length > 0
+        ? readRows<Pick<ApplicationRow, "id" | "external_reference">>(
+            restUrl,
+            serviceRoleKey,
+            "core_applications",
+            {
+              select: "id,external_reference",
+              id: `in.(${reservationApplicationIds.join(",")})`,
+            },
+          )
+        : Promise.resolve([]),
     ]);
 
     const buyersById = new Map(buyers.map((buyer) => [buyer.id, buyer]));
     const puppiesById = new Map(puppies.map((puppy) => [puppy.id, puppy]));
     const applicationsById = new Map(applications.map((application) => [application.id, application]));
-    const balancesByReservationId = new Map(
-      balances.map((balance) => [balance.reservation_id, balance]),
+    const reservationApplicationsById = new Map(
+      reservationApplications.map((application) => [application.id, application]),
     );
     const activelyReservedPuppyIds = new Set(
       activePuppyReservations
@@ -632,17 +674,22 @@ export async function getDashboardData(): Promise<DashboardData> {
         status: goHome.effective_status || "Pending",
       })),
       reservations: reservations.map((reservation) => {
-        const matchingBalance = balancesByReservationId.get(reservation.id);
+        const application = reservation.application_id
+          ? reservationApplicationsById.get(reservation.application_id)
+          : undefined;
 
         return {
-          puppy: puppyName(
-            reservation.puppy_id ? puppiesById.get(reservation.puppy_id) : undefined,
-          ),
-          buyer: buyerName(
-            reservation.buyer_id ? buyersById.get(reservation.buyer_id) : undefined,
-          ),
-          status: reservation.status || "Unknown",
-          balance: `${formatCurrencyFromCents(matchingBalance?.balance_due_cents)} due`,
+          id: reservation.reservation_id.slice(0, 8),
+          applicationReference: application?.external_reference || "No application reference",
+          puppy: reservation.puppy_name || "Unassigned puppy",
+          puppyStatus: reservation.puppy_status || "Unknown",
+          buyer: reservation.buyer_name || "Unassigned buyer",
+          buyerEmail: reservation.buyer_email || "No email on file",
+          status: reservation.reservation_status || "Unknown",
+          contractTotal: formatOptionalCurrencyFromCents(reservation.contract_total_cents),
+          depositRequired: formatOptionalCurrencyFromCents(reservation.deposit_required_cents),
+          balance: formatOptionalCurrencyFromCents(reservation.balance_due_cents),
+          reservedAt: formatDateTime(reservation.reserved_at),
         };
       }),
       phoneLookups: phoneLookups.map((lookup) => ({

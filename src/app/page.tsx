@@ -490,43 +490,58 @@ export default async function Home({
                 </SectionCard>
 
                 <SectionCard
-                  title="Reservations"
-                  description="Read from Core reservations with buyer, puppy, and ledger balance summaries."
+                  title="Reservation Workflow Status"
+                  description="Latest local/development reservations from the Core reservation summary read model."
                 >
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                  <div className="space-y-3">
                     {dashboard.reservations.length > 0 ? (
-                      <table className="w-full min-w-[640px] text-left text-sm">
-                        <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                          <tr>
-                            <th className="px-4 py-3">Puppy</th>
-                            <th className="px-4 py-3">Buyer</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Balance</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 bg-white">
-                          {dashboard.reservations.map((reservation) => (
-                            <tr key={`${reservation.puppy}-${reservation.buyer}`}>
-                              <td className="px-4 py-4 font-semibold text-slate-950">
-                                {reservation.puppy}
-                              </td>
-                              <td className="px-4 py-4 text-slate-600">
-                                {reservation.buyer}
-                              </td>
-                              <td className="px-4 py-4">
-                                <StatusBadge>{reservation.status}</StatusBadge>
-                              </td>
-                              <td className="px-4 py-4 font-semibold text-slate-950">
-                                {reservation.balance}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      dashboard.reservations.map((reservation) => (
+                        <div
+                          key={reservation.id}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-slate-950">{reservation.puppy}</p>
+                              <p className="mt-1 text-sm text-slate-600">
+                                {reservation.buyer} · {reservation.buyerEmail}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <StatusBadge>{reservation.status}</StatusBadge>
+                              <StatusBadge>Puppy: {reservation.puppyStatus}</StatusBadge>
+                            </div>
+                          </div>
+                          <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Reservation</dt>
+                              <dd className="mt-1 text-slate-700">{reservation.id}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Application</dt>
+                              <dd className="mt-1 text-slate-700">{reservation.applicationReference}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Reserved</dt>
+                              <dd className="mt-1 text-slate-700">{reservation.reservedAt}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Contract Total</dt>
+                              <dd className="mt-1 font-semibold text-slate-950">{reservation.contractTotal}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Deposit Required</dt>
+                              <dd className="mt-1 font-semibold text-slate-950">{reservation.depositRequired}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Balance Due</dt>
+                              <dd className="mt-1 font-semibold text-slate-950">{reservation.balance}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                      ))
                     ) : (
-                      <div className="p-4">
-                        <EmptyList text="No reservation rows found in local Supabase." />
-                      </div>
+                      <EmptyList text="No local/development reservations found yet. Approve an application and create a reservation to verify this workflow." />
                     )}
                   </div>
                 </SectionCard>
