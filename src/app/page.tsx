@@ -176,6 +176,42 @@ export default async function Home() {
             <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
               <div className="space-y-6">
                 <SectionCard
+                  title="Received Applications"
+                  description="Latest local Core applications imported from guarded intake or smoke data."
+                >
+                  <div className="space-y-3">
+                    {dashboard.applications.length > 0 ? (
+                      dashboard.applications.map((application) => (
+                        <div
+                          key={application.reference}
+                          className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_auto] lg:items-center"
+                        >
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-semibold text-slate-950">
+                                {application.applicant}
+                              </p>
+                              <StatusBadge>{application.status}</StatusBadge>
+                            </div>
+                            <p className="mt-1 text-sm text-slate-600">
+                              {application.email}
+                            </p>
+                            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              {application.source} · {application.reference}
+                            </p>
+                          </div>
+                          <div className="text-sm font-semibold text-slate-500 lg:text-right">
+                            {application.submitted}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyList text="No application rows found in local Supabase." />
+                    )}
+                  </div>
+                </SectionCard>
+
+                <SectionCard
                   title="Upcoming Go-Homes"
                   description="Read from the effective go-home view."
                 >
