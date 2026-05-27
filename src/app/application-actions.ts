@@ -141,32 +141,35 @@ export async function approveApplication(formData: FormData) {
   redirect(`/?approval=${outcome}`);
 }
 
-function parseRequiredPositiveCents(value: FormDataEntryValue | null) {
+function parseDollarAmountToCents(value: FormDataEntryValue | null) {
   const text = String(value ?? "").trim();
 
-  if (!/^\d+$/.test(text)) {
+  if (!/^\d+(?:\.\d{1,2})?$/.test(text)) {
     return null;
   }
 
-  const cents = Number.parseInt(text, 10);
+  const [dollars, fraction = ""] = text.split(".");
+  const cents = Number.parseInt(dollars, 10) * 100 + Number.parseInt(fraction.padEnd(2, "0") || "0", 10);
 
-  return Number.isSafeInteger(cents) && cents > 0 ? cents : null;
+  return Number.isSafeInteger(cents) ? cents : null;
 }
 
-function parseOptionalNonNegativeCents(value: FormDataEntryValue | null) {
+function parseRequiredPositiveDollars(value: FormDataEntryValue | null) {
+  const cents = parseDollarAmountToCents(value);
+
+  return cents !== null && cents > 0 ? cents : null;
+}
+
+function parseOptionalNonNegativeDollars(value: FormDataEntryValue | null) {
   const text = String(value ?? "").trim();
 
   if (!text) {
     return { valid: true, value: null };
   }
 
-  if (!/^\d+$/.test(text)) {
-    return { valid: false, value: null };
-  }
+  const cents = parseDollarAmountToCents(text);
 
-  const cents = Number.parseInt(text, 10);
-
-  if (!Number.isSafeInteger(cents) || cents < 0) {
+  if (cents === null || cents < 0) {
     return { valid: false, value: null };
   }
 
@@ -176,8 +179,8 @@ function parseOptionalNonNegativeCents(value: FormDataEntryValue | null) {
 export async function createReservation(formData: FormData) {
   const applicationId = String(formData.get("applicationId") ?? "").trim();
   const puppyId = String(formData.get("puppyId") ?? "").trim();
-  const contractTotalCents = parseRequiredPositiveCents(formData.get("contractTotalCents"));
-  const deposit = parseOptionalNonNegativeCents(formData.get("depositRequiredCents"));
+  const contractTotalCents = parseRequiredPositiveDollars(formData.get("contractTotalDollars"));
+  const deposit = parseOptionalNonNegativeDollars(formData.get("depositRequiredDollars"));
   const saleType = String(formData.get("saleType") ?? "").trim().slice(0, 100);
   const notes = String(formData.get("notes") ?? "").trim().slice(0, 1000);
   let outcome = "error";
@@ -191,12 +194,12 @@ export async function createReservation(formData: FormData) {
   }
 
   if (!contractTotalCents || !deposit.valid) {
-    logReservationFailure("invalid reservation amount submitted", {
+    logReservationFailure("invalid dollar amount submitted for reservation", {
       applicationId,
-      hasValidContractTotalCents: Boolean(contractTotalCents),
-      hasValidDepositRequiredCents: deposit.valid,
+      hasValidContractTotalDollars: Boolean(contractTotalCents),
+      hasValidDepositRequiredDollars: deposit.valid,
     });
-    redirect("/?reservation=error");
+    redirect("/?reservation=invalid_money");
   }
 
   if (deposit.value !== null && deposit.value > contractTotalCents) {

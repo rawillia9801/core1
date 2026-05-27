@@ -110,6 +110,14 @@ function ReservationResult({ outcome }: { outcome: string | undefined }) {
     );
   }
 
+  if (outcome === "invalid_money") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Enter dollar amounts using numbers with up to two decimal places, such as 2000.00.
+      </p>
+    );
+  }
+
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -340,23 +348,23 @@ export default async function Home({
                                 </label>
                                 <div className="grid gap-3 sm:grid-cols-2">
                                   <label className="block text-sm font-medium text-slate-700">
-                                    Contract total (cents)
+                                    Contract total (dollars)
                                     <input
-                                      type="number"
-                                      name="contractTotalCents"
-                                      min={1}
-                                      step={1}
+                                      type="text"
+                                      inputMode="decimal"
+                                      name="contractTotalDollars"
+                                      placeholder="2000.00"
                                       required
                                       className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
                                     />
                                   </label>
                                   <label className="block text-sm font-medium text-slate-700">
-                                    Deposit required (cents, optional)
+                                    Deposit required (dollars, optional)
                                     <input
-                                      type="number"
-                                      name="depositRequiredCents"
-                                      min={0}
-                                      step={1}
+                                      type="text"
+                                      inputMode="decimal"
+                                      name="depositRequiredDollars"
+                                      placeholder="500.00"
                                       className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
                                     />
                                   </label>
