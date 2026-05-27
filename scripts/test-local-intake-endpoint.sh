@@ -7,29 +7,22 @@ set -euo pipefail
 # Usage:
 #   CORE_INTAKE_SECRET=your-local-secret ./scripts/test-local-intake-endpoint.sh
 #
-# Example only:
-#   CORE_INTAKE_SECRET=local-test-secret-only ./scripts/test-local-intake-endpoint.sh
+ENDPOINT_URL="http://localhost:3000/api/intake/zoho-application"
+INTAKE_SECRET="${CORE_INTAKE_SECRET:-local-test-secret-only}"
 
-ENDPOINT_URL="${CORE_INTAKE_ENDPOINT_URL:-http://localhost:3000/api/intake/zoho-application}"
-INTAKE_SECRET="${CORE_INTAKE_SECRET:-}"
+echo "Endpoint: $ENDPOINT_URL"
+echo "Payload: fake local/dev Zoho report-label application data only"
+echo
 
-if [[ -z "$INTAKE_SECRET" ]]; then
-  echo "ERROR: CORE_INTAKE_SECRET is required."
-  echo
-  echo "Example:"
-  echo "  CORE_INTAKE_SECRET=local-test-secret-only ./scripts/test-local-intake-endpoint.sh"
-  exit 1
-fi
-
-curl -sS -X POST "$ENDPOINT_URL" \
+response="$(curl -sS -X POST "$ENDPOINT_URL" \
   -H "Content-Type: application/json" \
   -H "x-core-intake-secret: $INTAKE_SECRET" \
   --data-binary @- <<'JSON'
 {
   "Form": "Puppy Application",
-  "Southwest Virginia Chihuahua Application ID": "TEST-REPORT-LOCAL-SCRIPT-001",
-  "First and Last Name": "Report Test Applicant",
-  "Email Address": "report.test.applicant@example.invalid",
+  "Southwest Virginia Chihuahua Application ID": "LOCAL-SCRIPT-ENDPOINT-TEST-001",
+  "First and Last Name": "Local Script Test Applicant",
+  "Email Address": "local.script.applicant@example.invalid",
   "Phone Number": "+1 (276) 555-0501",
   "Street Address": "100 Test Report Lane",
   "City": "Testville",
@@ -63,5 +56,8 @@ curl -sS -X POST "$ENDPOINT_URL" \
   "Comments": "No Comments"
 }
 JSON
+)"
 
 echo
+echo "Response body:"
+printf '%s\n' "$response"

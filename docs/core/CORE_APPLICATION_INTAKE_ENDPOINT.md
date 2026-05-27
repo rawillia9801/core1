@@ -89,6 +89,22 @@ Start the app:
 npm run dev
 ```
 
+### Local Helper Script
+
+From Git Bash, with the local development app running, use the fake-payload helper:
+
+```bash
+./scripts/test-local-intake-endpoint.sh
+```
+
+The script posts fake report-label data only to `http://localhost:3000/api/intake/zoho-application` using external reference `LOCAL-SCRIPT-ENDPOINT-TEST-001`. It uses `CORE_INTAKE_SECRET` when set, or the local-only default `local-test-secret-only` otherwise:
+
+```bash
+CORE_INTAKE_SECRET=your-local-test-secret ./scripts/test-local-intake-endpoint.sh
+```
+
+The script does not contain or read a Supabase service role key, and it does not connect to live Zoho. Endpoint tests write fake records to the local development database.
+
 Example request:
 
 ```bash
