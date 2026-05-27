@@ -1,8 +1,10 @@
-# Cherolee Core Implementation Checklist
+# Cherolee Core Complete Implementation Checklist
 
 ## Purpose
 
-This checklist tracks what is completed, what is next, what is blocked, and what is intentionally deferred. It should be updated as work lands in the repository.
+This checklist tracks the full Core path from local foundation work to staff-only staging, internal production use, and customer-facing launch.
+
+It should be updated whenever work lands in the repository. It is intentionally broader than the current sprint so the remaining live-readiness work is visible.
 
 ## Status Legend
 
@@ -14,34 +16,51 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 | `[deferred]` | Intentionally postponed. |
 | `[blocked]` | Waiting on a decision, credential, export, or owner approval. |
 
-## Foundation Completed
+## Phase Summary
+
+| Phase | Goal | Status | Rough Distance |
+| --- | --- | --- | --- |
+| Phase 1 | Local/dev workflow proof | `[~]` Underway | Days |
+| Phase 2 | Staff-only staging with selected real data | `[ ]` Not started | 1-2 weeks after Phase 1 basics |
+| Phase 3 | Production internal staff use | `[ ]` Not started | 3-6 weeks after security/import work |
+| Phase 4 | Customer-facing Core | `[ ]` Not started | 2-4+ months depending on portal/docs/payments/signatures |
+
+## Phase 0 — Repository And Guardrails
 
 - [x] Repository initialized and pushed to GitHub.
+- [x] Correct active repository identified as `rawillia9801/core1` on `main`.
+- [x] Wrong duplicate checkout at `C:/Users/rawil/OneDrive/Documents/core1` identified and excluded from active work.
 - [x] Next.js TypeScript app scaffold added.
-- [x] Placeholder Core foundation page renders locally.
+- [x] Supabase project structure added.
 - [x] `AGENTS.md` added with Core scope and guardrails.
 - [x] `README.md` added with setup, quality checks, migration notes, and deferred work.
 - [x] `docs/core/` documentation folder added.
-- [x] Supabase project structure added.
+- [x] Canonical checkpoint docs added and updated.
+- [x] `.env.local` confirmed ignored by Git.
+- [x] `next-env.d.ts` identified as generated/local noise when auto-touched.
+- [ ] Add a local-only helper script for endpoint verification without copying long curl commands.
+- [ ] Add a short contributor note explaining the correct local path and wrong OneDrive path.
+
+## Phase 1 — Local/Development Workflow Proof
+
+### 1.1 Database Baseline And Smoke Tests
+
 - [x] Core V1 baseline migration added.
-- [x] Core V1 transaction-wrapped smoke test added.
-- [x] Main smoke test passes and rolls back.
-- [x] `npm run lint` passes.
-
-## Database / Source Of Truth Completed
-
 - [x] Canonical `core_` table baseline added.
 - [x] Buyers modeled as people/contact records, not transactions.
 - [x] Families modeled as household/customer groups.
-- [x] Reservations modeled as the official buyer/family plus puppy transaction.
+- [x] Reservations modeled as buyer/family plus one puppy transaction.
 - [x] Puppies and litters modeled separately.
 - [x] Documents and document versions represented as metadata foundations.
 - [x] Conversations, messages, calls, templates, and notifications represented as communication foundations.
 - [x] Events and audit logs represented separately.
 - [x] Integration events represented for future inbound/outbound provider records.
 - [x] Future tool-safety tables represented without enabling AI writes.
+- [x] Main transaction-wrapped smoke test exists.
+- [x] Main smoke test passes and rolls back.
+- [x] `npm run lint` passes.
 
-## Financial Foundation Completed
+### 1.2 Financial Foundation
 
 - [x] `core_financial_ledger.balance_effect` added.
 - [x] `amount_cents` corrected to non-negative magnitude semantics.
@@ -49,8 +68,12 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [x] `core_payment_balance_view` updated to calculate balance using `balance_effect`.
 - [x] Smoke tests cover deposit, payment, credit, fee, admin fee, transport fee, finance charge, refund, chargeback, neutral adjustment, invalid balance effect, and negative amount rejection.
 - [x] Financial balance remains reservation/ledger-derived and is not copied onto buyers.
+- [ ] Build a controlled payment/ledger write action for local/dev use.
+- [ ] Add payment recording validation before any staff-facing use.
+- [ ] Define refund/chargeback workflow before live payment operations.
+- [ ] Connect payment processor only after ledger write rules and security are complete.
 
-## Go-Home Foundation Completed
+### 1.3 Go-Home Foundation
 
 - [x] `core_go_home_groups` added as optional shared pickup/delivery event.
 - [x] `core_go_home_details` remains reservation-level current detail.
@@ -63,8 +86,11 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [x] `balance_cleared_status` documented as operational readiness only.
 - [x] `core_go_home_effective_view` added.
 - [x] Effective read model test covers `group_default`, `individual_override`, and `ungrouped_detail`.
+- [ ] Add local/dev go-home update action only after reservation flow is stable.
+- [ ] Add staff-facing go-home checklist workflow.
+- [ ] Add go-home communication/document handoff rules.
 
-## Phone Lookup Foundation Completed
+### 1.4 Phone Lookup Safety
 
 - [x] `core_phone_lookup_matches_view` added for distinct phone contact matches.
 - [x] `core_phone_lookup_summary_view` added for match count and ambiguity decision.
@@ -73,95 +99,177 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [x] Smoke tests cover single phone match, duplicate buyer/family phone match, and family-linked profile phone match.
 - [ ] Design actual verification workflow.
 - [ ] Build server-side phone lookup endpoint.
-- [ ] Connect Twilio to Core lookup.
+- [ ] Add staff routing behavior for ambiguous matches.
+- [ ] Connect Twilio only after endpoint and verification workflow are tested.
 
-## Read-Only Dashboard Foundation Completed
-
-- [x] Read-only dashboard plan and acceptance criteria documented.
-- [x] Static read-only dashboard shell added with placeholder data.
-- [x] Dashboard navigation sections started: dashboard, applications, buyers, families, dogs, litters, puppies, reservations, payments, go-home, documents, messages, phone lookup, kennel logs, events.
-- [x] Placeholder and not-connected/empty-style shell states started.
-- [x] Shell visibly states that production data and live integrations are not connected.
-- [ ] Replace placeholder dashboard data with an approved read-only server-side data path.
-- [ ] Add authenticated dashboard actions.
-
-## RLS / Security Still To Do
-
-- [ ] Implement admin/staff access policies.
-- [ ] Implement buyer/family portal access policies.
-- [ ] Implement public/anonymous access boundaries.
-- [ ] Implement service-role-only operation rules.
-- [ ] Add RLS policy tests.
-- [ ] Verify no sensitive tables/views are exposed to live clients before policies exist.
-
-## Controlled Write Foundations Completed
-
-- [x] Application approval write function added: `core_approve_application`.
-- [x] Application approval rollback-safe SQL test added.
-- [x] Reservation creation write function added: `core_create_reservation`.
-- [x] Reservation creation rollback-safe SQL test added.
-- [x] Completed write functions write operational/audit records as documented.
-- [ ] Connect write functions to authenticated and authorized server-side application actions.
-- [ ] Define the broader server-side write-tool authorization/error pattern.
-- [ ] Add low-risk tools first, such as create operational event, record puppy weight, record feeding, record medication, update puppy status.
-- [ ] Add payment recording only after ledger write rules are validated.
-- [ ] Add go-home update tools only after dashboard/read behavior is stable.
-- [ ] Prevent direct AI/database writes.
-
-## Document Generation Still To Do
-
-- [ ] Inventory existing document requirements: contract, health guarantee, bill of sale, payment agreement, receipts, vaccine/health records, care guides, pupdate packets.
-- [ ] Design template records, merge fields, generation runs, versioning, and approval gates.
-- [ ] Define which document types require staff approval before sending.
-- [ ] Define storage and signed URL rules.
-- [ ] Define customer visibility rules in the future Puppy Portal.
-- [ ] Build document generation service later.
-- [ ] Integrate signature provider later only after provider choice and approval.
-
-## Customer Interaction Still To Do
-
-- [ ] Define what Core may answer automatically.
-- [ ] Define what must route to staff.
-- [ ] Define customer portal message/conversation workflow.
-- [ ] Define website chat/customer inquiry workflow.
-- [ ] Define email reply workflow.
-- [ ] Define Facebook/Messenger workflow later.
-- [ ] Log all generated messages and interactions.
-- [ ] Keep sensitive decisions staff-approved.
-
-## Application Intake Foundation Completed
+### 1.5 Application Intake Foundation
 
 - [x] Zoho application field mapping documentation added.
-- [x] Zoho API-name intake function added.
+- [x] `core_ingest_zoho_application` added for Zoho-shaped payloads.
 - [x] Zoho API-name intake rollback-safe SQL test added.
 - [x] Zoho report/PDF-label intake compatibility added.
 - [x] Zoho report/PDF-label rollback-safe SQL test added.
 - [x] Guarded local/development application intake endpoint added.
-- [x] Controlled application approval workflow documented and implemented as a database write foundation.
-- [ ] Test the guarded endpoint locally with `.env.local` and a fake Zoho report-label `curl` payload.
-- [ ] Define applicant email template workflow.
-- [ ] Do not auto-approve applicants until workflow is reviewed.
+- [x] Guarded local/development endpoint tested with fake report-label payload.
+- [x] Endpoint test documented as writing local dev records rather than rolling back.
+- [x] Intake creates buyer, family, application, application sections, event, and audit records.
+- [ ] Add local-only endpoint verification script.
+- [ ] Confirm exact live Zoho webhook/API payload before live connection.
+- [ ] Define failed-intake retry/dead-letter behavior.
+- [ ] Define duplicate application handling for repeated Zoho submissions.
 
-## Zoho / Legacy Migration Still To Do
+### 1.6 Read-Only Dashboard Foundation
 
-- [~] Inventory Zoho modules and field mappings. Application intake fields are mapped; remaining live/legacy module inventory is incomplete.
+- [x] Read-only dashboard plan and acceptance criteria documented.
+- [x] Static dashboard shell added.
+- [x] Dashboard reads local Supabase/Core data for foundation verification.
+- [x] Dashboard navigation sections started: dashboard, applications, buyers, families, dogs, litters, puppies, reservations, payments, go-home, documents, messages, phone lookup, kennel logs, events.
+- [x] Placeholder and not-connected/empty-style shell states started.
+- [x] Shell visibly states that production data and live integrations are not connected.
+- [x] Received Applications panel reads local Core applications.
+- [x] Latest Application Detail panel reads `core_application_sections` and displays grouped responses.
+- [x] Phone Lookup Safety panel displays local ambiguity status.
+- [x] Latest Events panel displays local event data.
+- [ ] Add approved read-only data coverage for reservations.
+- [ ] Add approved read-only data coverage for puppies and litter context.
+- [ ] Add approved read-only data coverage for payment balance.
+- [ ] Add approved read-only data coverage for go-home effective view.
+- [ ] Add proper loading/empty/error states for all read panels.
+- [ ] Replace temporary/local-only data assumptions before staging.
+
+### 1.7 Controlled Local/Dev Write Foundations
+
+- [x] Application approval write function added: `core_approve_application`.
+- [x] Application approval rollback-safe SQL test added.
+- [x] Local/development dashboard approval action added.
+- [x] Dashboard approval action calls `core_approve_application` server-side.
+- [x] Dashboard approval action requires `CORE_APPROVAL_ACTOR_PROFILE_ID`.
+- [x] Dashboard approval action sets `p_queue_notification = false`.
+- [x] Dashboard approval action verified locally in browser.
+- [x] Dashboard approval action updates application and buyer approval status through the database function.
+- [x] Dashboard approval action writes event/audit through the database function.
+- [x] Dashboard approval action sends no email and creates no reservation.
+- [x] Reservation creation write function added: `core_create_reservation`.
+- [x] Reservation creation rollback-safe SQL test added.
+- [ ] Add controlled local/development reservation creation action.
+- [ ] Define minimal UI fields for reservation creation: approved application, buyer/family, puppy, contract amount, reservation status.
+- [ ] Show reservation creation result and refresh dashboard data.
+- [ ] Prevent reservation creation for already-reserved puppies through UI and function behavior.
+- [ ] Add local/dev verification for reservation creation in browser.
+- [ ] Define broader server-side write-tool authorization/error pattern.
+- [ ] Add low-risk kennel tools only after application/reservation flow is stable.
+- [ ] Prevent direct AI/database writes.
+
+## Phase 2 — Staff-Only Staging With Selected Real Data
+
+### 2.1 Authentication And Access Boundary
+
+- [ ] Decide staff authentication provider/path.
+- [ ] Protect dashboard route from public access.
+- [ ] Separate local/dev service-role usage from staging/production access patterns.
+- [ ] Add admin/staff role assignment flow.
+- [ ] Add server-side authorization checks for all actions.
+- [ ] Add a staging environment separate from local dev.
+- [ ] Add environment variable documentation for staging without committing secrets.
+- [ ] Add deployment checklist for staging.
+
+### 2.2 RLS And Security
+
+- [ ] Implement admin/staff access policies.
+- [ ] Implement buyer/family portal access policies later, not before portal design.
+- [ ] Implement public/anonymous access boundaries.
+- [ ] Implement service-role-only operation rules.
+- [ ] Add RLS policy tests.
+- [ ] Verify no sensitive tables/views are exposed to live clients before policies exist.
+- [ ] Review all read models for sensitive data leakage.
+- [ ] Review all server actions for authorization and audit coverage.
+
+### 2.3 Selected Real Data Import/Display
+
+- [ ] Define what selected real data means for first staging test.
+- [ ] Decide whether first real data is one application export, a small Zoho export, or manually selected records.
+- [ ] Export one or a few real Zoho application records safely.
+- [ ] Redact or handle sensitive fields during development review.
+- [ ] Validate field shapes against `core_ingest_zoho_application`.
+- [ ] Run local/dev dry-run import.
+- [ ] Run staging import with owner-approved limited records.
+- [ ] Verify received applications display correctly in staging.
+- [ ] Verify application details display correctly in staging.
+- [ ] Verify no emails/messages/payments are triggered by import.
+
+### 2.4 Duplicate And Source Precedence
+
+- [ ] Inventory existing Zoho modules and field mappings beyond applications.
 - [ ] Inventory existing Supabase duplicate tables.
 - [ ] Define source precedence for buyers, families, puppies, reservations, payments, documents, and go-home data.
 - [ ] Create migration map with duplicate detection.
+- [ ] Define matching rules for email, phone, Zoho IDs, buyer IDs, family IDs, and puppy/reservation records.
+- [ ] Define manual review workflow for ambiguous duplicates.
 - [ ] Dry-run import into local/dev only.
 - [ ] Review migration results manually.
+
+## Phase 3 — Production Internal Staff Use
+
+### 3.1 Internal Application Workflow
+
+- [ ] Use Core to review real applications internally.
+- [ ] Use Core to approve applications internally.
+- [ ] Add decline/needs-follow-up action only after approval flow is stable.
+- [ ] Add internal notes/follow-up workflow.
+- [ ] Add staff activity/audit review surface.
+- [ ] Decide if approved applications should update Zoho during transition or remain Core-only.
+
+### 3.2 Internal Reservation Workflow
+
+- [ ] Create reservations from approved applications in local/dev.
+- [ ] Verify reservation creation with real-like data in staging.
+- [ ] Show buyer/family/application/puppy/reservation linkage clearly.
+- [ ] Show puppy status change after reservation.
+- [ ] Prevent duplicate active reservation for one puppy.
+- [ ] Add reservation cancellation/change workflow.
+- [ ] Add reservation audit/event display.
+
+### 3.3 Payment And Ledger Workflow
+
+- [ ] Display reservation balance from `core_payment_balance_view`.
+- [ ] Add controlled ledger/payment entry action.
+- [ ] Add receipt metadata foundation.
+- [ ] Add payment method tracking rules.
+- [ ] Add refund/chargeback handling rules.
+- [ ] Add staff review for payment corrections.
+- [ ] Connect payment processor only after internal ledger flow is stable.
+
+### 3.4 Go-Home Workflow
+
+- [ ] Display effective go-home appointment data from `core_go_home_effective_view`.
+- [ ] Add controlled go-home group/detail update action.
+- [ ] Add go-home readiness checklist workflow.
+- [ ] Add balance clearance workflow display without copying financial truth.
+- [ ] Add shared multi-puppy pickup/delivery workflow.
+- [ ] Add go-home event/audit review.
+
+### 3.5 Communications Workflow
+
+- [ ] Define applicant email template workflow.
+- [ ] Define what Core may send automatically versus staff-approved.
+- [ ] Add notification queue review before sending.
+- [ ] Add email provider integration only after template and approval rules are defined.
+- [ ] Keep Twilio disconnected until phone verification/routing is built.
+- [ ] Log all generated messages and staff/customer interactions.
+
+### 3.6 Zoho Cutover Planning
+
+- [ ] Keep current Zoho workflow in place during Core internal testing.
+- [ ] Decide module-by-module cutover order.
+- [ ] Decide whether Zoho remains source of truth during transition.
+- [ ] Decide which Core actions write back to Zoho, if any.
+- [ ] Define rollback plan if Core staging/internal workflow fails.
 - [ ] Import production data only after owner approval.
 - [ ] Retire Zoho modules only after Core workflow replacement is proven.
 
-## Twilio Still To Do
+## Phase 4 — Customer-Facing Core
 
-- [ ] Keep current Twilio/Zoho lookup in place until Core phone lookup endpoint is built and tested.
-- [ ] Build Core phone lookup API endpoint.
-- [ ] Implement ambiguity handling and verification prompt/routing.
-- [ ] Test with non-production Twilio flow or safe test number.
-- [ ] Cut over only after owner approval.
-
-## Puppy Portal Still To Do
+### 4.1 Puppy Portal
 
 - [ ] Define portal route list.
 - [ ] Define family login/access model.
@@ -174,20 +282,52 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [ ] Define resources/care-guide page.
 - [ ] Build only after RLS and document visibility rules exist.
 
-## Public Website Still To Do
+### 4.2 Document Generation
+
+- [ ] Inventory document requirements: contract, health guarantee, bill of sale, payment agreement, receipts, vaccine/health records, care guides, pupdate packets.
+- [ ] Design template records, merge fields, generation runs, versioning, and approval gates.
+- [ ] Define which document types require staff approval before sending.
+- [ ] Define storage and signed URL rules.
+- [ ] Define customer visibility rules in the future Puppy Portal.
+- [ ] Build document generation service.
+- [ ] Integrate signature provider only after provider choice and approval.
+- [ ] Add document event/audit trail.
+
+### 4.3 Payments For Customers
+
+- [ ] Decide payment processor.
+- [ ] Define payment request/invoice workflow.
+- [ ] Define customer payment visibility.
+- [ ] Define receipt generation workflow.
+- [ ] Define refunds/chargebacks and reconciliation process.
+- [ ] Add payment processor integration only after ledger/security rules are complete.
+
+### 4.4 Public Website Replacement
 
 - [ ] Define website route list.
 - [ ] Define available puppies/litters display rules.
 - [ ] Define application form workflow.
 - [ ] Define contact/inquiry workflow.
+- [ ] Define public puppy/litter data visibility rules.
 - [ ] Build website replacement only after Core read/write flows are stable enough.
 
-## Kennel Core Still To Do
+### 4.5 Customer Communications
+
+- [ ] Define customer portal message/conversation workflow.
+- [ ] Define website chat/customer inquiry workflow.
+- [ ] Define email reply workflow.
+- [ ] Define Facebook/Messenger workflow later.
+- [ ] Define what Core may answer automatically.
+- [ ] Define what must route to staff.
+- [ ] Keep sensitive decisions staff-approved.
+
+## Kennel Core Track
 
 - [ ] Weight logging workflow.
 - [ ] Feeding logging workflow.
 - [ ] Medication logging workflow.
 - [ ] Puppy event/milestone workflow.
+- [ ] Litter milestone workflow.
 - [ ] Whelping mode later.
 - [ ] Overnight summary later.
 - [ ] Avoid medical inference or automated treatment decisions.
@@ -200,19 +340,6 @@ This checklist tracks what is completed, what is next, what is blocked, and what
 - [deferred] RF button flows.
 - [deferred] Advanced automation.
 
-## Stop Conditions
-
-Stop and review before continuing if any task attempts to:
-
-- Create new tables not explicitly named in the task.
-- Import production data.
-- Enable RLS without policy tests.
-- Connect Twilio, Zoho, email, payment, Home Assistant, cameras, or smart mirror.
-- Build customer-facing behavior without access rules.
-- Add AI write capability without tool-safety design.
-- Change financial balance semantics.
-- Change go-home cardinality or override semantics.
-
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
@@ -223,10 +350,10 @@ Stop and review before continuing if any task attempts to:
 - [ ] No production data import has occurred.
 - [ ] Document generation is not implemented.
 - [ ] Signature provider integration is not implemented.
-- [ ] Customer portal and public website replacement are not implemented.
+- [ ] Customer portal is not implemented.
+- [ ] Public website replacement is not implemented.
 - [ ] Kennel logging write tools are not implemented.
-- [ ] Authenticated dashboard actions are not implemented.
-- [ ] The dashboard remains placeholder/static until an approved read path is wired later.
+- [ ] Production-authenticated dashboard actions are not implemented.
 
 ## Current Verified Commands
 
@@ -243,6 +370,30 @@ cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i
 npm run lint
 ```
 
-## Next Recommended Task
+Do not rerun all commands after every small change. Run the relevant validation once after code changes or when repo state is unclear.
 
-Test the guarded local/development application intake endpoint using `.env.local` and a fake Zoho report-label `curl` payload. Use fake data only, do not paste or commit service role keys, and do not connect live Zoho.
+## Immediate Next Ordered Tasks
+
+1. [ ] Pull latest docs locally and verify clean repo state.
+2. [ ] Add local-only endpoint verification script.
+3. [ ] Define minimal reservation creation UI fields.
+4. [ ] Add controlled local/development reservation creation action using `core_create_reservation`.
+5. [ ] Verify approved application -> reservation -> puppy reserved workflow locally.
+6. [ ] Add read-only reservation/payment/go-home panels needed to confirm the workflow.
+7. [ ] Design staff auth/access boundary before staging.
+8. [ ] Prepare selected-real-data staging plan.
+9. [ ] Import/show selected real data in staging only after owner approval.
+
+## Stop Conditions
+
+Stop and review before continuing if any task attempts to:
+
+- Create new tables not explicitly named in the task.
+- Import production data.
+- Enable RLS without policy tests.
+- Connect Twilio, Zoho, email, payment, Home Assistant, cameras, or smart mirror.
+- Build customer-facing behavior without access rules.
+- Add AI write capability without tool-safety design.
+- Change financial balance semantics.
+- Change go-home cardinality or override semantics.
+- Add dashboard polish that does not advance the real workflow.
