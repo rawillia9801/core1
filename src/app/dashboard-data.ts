@@ -37,11 +37,6 @@ type CountResult = {
   count: number;
 };
 
-type ApplicationRow = {
-  id: string;
-  status: string | null;
-};
-
 type BuyerRow = {
   id: string;
   first_name: string | null;
@@ -385,16 +380,18 @@ export async function getDashboardData(): Promise<DashboardData> {
 
     const buyerIds = Array.from(
       new Set(
-        [...reservations.map((reservation) => reservation.buyer_id), ...goHomes.map((goHome) => goHome.buyer_id)].filter(
-          Boolean,
-        ) as string[],
+        [
+          ...reservations.map((reservation) => reservation.buyer_id),
+          ...goHomes.map((goHome) => goHome.buyer_id),
+        ].filter(Boolean) as string[],
       ),
     );
     const puppyIds = Array.from(
       new Set(
-        [...reservations.map((reservation) => reservation.puppy_id), ...goHomes.map((goHome) => goHome.puppy_id)].filter(
-          Boolean,
-        ) as string[],
+        [
+          ...reservations.map((reservation) => reservation.puppy_id),
+          ...goHomes.map((goHome) => goHome.puppy_id),
+        ].filter(Boolean) as string[],
       ),
     );
 
@@ -466,8 +463,12 @@ export async function getDashboardData(): Promise<DashboardData> {
         const matchingBalance = balancesByReservationId.get(reservation.id);
 
         return {
-          puppy: puppyName(reservation.puppy_id ? puppiesById.get(reservation.puppy_id) : undefined),
-          buyer: buyerName(reservation.buyer_id ? buyersById.get(reservation.buyer_id) : undefined),
+          puppy: puppyName(
+            reservation.puppy_id ? puppiesById.get(reservation.puppy_id) : undefined,
+          ),
+          buyer: buyerName(
+            reservation.buyer_id ? buyersById.get(reservation.buyer_id) : undefined,
+          ),
           status: reservation.status || "Unknown",
           balance: `${formatCurrencyFromCents(matchingBalance?.balance_due_cents)} due`,
         };
