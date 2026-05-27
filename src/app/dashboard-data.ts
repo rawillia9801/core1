@@ -6,12 +6,25 @@ type DashboardStat = {
 };
 
 type DashboardApplication = {
+  id: string;
   applicant: string;
   email: string;
   status: string;
   source: string;
   submitted: string;
   reference: string;
+};
+
+type DashboardApplicationSection = {
+  applicationId: string;
+  applicationReference: string;
+  sectionKey: string;
+  sectionLabel: string;
+  status: string;
+  responses: {
+    label: string;
+    value: string;
+  }[];
 };
 
 type DashboardGoHome = {
@@ -54,6 +67,14 @@ type ApplicationRow = {
   source: string | null;
   submitted_at: string | null;
   created_at: string | null;
+};
+
+type ApplicationSectionRow = {
+  application_id: string | null;
+  section_key: string | null;
+  section_label: string | null;
+  status: string | null;
+  responses: Record<string, unknown> | null;
 };
 
 type BuyerRow = {
@@ -116,6 +137,7 @@ export type DashboardData = {
   foundationChecks: readonly string[];
   navigation: readonly string[];
   applications: DashboardApplication[];
+  applicationSections: DashboardApplicationSection[];
   goHomes: DashboardGoHome[];
   reservations: DashboardReservation[];
   phoneLookups: DashboardPhoneLookup[];
@@ -230,6 +252,30 @@ function puppyName(puppy: PuppyRow | undefined) {
   return puppy.name || puppy.collar_color || puppy.sex || "Unnamed puppy";
 }
 
+function formatResponseLabel(key: string) {
+  return key
+    .replaceAll("_", " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatResponseValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "—";
+  }
+
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => formatResponseValue(item)).join(", ");
+  }
+
+  return JSON.stringify(value);
+}
+
 function fallbackDashboardData(dataWarning: string | null = null): DashboardData {
   return {
     stats: [
@@ -261,6 +307,7 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     foundationChecks,
     navigation,
     applications: [],
+    applicationSections: [],
     goHomes: [],
     reservations: [],
     phoneLookups: [],
@@ -417,6 +464,15 @@ export async function getDashboardData(): Promise<DashboardData> {
       }),
     ]);
 
+    const latestApplicationId = applications[0]?.id;
+    const applicationSections = latestApplicationId
+      ? await readRows<ApplicationSectionRow>(restUrl, serviceRoleKey, "core_application_sections", {
+          select: "application_id,section_key,section_label,status,responses",
+          application_id: `eq.${latestApplicationId}`,
+          order: "created_at.asc",
+        })
+      : [];
+
     const buyerIds = Array.from(
       new Set(
         [
@@ -452,6 +508,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
     const buyersById = new Map(buyers.map((buyer) => [buyer.id, buyer]));
     const puppiesById = new Map(puppies.map((puppy) => [puppy.id, puppy]));
+    const applicationsById = new Map(applications.map((application) => [application.id, application]));
     const balancesByReservationId = new Map(
       balances.map((balance) => [balance.reservation_id, balance]),
     );
@@ -496,12 +553,33 @@ export async function getDashboardData(): Promise<DashboardData> {
           : undefined;
 
         return {
+          id: application.id,
           applicant: buyerName(buyer),
           email: buyerEmail(buyer),
           status: application.status || "Unknown",
           source: application.source || "Unknown source",
           submitted: formatDateTime(application.submitted_at ?? application.created_at),
           reference: application.external_reference || application.id.slice(0, 8),
+        };
+      }),
+      applicationSections: applicationSections.map((section) => {
+        const application = section.application_id
+          ? applicationsById.get(section.application_id)
+          : undefined;
+        const responses = section.responses ?? {};
+
+        return {
+          applicationId: section.application_id || "",
+          applicationReference:
+            application?.external_reference || section.application_id?.slice(0, 8) || "Latest application",
+          sectionKey: section.section_key || "section",
+          sectionLabel:
+            section.section_label || formatResponseLabel(section.section_key || "application section"),
+          status: section.status || "received",
+          responses: Object.entries(responses).map(([key, value]) => ({
+            label: formatResponseLabel(key),
+            value: formatResponseValue(value),
+          })),
         };
       }),
       goHomes: goHomes.map((goHome) => ({
