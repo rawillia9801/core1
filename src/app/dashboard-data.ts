@@ -43,6 +43,7 @@ type DashboardGoHome = {
 
 type DashboardReservation = {
   id: string;
+  reservationId: string;
   applicationReference: string;
   puppy: string;
   puppyStatus: string;
@@ -680,6 +681,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
         return {
           id: reservation.reservation_id.slice(0, 8),
+          reservationId: reservation.reservation_id,
           applicationReference: application?.external_reference || "No application reference",
           puppy: reservation.puppy_name || "Unassigned puppy",
           puppyStatus: reservation.puppy_status || "Unknown",

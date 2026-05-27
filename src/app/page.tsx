@@ -1,4 +1,8 @@
-import { approveApplication, createReservation } from "./application-actions";
+import {
+  approveApplication,
+  createReservation,
+  recordReservationPayment,
+} from "./application-actions";
 import { getDashboardData } from "./dashboard-data";
 
 export const dynamic = "force-dynamic";
@@ -129,13 +133,57 @@ function ReservationResult({ outcome }: { outcome: string | undefined }) {
   return null;
 }
 
+function PaymentResult({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "success") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Deposit/payment recorded locally. Balance due has been refreshed from the ledger.
+      </p>
+    );
+  }
+
+  if (outcome === "invalid_money") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Enter an amount received in dollars using numbers with up to two decimal places, such as 500.00.
+      </p>
+    );
+  }
+
+  if (outcome === "invalid_input") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Payment entry must be a deposit or payment with valid optional details.
+      </p>
+    );
+  }
+
+  if (outcome === "not_found" || outcome === "not_eligible") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        The selected reservation cannot accept a recorded deposit/payment.
+      </p>
+    );
+  }
+
+  if (outcome === "error") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Deposit/payment recording failed. Check local server logs for details.
+      </p>
+    );
+  }
+
+  return null;
+}
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ approval?: string; reservation?: string }>;
+  searchParams: Promise<{ approval?: string; reservation?: string; payment?: string }>;
 }) {
   const dashboard = await getDashboardData();
-  const { approval, reservation } = await searchParams;
+  const { approval, reservation, payment } = await searchParams;
   const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 
   return (
@@ -494,10 +542,16 @@ export default async function Home({
                   description="Latest local/development reservations from the Core reservation summary read model."
                 >
                   <div className="space-y-3">
+                    <PaymentResult outcome={payment} />
                     {dashboard.reservations.length > 0 ? (
-                      dashboard.reservations.map((reservation) => (
+                      dashboard.reservations.map((reservation) => {
+                        const canRecordPayment = !["cancelled", "void", "released"].includes(
+                          reservation.status.toLowerCase(),
+                        );
+
+                        return (
                         <div
-                          key={reservation.id}
+                          key={reservation.reservationId}
                           className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -538,8 +592,73 @@ export default async function Home({
                               <dd className="mt-1 font-semibold text-slate-950">{reservation.balance}</dd>
                             </div>
                           </dl>
+                          {canRecordPayment ? (
+                            <form action={recordReservationPayment} className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+                              <input type="hidden" name="reservationId" value={reservation.reservationId} />
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Local/development payment recording only
+                              </p>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Transaction type
+                                  <select
+                                    name="entryType"
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  >
+                                    <option value="deposit">Deposit</option>
+                                    <option value="payment">Payment</option>
+                                  </select>
+                                </label>
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Amount received (dollars)
+                                  <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    name="amountDollars"
+                                    placeholder="500.00"
+                                    required
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  />
+                                </label>
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Payment method (optional)
+                                  <input
+                                    type="text"
+                                    name="paymentMethod"
+                                    maxLength={100}
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  />
+                                </label>
+                                <label className="block text-sm font-medium text-slate-700">
+                                  External reference (optional)
+                                  <input
+                                    type="text"
+                                    name="externalReference"
+                                    maxLength={255}
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  />
+                                </label>
+                              </div>
+                              <label className="block text-sm font-medium text-slate-700">
+                                Notes (optional)
+                                <textarea
+                                  name="notes"
+                                  maxLength={1000}
+                                  rows={2}
+                                  className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                />
+                              </label>
+                              <button
+                                type="submit"
+                                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                              >
+                                Record Deposit/Payment
+                              </button>
+                            </form>
+                          ) : null}
                         </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <EmptyList text="No local/development reservations found yet. Approve an application and create a reservation to verify this workflow." />
                     )}

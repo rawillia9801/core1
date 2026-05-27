@@ -19,6 +19,10 @@ type PuppyStatusRow = {
   status: string | null;
 };
 
+type ReservationStatusRow = {
+  status: string | null;
+};
+
 function logApprovalFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
     console.error("[core approval]", reason, details ?? {});
@@ -28,6 +32,12 @@ function logApprovalFailure(reason: string, details?: Record<string, unknown>) {
 function logReservationFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
     console.error("[core reservation]", reason, details ?? {});
+  }
+}
+
+function logPaymentFailure(reason: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error("[core payment]", reason, details ?? {});
   }
 }
 
@@ -139,6 +149,31 @@ export async function approveApplication(formData: FormData) {
   }
 
   redirect(`/?approval=${outcome}`);
+}
+
+function getLocalPaymentConfig() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Payment recording actions are disabled outside local/development use.");
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const actorProfileId = process.env.CORE_APPROVAL_ACTOR_PROFILE_ID;
+
+  if (!supabaseUrl || !serviceRoleKey || !actorProfileId || !UUID_PATTERN.test(actorProfileId)) {
+    logPaymentFailure("missing or invalid local payment configuration", {
+      hasSupabaseUrl: Boolean(supabaseUrl),
+      hasServiceRoleKey: Boolean(serviceRoleKey),
+      hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
+    });
+    throw new Error("Local payment recording configuration is incomplete.");
+  }
+
+  return {
+    restUrl: `${supabaseUrl}/rest/v1`,
+    serviceRoleKey,
+    actorProfileId,
+  };
 }
 
 function parseDollarAmountToCents(value: FormDataEntryValue | null) {
@@ -334,4 +369,117 @@ export async function createReservation(formData: FormData) {
   }
 
   redirect(`/?reservation=${outcome}`);
+}
+
+export async function recordReservationPayment(formData: FormData) {
+  const reservationId = String(formData.get("reservationId") ?? "").trim();
+  const entryType = String(formData.get("entryType") ?? "").trim().toLowerCase();
+  const amountCents = parseRequiredPositiveDollars(formData.get("amountDollars"));
+  const paymentMethod = String(formData.get("paymentMethod") ?? "").trim();
+  const externalReference = String(formData.get("externalReference") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const ineligibleStatuses = new Set(["cancelled", "void", "released"]);
+  let outcome = "error";
+
+  if (!UUID_PATTERN.test(reservationId)) {
+    logPaymentFailure("invalid reservation id submitted", {
+      hasValidReservationId: false,
+    });
+    redirect("/?payment=invalid_input");
+  }
+
+  if (!["deposit", "payment"].includes(entryType)) {
+    logPaymentFailure("invalid payment entry type submitted", {
+      reservationId,
+      entryType,
+    });
+    redirect("/?payment=invalid_input");
+  }
+
+  if (!amountCents) {
+    logPaymentFailure("invalid dollar amount submitted for payment", {
+      reservationId,
+      hasValidAmountDollars: false,
+    });
+    redirect("/?payment=invalid_money");
+  }
+
+  if (paymentMethod.length > 100 || externalReference.length > 255 || notes.length > 1000) {
+    logPaymentFailure("bounded payment input exceeded maximum length", {
+      reservationId,
+      paymentMethodTooLong: paymentMethod.length > 100,
+      externalReferenceTooLong: externalReference.length > 255,
+      notesTooLong: notes.length > 1000,
+    });
+    redirect("/?payment=invalid_input");
+  }
+
+  try {
+    const { restUrl, serviceRoleKey, actorProfileId } = getLocalPaymentConfig();
+    const headers = serverHeaders(serviceRoleKey);
+    const reservationResponse = await fetch(
+      `${restUrl}/core_reservations?select=status&id=eq.${reservationId}`,
+      { headers, cache: "no-store" },
+    );
+
+    if (!reservationResponse.ok) {
+      const responseBody = await reservationResponse.text().catch(() => "");
+      logPaymentFailure("reservation lookup failed", {
+        reservationId,
+        httpStatus: reservationResponse.status,
+        responseBody,
+      });
+    } else {
+      const rows = (await reservationResponse.json()) as ReservationStatusRow[];
+      const reservation = rows[0];
+      const status = reservation?.status?.toLowerCase();
+
+      if (!reservation) {
+        logPaymentFailure("reservation lookup returned no row", { reservationId });
+        outcome = "not_found";
+      } else if (!status || ineligibleStatuses.has(status)) {
+        logPaymentFailure("reservation is not eligible for payment recording", {
+          reservationId,
+          status: reservation.status,
+        });
+        outcome = "not_eligible";
+      } else {
+        const rpcResponse = await fetch(`${restUrl}/rpc/core_record_reservation_payment`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            p_reservation_id: reservationId,
+            p_actor_profile_id: actorProfileId,
+            p_entry_type: entryType,
+            p_amount_cents: amountCents,
+            p_payment_method: paymentMethod || null,
+            p_external_reference: externalReference || null,
+            p_notes: notes || null,
+          }),
+          cache: "no-store",
+        });
+
+        if (rpcResponse.ok) {
+          revalidatePath("/");
+          outcome = "success";
+        } else {
+          const responseBody = await rpcResponse.text().catch(() => "");
+          logPaymentFailure("payment RPC failed", {
+            reservationId,
+            entryType,
+            httpStatus: rpcResponse.status,
+            responseBody,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    logPaymentFailure("payment action threw an error", {
+      reservationId,
+      entryType,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+
+  redirect(`/?payment=${outcome}`);
 }
