@@ -1,136 +1,6 @@
-const stats = [
-  {
-    label: "Applications",
-    value: "7",
-    helper: "3 need review",
-    tone: "bg-blue-50 text-blue-700 ring-blue-100",
-  },
-  {
-    label: "Reserved Puppies",
-    value: "12",
-    helper: "5 go-home soon",
-    tone: "bg-violet-50 text-violet-700 ring-violet-100",
-  },
-  {
-    label: "Balance Due",
-    value: "$18,450",
-    helper: "ledger-derived total",
-    tone: "bg-amber-50 text-amber-700 ring-amber-100",
-  },
-  {
-    label: "Today",
-    value: "14",
-    helper: "feed items",
-    tone: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-  },
-];
+import { getDashboardData } from "./dashboard-data";
 
-const foundationChecks = [
-  "Migrations apply locally",
-  "Core smoke test passes",
-  "Go-home effective view passes",
-  "Lint passes",
-];
-
-const navigation = [
-  "Dashboard",
-  "Applications",
-  "Buyers",
-  "Families",
-  "Dogs",
-  "Litters",
-  "Puppies",
-  "Reservations",
-  "Payments",
-  "Go-Home",
-  "Documents",
-  "Messages",
-  "Phone Lookup",
-  "Kennel Logs",
-  "Events",
-];
-
-const goHomes = [
-  {
-    puppy: "Luna Test Puppy",
-    buyer: "Sarah Test Buyer",
-    time: "May 30, 2:00 PM",
-    source: "Group default",
-    status: "Scheduled",
-  },
-  {
-    puppy: "Nova Test Puppy",
-    buyer: "Sarah Test Buyer",
-    time: "May 30, 5:00 PM",
-    source: "Individual override",
-    status: "Review",
-  },
-  {
-    puppy: "Blue Boy",
-    buyer: "Miller Family",
-    time: "Jun 2, 11:00 AM",
-    source: "Ungrouped detail",
-    status: "Pending",
-  },
-];
-
-const reservations = [
-  {
-    puppy: "Pink Girl",
-    buyer: "Davis Family",
-    status: "Deposit paid",
-    balance: "$1,500 due",
-  },
-  {
-    puppy: "Luna Test Puppy",
-    buyer: "Sarah Test Buyer",
-    status: "Reserved",
-    balance: "$1,530 due",
-  },
-  {
-    puppy: "Cream Girl",
-    buyer: "Watson Family",
-    status: "Contract sent",
-    balance: "$2,000 due",
-  },
-];
-
-const phoneLookups = [
-  {
-    phone: "+1 (276) 555-0101",
-    result: "Unambiguous match",
-    detail: "Safe context available after server validation",
-    tone: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  },
-  {
-    phone: "+1 (276) 555-0102",
-    result: "Ambiguous match",
-    detail: "Sensitive details redacted; route to staff",
-    tone: "border-amber-200 bg-amber-50 text-amber-800",
-  },
-];
-
-const kennelNotes = [
-  "Weight log due for Ember litter",
-  "Pupdate draft needed for reserved puppies",
-  "Medication reminder requires staff confirmation",
-  "No AI write actions are enabled",
-];
-
-const emptyStates = [
-  {
-    title: "Documents",
-    text: "Template-driven generation, signatures, and customer visibility are planned but not connected.",
-  },
-  {
-    title: "Customer Portal",
-    text: "Portal screens wait for RLS, document visibility rules, and verified family access.",
-  },
-  {
-    title: "Integrations",
-    text: "Zoho, Twilio, email, payments, Home Assistant, cameras, and smart mirror remain off.",
-  },
-];
+export const dynamic = "force-dynamic";
 
 function StatusBadge({ children }: { children: React.ReactNode }) {
   return (
@@ -162,7 +32,17 @@ function SectionCard({
   );
 }
 
-export default function Home() {
+function EmptyList({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+      {text}
+    </div>
+  );
+}
+
+export default async function Home() {
+  const dashboard = await getDashboardData();
+
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <div className="lg:flex lg:min-h-screen">
@@ -178,7 +58,7 @@ export default function Home() {
           </div>
 
           <nav className="space-y-1 pb-8">
-            {navigation.map((item) => (
+            {dashboard.navigation.map((item) => (
               <div
                 key={item}
                 className={`rounded-2xl px-4 py-3 text-sm font-medium ${
@@ -195,16 +75,25 @@ export default function Home() {
 
         <div className="flex-1 px-4 pb-12 pt-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1500px] space-y-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-amber-950 shadow-sm sm:p-5">
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-                Placeholder data only
-              </p>
-              <p className="mt-2 text-sm leading-6">
-                This dashboard is a read-only visual shell. It is not connected to
-                Supabase, production records, Zoho, Twilio, email, payments, Home
-                Assistant, cameras, or customer-facing workflows.
-              </p>
-            </div>
+            {dashboard.dataWarning ? (
+              <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-amber-950 shadow-sm sm:p-5">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+                  Dashboard data warning
+                </p>
+                <p className="mt-2 text-sm leading-6">{dashboard.dataWarning}</p>
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950 shadow-sm sm:p-5">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">
+                  {dashboard.dataSourceLabel}
+                </p>
+                <p className="mt-2 text-sm leading-6">
+                  This dashboard is reading local Supabase data server-side. It
+                  still has no dashboard write actions, no public customer portal,
+                  and no live external integrations.
+                </p>
+              </div>
+            )}
 
             <header className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
               <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -216,21 +105,22 @@ export default function Home() {
                     Cherolee Core Dashboard
                   </h1>
                   <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                    Read-only shell for the future operating dashboard. Core read
-                    models have been verified locally, while RLS, imports, live data,
-                    and write tools remain controlled and separate.
+                    Read-only operating dashboard backed by local Core Supabase
+                    tables and verified read models. Write tools, live imports,
+                    customer access, payments, documents, and messaging remain
+                    controlled separately.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <StatusBadge>Read-only</StatusBadge>
-                  <StatusBadge>No production data</StatusBadge>
+                  <StatusBadge>Server-side data</StatusBadge>
                   <StatusBadge>No live integrations</StatusBadge>
                 </div>
               </div>
             </header>
 
             <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {stats.map((stat) => (
+              {dashboard.stats.map((stat) => (
                 <div
                   key={stat.label}
                   className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
@@ -251,10 +141,10 @@ export default function Home() {
             <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
               <SectionCard
                 title="Foundation Verification"
-                description="Current local checkpoint before live dashboard wiring."
+                description="Current local checkpoint before authenticated dashboard actions."
               >
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {foundationChecks.map((check) => (
+                  {dashboard.foundationChecks.map((check) => (
                     <div
                       key={check}
                       className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800"
@@ -271,13 +161,13 @@ export default function Home() {
               <SectionCard title="Build Boundary">
                 <div className="rounded-2xl bg-slate-950 p-5 text-white">
                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-200">
-                    Before live data
+                    Current dashboard scope
                   </p>
                   <p className="mt-3 text-sm leading-6 text-slate-200">
-                    Connect this dashboard to Supabase only after read models,
-                    access rules, and safe server-side data loading are reviewed.
-                    No customer-facing portal, phone routing, payments, or document
-                    generation should be enabled from this shell.
+                    Local read-only Supabase data is allowed here. No dashboard
+                    writes, no customer portal, no live Zoho cutover, no Twilio
+                    routing, no payment processor, and no document generation are
+                    enabled from this shell.
                   </p>
                 </div>
               </SectionCard>
@@ -287,64 +177,102 @@ export default function Home() {
               <div className="space-y-6">
                 <SectionCard
                   title="Upcoming Go-Homes"
-                  description="Resolved from the effective go-home read model: group defaults, individual overrides, or ungrouped details."
+                  description="Read from the effective go-home view."
                 >
                   <div className="space-y-3">
-                    {goHomes.map((goHome) => (
-                      <div
-                        key={`${goHome.puppy}-${goHome.time}`}
-                        className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[1fr_auto] sm:items-center"
-                      >
-                        <div>
-                          <p className="font-semibold text-slate-950">
-                            {goHome.puppy}
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {goHome.buyer} · {goHome.time}
-                          </p>
+                    {dashboard.goHomes.length > 0 ? (
+                      dashboard.goHomes.map((goHome) => (
+                        <div
+                          key={`${goHome.puppy}-${goHome.buyer}-${goHome.time}`}
+                          className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[1fr_auto] sm:items-center"
+                        >
+                          <div>
+                            <p className="font-semibold text-slate-950">
+                              {goHome.puppy}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-600">
+                              {goHome.buyer} · {goHome.time}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2 sm:justify-end">
+                            <StatusBadge>{goHome.source}</StatusBadge>
+                            <StatusBadge>{goHome.status}</StatusBadge>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2 sm:justify-end">
-                          <StatusBadge>{goHome.source}</StatusBadge>
-                          <StatusBadge>{goHome.status}</StatusBadge>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <EmptyList text="No go-home rows found in the local effective view." />
+                    )}
                   </div>
                 </SectionCard>
 
                 <SectionCard
                   title="Reservations"
-                  description="Future dashboard rows should come from Core reservation, puppy, buyer, and payment summary views."
+                  description="Read from Core reservations with buyer, puppy, and ledger balance summaries."
                 >
                   <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full min-w-[640px] text-left text-sm">
-                      <thead className="bg-slate-950 text-white">
-                        <tr>
-                          <th className="px-4 py-3 font-semibold">Puppy</th>
-                          <th className="px-4 py-3 font-semibold">Buyer</th>
-                          <th className="px-4 py-3 font-semibold">Status</th>
-                          <th className="px-4 py-3 font-semibold">Balance</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200 bg-white">
-                        {reservations.map((reservation) => (
-                          <tr key={`${reservation.puppy}-${reservation.buyer}`}>
-                            <td className="px-4 py-3 font-medium text-slate-950">
-                              {reservation.puppy}
-                            </td>
-                            <td className="px-4 py-3 text-slate-600">
-                              {reservation.buyer}
-                            </td>
-                            <td className="px-4 py-3 text-slate-600">
-                              {reservation.status}
-                            </td>
-                            <td className="px-4 py-3 font-semibold text-slate-950">
-                              {reservation.balance}
-                            </td>
+                    {dashboard.reservations.length > 0 ? (
+                      <table className="w-full min-w-[640px] text-left text-sm">
+                        <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                          <tr>
+                            <th className="px-4 py-3">Puppy</th>
+                            <th className="px-4 py-3">Buyer</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3">Balance</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200 bg-white">
+                          {dashboard.reservations.map((reservation) => (
+                            <tr key={`${reservation.puppy}-${reservation.buyer}`}>
+                              <td className="px-4 py-4 font-semibold text-slate-950">
+                                {reservation.puppy}
+                              </td>
+                              <td className="px-4 py-4 text-slate-600">
+                                {reservation.buyer}
+                              </td>
+                              <td className="px-4 py-4">
+                                <StatusBadge>{reservation.status}</StatusBadge>
+                              </td>
+                              <td className="px-4 py-4 font-semibold text-slate-950">
+                                {reservation.balance}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="p-4">
+                        <EmptyList text="No reservation rows found in local Supabase." />
+                      </div>
+                    )}
+                  </div>
+                </SectionCard>
+
+                <SectionCard
+                  title="Latest Events"
+                  description="Recent Core event feed from local Supabase."
+                >
+                  <div className="space-y-3">
+                    {dashboard.events.length > 0 ? (
+                      dashboard.events.map((event) => (
+                        <div
+                          key={`${event.type}-${event.when}-${event.summary}`}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <StatusBadge>{event.type}</StatusBadge>
+                            <span className="text-xs font-semibold text-slate-500">
+                              {event.when}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-sm font-medium text-slate-800">
+                            {event.summary}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyList text="No event rows found in local Supabase." />
+                    )}
                   </div>
                 </SectionCard>
               </div>
@@ -352,58 +280,58 @@ export default function Home() {
               <div className="space-y-6">
                 <SectionCard
                   title="Phone Lookup Safety"
-                  description="Ambiguous phone matches must redact puppy, payment, and go-home context until verification or staff routing exists."
+                  description="Read from the phone lookup summary view."
                 >
                   <div className="space-y-3">
-                    {phoneLookups.map((lookup) => (
+                    {dashboard.phoneLookups.length > 0 ? (
+                      dashboard.phoneLookups.map((lookup) => (
+                        <div
+                          key={lookup.phone}
+                          className={`rounded-2xl border p-4 ${lookup.tone}`}
+                        >
+                          <p className="text-sm font-bold">{lookup.phone}</p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {lookup.result}
+                          </p>
+                          <p className="mt-1 text-sm opacity-80">{lookup.detail}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyList text="No phone lookup summary rows found locally." />
+                    )}
+                  </div>
+                </SectionCard>
+
+                <SectionCard title="Kennel / Staff Notes">
+                  <div className="space-y-3">
+                    {dashboard.kennelNotes.map((note) => (
                       <div
-                        key={lookup.phone}
-                        className={`rounded-2xl border p-4 ${lookup.tone}`}
+                        key={note}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
                       >
-                        <p className="text-sm font-semibold">{lookup.phone}</p>
-                        <p className="mt-2 text-base font-bold">{lookup.result}</p>
-                        <p className="mt-1 text-sm leading-6">{lookup.detail}</p>
+                        {note}
                       </div>
                     ))}
                   </div>
                 </SectionCard>
 
-                <SectionCard
-                  title="Kennel Notes"
-                  description="Kennel workflows stay read-only until validated write tools and audit rules are approved."
-                >
-                  <ul className="space-y-3">
-                    {kennelNotes.map((note) => (
-                      <li
-                        key={note}
-                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                <SectionCard title="Still Offline">
+                  <div className="space-y-3">
+                    {dashboard.emptyStates.map((item) => (
+                      <div
+                        key={item.title}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                       >
-                        {note}
-                      </li>
+                        <p className="font-semibold text-slate-950">{item.title}</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                          {item.text}
+                        </p>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </SectionCard>
               </div>
             </div>
-
-            <section className="grid gap-4 lg:grid-cols-3">
-              {emptyStates.map((state) => (
-                <div
-                  key={state.title}
-                  className="rounded-3xl border border-dashed border-slate-300 bg-white/70 p-5 shadow-sm"
-                >
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Not connected yet
-                  </p>
-                  <h2 className="mt-3 text-lg font-semibold text-slate-950">
-                    {state.title}
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {state.text}
-                  </p>
-                </div>
-              ))}
-            </section>
           </div>
         </div>
       </div>
