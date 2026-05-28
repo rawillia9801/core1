@@ -38,7 +38,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Canonical checkpoint docs added and updated.
 - [x] `.env.local` confirmed ignored by Git.
 - [x] `next-env.d.ts` identified as generated/local noise when auto-touched.
-- [ ] Add a local-only helper script for endpoint verification without copying long curl commands.
+- [x] Local-only intake endpoint verification script added for fake payload testing without embedding secrets.
 - [ ] Add a short contributor note explaining the correct local path and wrong OneDrive path.
 
 ## Phase 1 — Local/Development Workflow Proof
@@ -70,7 +70,10 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Financial balance remains reservation/ledger-derived and is not copied onto buyers.
 - [x] Controlled `core_record_reservation_payment` database RPC added for posted local/dev deposits and payments.
 - [x] Rollback-safe payment recording test covers decreasing balance, event/audit writes, input rejection, and duplicate external-reference rejection.
-- [ ] Add a guarded local/development dashboard action for the controlled payment RPC.
+- [x] Guarded local/development dashboard action added for the controlled payment RPC.
+- [x] Payment action accepts dollar input and converts it server-side to integer cents before calling the RPC.
+- [x] Payment action permits only `deposit` and `payment`; it does not expose refunds, fees, chargebacks, credits, or adjustments.
+- [x] Payment action refreshes the dashboard so ledger-derived balance is shown after a successful local/dev record.
 - [ ] Add further payment recording validation before any staff-facing use.
 - [ ] Define refund/chargeback workflow before live payment operations.
 - [ ] Connect payment processor only after ledger write rules and security are complete.
@@ -115,7 +118,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Guarded local/development endpoint tested with fake report-label payload.
 - [x] Endpoint test documented as writing local dev records rather than rolling back.
 - [x] Intake creates buyer, family, application, application sections, event, and audit records.
-- [ ] Add local-only endpoint verification script.
+- [x] Local-only endpoint verification script added using fake report-label data.
 - [ ] Confirm exact live Zoho webhook/API payload before live connection.
 - [ ] Define failed-intake retry/dead-letter behavior.
 - [ ] Define duplicate application handling for repeated Zoho submissions.
@@ -132,10 +135,11 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Latest Application Detail panel reads `core_application_sections` and displays grouped responses.
 - [x] Phone Lookup Safety panel displays local ambiguity status.
 - [x] Latest Events panel displays local event data.
-- [ ] Add approved read-only data coverage for reservations.
-- [ ] Add approved read-only data coverage for puppies and litter context.
-- [ ] Add approved read-only data coverage for payment balance.
-- [ ] Add approved read-only data coverage for go-home effective view.
+- [x] Reservation Workflow Status panel displays recent local/development reservation context.
+- [x] Reservation Workflow Status panel displays linked puppy identity and current puppy status.
+- [ ] Add approved read-only data coverage for litter context within reservation workflow views.
+- [x] Reservation Workflow Status panel displays ledger-derived payment balance.
+- [x] Go-home read panel consumes the effective go-home view.
 - [ ] Add proper loading/empty/error states for all read panels.
 - [ ] Replace temporary/local-only data assumptions before staging.
 
@@ -153,11 +157,15 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Dashboard approval action sends no email and creates no reservation.
 - [x] Reservation creation write function added: `core_create_reservation`.
 - [x] Reservation creation rollback-safe SQL test added.
-- [ ] Add controlled local/development reservation creation action.
-- [ ] Define minimal UI fields for reservation creation: approved application, buyer/family, puppy, contract amount, reservation status.
-- [ ] Show reservation creation result and refresh dashboard data.
-- [ ] Prevent reservation creation for already-reserved puppies through UI and function behavior.
+- [x] Controlled local/development reservation creation action added.
+- [x] Minimal reservation form supports approved application context, puppy selection, dollar contract/deposit input, sale type, and notes.
+- [x] Reservation action converts entered dollar amounts to integer cents server-side before calling `core_create_reservation`.
+- [x] Reservation creation result refreshes dashboard data and is visible in the read-only reservation panel.
+- [x] Available puppy read filtering and database-function validation prevent duplicate active reservation creation through the controlled workflow.
 - [ ] Add local/dev verification for reservation creation in browser.
+- [x] Controlled local/development deposit/payment dashboard action calls `core_record_reservation_payment`.
+- [x] Deposit/payment action records only validated `deposit` or `payment` activity and refreshes ledger-derived balance display.
+- [x] Controlled dashboard actions use server-side RPC calls rather than direct browser/database writes.
 - [ ] Define broader server-side write-tool authorization/error pattern.
 - [ ] Add low-risk kennel tools only after application/reservation flow is stable.
 - [ ] Prevent direct AI/database writes.
@@ -223,18 +231,18 @@ It should be updated whenever work lands in the repository. It is intentionally 
 
 ### 3.2 Internal Reservation Workflow
 
-- [ ] Create reservations from approved applications in local/dev.
+- [x] Create reservations from approved applications in local/dev.
 - [ ] Verify reservation creation with real-like data in staging.
-- [ ] Show buyer/family/application/puppy/reservation linkage clearly.
-- [ ] Show puppy status change after reservation.
-- [ ] Prevent duplicate active reservation for one puppy.
+- [x] Show buyer/application/puppy/reservation linkage in the local/development read panel.
+- [x] Show puppy status after reservation in the local/development read panel.
+- [x] Prevent duplicate active reservation for one puppy through controlled local/development workflow validation.
 - [ ] Add reservation cancellation/change workflow.
 - [ ] Add reservation audit/event display.
 
 ### 3.3 Payment And Ledger Workflow
 
-- [ ] Display reservation balance from `core_payment_balance_view`.
-- [ ] Add controlled ledger/payment entry action.
+- [x] Display reservation balance from ledger-derived reservation/payment read models in local/development dashboard.
+- [x] Add controlled local/development ledger/payment entry action for deposits and payments only.
 - [ ] Add receipt metadata foundation.
 - [ ] Add payment method tracking rules.
 - [ ] Add refund/chargeback handling rules.
@@ -367,6 +375,7 @@ cat supabase/tests/core_v1_smoke_tests.sql | docker exec -i supabase_db_core1 ps
 cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
@@ -376,15 +385,12 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Pull latest docs locally and verify clean repo state.
-2. [ ] Add local-only endpoint verification script.
-3. [ ] Define minimal reservation creation UI fields.
-4. [ ] Add controlled local/development reservation creation action using `core_create_reservation`.
-5. [ ] Verify approved application -> reservation -> puppy reserved workflow locally.
-6. [ ] Add read-only reservation/payment/go-home panels needed to confirm the workflow.
-7. [ ] Design staff auth/access boundary before staging.
-8. [ ] Prepare selected-real-data staging plan.
-9. [ ] Import/show selected real data in staging only after owner approval.
+1. [ ] Exercise the controlled local/development deposit/payment form with fake reservation data and confirm balance display changes as expected.
+2. [ ] Define cancellation/correction behavior before adding broader reservation or ledger actions.
+3. [ ] Define refund, fee, chargeback, and reconciliation rules before any payment processor connection.
+4. [ ] Design staff authentication and server-side authorization boundaries before staging.
+5. [ ] Design and test RLS before any live client exposure.
+6. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
 
 ## Stop Conditions
 
