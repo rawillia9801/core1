@@ -134,7 +134,7 @@ export async function approveApplication(formData: FormData) {
           });
 
           if (approvalResponse.ok) {
-            revalidatePath("/");
+            revalidatePath("/staff");
             outcome = "success";
           } else {
             const responseBody = await approvalResponse.text().catch(() => "");
@@ -155,7 +155,7 @@ export async function approveApplication(formData: FormData) {
     }
   }
 
-  redirect(`/?approval=${outcome}`);
+  redirect(`/staff?approval=${outcome}`);
 }
 
 function getLocalPaymentConfig() {
@@ -257,7 +257,7 @@ export async function createReservation(formData: FormData) {
       hasValidApplicationId: UUID_PATTERN.test(applicationId),
       hasValidPuppyId: UUID_PATTERN.test(puppyId),
     });
-    redirect("/?reservation=error");
+    redirect("/staff?reservation=error");
   }
 
   if (!contractTotalCents || !deposit.valid) {
@@ -266,7 +266,7 @@ export async function createReservation(formData: FormData) {
       hasValidContractTotalDollars: Boolean(contractTotalCents),
       hasValidDepositRequiredDollars: deposit.valid,
     });
-    redirect("/?reservation=invalid_money");
+    redirect("/staff?reservation=invalid_money");
   }
 
   if (deposit.value !== null && deposit.value > contractTotalCents) {
@@ -275,7 +275,7 @@ export async function createReservation(formData: FormData) {
       contractTotalCents,
       depositRequiredCents: deposit.value,
     });
-    redirect("/?reservation=invalid_amounts");
+    redirect("/staff?reservation=invalid_amounts");
   }
 
   try {
@@ -375,7 +375,7 @@ export async function createReservation(formData: FormData) {
                 });
 
                 if (rpcResponse.ok) {
-                  revalidatePath("/");
+                  revalidatePath("/staff");
                   outcome = "success";
                 } else {
                   const responseBody = await rpcResponse.text().catch(() => "");
@@ -400,7 +400,7 @@ export async function createReservation(formData: FormData) {
     });
   }
 
-  redirect(`/?reservation=${outcome}`);
+  redirect(`/staff?reservation=${outcome}`);
 }
 
 export async function recordReservationPayment(formData: FormData) {
@@ -417,7 +417,7 @@ export async function recordReservationPayment(formData: FormData) {
     logPaymentFailure("invalid reservation id submitted", {
       hasValidReservationId: false,
     });
-    redirect("/?payment=invalid_input");
+    redirect("/staff?payment=invalid_input");
   }
 
   if (!["deposit", "payment"].includes(entryType)) {
@@ -425,7 +425,7 @@ export async function recordReservationPayment(formData: FormData) {
       reservationId,
       entryType,
     });
-    redirect("/?payment=invalid_input");
+    redirect("/staff?payment=invalid_input");
   }
 
   if (!amountCents) {
@@ -433,7 +433,7 @@ export async function recordReservationPayment(formData: FormData) {
       reservationId,
       hasValidAmountDollars: false,
     });
-    redirect("/?payment=invalid_money");
+    redirect("/staff?payment=invalid_money");
   }
 
   if (paymentMethod.length > 100 || externalReference.length > 255 || notes.length > 1000) {
@@ -443,7 +443,7 @@ export async function recordReservationPayment(formData: FormData) {
       externalReferenceTooLong: externalReference.length > 255,
       notesTooLong: notes.length > 1000,
     });
-    redirect("/?payment=invalid_input");
+    redirect("/staff?payment=invalid_input");
   }
 
   try {
@@ -492,7 +492,7 @@ export async function recordReservationPayment(formData: FormData) {
         });
 
         if (rpcResponse.ok) {
-          revalidatePath("/");
+          revalidatePath("/staff");
           outcome = "success";
         } else {
           const responseBody = await rpcResponse.text().catch(() => "");
@@ -513,7 +513,7 @@ export async function recordReservationPayment(formData: FormData) {
     });
   }
 
-  redirect(`/?payment=${outcome}`);
+  redirect(`/staff?payment=${outcome}`);
 }
 
 export async function cancelReservation(formData: FormData) {
@@ -528,7 +528,7 @@ export async function cancelReservation(formData: FormData) {
     logCancellationFailure("invalid reservation id submitted", {
       hasValidReservationId: false,
     });
-    redirect("/?cancellation=invalid_input");
+    redirect("/staff?cancellation=invalid_input");
   }
 
   if (!cancellationReason || cancellationReason.length > 1000) {
@@ -537,7 +537,7 @@ export async function cancelReservation(formData: FormData) {
       hasReason: Boolean(cancellationReason),
       reasonTooLong: cancellationReason.length > 1000,
     });
-    redirect("/?cancellation=invalid_reason");
+    redirect("/staff?cancellation=invalid_reason");
   }
 
   if (notes.length > 1000 || !["available", "unavailable", "hold"].includes(releasedPuppyStatus)) {
@@ -546,7 +546,7 @@ export async function cancelReservation(formData: FormData) {
       notesTooLong: notes.length > 1000,
       releasedPuppyStatus,
     });
-    redirect("/?cancellation=invalid_input");
+    redirect("/staff?cancellation=invalid_input");
   }
 
   try {
@@ -594,7 +594,7 @@ export async function cancelReservation(formData: FormData) {
         });
 
         if (rpcResponse.ok) {
-          revalidatePath("/");
+          revalidatePath("/staff");
           outcome = "success";
         } else {
           const responseBody = await rpcResponse.text().catch(() => "");
@@ -613,5 +613,5 @@ export async function cancelReservation(formData: FormData) {
     });
   }
 
-  redirect(`/?cancellation=${outcome}`);
+  redirect(`/staff?cancellation=${outcome}`);
 }

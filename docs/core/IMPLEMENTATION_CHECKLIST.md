@@ -192,13 +192,16 @@ It should be updated whenever work lands in the repository. It is intentionally 
 ### 2.1 Authentication And Access Boundary
 
 - [x] Staff authentication and access-boundary planning document added: `docs/core/CORE_STAFF_AUTH_PLAN.md`.
-- [~] Staff authentication provider/path recommended as Supabase Auth; implementation has not started.
-- [ ] Protect dashboard route from public access.
-- [ ] Separate local/dev service-role usage from staging/production access patterns.
+- [x] Supabase Auth packages added for the staff auth foundation.
+- [x] Minimal staff login page added.
+- [x] Protected `/staff` route added with active staff profile requirement.
+- [x] Root `/` route changed to a non-sensitive landing page.
+- [~] Staff profile lookup maps Supabase Auth user to `core_profiles.auth_user_id`; it currently uses service role server-side as a transitional bridge until RLS exists.
+- [~] Separate local/dev service-role usage from staging/production access patterns.
 - [ ] Add admin/staff role assignment flow.
-- [ ] Add server-side authorization checks for all actions.
+- [ ] Add per-action server-side authorization checks for all actions.
 - [ ] Replace static local/development actor env usage with authenticated staff profile actors.
-- [ ] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles.
+- [x] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles for staff route access.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -376,7 +379,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
-- [ ] Staff authentication implementation is not started.
+- [ ] Staff authentication is only partially implemented; action actor replacement and role checks remain incomplete.
 - [ ] Zoho is not connected live.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
@@ -412,12 +415,14 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Implement the minimal staff authentication/access boundary from `docs/core/CORE_STAFF_AUTH_PLAN.md`.
-2. [ ] Design and test RLS before any live client exposure.
-3. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
-4. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
-5. [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
-6. [ ] Prepare production-safe integration and deployment handling.
+1. [ ] Verify local Supabase Auth sign-in with an active `core_profiles.auth_user_id` mapping.
+2. [ ] Replace static local/development actor usage with authenticated staff profile actors.
+3. [ ] Add per-action role checks for approval, reservation, payment, cancellation, and future financial adjustment actions.
+4. [ ] Design and test RLS before any live client exposure.
+5. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
+6. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
+7. [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
+8. [ ] Prepare production-safe integration and deployment handling.
 
 ## Stop Conditions
 

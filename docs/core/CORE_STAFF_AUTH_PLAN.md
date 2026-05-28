@@ -4,13 +4,14 @@
 
 This document defines the recommended staff authentication and access-boundary plan for Core Phase 2. It is a planning checkpoint only.
 
-Do not treat this as implemented security. No auth, middleware, RLS, route movement, schema change, or selected-real-data import has been added by this document.
+Do not treat this as complete production security. The first staff auth foundation exists, but RLS, production authorization hardening, and selected-real-data staging are still blocked.
 
 ## Current Unsafe State
 
 Core currently proves the local/development workflow, but it is not safe for staff staging or production use yet.
 
-- The dashboard route is not authenticated and would be public if deployed without external protection.
+- The root route is now a non-sensitive landing page.
+- The staff dashboard foundation is available at `/staff` and requires a Supabase Auth user mapped to an active staff `core_profiles` row.
 - Server-side dashboard reads currently use the Supabase service-role key.
 - Server actions use the static local/development actor setting `CORE_APPROVAL_ACTOR_PROFILE_ID`.
 - The current action actor is a configured profile ID, not the authenticated staff user who clicked the button.
@@ -32,16 +33,31 @@ Recommended identity mapping:
 
 This keeps the first security step focused: authenticated internal staff only.
 
+## Current Auth Foundation Implemented
+
+The repository now includes the smallest staff auth foundation:
+
+- Supabase Auth packages are installed: `@supabase/supabase-js` and `@supabase/ssr`.
+- `src/lib/supabase/server.ts` creates a server-side Supabase Auth client using `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and request cookies.
+- `src/lib/staff-auth.ts` provides `requireStaffProfile()`.
+- `/login` provides a minimal staff email/password sign-in form.
+- `/staff` requires an authenticated Supabase user and active staff `core_profiles` row before rendering the dashboard.
+- `/` is intentionally non-sensitive and does not show Core dashboard data.
+
+Because RLS policies are not enabled yet, `requireStaffProfile()` uses the service role server-side only to look up `core_profiles` by `auth_user_id`. This is transitional. It must not be copied into browser code, and it should be narrowed or replaced after RLS policies and server authorization tests exist.
+
+The existing approval, reservation, deposit/payment, and cancellation actions still use the local/development static actor setting `CORE_APPROVAL_ACTOR_PROFILE_ID`. Authenticated actor replacement is not complete.
+
 ## Route And Access Structure
 
 Recommended route shape:
 
-- Move or place staff dashboard behavior behind a protected staff route or route group, such as `/staff` or a `(staff)` route group.
+- Keep staff dashboard behavior behind `/staff`.
 - Add middleware or a server-side guard that blocks unauthenticated access before staff data is read.
 - Keep the intake API separately guarded with integration-specific secret validation.
 - Keep public website and customer portal routes separate future work.
 
-The current dashboard should remain local/development-only until this boundary exists.
+The current dashboard should remain local/development-only until action actor mapping, authorization checks, and staging verification exist.
 
 ## Server-Side Authorization Pattern
 
@@ -147,11 +163,11 @@ Recommended implementation order:
 
 ## Next Recommended Task
 
-Implement the minimal staff authentication boundary from this plan:
+Continue the staff authentication boundary from this plan:
 
-1. Add a server-side auth/profile helper.
-2. Protect the staff dashboard route.
-3. Add staff login/sign-out.
-4. Replace static local/dev actor usage with the authenticated staff profile actor.
+1. Verify local Supabase Auth sign-in and an active `core_profiles.auth_user_id` mapping.
+2. Replace static local/dev actor usage with the authenticated staff profile actor.
+3. Add per-action role checks.
+4. Add manual verification steps for unauthenticated, unauthorized, and authorized staff paths.
 
 Do not import selected real data until those pieces are working and manually verified.

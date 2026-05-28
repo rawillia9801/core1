@@ -322,19 +322,26 @@ The helper does not read `.env.local`, does not require private keys, does not c
 - Kennel logging write tools are not implemented.
 - Home Assistant, cameras, and smart mirror work are not connected.
 
-## Staff Auth And Access Boundary Planning
+## Staff Auth And Access Boundary
 
 `docs/core/CORE_STAFF_AUTH_PLAN.md` now defines the recommended Phase 2 staff authentication and server-side authorization plan.
 
-The plan recommends Supabase Auth, mapping `auth.users.id` to `core_profiles.auth_user_id`, requiring active staff profiles, protecting the staff dashboard route, replacing the static local/development actor ID with the authenticated staff profile actor, and adding role checks before any selected-real-data staging.
+The first staff auth foundation is implemented:
 
-This is a planning document only. Staff auth implementation has not started, RLS remains deferred, and selected real data remains blocked until the staff access boundary is implemented and verified.
+- Supabase Auth packages are installed.
+- `/login` provides a minimal staff email/password sign-in path.
+- `/staff` requires an authenticated Supabase user mapped to an active `core_profiles` staff profile.
+- `/` is now a non-sensitive landing page and does not display Core dashboard data.
+- The staff profile lookup uses the service role server-side as a transitional bridge until RLS policies exist.
+
+This is not a complete staging/production security boundary yet. Existing dashboard write actions still use `CORE_APPROVAL_ACTOR_PROFILE_ID` as the local/development actor. Authenticated actor replacement, per-action role checks, RLS policy work, and selected-real-data verification remain incomplete.
 
 ## Remaining Work Before Staging Or Production
 
 Before any staff-facing staging or production use, Core still needs deliberate security and workflow decisions:
 
-- Implementation of the documented staff authentication and server-side authorization boundary.
+- Authenticated actor replacement for approval, reservation, payment, cancellation, and future financial adjustment actions.
+- Per-action staff role checks.
 - RLS policies and policy tests.
 - Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
 - A reviewed approach to stronger payment idempotency before processor integration.
@@ -343,4 +350,4 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Implement the minimal staff authentication/access boundary from `docs/core/CORE_STAFF_AUTH_PLAN.md` before selected real-data staging. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Verify local Supabase Auth sign-in with an active `core_profiles.auth_user_id` mapping, then replace static local/development actor usage with the authenticated staff profile actor. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
