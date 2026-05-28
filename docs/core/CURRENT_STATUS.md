@@ -26,7 +26,7 @@ main
 
 The duplicate OneDrive checkout is not the working repository for Core tasks.
 
-## Current Implemented Workflow
+## Current Implemented And Locally Verified Workflow
 
 Core now contains a local/development workflow foundation for:
 
@@ -39,6 +39,8 @@ fake application intake
   -> record a deposit or payment
   -> refresh and show the reduced ledger-derived balance
 ```
+
+This was verified locally after repopulating the reset database with the local workflow seed helper. A fake reservation with a `$2,000.00` contract balance accepted a local/development `$500.00` deposit entry through the dashboard, and the Reservation Workflow Status panel refreshed to show the ledger-derived balance due reduced to `$1,500.00`.
 
 Each write step is deliberately narrow. The application does not directly insert arbitrary transaction data from the browser. Server-side actions call controlled database functions that validate the operation and write operational/audit records.
 
@@ -93,7 +95,7 @@ The intake path writes Core buyer/family/application/application-section context
 
 ### Guarded Local/Development Endpoint
 
-A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any service-role key.
+A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.
 
 This endpoint does not establish a live Zoho integration.
 
@@ -152,7 +154,7 @@ The function:
 - Creates `core_events` and `core_audit_log` records.
 - Rejects an accidental repeated posted payment when the same reservation, entry type, amount, and supplied external reference match.
 
-The dashboard now includes a local/development-only deposit/payment form on eligible reservation cards. It accepts:
+The dashboard includes a local/development-only deposit/payment form on eligible reservation cards. It accepts:
 
 - Transaction type: deposit or payment only.
 - Amount received in dollars.
@@ -162,7 +164,7 @@ The dashboard now includes a local/development-only deposit/payment form on elig
 
 The server action converts dollar input to integer cents and calls `core_record_reservation_payment`; it does not directly insert financial ledger rows. After success, the existing reservation read panel refreshes and shows the updated ledger-derived balance.
 
-This records local Core ledger activity only. It does not verify that external funds were transferred.
+This records local Core ledger activity only. It does not verify that external funds were transferred and does not connect a payment processor.
 
 ## Tests And Validation Present
 
@@ -176,7 +178,7 @@ The repository includes rollback-safe SQL tests for:
 - Zoho API-name shaped fake intake.
 - Zoho report/PDF-label shaped fake intake.
 
-The newly added `core_record_reservation_payment_tests.sql` was run locally and verified that:
+The `core_record_reservation_payment_tests.sql` test verified that:
 
 - A posted `$500.00` test deposit decreases a `$2,000.00` balance to `$1,500.00`.
 - A posted `$250.00` test payment further decreases it to `$1,250.00`.
@@ -187,7 +189,7 @@ The newly added `core_record_reservation_payment_tests.sql` was run locally and 
 
 `npm run lint` passed after the current dashboard deposit/payment action was added.
 
-The most recent local `supabase db reset --local` applied all migrations, including the payment RPC migration, before the Supabase CLI reported a local storage-container readiness failure during service restart. The payment RPC test was then successfully executed directly against the local database container.
+The dashboard payment form was also locally verified with seeded fake data: a `$500.00` deposit was recorded for the local seeded reservation and the visible balance due changed from `$2,000.00` to `$1,500.00`.
 
 ## Current Verified Commands
 
@@ -205,6 +207,8 @@ cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supab
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
 ```
+
+Do not rerun the full command list after every small change. Run the relevant validation once after code changes or when repository/database state is unclear.
 
 ## Local Workflow Seed Helper
 
@@ -243,7 +247,7 @@ Or run the SQL directly:
 cat scripts/seed-local-core-workflow.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 ```
 
-The helper does not read `.env.local`, does not require service role keys, does not connect live services, and can be safely rerun against the local database because all seeded rows use deterministic UUIDs with upsert/update behavior.
+The helper does not read `.env.local`, does not require private keys, does not connect live services, and can be safely rerun against the local database because all seeded rows use deterministic UUIDs with upsert/update behavior.
 
 ## Still Not Connected Live
 
@@ -268,10 +272,10 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 - Payment correction, refund, fee, chargeback, and reconciliation rules.
 - A reviewed approach to stronger payment idempotency before processor integration.
 - Limited, owner-approved staging/import planning.
-- Production-safe integration and credential handling.
+- Production-safe integration and deployment handling.
 
 ## Next Recommended Task
 
-Use fake local/development reservation data to exercise the newly added deposit/payment dashboard form end-to-end and confirm that the Reservation Workflow Status balance changes only through the controlled RPC and ledger-derived read model.
+Define cancellation and correction behavior before expanding reservation or ledger actions. Specifically decide how Core should handle reservation cancellation, puppy release, payment corrections, refunds, fees, chargebacks, and audit visibility before adding broader staff-facing controls.
 
-Do not use production data, connect a payment processor, paste or commit service-role credentials, or add refund/fee/chargeback support during that verification.
+Do not use production data, connect a payment processor, or add refund/fee/chargeback support until those rules are reviewed.
