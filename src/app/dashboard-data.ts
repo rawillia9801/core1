@@ -83,6 +83,23 @@ type DashboardWorkflowActivity = {
   sortTime: number;
 };
 
+type DashboardLedgerActivity = {
+  id: string;
+  type: string;
+  category: string;
+  balanceEffect: string;
+  amount: string;
+  reservationId: string;
+  buyer: string;
+  buyerEmail: string;
+  puppy: string;
+  externalReference: string;
+  description: string;
+  relatedLedgerId: string;
+  status: string;
+  occurredAt: string;
+};
+
 type CountResult = {
   count: number;
 };
@@ -154,6 +171,21 @@ type PaymentBalanceRow = {
   balance_due_cents: number | null;
 };
 
+type LedgerRow = {
+  id: string;
+  reservation_id: string | null;
+  buyer_id: string | null;
+  external_reference: string | null;
+  entry_type: string | null;
+  balance_effect: string | null;
+  status: string | null;
+  amount_cents: number | null;
+  currency: string | null;
+  occurred_at: string | null;
+  description: string | null;
+  metadata: Record<string, unknown> | null;
+};
+
 type GoHomeRow = {
   reservation_id: string | null;
   buyer_id: string | null;
@@ -219,6 +251,7 @@ export type DashboardData = {
   }[];
   events: DashboardEvent[];
   workflowActivity: DashboardWorkflowActivity[];
+  ledgerActivity: DashboardLedgerActivity[];
   dataSourceLabel: string;
   dataWarning: string | null;
 };
@@ -227,6 +260,13 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
+});
+
+const ledgerCurrencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
 
 const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -282,6 +322,10 @@ function formatCurrencyFromCents(value: number | null | undefined) {
 
 function formatOptionalCurrencyFromCents(value: number | null | undefined) {
   return value === null || value === undefined ? "Not available" : formatCurrencyFromCents(value);
+}
+
+function formatLedgerCurrencyFromCents(value: number | null | undefined) {
+  return ledgerCurrencyFormatter.format((value ?? 0) / 100);
 }
 
 function formatDateTime(value: string | null | undefined) {
@@ -378,6 +422,34 @@ function workflowDetail(values: (string | null)[]) {
   return values.filter(Boolean).join(" | ") || "No extra safe detail recorded.";
 }
 
+function ledgerCategory(entryType: string | null | undefined, balanceEffect: string | null | undefined) {
+  if (entryType === "deposit" || entryType === "payment") {
+    return "Money received";
+  }
+
+  if (entryType === "credit") {
+    return "Balance-reducing credit";
+  }
+
+  if (entryType === "adjustment" || balanceEffect === "neutral") {
+    return "Neutral adjustment";
+  }
+
+  if (["refund", "chargeback"].includes(entryType ?? "")) {
+    return "Internal ledger exception";
+  }
+
+  if (balanceEffect === "increase") {
+    return "Balance-increasing charge";
+  }
+
+  if (balanceEffect === "decrease") {
+    return "Balance decrease";
+  }
+
+  return "Ledger activity";
+}
+
 function fallbackDashboardData(dataWarning: string | null = null): DashboardData {
   return {
     stats: [
@@ -421,6 +493,7 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     emptyStates,
     events: [],
     workflowActivity: [],
+    ledgerActivity: [],
     dataSourceLabel: "Not connected",
     dataWarning:
       dataWarning ??
@@ -534,6 +607,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       events,
       workflowEvents,
       auditLogs,
+      ledgerRows,
     ] = await Promise.all([
       readCount(restUrl, serviceRoleKey, "core_applications"),
       readCount(restUrl, serviceRoleKey, "core_applications", {
@@ -597,6 +671,14 @@ export async function getDashboardData(): Promise<DashboardData> {
         order: "created_at.desc",
         limit: "15",
       }),
+      readRows<LedgerRow>(restUrl, serviceRoleKey, "core_financial_ledger", {
+        select:
+          "id,reservation_id,buyer_id,external_reference,entry_type,balance_effect,status,amount_cents,currency,occurred_at,description,metadata",
+        entry_type:
+          "in.(deposit,payment,credit,refund,chargeback,fee,admin_fee,transport_fee,finance_charge,adjustment)",
+        order: "occurred_at.desc",
+        limit: "15",
+      }),
     ]);
 
     const latestApplicationId = applications[0]?.id;
@@ -607,12 +689,25 @@ export async function getDashboardData(): Promise<DashboardData> {
           order: "section_label.asc.nullslast,section_key.asc.nullslast",
         })
       : [];
+    const ledgerReservationIds = Array.from(
+      new Set(ledgerRows.map((ledger) => ledger.reservation_id).filter(Boolean) as string[]),
+    );
+    const ledgerReservationSummaries =
+      ledgerReservationIds.length > 0
+        ? await readRows<ReservationSummaryRow>(restUrl, serviceRoleKey, "core_reservation_summary_view", {
+            select:
+              "reservation_id,reservation_status,reserved_at,buyer_id,buyer_name,buyer_email,puppy_id,puppy_name,puppy_status,application_id,contract_total_cents,deposit_required_cents,balance_due_cents",
+            reservation_id: `in.(${ledgerReservationIds.join(",")})`,
+          })
+        : [];
 
     const buyerIds = Array.from(
       new Set(
         [
           ...applications.map((application) => application.buyer_id),
           ...reservations.map((reservation) => reservation.buyer_id),
+          ...ledgerReservationSummaries.map((reservation) => reservation.buyer_id),
+          ...ledgerRows.map((ledger) => ledger.buyer_id),
           ...goHomes.map((goHome) => goHome.buyer_id),
         ].filter(Boolean) as string[],
       ),
@@ -621,6 +716,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       new Set(
         [
           ...reservations.map((reservation) => reservation.puppy_id),
+          ...ledgerReservationSummaries.map((reservation) => reservation.puppy_id),
           ...goHomes.map((goHome) => goHome.puppy_id),
         ].filter(Boolean) as string[],
       ),
@@ -660,6 +756,12 @@ export async function getDashboardData(): Promise<DashboardData> {
     const applicationsById = new Map(applications.map((application) => [application.id, application]));
     const reservationApplicationsById = new Map(
       reservationApplications.map((application) => [application.id, application]),
+    );
+    const reservationContextById = new Map(
+      [...reservations, ...ledgerReservationSummaries].map((reservation) => [
+        reservation.reservation_id,
+        reservation,
+      ]),
     );
     const activelyReservedPuppyIds = new Set(
       activePuppyReservations
@@ -861,6 +963,36 @@ export async function getDashboardData(): Promise<DashboardData> {
         when: formatDateTime(event.event_at),
       })),
       workflowActivity,
+      ledgerActivity: ledgerRows.map((ledger) => {
+        const reservation = ledger.reservation_id ? reservationContextById.get(ledger.reservation_id) : undefined;
+        const buyer = ledger.buyer_id ? buyersById.get(ledger.buyer_id) : undefined;
+        const relatedLedgerId = safeTextValue(ledger.metadata?.related_ledger_id);
+        const processorNotice =
+          ledger.entry_type === "refund" || ledger.entry_type === "chargeback"
+            ? "Internal ledger record only; no processor money movement."
+            : null;
+
+        return {
+          id: ledger.id,
+          type: ledger.entry_type || "ledger",
+          category: ledgerCategory(ledger.entry_type, ledger.balance_effect),
+          balanceEffect: ledger.balance_effect || "unknown",
+          amount: formatLedgerCurrencyFromCents(ledger.amount_cents),
+          reservationId: shortId(ledger.reservation_id),
+          buyer: reservation?.buyer_name || buyerName(buyer),
+          buyerEmail: reservation?.buyer_email || buyerEmail(buyer),
+          puppy: reservation?.puppy_name || "Unassigned puppy",
+          externalReference: ledger.external_reference || "None",
+          description: workflowDetail([
+            ledger.description || null,
+            safeTextValue(ledger.metadata?.reason) ? `Reason: ${safeTextValue(ledger.metadata?.reason)}` : null,
+            processorNotice,
+          ]),
+          relatedLedgerId: shortId(relatedLedgerId),
+          status: ledger.status || "unknown",
+          occurredAt: formatDateTime(ledger.occurred_at),
+        };
+      }),
       dataSourceLabel: "Local Supabase read-only",
       dataWarning: null,
     };

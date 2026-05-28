@@ -775,6 +775,64 @@ export default async function Home({
                 </SectionCard>
 
                 <SectionCard
+                  title="Financial Ledger Activity"
+                  description="Read-only local/development ledger visibility. Refunds and chargebacks shown here are internal ledger records only, not processor money movement."
+                >
+                  <div className="space-y-3">
+                    {dashboard.ledgerActivity.length > 0 ? (
+                      dashboard.ledgerActivity.map((ledger) => (
+                        <div
+                          key={ledger.id}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <StatusBadge>{ledger.type}</StatusBadge>
+                                <StatusBadge>{ledger.category}</StatusBadge>
+                                <StatusBadge>{ledger.balanceEffect}</StatusBadge>
+                              </div>
+                              <p className="mt-2 text-sm font-semibold text-slate-900">
+                                {ledger.amount} · {ledger.buyer}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-600">
+                                {ledger.buyerEmail} · {ledger.puppy}
+                              </p>
+                            </div>
+                            <div className="text-sm font-semibold text-slate-500">
+                              {ledger.occurredAt}
+                            </div>
+                          </div>
+                          <p className="mt-3 text-sm leading-6 text-slate-600">
+                            {ledger.description}
+                          </p>
+                          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Reservation</dt>
+                              <dd className="mt-1 font-mono text-slate-700">{ledger.reservationId}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Status</dt>
+                              <dd className="mt-1 text-slate-700">{ledger.status}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">External Ref</dt>
+                              <dd className="mt-1 text-slate-700">{ledger.externalReference}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Related Ledger</dt>
+                              <dd className="mt-1 font-mono text-slate-700">{ledger.relatedLedgerId}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyList text="No local/development deposit, payment, credit, refund, chargeback, fee, finance charge, or adjustment ledger rows found yet." />
+                    )}
+                  </div>
+                </SectionCard>
+
+                <SectionCard
                   title="Latest Events"
                   description="Recent Core event feed from local Supabase."
                 >
