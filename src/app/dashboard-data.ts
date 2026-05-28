@@ -74,6 +74,7 @@ type DashboardWorkflowActivity = {
   recordType: string;
   type: string;
   summary: string;
+  detail: string;
   actor: string;
   source: string;
   entity: string;
@@ -186,6 +187,7 @@ type EventRow = {
   related_id?: string | null;
   source?: string | null;
   created_by_profile_id?: string | null;
+  details?: Record<string, unknown> | null;
 };
 
 type AuditLogRow = {
@@ -197,6 +199,7 @@ type AuditLogRow = {
   actor_identifier: string | null;
   outcome: string | null;
   created_at: string | null;
+  request_context?: Record<string, unknown> | null;
 };
 
 export type DashboardData = {
@@ -361,6 +364,18 @@ function formatResponseValue(value: unknown) {
   }
 
   return JSON.stringify(value);
+}
+
+function safeTextValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function safeBooleanLabel(value: unknown) {
+  return typeof value === "boolean" ? (value ? "yes" : "no") : null;
+}
+
+function workflowDetail(values: (string | null)[]) {
+  return values.filter(Boolean).join(" | ") || "No extra safe detail recorded.";
 }
 
 function fallbackDashboardData(dataWarning: string | null = null): DashboardData {
@@ -569,16 +584,16 @@ export async function getDashboardData(): Promise<DashboardData> {
       }),
       readRows<EventRow>(restUrl, serviceRoleKey, "core_events", {
         select:
-          "id,event_type,event_at,summary,application_id,buyer_id,puppy_id,reservation_id,related_table,related_id,source,created_by_profile_id",
+          "id,event_type,event_at,summary,application_id,buyer_id,puppy_id,reservation_id,related_table,related_id,source,created_by_profile_id,details",
         event_type:
-          "in.(application_approved,reservation_created,reservation_payment_recorded,local_workflow_seeded)",
+          "in.(application_approved,reservation_created,reservation_payment_recorded,reservation_cancelled,puppy_released,local_workflow_seeded)",
         order: "event_at.desc",
         limit: "15",
       }),
       readRows<AuditLogRow>(restUrl, serviceRoleKey, "core_audit_log", {
-        select: "id,action,entity_table,entity_id,source,actor_identifier,outcome,created_at",
+        select: "id,action,entity_table,entity_id,source,actor_identifier,outcome,created_at,request_context",
         action:
-          "in.(approve_application,create_reservation,record_reservation_payment,seed_local_core_workflow,seed_reservation_example)",
+          "in.(approve_application,create_reservation,record_reservation_payment,cancel_reservation,release_puppy_from_cancelled_reservation,seed_local_core_workflow,seed_reservation_example)",
         order: "created_at.desc",
         limit: "15",
       }),
@@ -657,30 +672,66 @@ export async function getDashboardData(): Promise<DashboardData> {
       0,
     );
     const workflowActivity = [
-      ...workflowEvents.map((event) => ({
-        id: `event-${event.id}`,
-        recordType: "Event",
-        type: event.event_type || "event",
-        summary: event.summary || "Core workflow event recorded",
-        actor: event.created_by_profile_id ? `Profile ${shortId(event.created_by_profile_id)}` : "System or not linked",
-        source: event.source || "core_events",
-        entity: event.related_table || "core_events",
-        relatedId: shortId(event.reservation_id ?? event.application_id ?? event.puppy_id ?? event.buyer_id ?? event.related_id),
-        when: formatDateTime(event.event_at),
-        sortTime: sortTime(event.event_at),
-      })),
-      ...auditLogs.map((audit) => ({
-        id: `audit-${audit.id}`,
-        recordType: "Audit",
-        type: audit.action || "audit",
-        summary: `${audit.action || "Workflow write"} recorded with ${audit.outcome || "unknown"} outcome`,
-        actor: audit.actor_identifier || "Actor not recorded",
-        source: audit.source || "core_audit_log",
-        entity: audit.entity_table || "Unknown entity",
-        relatedId: shortId(audit.entity_id),
-        when: formatDateTime(audit.created_at),
-        sortTime: sortTime(audit.created_at),
-      })),
+      ...workflowEvents.map((event) => {
+        const details = event.details ?? {};
+
+        return {
+          id: `event-${event.id}`,
+          recordType: "Event",
+          type: event.event_type || "event",
+          summary: event.summary || "Core workflow event recorded",
+          detail: workflowDetail([
+            safeTextValue(details.cancellation_reason)
+              ? `Reason: ${safeTextValue(details.cancellation_reason)}`
+              : null,
+            safeBooleanLabel(details.release_puppy_requested)
+              ? `Release requested: ${safeBooleanLabel(details.release_puppy_requested)}`
+              : null,
+            safeTextValue(details.released_puppy_status_requested)
+              ? `Requested puppy status: ${safeTextValue(details.released_puppy_status_requested)}`
+              : null,
+            safeTextValue(details.from_status) && safeTextValue(details.to_status)
+              ? `Puppy status: ${safeTextValue(details.from_status)} to ${safeTextValue(details.to_status)}`
+              : null,
+          ]),
+          actor: event.created_by_profile_id ? `Profile ${shortId(event.created_by_profile_id)}` : "System or not linked",
+          source: event.source || "core_events",
+          entity: event.related_table || "core_events",
+          relatedId: shortId(event.reservation_id ?? event.application_id ?? event.puppy_id ?? event.buyer_id ?? event.related_id),
+          when: formatDateTime(event.event_at),
+          sortTime: sortTime(event.event_at),
+        };
+      }),
+      ...auditLogs.map((audit) => {
+        const requestContext = audit.request_context ?? {};
+
+        return {
+          id: `audit-${audit.id}`,
+          recordType: "Audit",
+          type: audit.action || "audit",
+          summary: `${audit.action || "Workflow write"} recorded with ${audit.outcome || "unknown"} outcome`,
+          detail: workflowDetail([
+            safeTextValue(requestContext.cancellation_reason)
+              ? `Reason: ${safeTextValue(requestContext.cancellation_reason)}`
+              : null,
+            safeBooleanLabel(requestContext.release_puppy_requested)
+              ? `Release requested: ${safeBooleanLabel(requestContext.release_puppy_requested)}`
+              : null,
+            safeTextValue(requestContext.released_puppy_status_requested)
+              ? `Requested puppy status: ${safeTextValue(requestContext.released_puppy_status_requested)}`
+              : null,
+            safeTextValue(requestContext.released_puppy_status)
+              ? `Puppy status: ${safeTextValue(requestContext.released_puppy_status)}`
+              : null,
+          ]),
+          actor: audit.actor_identifier || "Actor not recorded",
+          source: audit.source || "core_audit_log",
+          entity: audit.entity_table || "Unknown entity",
+          relatedId: shortId(audit.entity_id),
+          when: formatDateTime(audit.created_at),
+          sortTime: sortTime(audit.created_at),
+        };
+      }),
     ]
       .sort((left, right) => right.sortTime - left.sortTime)
       .slice(0, 15);

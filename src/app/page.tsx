@@ -696,7 +696,7 @@ export default async function Home({
 
                 <SectionCard
                   title="Reservation Activity / Audit"
-                  description="Read-only local/development workflow trail from Core events and audit logs."
+                  description="Read-only local/development workflow trail from Core events and audit logs, including cancellation and puppy-release outcomes."
                 >
                   <div className="space-y-3">
                     {dashboard.workflowActivity.length > 0 ? (
@@ -714,6 +714,9 @@ export default async function Home({
                           </div>
                           <p className="mt-2 text-sm font-semibold text-slate-900">
                             {activity.summary}
+                          </p>
+                          <p className="mt-1 text-sm leading-6 text-slate-600">
+                            {activity.detail}
                           </p>
                           <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
                             <div>
@@ -736,7 +739,7 @@ export default async function Home({
                         </div>
                       ))
                     ) : (
-                      <EmptyList text="No local/development reservation workflow event or audit rows found yet." />
+                      <EmptyList text="No local/development reservation workflow, cancellation, or puppy-release event/audit rows found yet." />
                     )}
                   </div>
                 </SectionCard>
