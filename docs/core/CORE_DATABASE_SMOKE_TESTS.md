@@ -59,6 +59,22 @@ npm run lint
 
 The SQL validation scripts use fake data and are intended to roll their database changes back at the end.
 
+## Local Workflow Seed Helper
+
+For dashboard testing after a local reset, use the local-only workflow seed helper:
+
+```bash
+./scripts/seed-local-core-workflow.sh
+```
+
+Equivalent direct SQL command:
+
+```bash
+cat scripts/seed-local-core-workflow.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+```
+
+This helper differs from the rollback-safe smoke tests: it intentionally commits fake local/dev records so the dashboard has applications, application sections, puppies, one reserved example, and event/audit context to display after `supabase db reset --local`. It is not loaded by migrations, uses only `LOCAL-*` references and `example.invalid` contact data, marks records with `local_dev_only`, creates no payment/ledger rows, and is safe to rerun because it uses deterministic UUIDs with upsert/update behavior.
+
 ## Additional Validation Coverage
 
 | Test Script | Purpose |
