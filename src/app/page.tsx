@@ -232,8 +232,9 @@ export default async function Home({
                 </p>
                 <p className="mt-2 text-sm leading-6">
                   This dashboard is reading local Supabase data server-side. It
-                  still has no dashboard write actions, no public customer portal,
-                  and no live external integrations.
+                  has guarded local/dev write actions for approved workflows;
+                  customer access, production writes, and live external integrations
+                  remain off.
                 </p>
               </div>
             )}
