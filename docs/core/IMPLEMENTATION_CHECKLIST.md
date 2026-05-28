@@ -78,8 +78,11 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Controlled `core_record_financial_adjustment` database RPC added for local/dev credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
 - [x] Financial adjustment rollback-safe SQL test added.
 - [x] Adjustment RPC maps `balance_effect` internally and keeps deposit/payment recording separate.
+- [x] Read-only Financial Ledger Activity panel added for deposits, payments, credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
+- [x] Ledger activity panel distinguishes money received, balance-reducing credit, internal ledger exception, balance-increasing charge, and neutral adjustment rows.
 - [ ] Add further payment recording validation before any staff-facing use.
 - [x] Define local/development refund/chargeback ledger workflow before live payment operations.
+- [ ] Add dashboard UI for creating financial adjustments only after staff authorization boundaries are designed.
 - [ ] Define live payment processor reconciliation and idempotency before live refund/chargeback operations.
 - [ ] Connect payment processor only after ledger write rules and security are complete.
 
@@ -144,6 +147,8 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Reservation Workflow Status panel displays linked puppy identity and current puppy status.
 - [ ] Add approved read-only data coverage for litter context within reservation workflow views.
 - [x] Reservation Workflow Status panel displays ledger-derived payment balance.
+- [x] Financial Ledger Activity panel displays ledger rows read-only.
+- [x] Ledger panel labels refunds/chargebacks as internal ledger records rather than processor movement.
 - [x] Go-home read panel consumes the effective go-home view.
 - [ ] Add proper loading/empty/error states for all read panels.
 - [ ] Replace temporary/local-only data assumptions before staging.
@@ -173,6 +178,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Local/dev deposit/payment form verified with fake seeded data.
 - [x] Controlled dashboard actions use server-side RPC calls rather than direct browser/database writes.
 - [x] Controlled financial adjustment database RPC added for local/dev ledger exceptions without dashboard UI.
+- [x] Read-only financial adjustment/ledger exception visibility added to dashboard.
 - [x] Controlled reservation cancellation database RPC added: `core_cancel_reservation`.
 - [x] Reservation cancellation rollback-safe SQL test added.
 - [x] Cancellation preserves ledger rows and does not imply refunds, fees, chargebacks, documents, or messages.
@@ -256,10 +262,11 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Add controlled local/development ledger/payment entry action for deposits and payments only.
 - [x] Verify local/development deposit/payment form reduces visible balance through the ledger-derived read model.
 - [x] Add controlled database foundation for local/development credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
+- [x] Show local/development financial ledger and adjustment activity read-only.
 - [ ] Add receipt metadata foundation.
 - [ ] Add payment method tracking rules.
 - [x] Add local/development refund/chargeback handling rules as ledger-only records.
-- [ ] Add staff review for payment corrections.
+- [ ] Add staff review and creation UI for payment corrections.
 - [ ] Connect payment processor only after internal ledger flow is stable.
 
 ### 3.4 Go-Home Workflow
@@ -390,6 +397,8 @@ cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supaba
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_record_financial_adjustment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
@@ -399,12 +408,12 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Define cancellation/correction behavior before adding broader reservation or ledger actions.
-2. [ ] Define refund, fee, chargeback, and reconciliation rules before any payment processor connection.
-3. [ ] Add reservation audit/event visibility.
-4. [ ] Design staff authentication and server-side authorization boundaries before staging.
-5. [ ] Design and test RLS before any live client exposure.
-6. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
+1. [ ] Design staff authentication and server-side authorization boundaries before staging.
+2. [ ] Design and test RLS before any live client exposure.
+3. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
+4. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
+5. [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
+6. [ ] Prepare production-safe integration and deployment handling.
 
 ## Stop Conditions
 

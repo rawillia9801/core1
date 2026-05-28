@@ -38,6 +38,9 @@ fake application intake
   -> show reserved puppy and ledger-derived balance
   -> record a deposit or payment
   -> refresh and show the reduced ledger-derived balance
+  -> cancel a reservation with optional explicit puppy release
+  -> show cancellation activity
+  -> show financial ledger and adjustment activity read-only
 ```
 
 This was verified locally after repopulating the reset database with the local workflow seed helper. A fake reservation with a `$2,000.00` contract balance accepted a local/development `$500.00` deposit entry through the dashboard, and the Reservation Workflow Status panel refreshed to show the ledger-derived balance due reduced to `$1,500.00`.
@@ -62,6 +65,21 @@ The financial ledger correction is implemented:
 - `core_payment_balance_view` calculates balances from reservation contract totals and posted ledger effects.
 
 Deposits and payments reduce amount owed through `balance_effect = 'decrease'`. Fees, refunds, chargebacks, credits, and adjustments are not exposed through the current local/development payment action.
+
+The controlled financial adjustment RPC is now implemented separately from deposit/payment recording. `core_record_financial_adjustment` supports local/development ledger exception rows for:
+
+- `credit`
+- `refund`
+- `chargeback`
+- `fee`
+- `admin_fee`
+- `transport_fee`
+- `finance_charge`
+- neutral `adjustment`
+
+The function maps `balance_effect` internally. Credit decreases balance; refund, chargeback, fees, transport fee, and finance charge increase balance; neutral adjustment does not affect balance. It inserts additive ledger rows only and does not edit or delete prior ledger entries.
+
+Refunds and chargebacks in this foundation are internal Core ledger records only. They do not move money, contact a payment processor, send email, create receipts, or generate documents. Stronger reconciliation and idempotency remain required before live payment operations.
 
 ### Go-Home Model And Read Rules
 
@@ -166,6 +184,41 @@ The server action converts dollar input to integer cents and calls `core_record_
 
 This records local Core ledger activity only. It does not verify that external funds were transferred and does not connect a payment processor.
 
+### Financial Adjustment Foundation And Visibility
+
+The database function `core_record_financial_adjustment` is implemented and covered by a rollback-safe SQL test. It is intentionally separate from `core_record_reservation_payment`.
+
+The dashboard now includes a read-only Financial Ledger Activity panel. It reads ledger rows server-side and shows recent:
+
+- deposit
+- payment
+- credit
+- refund
+- chargeback
+- fee
+- admin_fee
+- transport_fee
+- finance_charge
+- neutral adjustment
+
+The panel distinguishes ledger rows as money received, balance-reducing credit, internal ledger exception, balance-increasing charge, or neutral adjustment. It shows safe ledger context such as amount, balance effect, reservation short ID, buyer/email, puppy, external reference, related ledger ID, status, timestamp, and reason/description without displaying raw JSON.
+
+Event and audit activity remains separate in the Reservation Activity / Audit panel. No dashboard UI exists yet for creating financial adjustments, refunds, fees, chargebacks, credits, or neutral adjustments.
+
+### Reservation Cancellation
+
+The database function `core_cancel_reservation` is implemented and covered by a rollback-safe SQL test. The local/development dashboard includes a guarded cancellation action for eligible `reserved` or `pending` reservations.
+
+Cancellation:
+
+- does not create refunds
+- does not edit ledger rows
+- does not delete reservations
+- does not delete puppies
+- can release a puppy only when explicitly requested
+- writes cancellation event/audit rows
+- writes puppy-release event/audit rows only when puppy status changes
+
 ## Tests And Validation Present
 
 The repository includes rollback-safe SQL tests for:
@@ -175,6 +228,8 @@ The repository includes rollback-safe SQL tests for:
 - Controlled application approval.
 - Controlled reservation creation.
 - Controlled deposit/payment recording.
+- Controlled financial adjustment records.
+- Controlled reservation cancellation.
 - Zoho API-name shaped fake intake.
 - Zoho report/PDF-label shaped fake intake.
 
@@ -203,6 +258,8 @@ cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supaba
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_record_financial_adjustment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
@@ -255,6 +312,8 @@ The helper does not read `.env.local`, does not require private keys, does not c
 - Twilio is not connected live.
 - Email is not sending.
 - A payment processor is not connected.
+- Refunds and chargebacks are internal Core ledger records only; no processor money movement is connected.
+- Financial adjustment dashboard creation UI is not implemented.
 - Document generation and signature handling are not implemented.
 - No production data import has happened.
 - RLS is not enabled for live client exposure.
@@ -269,13 +328,11 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 - Authentication and server-side authorization boundaries.
 - RLS policies and policy tests.
-- Payment correction, refund, fee, chargeback, and reconciliation rules.
+- Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
 - A reviewed approach to stronger payment idempotency before processor integration.
 - Limited, owner-approved staging/import planning.
 - Production-safe integration and deployment handling.
 
 ## Next Recommended Task
 
-Define cancellation and correction behavior before expanding reservation or ledger actions. Specifically decide how Core should handle reservation cancellation, puppy release, payment corrections, refunds, fees, chargebacks, and audit visibility before adding broader staff-facing controls.
-
-Do not use production data, connect a payment processor, or add refund/fee/chargeback support until those rules are reviewed.
+Plan staff authentication and server-side access boundaries before selected real-data staging. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are reviewed.
