@@ -191,11 +191,14 @@ It should be updated whenever work lands in the repository. It is intentionally 
 
 ### 2.1 Authentication And Access Boundary
 
-- [ ] Decide staff authentication provider/path.
+- [x] Staff authentication and access-boundary planning document added: `docs/core/CORE_STAFF_AUTH_PLAN.md`.
+- [~] Staff authentication provider/path recommended as Supabase Auth; implementation has not started.
 - [ ] Protect dashboard route from public access.
 - [ ] Separate local/dev service-role usage from staging/production access patterns.
 - [ ] Add admin/staff role assignment flow.
 - [ ] Add server-side authorization checks for all actions.
+- [ ] Replace static local/development actor env usage with authenticated staff profile actors.
+- [ ] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -373,6 +376,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
+- [ ] Staff authentication implementation is not started.
 - [ ] Zoho is not connected live.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
@@ -408,7 +412,7 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Design staff authentication and server-side authorization boundaries before staging.
+1. [ ] Implement the minimal staff authentication/access boundary from `docs/core/CORE_STAFF_AUTH_PLAN.md`.
 2. [ ] Design and test RLS before any live client exposure.
 3. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
 4. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
