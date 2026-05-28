@@ -36,6 +36,12 @@ Any future write affecting `core_financial_ledger` must audit both `entry_type` 
 
 `core_record_reservation_payment(...)` is the controlled Core V1 deposit/payment write foundation. It permits only posted `deposit` and `payment` entries, forces `balance_effect = 'decrease'`, derives the buyer from the reservation, and creates both an operational event and audit entry. It does not prove external funds were collected and does not support refunds, fees, chargebacks, or live processor reconciliation.
 
+### Reservation Cancellation Audit Context
+
+`core_cancel_reservation(...)` is the controlled Core V1 cancellation foundation. It changes an eligible `reserved` or `pending` reservation to `cancelled`, records a required cancellation reason, and creates both a `reservation_cancelled` operational event and a `cancel_reservation` audit entry.
+
+Cancellation does not delete the reservation, delete the puppy, edit ledger rows, create refunds, create fees, send messages, or create documents. If puppy release is explicitly requested and no other active reservation exists for the puppy, the function changes puppy status to an allowed release status and writes separate `puppy_released` event/audit records. If another active reservation exists, the cancellation still records but the puppy remains unchanged.
+
 ## Integration Event Rule
 
 Each inbound webhook or outbound sync event must be persisted before processing. Processing should be idempotent using the source system and external event ID when one exists.

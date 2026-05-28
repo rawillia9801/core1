@@ -4,7 +4,7 @@
 
 Core V1 defines a new canonical Supabase Postgres model for Cherolee Core. It does not import production records, replace existing workflows, or delete any existing table. Existing Zoho/Supabase duplicates remain possible migration sources until a later approved mapping project.
 
-The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections and controlled write foundations live in the subsequent migrations, including `20260526150000_core_financial_ledger_balance_effect.sql` and `20260526240000_core_record_reservation_payment_write_tool.sql`.
+The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections and controlled write foundations live in the subsequent migrations, including `20260526150000_core_financial_ledger_balance_effect.sql`, `20260526240000_core_record_reservation_payment_write_tool.sql`, and `20260526250000_core_cancel_reservation_write_tool.sql`.
 
 ## Modeling Rules
 
@@ -107,6 +107,16 @@ The financial correction migration assigns no `balance_effect` default for futur
 `core_record_reservation_payment(...)` is the first controlled financial write RPC. It accepts only `deposit` or `payment`, requires a positive cent amount and a valid actor/reservation, derives `buyer_id` from the reservation, and inserts a `posted` ledger entry with `balance_effect = 'decrease'`. The caller cannot select a different status or balance effect. It also writes `core_events` and `core_audit_log` records.
 
 When an external reference is supplied, this RPC rejects a repeated posted row for the same reservation, entry type, amount, and external reference while holding the reservation row lock. This is local/development accidental-repeat protection, not a completed payment-processor idempotency or reconciliation design.
+
+## Reservation Cancellation Rule
+
+`core_cancel_reservation(...)` is the controlled Core V1 cancellation foundation. It accepts only active `reserved` or `pending` reservations, requires a valid actor profile and cancellation reason, and updates the reservation status to `cancelled`.
+
+Cancellation preserves `reserved_at`, `contract_total_cents`, `deposit_required_cents`, and all `core_financial_ledger` rows. It does not imply a refund, payment correction, fee, chargeback, document, customer message, or payment-processor action. Those remain separate future workflows.
+
+Puppy release is explicit. If `p_release_puppy = false`, the linked puppy status is not changed. If `p_release_puppy = true`, the function may set the linked puppy to `available`, `unavailable`, or `hold`, but only when no other active reservation exists for that puppy. If another active reservation exists, the cancellation still records normally and the puppy remains unchanged.
+
+The function writes a `reservation_cancelled` `core_events` row and `cancel_reservation` `core_audit_log` row. It writes `puppy_released` event/audit rows only when the puppy status actually changes.
 
 ## Go-Home Cardinality
 

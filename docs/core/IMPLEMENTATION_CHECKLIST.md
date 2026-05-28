@@ -168,6 +168,10 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Deposit/payment action records only validated `deposit` or `payment` activity and refreshes ledger-derived balance display.
 - [x] Local/dev deposit/payment form verified with fake seeded data.
 - [x] Controlled dashboard actions use server-side RPC calls rather than direct browser/database writes.
+- [x] Controlled reservation cancellation database RPC added: `core_cancel_reservation`.
+- [x] Reservation cancellation rollback-safe SQL test added.
+- [x] Cancellation preserves ledger rows and does not imply refunds, fees, chargebacks, documents, or messages.
+- [x] Puppy release on cancellation is explicit and protected when another active reservation exists.
 - [ ] Define broader server-side write-tool authorization/error pattern.
 - [ ] Add low-risk kennel tools only after application/reservation/payment flow is stable.
 - [ ] Prevent direct AI/database writes.
@@ -239,7 +243,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Show puppy status after reservation in the local/development read panel.
 - [x] Prevent duplicate active reservation for one puppy through controlled local/development workflow validation.
 - [ ] Add reservation cancellation/change workflow.
-- [ ] Add reservation audit/event display.
+- [x] Add reservation audit/event display.
 
 ### 3.3 Payment And Ledger Workflow
 

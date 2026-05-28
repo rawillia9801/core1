@@ -52,6 +52,7 @@ cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supaba
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
@@ -83,6 +84,7 @@ This helper differs from the rollback-safe smoke tests: it intentionally commits
 | `core_application_approval_write_tool_tests.sql` | Validates controlled approval updates plus event/audit records and queued-notification behavior without sending anything. |
 | `core_create_reservation_write_tool_tests.sql` | Validates controlled reservation creation, puppy status transition, event/audit records, and duplicate active reservation rejection. |
 | `core_record_reservation_payment_tests.sql` | Validates controlled posted deposits/payments, decreasing balance semantics, event/audit records, and duplicate-reference rejection without connecting payments. |
+| `core_cancel_reservation_tests.sql` | Validates controlled reservation cancellation, explicit puppy release behavior, ledger preservation, event/audit records, and rejection of unsafe cancellation inputs. |
 | `core_zoho_application_intake_tests.sql` | Validates fake Zoho API-name payload intake into Core without a live Zoho connection. |
 | `core_zoho_application_report_label_tests.sql` | Validates fake report/PDF-label payload compatibility without a live Zoho connection. |
 
@@ -146,6 +148,12 @@ The follow-up ledger migration backfills recognized existing Core entry types us
 There is no default `balance_effect` for future inserts; validated financial write tools must always provide it explicitly.
 
 `core_record_reservation_payment(...)` is intentionally narrow: it records only posted `deposit` and `payment` entries and always writes `balance_effect = 'decrease'`. Its rollback-safe test proves a `$500.00` deposit lowers a `$2,000.00` reservation balance to `$1,500.00`, then a `$250.00` payment lowers it to `$1,250.00`; it also rejects `fee`, zero/negative amounts, missing reservation/actor records, and a repeated external reference for an otherwise identical posted deposit.
+
+## Reservation Cancellation Rule
+
+`core_cancel_reservation(...)` is intentionally narrow: it cancels only active `reserved` or `pending` reservations, requires a valid actor and cancellation reason, preserves transaction history, and writes event/audit records. It does not delete reservations or puppies, does not edit ledger rows, does not record refunds or fees, and does not send documents or messages.
+
+The rollback-safe cancellation test proves cancellation without puppy release leaves the puppy status unchanged and preserves a posted deposit ledger row. It also proves explicit puppy release can move the linked puppy to `available`, that release event/audit rows are only created when the puppy status changes, and that a puppy is not released when another active reservation exists for that puppy. Missing reason, missing reservation, missing actor, invalid release status, and already-cancelled reservations are rejected.
 
 ## Go-Home Cardinality Rule
 
