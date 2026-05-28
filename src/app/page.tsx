@@ -693,6 +693,53 @@ export default async function Home({
                     )}
                   </div>
                 </SectionCard>
+
+                <SectionCard
+                  title="Reservation Activity / Audit"
+                  description="Read-only local/development workflow trail from Core events and audit logs."
+                >
+                  <div className="space-y-3">
+                    {dashboard.workflowActivity.length > 0 ? (
+                      dashboard.workflowActivity.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <StatusBadge>{activity.recordType}</StatusBadge>
+                            <StatusBadge>{activity.type}</StatusBadge>
+                            <span className="text-xs font-semibold text-slate-500">
+                              {activity.when}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-sm font-semibold text-slate-900">
+                            {activity.summary}
+                          </p>
+                          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Actor</dt>
+                              <dd className="mt-1 text-slate-700">{activity.actor}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Source</dt>
+                              <dd className="mt-1 text-slate-700">{activity.source}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Entity</dt>
+                              <dd className="mt-1 text-slate-700">{activity.entity}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Related ID</dt>
+                              <dd className="mt-1 font-mono text-slate-700">{activity.relatedId}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyList text="No local/development reservation workflow event or audit rows found yet." />
+                    )}
+                  </div>
+                </SectionCard>
               </div>
 
               <div className="space-y-6">

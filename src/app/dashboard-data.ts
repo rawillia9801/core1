@@ -69,6 +69,19 @@ type DashboardEvent = {
   when: string;
 };
 
+type DashboardWorkflowActivity = {
+  id: string;
+  recordType: string;
+  type: string;
+  summary: string;
+  actor: string;
+  source: string;
+  entity: string;
+  relatedId: string;
+  when: string;
+  sortTime: number;
+};
+
 type CountResult = {
   count: number;
 };
@@ -165,6 +178,25 @@ type EventRow = {
   event_type: string | null;
   event_at: string | null;
   summary: string | null;
+  application_id?: string | null;
+  buyer_id?: string | null;
+  puppy_id?: string | null;
+  reservation_id?: string | null;
+  related_table?: string | null;
+  related_id?: string | null;
+  source?: string | null;
+  created_by_profile_id?: string | null;
+};
+
+type AuditLogRow = {
+  id: string;
+  action: string | null;
+  entity_table: string | null;
+  entity_id: string | null;
+  source: string | null;
+  actor_identifier: string | null;
+  outcome: string | null;
+  created_at: string | null;
 };
 
 export type DashboardData = {
@@ -183,6 +215,7 @@ export type DashboardData = {
     text: string;
   }[];
   events: DashboardEvent[];
+  workflowActivity: DashboardWorkflowActivity[];
   dataSourceLabel: string;
   dataWarning: string | null;
 };
@@ -268,6 +301,20 @@ function formatScheduledDateTime(value: string | null | undefined) {
   }
 
   return formatDateTime(value);
+}
+
+function sortTime(value: string | null | undefined) {
+  if (!value) {
+    return 0;
+  }
+
+  const parsed = new Date(value);
+
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+}
+
+function shortId(value: string | null | undefined) {
+  return value ? value.slice(0, 8) : "Not linked";
 }
 
 function buyerName(buyer: BuyerRow | undefined) {
@@ -358,6 +405,7 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     ],
     emptyStates,
     events: [],
+    workflowActivity: [],
     dataSourceLabel: "Not connected",
     dataWarning:
       dataWarning ??
@@ -469,6 +517,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       goHomes,
       phoneLookups,
       events,
+      workflowEvents,
+      auditLogs,
     ] = await Promise.all([
       readCount(restUrl, serviceRoleKey, "core_applications"),
       readCount(restUrl, serviceRoleKey, "core_applications", {
@@ -516,6 +566,21 @@ export async function getDashboardData(): Promise<DashboardData> {
         select: "id,event_type,event_at,summary",
         order: "event_at.desc",
         limit: "6",
+      }),
+      readRows<EventRow>(restUrl, serviceRoleKey, "core_events", {
+        select:
+          "id,event_type,event_at,summary,application_id,buyer_id,puppy_id,reservation_id,related_table,related_id,source,created_by_profile_id",
+        event_type:
+          "in.(application_approved,reservation_created,reservation_payment_recorded,local_workflow_seeded)",
+        order: "event_at.desc",
+        limit: "15",
+      }),
+      readRows<AuditLogRow>(restUrl, serviceRoleKey, "core_audit_log", {
+        select: "id,action,entity_table,entity_id,source,actor_identifier,outcome,created_at",
+        action:
+          "in.(approve_application,create_reservation,record_reservation_payment,seed_local_core_workflow,seed_reservation_example)",
+        order: "created_at.desc",
+        limit: "15",
       }),
     ]);
 
@@ -591,6 +656,34 @@ export async function getDashboardData(): Promise<DashboardData> {
       (sum, balance) => sum + Math.max(balance.balance_due_cents ?? 0, 0),
       0,
     );
+    const workflowActivity = [
+      ...workflowEvents.map((event) => ({
+        id: `event-${event.id}`,
+        recordType: "Event",
+        type: event.event_type || "event",
+        summary: event.summary || "Core workflow event recorded",
+        actor: event.created_by_profile_id ? `Profile ${shortId(event.created_by_profile_id)}` : "System or not linked",
+        source: event.source || "core_events",
+        entity: event.related_table || "core_events",
+        relatedId: shortId(event.reservation_id ?? event.application_id ?? event.puppy_id ?? event.buyer_id ?? event.related_id),
+        when: formatDateTime(event.event_at),
+        sortTime: sortTime(event.event_at),
+      })),
+      ...auditLogs.map((audit) => ({
+        id: `audit-${audit.id}`,
+        recordType: "Audit",
+        type: audit.action || "audit",
+        summary: `${audit.action || "Workflow write"} recorded with ${audit.outcome || "unknown"} outcome`,
+        actor: audit.actor_identifier || "Actor not recorded",
+        source: audit.source || "core_audit_log",
+        entity: audit.entity_table || "Unknown entity",
+        relatedId: shortId(audit.entity_id),
+        when: formatDateTime(audit.created_at),
+        sortTime: sortTime(audit.created_at),
+      })),
+    ]
+      .sort((left, right) => right.sortTime - left.sortTime)
+      .slice(0, 15);
 
     return {
       stats: [
@@ -716,6 +809,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         type: event.event_type || "event",
         when: formatDateTime(event.event_at),
       })),
+      workflowActivity,
       dataSourceLabel: "Local Supabase read-only",
       dataWarning: null,
     };
