@@ -36,6 +36,10 @@ Any future write affecting `core_financial_ledger` must audit both `entry_type` 
 
 `core_record_reservation_payment(...)` is the controlled Core V1 deposit/payment write foundation. It permits only posted `deposit` and `payment` entries, forces `balance_effect = 'decrease'`, derives the buyer from the reservation, and creates both an operational event and audit entry. It does not prove external funds were collected and does not support refunds, fees, chargebacks, or live processor reconciliation.
 
+`core_record_financial_adjustment(...)` is the separate controlled Core V1 adjustment foundation for `credit`, `refund`, `chargeback`, `fee`, `admin_fee`, `transport_fee`, `finance_charge`, and neutral `adjustment`. It maps `balance_effect` internally, records a required reason, inserts a new posted ledger row, and creates both an operational event and audit entry. It must not be treated as payment-processor execution; refunds and chargebacks remain internal ledger records until later reconciliation work is designed.
+
+Financial correction work must remain additive. Prior ledger rows are not edited or deleted. If an adjustment relates to a prior ledger row, the controlled function records that relation in metadata for local/development use; stronger first-class reconciliation fields and indexes are deferred until live payment integration design.
+
 ### Reservation Cancellation Audit Context
 
 `core_cancel_reservation(...)` is the controlled Core V1 cancellation foundation. It changes an eligible `reserved` or `pending` reservation to `cancelled`, records a required cancellation reason, and creates both a `reservation_cancelled` operational event and a `cancel_reservation` audit entry.

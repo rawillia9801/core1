@@ -52,6 +52,7 @@ cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supaba
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_record_financial_adjustment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
@@ -84,6 +85,7 @@ This helper differs from the rollback-safe smoke tests: it intentionally commits
 | `core_application_approval_write_tool_tests.sql` | Validates controlled approval updates plus event/audit records and queued-notification behavior without sending anything. |
 | `core_create_reservation_write_tool_tests.sql` | Validates controlled reservation creation, puppy status transition, event/audit records, and duplicate active reservation rejection. |
 | `core_record_reservation_payment_tests.sql` | Validates controlled posted deposits/payments, decreasing balance semantics, event/audit records, and duplicate-reference rejection without connecting payments. |
+| `core_record_financial_adjustment_tests.sql` | Validates controlled financial exceptions for credits, refunds, chargebacks, fees, finance charges, neutral adjustments, balance-effect mapping, event/audit records, and duplicate-reference rejection without connecting payments. |
 | `core_cancel_reservation_tests.sql` | Validates controlled reservation cancellation, explicit puppy release behavior, ledger preservation, event/audit records, and rejection of unsafe cancellation inputs. |
 | `core_zoho_application_intake_tests.sql` | Validates fake Zoho API-name payload intake into Core without a live Zoho connection. |
 | `core_zoho_application_report_label_tests.sql` | Validates fake report/PDF-label payload compatibility without a live Zoho connection. |
@@ -148,6 +150,10 @@ The follow-up ledger migration backfills recognized existing Core entry types us
 There is no default `balance_effect` for future inserts; validated financial write tools must always provide it explicitly.
 
 `core_record_reservation_payment(...)` is intentionally narrow: it records only posted `deposit` and `payment` entries and always writes `balance_effect = 'decrease'`. Its rollback-safe test proves a `$500.00` deposit lowers a `$2,000.00` reservation balance to `$1,500.00`, then a `$250.00` payment lowers it to `$1,250.00`; it also rejects `fee`, zero/negative amounts, missing reservation/actor records, and a repeated external reference for an otherwise identical posted deposit.
+
+`core_record_financial_adjustment(...)` is intentionally separate from payment recording. It records only allowlisted local/development exceptions: `credit`, `refund`, `chargeback`, `fee`, `admin_fee`, `transport_fee`, `finance_charge`, and neutral `adjustment`. It maps balance effect internally and never lets the caller choose arbitrary `balance_effect`. Its rollback-safe test starts from a `$2,000.00` reservation with a `$500.00` deposit, then proves credit decreases balance, refund/chargeback/fees/finance charge increase balance, and zero-dollar neutral adjustment does not change balance. It also rejects invalid entry types, invalid amounts, missing reason, missing reservation, missing actor, and duplicate external reference for the same posted adjustment.
+
+Refund and chargeback rows in this test are ledger-only records. They do not contact a payment processor, move funds, send email, or create receipts/documents.
 
 ## Reservation Cancellation Rule
 

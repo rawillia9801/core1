@@ -75,8 +75,12 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Payment action permits only `deposit` and `payment`; it does not expose refunds, fees, chargebacks, credits, or adjustments.
 - [x] Payment action refreshes the dashboard so ledger-derived balance is shown after a successful local/dev record.
 - [x] Payment dashboard action verified locally with fake seeded data: a `$500.00` deposit reduced visible balance from `$2,000.00` to `$1,500.00`.
+- [x] Controlled `core_record_financial_adjustment` database RPC added for local/dev credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
+- [x] Financial adjustment rollback-safe SQL test added.
+- [x] Adjustment RPC maps `balance_effect` internally and keeps deposit/payment recording separate.
 - [ ] Add further payment recording validation before any staff-facing use.
-- [ ] Define refund/chargeback workflow before live payment operations.
+- [x] Define local/development refund/chargeback ledger workflow before live payment operations.
+- [ ] Define live payment processor reconciliation and idempotency before live refund/chargeback operations.
 - [ ] Connect payment processor only after ledger write rules and security are complete.
 
 ### 1.3 Go-Home Foundation
@@ -168,6 +172,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Deposit/payment action records only validated `deposit` or `payment` activity and refreshes ledger-derived balance display.
 - [x] Local/dev deposit/payment form verified with fake seeded data.
 - [x] Controlled dashboard actions use server-side RPC calls rather than direct browser/database writes.
+- [x] Controlled financial adjustment database RPC added for local/dev ledger exceptions without dashboard UI.
 - [x] Controlled reservation cancellation database RPC added: `core_cancel_reservation`.
 - [x] Reservation cancellation rollback-safe SQL test added.
 - [x] Cancellation preserves ledger rows and does not imply refunds, fees, chargebacks, documents, or messages.
@@ -250,9 +255,10 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Display reservation balance from ledger-derived reservation/payment read models in local/development dashboard.
 - [x] Add controlled local/development ledger/payment entry action for deposits and payments only.
 - [x] Verify local/development deposit/payment form reduces visible balance through the ledger-derived read model.
+- [x] Add controlled database foundation for local/development credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
 - [ ] Add receipt metadata foundation.
 - [ ] Add payment method tracking rules.
-- [ ] Add refund/chargeback handling rules.
+- [x] Add local/development refund/chargeback handling rules as ledger-only records.
 - [ ] Add staff review for payment corrections.
 - [ ] Connect payment processor only after internal ledger flow is stable.
 

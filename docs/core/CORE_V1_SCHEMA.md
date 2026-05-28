@@ -4,7 +4,7 @@
 
 Core V1 defines a new canonical Supabase Postgres model for Cherolee Core. It does not import production records, replace existing workflows, or delete any existing table. Existing Zoho/Supabase duplicates remain possible migration sources until a later approved mapping project.
 
-The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections and controlled write foundations live in the subsequent migrations, including `20260526150000_core_financial_ledger_balance_effect.sql`, `20260526240000_core_record_reservation_payment_write_tool.sql`, and `20260526250000_core_cancel_reservation_write_tool.sql`.
+The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections and controlled write foundations live in the subsequent migrations, including `20260526150000_core_financial_ledger_balance_effect.sql`, `20260526240000_core_record_reservation_payment_write_tool.sql`, `20260526250000_core_cancel_reservation_write_tool.sql`, and `20260526260000_core_record_financial_adjustment_write_tool.sql`.
 
 ## Modeling Rules
 
@@ -107,6 +107,12 @@ The financial correction migration assigns no `balance_effect` default for futur
 `core_record_reservation_payment(...)` is the first controlled financial write RPC. It accepts only `deposit` or `payment`, requires a positive cent amount and a valid actor/reservation, derives `buyer_id` from the reservation, and inserts a `posted` ledger entry with `balance_effect = 'decrease'`. The caller cannot select a different status or balance effect. It also writes `core_events` and `core_audit_log` records.
 
 When an external reference is supplied, this RPC rejects a repeated posted row for the same reservation, entry type, amount, and external reference while holding the reservation row lock. This is local/development accidental-repeat protection, not a completed payment-processor idempotency or reconciliation design.
+
+`core_record_financial_adjustment(...)` is separate from deposit/payment recording. It supports controlled local/development financial exceptions only: `credit`, `refund`, `chargeback`, `fee`, `admin_fee`, `transport_fee`, `finance_charge`, and neutral `adjustment`. It inserts additive posted ledger rows, maps `balance_effect` internally, writes event/audit rows, and never edits or deletes prior ledger rows.
+
+The adjustment RPC maps `credit` to `decrease`; `refund`, `chargeback`, `fee`, `admin_fee`, `transport_fee`, and `finance_charge` to `increase`; and `adjustment` to `neutral`. Neutral adjustment currently permits a zero-cent informational row because the ledger constraint allows non-negative amounts. All balance-changing adjustment types require a positive cent amount.
+
+Refunds and chargebacks recorded through this function are internal ledger records only. They do not contact a payment processor, move money, send receipts, send email, or create documents. Stronger idempotency, reconciliation, and processor webhook behavior remain later work. Function-level duplicate detection rejects the same posted reservation, entry type, amount, and external reference when an external reference is supplied.
 
 ## Reservation Cancellation Rule
 
