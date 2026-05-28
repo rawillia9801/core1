@@ -74,6 +74,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Payment action accepts dollar input and converts it server-side to integer cents before calling the RPC.
 - [x] Payment action permits only `deposit` and `payment`; it does not expose refunds, fees, chargebacks, credits, or adjustments.
 - [x] Payment action refreshes the dashboard so ledger-derived balance is shown after a successful local/dev record.
+- [x] Payment dashboard action verified locally with fake seeded data: a `$500.00` deposit reduced visible balance from `$2,000.00` to `$1,500.00`.
 - [ ] Add further payment recording validation before any staff-facing use.
 - [ ] Define refund/chargeback workflow before live payment operations.
 - [ ] Connect payment processor only after ledger write rules and security are complete.
@@ -162,12 +163,13 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Reservation action converts entered dollar amounts to integer cents server-side before calling `core_create_reservation`.
 - [x] Reservation creation result refreshes dashboard data and is visible in the read-only reservation panel.
 - [x] Available puppy read filtering and database-function validation prevent duplicate active reservation creation through the controlled workflow.
-- [ ] Add local/dev verification for reservation creation in browser.
+- [x] Local/dev reservation creation verified through the seeded workflow and dashboard read panel.
 - [x] Controlled local/development deposit/payment dashboard action calls `core_record_reservation_payment`.
 - [x] Deposit/payment action records only validated `deposit` or `payment` activity and refreshes ledger-derived balance display.
+- [x] Local/dev deposit/payment form verified with fake seeded data.
 - [x] Controlled dashboard actions use server-side RPC calls rather than direct browser/database writes.
 - [ ] Define broader server-side write-tool authorization/error pattern.
-- [ ] Add low-risk kennel tools only after application/reservation flow is stable.
+- [ ] Add low-risk kennel tools only after application/reservation/payment flow is stable.
 - [ ] Prevent direct AI/database writes.
 
 ## Phase 2 — Staff-Only Staging With Selected Real Data
@@ -243,6 +245,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 
 - [x] Display reservation balance from ledger-derived reservation/payment read models in local/development dashboard.
 - [x] Add controlled local/development ledger/payment entry action for deposits and payments only.
+- [x] Verify local/development deposit/payment form reduces visible balance through the ledger-derived read model.
 - [ ] Add receipt metadata foundation.
 - [ ] Add payment method tracking rules.
 - [ ] Add refund/chargeback handling rules.
@@ -356,7 +359,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [ ] Zoho is not connected live.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
-- [ ] Payments are not connected.
+- [ ] Payments are not connected to a payment processor.
 - [ ] No production data import has occurred.
 - [ ] Document generation is not implemented.
 - [ ] Signature provider integration is not implemented.
@@ -371,6 +374,7 @@ From Git Bash in the repository root:
 
 ```bash
 supabase db reset --local
+./scripts/seed-local-core-workflow.sh
 cat supabase/tests/core_v1_smoke_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_go_home_effective_view_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_application_approval_write_tool_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
@@ -385,9 +389,9 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Exercise the controlled local/development deposit/payment form with fake reservation data and confirm balance display changes as expected.
-2. [ ] Define cancellation/correction behavior before adding broader reservation or ledger actions.
-3. [ ] Define refund, fee, chargeback, and reconciliation rules before any payment processor connection.
+1. [ ] Define cancellation/correction behavior before adding broader reservation or ledger actions.
+2. [ ] Define refund, fee, chargeback, and reconciliation rules before any payment processor connection.
+3. [ ] Add reservation audit/event visibility.
 4. [ ] Design staff authentication and server-side authorization boundaries before staging.
 5. [ ] Design and test RLS before any live client exposure.
 6. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
@@ -399,7 +403,7 @@ Stop and review before continuing if any task attempts to:
 - Create new tables not explicitly named in the task.
 - Import production data.
 - Enable RLS without policy tests.
-- Connect Twilio, Zoho, email, payment, Home Assistant, cameras, or smart mirror.
+- Connect Twilio, Zoho, email, payment processor, Home Assistant, cameras, or smart mirror.
 - Build customer-facing behavior without access rules.
 - Add AI write capability without tool-safety design.
 - Change financial balance semantics.
