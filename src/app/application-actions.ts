@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 const APPROVABLE_STATUSES = new Set(["received", "needs_review"]);
+const CANCELLABLE_RESERVATION_STATUSES = new Set(["reserved", "pending"]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type ApplicationStatusRow = {
@@ -38,6 +39,12 @@ function logReservationFailure(reason: string, details?: Record<string, unknown>
 function logPaymentFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
     console.error("[core payment]", reason, details ?? {});
+  }
+}
+
+function logCancellationFailure(reason: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error("[core cancellation]", reason, details ?? {});
   }
 }
 
@@ -167,6 +174,31 @@ function getLocalPaymentConfig() {
       hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
     });
     throw new Error("Local payment recording configuration is incomplete.");
+  }
+
+  return {
+    restUrl: `${supabaseUrl}/rest/v1`,
+    serviceRoleKey,
+    actorProfileId,
+  };
+}
+
+function getLocalCancellationConfig() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Cancellation actions are disabled outside local/development use.");
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const actorProfileId = process.env.CORE_APPROVAL_ACTOR_PROFILE_ID;
+
+  if (!supabaseUrl || !serviceRoleKey || !actorProfileId || !UUID_PATTERN.test(actorProfileId)) {
+    logCancellationFailure("missing or invalid local cancellation configuration", {
+      hasSupabaseUrl: Boolean(supabaseUrl),
+      hasServiceRoleKey: Boolean(serviceRoleKey),
+      hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
+    });
+    throw new Error("Local cancellation configuration is incomplete.");
   }
 
   return {
@@ -482,4 +514,104 @@ export async function recordReservationPayment(formData: FormData) {
   }
 
   redirect(`/?payment=${outcome}`);
+}
+
+export async function cancelReservation(formData: FormData) {
+  const reservationId = String(formData.get("reservationId") ?? "").trim();
+  const cancellationReason = String(formData.get("cancellationReason") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const releasePuppy = formData.get("releasePuppy") === "on";
+  const releasedPuppyStatus = String(formData.get("releasedPuppyStatus") ?? "available").trim().toLowerCase();
+  let outcome = "error";
+
+  if (!UUID_PATTERN.test(reservationId)) {
+    logCancellationFailure("invalid reservation id submitted", {
+      hasValidReservationId: false,
+    });
+    redirect("/?cancellation=invalid_input");
+  }
+
+  if (!cancellationReason || cancellationReason.length > 1000) {
+    logCancellationFailure("invalid cancellation reason submitted", {
+      reservationId,
+      hasReason: Boolean(cancellationReason),
+      reasonTooLong: cancellationReason.length > 1000,
+    });
+    redirect("/?cancellation=invalid_reason");
+  }
+
+  if (notes.length > 1000 || !["available", "unavailable", "hold"].includes(releasedPuppyStatus)) {
+    logCancellationFailure("bounded cancellation input exceeded maximum length or invalid release status", {
+      reservationId,
+      notesTooLong: notes.length > 1000,
+      releasedPuppyStatus,
+    });
+    redirect("/?cancellation=invalid_input");
+  }
+
+  try {
+    const { restUrl, serviceRoleKey, actorProfileId } = getLocalCancellationConfig();
+    const headers = serverHeaders(serviceRoleKey);
+    const reservationResponse = await fetch(
+      `${restUrl}/core_reservations?select=status&id=eq.${reservationId}`,
+      { headers, cache: "no-store" },
+    );
+
+    if (!reservationResponse.ok) {
+      const responseBody = await reservationResponse.text().catch(() => "");
+      logCancellationFailure("reservation lookup failed", {
+        reservationId,
+        httpStatus: reservationResponse.status,
+        responseBody,
+      });
+    } else {
+      const rows = (await reservationResponse.json()) as ReservationStatusRow[];
+      const reservation = rows[0];
+      const status = reservation?.status?.toLowerCase();
+
+      if (!reservation) {
+        logCancellationFailure("reservation lookup returned no row", { reservationId });
+        outcome = "not_found";
+      } else if (!status || !CANCELLABLE_RESERVATION_STATUSES.has(status)) {
+        logCancellationFailure("reservation is not eligible for cancellation", {
+          reservationId,
+          status: reservation.status,
+        });
+        outcome = "not_eligible";
+      } else {
+        const rpcResponse = await fetch(`${restUrl}/rpc/core_cancel_reservation`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            p_reservation_id: reservationId,
+            p_actor_profile_id: actorProfileId,
+            p_cancellation_reason: cancellationReason,
+            p_release_puppy: releasePuppy,
+            p_released_puppy_status: releasedPuppyStatus,
+            p_notes: notes || null,
+          }),
+          cache: "no-store",
+        });
+
+        if (rpcResponse.ok) {
+          revalidatePath("/");
+          outcome = "success";
+        } else {
+          const responseBody = await rpcResponse.text().catch(() => "");
+          logCancellationFailure("cancellation RPC failed", {
+            reservationId,
+            httpStatus: rpcResponse.status,
+            responseBody,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    logCancellationFailure("cancellation action threw an error", {
+      reservationId,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+
+  redirect(`/?cancellation=${outcome}`);
 }

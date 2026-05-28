@@ -1,5 +1,6 @@
 import {
   approveApplication,
+  cancelReservation,
   createReservation,
   recordReservationPayment,
 } from "./application-actions";
@@ -177,13 +178,57 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
   return null;
 }
 
+function CancellationResult({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "success") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Reservation cancelled locally. No refund was issued and ledger history was not modified.
+      </p>
+    );
+  }
+
+  if (outcome === "invalid_reason") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Cancellation requires a reason of 1000 characters or fewer.
+      </p>
+    );
+  }
+
+  if (outcome === "invalid_input") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Cancellation input was invalid. Check the reservation and release status values.
+      </p>
+    );
+  }
+
+  if (outcome === "not_found" || outcome === "not_eligible") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        The selected reservation is not eligible for cancellation.
+      </p>
+    );
+  }
+
+  if (outcome === "error") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Reservation cancellation failed. Check local server logs for details.
+      </p>
+    );
+  }
+
+  return null;
+}
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ approval?: string; reservation?: string; payment?: string }>;
+  searchParams: Promise<{ approval?: string; reservation?: string; payment?: string; cancellation?: string }>;
 }) {
   const dashboard = await getDashboardData();
-  const { approval, reservation, payment } = await searchParams;
+  const { approval, reservation, payment, cancellation } = await searchParams;
   const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 
   return (
@@ -544,9 +589,13 @@ export default async function Home({
                 >
                   <div className="space-y-3">
                     <PaymentResult outcome={payment} />
+                    <CancellationResult outcome={cancellation} />
                     {dashboard.reservations.length > 0 ? (
                       dashboard.reservations.map((reservation) => {
                         const canRecordPayment = !["cancelled", "void", "released"].includes(
+                          reservation.status.toLowerCase(),
+                        );
+                        const canCancelReservation = ["reserved", "pending"].includes(
                           reservation.status.toLowerCase(),
                         );
 
@@ -654,6 +703,65 @@ export default async function Home({
                                 className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
                               >
                                 Record Deposit/Payment
+                              </button>
+                            </form>
+                          ) : null}
+                          {canCancelReservation ? (
+                            <form action={cancelReservation} className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+                              <input type="hidden" name="reservationId" value={reservation.reservationId} />
+                              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                                <p className="font-semibold">Local/development cancellation only</p>
+                                <p className="mt-1 leading-6">
+                                  Cancellation does not issue a refund, does not modify ledger/payment history,
+                                  and only releases the puppy when explicitly selected.
+                                </p>
+                              </div>
+                              <label className="block text-sm font-medium text-slate-700">
+                                Cancellation reason
+                                <textarea
+                                  name="cancellationReason"
+                                  maxLength={1000}
+                                  rows={2}
+                                  required
+                                  className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                />
+                              </label>
+                              <label className="block text-sm font-medium text-slate-700">
+                                Notes (optional)
+                                <textarea
+                                  name="notes"
+                                  maxLength={1000}
+                                  rows={2}
+                                  className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                />
+                              </label>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                <label className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700">
+                                  <input
+                                    type="checkbox"
+                                    name="releasePuppy"
+                                    className="h-4 w-4 rounded border-slate-300"
+                                  />
+                                  Release puppy after cancellation
+                                </label>
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Released puppy status
+                                  <select
+                                    name="releasedPuppyStatus"
+                                    defaultValue="available"
+                                    className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+                                  >
+                                    <option value="available">Available</option>
+                                    <option value="unavailable">Unavailable</option>
+                                    <option value="hold">Hold</option>
+                                  </select>
+                                </label>
+                              </div>
+                              <button
+                                type="submit"
+                                className="rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white"
+                              >
+                                Cancel Reservation
                               </button>
                             </form>
                           ) : null}
