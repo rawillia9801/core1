@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "./supabase/server";
 
 const STAFF_ROLES = ["owner", "admin", "staff"] as const;
 const STAFF_ROLE_SET = new Set<string>(STAFF_ROLES);
+const SENSITIVE_READ_ROLES = new Set<StaffRole>(["owner", "admin"]);
 
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
@@ -141,4 +142,20 @@ export function canStaffPerformDashboardAction(
     action === "create_reservation" ||
     action === "record_reservation_payment"
   );
+}
+
+export function canViewSensitiveFinancials(role: StaffRole) {
+  return SENSITIVE_READ_ROLES.has(role);
+}
+
+export function canViewAuditActivity(role: StaffRole) {
+  return SENSITIVE_READ_ROLES.has(role);
+}
+
+export function canViewPhoneLookup(role: StaffRole) {
+  return SENSITIVE_READ_ROLES.has(role);
+}
+
+export function canViewEventFeed(role: StaffRole) {
+  return SENSITIVE_READ_ROLES.has(role);
 }

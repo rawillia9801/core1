@@ -47,6 +47,15 @@ function EmptyList({ text }: { text: string }) {
   );
 }
 
+function RestrictedPanel({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+      <p className="font-semibold">Restricted to owner/admin</p>
+      <p className="mt-1">{text}</p>
+    </div>
+  );
+}
+
 function ApprovalResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "success") {
     return (
@@ -318,6 +327,18 @@ export default async function Home({
                 </p>
               </div>
             )}
+            {staff.role === "staff" ? (
+              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4 text-blue-950 shadow-sm sm:p-5">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-blue-700">
+                  Staff operational read scope
+                </p>
+                <p className="mt-2 text-sm leading-6">
+                  You can see application, puppy, reservation, and go-home workflow basics.
+                  Financial ledger exceptions, full audit activity, phone lookup, and the
+                  general event feed are restricted to owner/admin during Phase 2 staging work.
+                </p>
+              </div>
+            ) : null}
 
             <header className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
               <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -814,7 +835,9 @@ export default async function Home({
                   description="Read-only local/development ledger visibility. Refunds and chargebacks shown here are internal ledger records only, not processor money movement."
                 >
                   <div className="space-y-3">
-                    {dashboard.ledgerActivity.length > 0 ? (
+                    {!dashboard.readScopes.canViewSensitiveFinancials ? (
+                      <RestrictedPanel text="Financial ledger activity, refunds, chargebacks, fees, credits, and adjustments are hidden from staff read scope until owner/admin staging rules are approved." />
+                    ) : dashboard.ledgerActivity.length > 0 ? (
                       dashboard.ledgerActivity.map((ledger) => (
                         <div
                           key={ledger.id}
@@ -872,7 +895,9 @@ export default async function Home({
                   description="Recent Core event feed from local Supabase."
                 >
                   <div className="space-y-3">
-                    {dashboard.events.length > 0 ? (
+                    {!dashboard.readScopes.canViewEventFeed ? (
+                      <RestrictedPanel text="The general event feed can include sensitive workflow details, so it is restricted to owner/admin during the first selected-real-data staging pass." />
+                    ) : dashboard.events.length > 0 ? (
                       dashboard.events.map((event) => (
                         <div
                           key={`${event.type}-${event.when}-${event.summary}`}
@@ -900,7 +925,9 @@ export default async function Home({
                   description="Read-only local/development workflow trail from Core events and audit logs, including cancellation and puppy-release outcomes."
                 >
                   <div className="space-y-3">
-                    {dashboard.workflowActivity.length > 0 ? (
+                    {!dashboard.readScopes.canViewAuditActivity ? (
+                      <RestrictedPanel text="Full workflow activity and audit rows are hidden from staff read scope because they may include actor, cancellation, and internal operational details." />
+                    ) : dashboard.workflowActivity.length > 0 ? (
                       dashboard.workflowActivity.map((activity) => (
                         <div
                           key={activity.id}
@@ -952,7 +979,9 @@ export default async function Home({
                   description="Read from the phone lookup summary view."
                 >
                   <div className="space-y-3">
-                    {dashboard.phoneLookups.length > 0 ? (
+                    {!dashboard.readScopes.canViewPhoneLookup ? (
+                      <RestrictedPanel text="Phone lookup and ambiguity details are restricted to owner/admin until verification and staff-routing workflows are approved." />
+                    ) : dashboard.phoneLookups.length > 0 ? (
                       dashboard.phoneLookups.map((lookup) => (
                         <div
                           key={lookup.phone}

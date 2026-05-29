@@ -13,6 +13,7 @@ Core currently proves the local/development workflow, but it is not safe for sta
 - The root route is now a non-sensitive landing page.
 - The staff dashboard foundation is available at `/staff` and requires a Supabase Auth user mapped to an active staff `core_profiles` row.
 - Server-side dashboard reads currently use the Supabase service-role key, but the dashboard read model now requires an authenticated active staff profile context before broad service-role reads run.
+- Role-based read filtering is now in place for the staff dashboard: owner/admin keep the full current read surface, while staff users receive operational read panels only.
 - Dashboard server actions for approval, reservation creation, deposit/payment recording, and reservation cancellation now use the authenticated staff profile ID as the RPC actor.
 - Current dashboard actions have initial role checks, but the access model still needs manual verification before selected-real-data staging.
 - RLS is deferred and is not production-ready for live client exposure.
@@ -46,7 +47,7 @@ The repository now includes the smallest staff auth foundation:
 
 Because RLS policies are not enabled yet, `requireStaffProfile()` uses the service role server-side only to look up `core_profiles` by `auth_user_id`. This is transitional. It must not be copied into browser code, and it should be narrowed or replaced after RLS policies and server authorization tests exist.
 
-The existing approval, reservation, deposit/payment, and cancellation actions now pass the authenticated staff profile ID to controlled RPCs. The staff dashboard read model also requires the authenticated staff profile before service-role reads run. The service role is still used server-side for transitional RPC/read access until RLS and production authorization policies exist.
+The existing approval, reservation, deposit/payment, and cancellation actions now pass the authenticated staff profile ID to controlled RPCs. The staff dashboard read model also requires the authenticated staff profile before service-role reads run. Owner/admin users can see the full current dashboard. Staff users do not fetch or see sensitive financial ledger activity, full audit/activity rows, phone lookup details, or the general event feed. The service role is still used server-side for transitional RPC/read access until RLS and production authorization policies exist.
 
 Local verification confirms staff login/profile mapping works and `core_audit_log.actor_profile_id` uses the authenticated staff profile ID `70000000-0000-0000-0000-000000000001` for at least approval and payment recording actions.
 
@@ -81,8 +82,8 @@ The static `CORE_APPROVAL_ACTOR_PROFILE_ID` pattern is no longer used by the sta
 Initial role model:
 
 - `owner`: all staff dashboard reads and all staff actions, including access management and sensitive financial workflows.
-- `admin`: application approval, reservation creation, deposit/payment recording, reservation cancellation, and financial adjustments.
-- `staff`: staff dashboard reads, application review, application approval, reservation creation, and possibly deposit/payment recording.
+- `admin`: all current staff dashboard reads, application approval, reservation creation, deposit/payment recording, reservation cancellation, and financial adjustments.
+- `staff`: operational dashboard reads, application review, application approval, reservation creation, and deposit/payment recording. Staff cannot see sensitive financial ledger activity, full audit/activity rows, phone lookup details, or the general event feed during the Phase 2 bridge.
 
 Before selected-real-data staging, consider making these actions admin/owner-only:
 
@@ -96,7 +97,7 @@ The service-role key must remain backend-only.
 
 - Never expose the service-role key to the browser.
 - Do not use the service-role key as a substitute for staff authorization.
-- Reduce broad service-role reads before staging where practical.
+- Reduce broad service-role reads before staging where practical. Current staff role filtering avoids fetching owner/admin-only financial, audit, phone lookup, and general event-feed datasets for staff users.
 - Document any temporary staging-only server-side service-role reads with an explicit reason and removal path.
 - Integration endpoints should use separate secrets, signature validation, or provider-specific verification, not dashboard staff auth alone.
 
@@ -133,6 +134,7 @@ Before importing or showing selected real data, all of the following should be t
 - Authenticated users map to active `core_profiles` rows.
 - Server-side reads reject unauthenticated users.
 - The staff dashboard read model requires authenticated staff context before service-role reads run.
+- Staff dashboard read filtering prevents staff users from fetching owner/admin-only financial ledger activity, audit/activity rows, phone lookup details, and the general event feed.
 - Server actions use the real staff profile actor, not a static local/dev actor.
 - Role checks exist before approval, reservation, payment, cancellation, and financial adjustment actions.
 - Email, payment processor, Twilio, document generation, and other live side effects remain off.
@@ -151,7 +153,7 @@ Recommended implementation order:
 3. Add staff login and sign-out paths.
 4. Map the Supabase session user to `core_profiles.auth_user_id`.
 5. Replace static actor env usage in server actions with the authenticated profile actor. Completed for approval, reservation creation, deposit/payment recording, and reservation cancellation.
-6. Add role checks to dashboard reads and server actions. Current dashboard reads require active staff context before service-role access, and initial checks are in place for current dashboard actions; role-specific read filtering and future actions still need review.
+6. Add role checks to dashboard reads and server actions. Current dashboard reads require active staff context before service-role access, and staff read scope is limited to operational panels. Future actions and RLS still need review.
 7. Add manual verification steps for unauthenticated, unauthorized, and authorized staff paths.
 8. Plan RLS policy tests.
 9. Only then plan selected-real-data staging.
@@ -161,6 +163,7 @@ Recommended implementation order:
 - Supabase Auth is recommended, but the owner should confirm it before implementation.
 - Final staff role definitions may need adjustment once real staff workflow expectations are reviewed.
 - Financial adjustment and cancellation actions should likely be admin/owner-only for the first staging pass.
+- Staff-visible application details should be reviewed against real Zoho field content before selected-real-data staging.
 - Vercel password protection may still be useful as an extra staging gate, but it should not replace real app authorization.
 - The exact selected real-data scope must be approved before import.
 - Production RLS timing should be planned after staff auth and staging read/write paths are verified.
@@ -171,8 +174,9 @@ Recommended implementation order:
 Continue the staff authentication boundary from this plan:
 
 1. Verify unauthorized role behavior, especially staff cancellation with puppy release.
-2. Decide whether selected-real-data staging should restrict sensitive read panels to owner/admin only.
-3. Design and test RLS policies.
-4. Prepare selected-real-data staging only after access checks are reviewed.
+2. Manually verify owner/admin/staff read-scope behavior in browser.
+3. Review real Zoho application fields before exposing application details to staff in selected staging.
+4. Design and test RLS policies.
+5. Prepare selected-real-data staging only after access checks are reviewed.
 
 Do not import selected real data until those pieces are working and manually verified.

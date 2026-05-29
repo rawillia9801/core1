@@ -1,4 +1,11 @@
-import type { StaffProfile, StaffRole } from "@/lib/staff-auth";
+import {
+  canViewAuditActivity,
+  canViewEventFeed,
+  canViewPhoneLookup,
+  canViewSensitiveFinancials,
+  type StaffProfile,
+  type StaffRole,
+} from "@/lib/staff-auth";
 
 type DashboardStat = {
   label: string;
@@ -100,6 +107,13 @@ type DashboardLedgerActivity = {
   relatedLedgerId: string;
   status: string;
   occurredAt: string;
+};
+
+type DashboardReadScopes = {
+  canViewSensitiveFinancials: boolean;
+  canViewAuditActivity: boolean;
+  canViewPhoneLookup: boolean;
+  canViewEventFeed: boolean;
 };
 
 type CountResult = {
@@ -256,6 +270,7 @@ export type DashboardData = {
   events: DashboardEvent[];
   workflowActivity: DashboardWorkflowActivity[];
   ledgerActivity: DashboardLedgerActivity[];
+  readScopes: DashboardReadScopes;
   dataSourceLabel: string;
   dataWarning: string | null;
 };
@@ -498,10 +513,25 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     events: [],
     workflowActivity: [],
     ledgerActivity: [],
+    readScopes: {
+      canViewSensitiveFinancials: false,
+      canViewAuditActivity: false,
+      canViewPhoneLookup: false,
+      canViewEventFeed: false,
+    },
     dataSourceLabel: "Not connected",
     dataWarning:
       dataWarning ??
       "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Add them to .env.local for local server-side reads.",
+  };
+}
+
+function dashboardReadScopesFor(staff: StaffProfile): DashboardReadScopes {
+  return {
+    canViewSensitiveFinancials: canViewSensitiveFinancials(staff.role),
+    canViewAuditActivity: canViewAuditActivity(staff.role),
+    canViewPhoneLookup: canViewPhoneLookup(staff.role),
+    canViewEventFeed: canViewEventFeed(staff.role),
   };
 }
 
@@ -611,6 +641,7 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
   }
 
   const config = getSupabaseRestConfig();
+  const readScopes = dashboardReadScopesFor(staff);
 
   if (!config) {
     return fallbackDashboardData();
@@ -672,39 +703,50 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
         order: "effective_scheduled_at.asc.nullslast",
         limit: "5",
       }),
-      readRows<PhoneLookupRow>(restUrl, serviceRoleKey, "core_phone_lookup_summary_view", {
-        select:
-          "normalized_phone,match_count,is_ambiguous,safe_display_name,verification_required,staff_routing_recommended",
-        limit: "5",
-      }),
-      readRows<EventRow>(restUrl, serviceRoleKey, "core_events", {
-        select: "id,event_type,event_at,summary",
-        order: "event_at.desc",
-        limit: "6",
-      }),
-      readRows<EventRow>(restUrl, serviceRoleKey, "core_events", {
-        select:
-          "id,event_type,event_at,summary,application_id,buyer_id,puppy_id,reservation_id,related_table,related_id,source,created_by_profile_id,details",
-        event_type:
-          "in.(application_approved,reservation_created,reservation_payment_recorded,reservation_cancelled,puppy_released,local_workflow_seeded)",
-        order: "event_at.desc",
-        limit: "15",
-      }),
-      readRows<AuditLogRow>(restUrl, serviceRoleKey, "core_audit_log", {
-        select: "id,action,entity_table,entity_id,source,actor_identifier,outcome,created_at,request_context",
-        action:
-          "in.(approve_application,create_reservation,record_reservation_payment,cancel_reservation,release_puppy_from_cancelled_reservation,seed_local_core_workflow,seed_reservation_example)",
-        order: "created_at.desc",
-        limit: "15",
-      }),
-      readRows<LedgerRow>(restUrl, serviceRoleKey, "core_financial_ledger", {
-        select:
-          "id,reservation_id,buyer_id,external_reference,entry_type,balance_effect,status,amount_cents,currency,occurred_at,description,metadata",
-        entry_type:
-          "in.(deposit,payment,credit,refund,chargeback,fee,admin_fee,transport_fee,finance_charge,adjustment)",
-        order: "occurred_at.desc",
-        limit: "15",
-      }),
+      readScopes.canViewPhoneLookup
+        ? readRows<PhoneLookupRow>(restUrl, serviceRoleKey, "core_phone_lookup_summary_view", {
+            select:
+              "normalized_phone,match_count,is_ambiguous,safe_display_name,verification_required,staff_routing_recommended",
+            limit: "5",
+          })
+        : Promise.resolve([]),
+      readScopes.canViewEventFeed
+        ? readRows<EventRow>(restUrl, serviceRoleKey, "core_events", {
+            select: "id,event_type,event_at,summary",
+            order: "event_at.desc",
+            limit: "6",
+          })
+        : Promise.resolve([]),
+      readScopes.canViewAuditActivity
+        ? readRows<EventRow>(restUrl, serviceRoleKey, "core_events", {
+            select:
+              "id,event_type,event_at,summary,application_id,buyer_id,puppy_id,reservation_id,related_table,related_id,source,created_by_profile_id,details",
+            event_type:
+              "in.(application_approved,reservation_created,reservation_payment_recorded,reservation_cancelled,puppy_released,local_workflow_seeded)",
+            order: "event_at.desc",
+            limit: "15",
+          })
+        : Promise.resolve([]),
+      readScopes.canViewAuditActivity
+        ? readRows<AuditLogRow>(restUrl, serviceRoleKey, "core_audit_log", {
+            select:
+              "id,action,entity_table,entity_id,source,actor_identifier,outcome,created_at,request_context",
+            action:
+              "in.(approve_application,create_reservation,record_reservation_payment,cancel_reservation,release_puppy_from_cancelled_reservation,seed_local_core_workflow,seed_reservation_example)",
+            order: "created_at.desc",
+            limit: "15",
+          })
+        : Promise.resolve([]),
+      readScopes.canViewSensitiveFinancials
+        ? readRows<LedgerRow>(restUrl, serviceRoleKey, "core_financial_ledger", {
+            select:
+              "id,reservation_id,buyer_id,external_reference,entry_type,balance_effect,status,amount_cents,currency,occurred_at,description,metadata",
+            entry_type:
+              "in.(deposit,payment,credit,refund,chargeback,fee,admin_fee,transport_fee,finance_charge,adjustment)",
+            order: "occurred_at.desc",
+            limit: "15",
+          })
+        : Promise.resolve([]),
     ]);
 
     const latestApplicationId = applications[0]?.id;
@@ -1019,6 +1061,7 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
           occurredAt: formatDateTime(ledger.occurred_at),
         };
       }),
+      readScopes,
       dataSourceLabel: "Local Supabase read-only",
       dataWarning: null,
     };
