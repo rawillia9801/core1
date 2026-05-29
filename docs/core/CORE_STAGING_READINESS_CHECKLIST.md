@@ -10,6 +10,7 @@ Do not import selected real data until every required item below is satisfied or
 
 ## Environment Readiness
 
+- [ ] First staging environment plan is reviewed: `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`.
 - [ ] Separate staging environment is identified.
 - [ ] Staging URL is known.
 - [ ] Staging database is separate from local/development.
