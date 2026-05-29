@@ -111,6 +111,16 @@ The repository contains documented Zoho application field mapping and controlled
 
 The intake path writes Core buyer/family/application/application-section context along with audit/event records through controlled database logic. Rollback-safe SQL tests exist for both supported fake payload shapes.
 
+Zoho-shaped intake is now treated as compatibility, import, and dry-run support rather than the preferred future dependency for new Core-native application intake.
+
+### Core-Native Application Entry Plan
+
+`docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md` defines the recommended replacement path for Zoho-dependent application intake.
+
+The plan recommends a future protected private staff route at `/staff/applications/new`, initially owner/admin only, backed by a new Core-native application RPC rather than continued expansion of `core_ingest_zoho_application`.
+
+No Core-native application entry implementation has started yet. Email sending remains blocked until notification queue and preview behavior are designed and approved.
+
 ### Guarded Local/Development Endpoint
 
 A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.

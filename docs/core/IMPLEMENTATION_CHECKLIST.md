@@ -119,6 +119,8 @@ It should be updated whenever work lands in the repository. It is intentionally 
 
 - [x] Zoho application field mapping documentation added.
 - [x] `core_ingest_zoho_application` added for Zoho-shaped payloads.
+- [x] Core-native private application entry plan added: `docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
+- [blocked] Core-native application entry implementation has not started yet.
 - [x] Zoho API-name intake rollback-safe SQL test added.
 - [x] Zoho report/PDF-label intake compatibility added.
 - [x] Zoho report/PDF-label rollback-safe SQL test added.
@@ -127,6 +129,8 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Endpoint test documented as writing local dev records rather than rolling back.
 - [x] Intake creates buyer, family, application, application sections, event, and audit records.
 - [x] Local-only endpoint verification script added using fake report-label data.
+- [ ] Add Core-native application entry RPC and rollback-safe SQL test.
+- [ ] Add private `/staff/applications/new` owner/admin entry form.
 - [ ] Confirm exact live Zoho webhook/API payload before live connection.
 - [ ] Define failed-intake retry/dead-letter behavior.
 - [ ] Define duplicate application handling for repeated Zoho submissions.
