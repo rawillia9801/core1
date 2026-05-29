@@ -205,8 +205,9 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Locally verify staff login and active profile mapping.
 - [x] Locally verify `core_audit_log.actor_profile_id` uses the authenticated staff profile for approval and payment recording.
 - [x] Add local/dev helper for switching mapped staff profile role/status during authorization testing.
+- [x] Require authenticated active staff context before staff dashboard service-role reads run.
 - [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
-- [ ] Add read authorization review beyond the protected `/staff` route.
+- [~] Add read authorization review beyond the protected `/staff` route; broad staff context is now required, but role-specific read filtering is still undecided.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -384,7 +385,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
-- [ ] Staff authentication is partially implemented; RLS, read authorization review, and manual staging verification remain incomplete.
+- [ ] Staff authentication is partially implemented; RLS, role-specific read authorization decisions, and manual staging verification remain incomplete.
 - [ ] Zoho is not connected live.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
@@ -421,7 +422,7 @@ Do not rerun all commands after every small change. Run the relevant validation 
 ## Immediate Next Ordered Tasks
 
 1. [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
-2. [ ] Review read authorization beyond the protected `/staff` route.
+2. [ ] Decide whether selected-real-data staging should restrict sensitive read panels to owner/admin only.
 3. [ ] Add role checks for any future financial adjustment, go-home, or kennel actions before exposing them.
 4. [ ] Design and test RLS before any live client exposure.
 5. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.

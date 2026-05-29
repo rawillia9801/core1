@@ -21,6 +21,7 @@ export type StaffProfile = {
   displayName: string;
   email: string;
   role: StaffRole;
+  status: "active";
 };
 
 type DashboardAction =
@@ -114,6 +115,7 @@ export async function requireStaffProfile(): Promise<StaffProfile> {
     displayName: profile.display_name || user.email || "Core staff",
     email: profile.email || user.email || "No email on profile",
     role: role as StaffRole,
+    status: "active",
   };
 }
 

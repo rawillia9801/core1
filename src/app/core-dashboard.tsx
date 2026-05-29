@@ -5,6 +5,7 @@ import {
   recordReservationPayment,
 } from "./application-actions";
 import { getDashboardData } from "./dashboard-data";
+import type { StaffProfile } from "@/lib/staff-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -256,10 +257,12 @@ function CancellationResult({ outcome }: { outcome: string | undefined }) {
 
 export default async function Home({
   searchParams,
+  staff,
 }: {
   searchParams: Promise<{ approval?: string; reservation?: string; payment?: string; cancellation?: string }>;
+  staff: StaffProfile;
 }) {
-  const dashboard = await getDashboardData();
+  const dashboard = await getDashboardData(staff);
   const { approval, reservation, payment, cancellation } = await searchParams;
   const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 

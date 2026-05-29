@@ -12,7 +12,7 @@ Core currently proves the local/development workflow, but it is not safe for sta
 
 - The root route is now a non-sensitive landing page.
 - The staff dashboard foundation is available at `/staff` and requires a Supabase Auth user mapped to an active staff `core_profiles` row.
-- Server-side dashboard reads currently use the Supabase service-role key.
+- Server-side dashboard reads currently use the Supabase service-role key, but the dashboard read model now requires an authenticated active staff profile context before broad service-role reads run.
 - Dashboard server actions for approval, reservation creation, deposit/payment recording, and reservation cancellation now use the authenticated staff profile ID as the RPC actor.
 - Current dashboard actions have initial role checks, but the access model still needs manual verification before selected-real-data staging.
 - RLS is deferred and is not production-ready for live client exposure.
@@ -46,7 +46,7 @@ The repository now includes the smallest staff auth foundation:
 
 Because RLS policies are not enabled yet, `requireStaffProfile()` uses the service role server-side only to look up `core_profiles` by `auth_user_id`. This is transitional. It must not be copied into browser code, and it should be narrowed or replaced after RLS policies and server authorization tests exist.
 
-The existing approval, reservation, deposit/payment, and cancellation actions now pass the authenticated staff profile ID to controlled RPCs. The service role is still used server-side for transitional RPC/read access until RLS and production authorization policies exist.
+The existing approval, reservation, deposit/payment, and cancellation actions now pass the authenticated staff profile ID to controlled RPCs. The staff dashboard read model also requires the authenticated staff profile before service-role reads run. The service role is still used server-side for transitional RPC/read access until RLS and production authorization policies exist.
 
 Local verification confirms staff login/profile mapping works and `core_audit_log.actor_profile_id` uses the authenticated staff profile ID `70000000-0000-0000-0000-000000000001` for at least approval and payment recording actions.
 
@@ -132,6 +132,7 @@ Before importing or showing selected real data, all of the following should be t
 - Supabase Auth sign-in/sign-out works for staff.
 - Authenticated users map to active `core_profiles` rows.
 - Server-side reads reject unauthenticated users.
+- The staff dashboard read model requires authenticated staff context before service-role reads run.
 - Server actions use the real staff profile actor, not a static local/dev actor.
 - Role checks exist before approval, reservation, payment, cancellation, and financial adjustment actions.
 - Email, payment processor, Twilio, document generation, and other live side effects remain off.
@@ -150,7 +151,7 @@ Recommended implementation order:
 3. Add staff login and sign-out paths.
 4. Map the Supabase session user to `core_profiles.auth_user_id`.
 5. Replace static actor env usage in server actions with the authenticated profile actor. Completed for approval, reservation creation, deposit/payment recording, and reservation cancellation.
-6. Add role checks to dashboard reads and server actions. Initial checks are in place for current dashboard actions; broader read authorization and future actions still need review.
+6. Add role checks to dashboard reads and server actions. Current dashboard reads require active staff context before service-role access, and initial checks are in place for current dashboard actions; role-specific read filtering and future actions still need review.
 7. Add manual verification steps for unauthenticated, unauthorized, and authorized staff paths.
 8. Plan RLS policy tests.
 9. Only then plan selected-real-data staging.
@@ -170,7 +171,7 @@ Recommended implementation order:
 Continue the staff authentication boundary from this plan:
 
 1. Verify unauthorized role behavior, especially staff cancellation with puppy release.
-2. Review read authorization beyond the protected `/staff` route.
+2. Decide whether selected-real-data staging should restrict sensitive read panels to owner/admin only.
 3. Design and test RLS policies.
 4. Prepare selected-real-data staging only after access checks are reviewed.
 

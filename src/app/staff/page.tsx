@@ -40,7 +40,7 @@ export default async function StaffPage({
           </form>
         </div>
       </section>
-      <CoreDashboard searchParams={searchParams} />
+      <CoreDashboard searchParams={searchParams} staff={staff} />
     </>
   );
 }

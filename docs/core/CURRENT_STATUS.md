@@ -333,6 +333,7 @@ The first staff auth foundation is implemented:
 - `/staff` requires an authenticated Supabase user mapped to an active `core_profiles` staff profile.
 - `/` is now a non-sensitive landing page and does not display Core dashboard data.
 - The staff profile lookup uses the service role server-side as a transitional bridge until RLS policies exist.
+- The staff dashboard read model now requires authenticated active staff profile context before broad service-role reads run.
 
 Dashboard approval, reservation creation, deposit/payment recording, and reservation cancellation actions now require the authenticated staff session and pass the mapped `core_profiles.id` as the RPC actor. Initial role checks are in place: owner/admin can perform all current dashboard actions; staff can approve, create reservations, and record deposits/payments, but cannot release a puppy during cancellation.
 
@@ -341,7 +342,7 @@ Local verification confirms `/login` works, `/staff` loads for the mapped active
 - `approve_application`
 - `record_reservation_payment`
 
-This is not a complete staging/production security boundary yet. RLS policy work, broader read authorization review, unauthorized-role verification, and selected-real-data verification remain incomplete.
+This is not a complete staging/production security boundary yet. Service-role reads are still transitional server-side reads, role-specific read filtering has not been finalized, RLS policy work remains incomplete, and selected-real-data verification remains blocked.
 
 ## Remaining Work Before Staging Or Production
 
@@ -349,7 +350,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 - Unauthorized-role verification, especially staff cancellation with puppy release.
 - Future authenticated actor and role checks for any new financial adjustment/go-home/kennel actions.
-- Broader read authorization review.
+- Role-specific read authorization decisions for sensitive panels such as financial ledger, audit/activity, phone lookup, and document metadata.
 - RLS policies and policy tests.
 - Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
 - A reviewed approach to stronger payment idempotency before processor integration.
@@ -358,4 +359,4 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Verify unauthorized role behavior and review read authorization beyond the protected `/staff` route. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Verify unauthorized role behavior and decide whether selected-real-data staging should restrict sensitive dashboard read panels to owner/admin only. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.

@@ -1,3 +1,5 @@
+import type { StaffProfile, StaffRole } from "@/lib/staff-auth";
+
 type DashboardStat = {
   label: string;
   value: string;
@@ -103,6 +105,8 @@ type DashboardLedgerActivity = {
 type CountResult = {
   count: number;
 };
+
+const DASHBOARD_READ_ROLES = new Set<StaffRole>(["owner", "admin", "staff"]);
 
 type ApplicationRow = {
   id: string;
@@ -501,6 +505,15 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
   };
 }
 
+function hasAuthorizedStaffReadContext(staff: StaffProfile | null | undefined) {
+  return Boolean(
+    staff?.id &&
+      staff.authUserId &&
+      staff.status === "active" &&
+      DASHBOARD_READ_ROLES.has(staff.role),
+  );
+}
+
 function getSupabaseRestConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -583,7 +596,20 @@ async function readCount(
   };
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getDashboardData(staff: StaffProfile): Promise<DashboardData> {
+  if (!hasAuthorizedStaffReadContext(staff)) {
+    console.error("[core dashboard reads] missing or unauthorized staff context", {
+      hasStaffProfile: Boolean(staff),
+      staffProfileId: staff?.id ?? null,
+      staffRole: staff?.role ?? null,
+      staffStatus: staff?.status ?? null,
+    });
+
+    return fallbackDashboardData(
+      "Dashboard reads require an authenticated active staff profile before service-role data access can run.",
+    );
+  }
+
   const config = getSupabaseRestConfig();
 
   if (!config) {
