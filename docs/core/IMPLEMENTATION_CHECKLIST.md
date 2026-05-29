@@ -204,6 +204,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles for staff route access.
 - [x] Locally verify staff login and active profile mapping.
 - [x] Locally verify `core_audit_log.actor_profile_id` uses the authenticated staff profile for approval and payment recording.
+- [x] Add local/dev helper for switching mapped staff profile role/status during authorization testing.
 - [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
 - [ ] Add read authorization review beyond the protected `/staff` route.
 - [ ] Add a staging environment separate from local dev.

@@ -50,6 +50,8 @@ The existing approval, reservation, deposit/payment, and cancellation actions no
 
 Local verification confirms staff login/profile mapping works and `core_audit_log.actor_profile_id` uses the authenticated staff profile ID `70000000-0000-0000-0000-000000000001` for at least approval and payment recording actions.
 
+`scripts/set-local-staff-profile-access.sql` can be used in local/dev to switch the deterministic mapped staff profile between `owner`, `admin`, `staff`, `active`, `inactive`, and temporarily unmapped states for authorization testing. It does not create Auth users or store passwords.
+
 ## Route And Access Structure
 
 Recommended route shape:

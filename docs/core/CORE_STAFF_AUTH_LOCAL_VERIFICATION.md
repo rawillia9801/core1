@@ -139,6 +139,83 @@ Expected result:
 /login?error=unauthorized
 ```
 
+You can also test the mapped local profile as temporarily unmapped by clearing `auth_user_id`:
+
+```bash
+cat scripts/set-local-staff-profile-access.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v clear_auth_user_id=true -v staff_role=owner -v staff_status=active
+```
+
+Expected result:
+
+```text
+/login?error=unauthorized
+```
+
+Restore the mapping afterward by passing the same local Auth user UUID used earlier:
+
+```bash
+cat scripts/set-local-staff-profile-access.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v auth_user_id="PASTE-LOCAL-AUTH-USER-UUID-HERE" -v staff_role=owner -v staff_status=active
+```
+
+## Verify Role And Status Behavior
+
+Use the local access-state helper to switch the deterministic staff profile between role/status combinations. The helper is local/dev only, idempotent, and does not create Auth users or store passwords.
+
+### Owner Active
+
+```bash
+cat scripts/set-local-staff-profile-access.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v auth_user_id="PASTE-LOCAL-AUTH-USER-UUID-HERE" -v staff_role=owner -v staff_status=active
+```
+
+Expected behavior:
+
+- `/staff` loads.
+- Approval is allowed.
+- Reservation creation is allowed.
+- Deposit/payment recording is allowed.
+- Reservation cancellation is allowed, including cancellation with puppy release.
+
+### Admin Active
+
+```bash
+cat scripts/set-local-staff-profile-access.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v auth_user_id="PASTE-LOCAL-AUTH-USER-UUID-HERE" -v staff_role=admin -v staff_status=active
+```
+
+Expected behavior:
+
+- `/staff` loads.
+- Approval is allowed.
+- Reservation creation is allowed.
+- Deposit/payment recording is allowed.
+- Reservation cancellation is allowed, including cancellation with puppy release.
+
+### Staff Active
+
+```bash
+cat scripts/set-local-staff-profile-access.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v auth_user_id="PASTE-LOCAL-AUTH-USER-UUID-HERE" -v staff_role=staff -v staff_status=active
+```
+
+Expected behavior:
+
+- `/staff` loads.
+- Approval is allowed.
+- Reservation creation is allowed.
+- Deposit/payment recording is allowed.
+- Reservation cancellation is allowed only when puppy release is not selected.
+- Reservation cancellation with `Release puppy after cancellation` selected is rejected and redirects to `/staff?cancellation=unauthorized`.
+
+### Staff Inactive
+
+```bash
+cat scripts/set-local-staff-profile-access.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v auth_user_id="PASTE-LOCAL-AUTH-USER-UUID-HERE" -v staff_role=staff -v staff_status=inactive
+```
+
+Expected behavior:
+
+- `/staff` is blocked.
+- The user is redirected to `/login?error=unauthorized`.
+- Dashboard actions are not reachable from the protected staff route.
+
 ## Current Constraints
 
 - RLS is not enabled.
@@ -146,6 +223,7 @@ Expected result:
 - Dashboard approval, reservation, deposit/payment, and cancellation actions use the authenticated staff profile as the RPC actor.
 - Per-action role checks are implemented for the current dashboard actions.
 - Approval and payment-recording audit actor attribution has been verified locally.
+- Unauthorized role/status behavior still needs to be manually exercised using local fake data.
 - Selected real-data staging remains blocked.
 
 ## Next Recommended Task
