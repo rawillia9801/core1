@@ -92,6 +92,43 @@ Dry-run helper:
 
 The helper reads a local JSON payload file, calls the existing `core_ingest_zoho_application` database function inside a transaction, prints the buyer/family/application IDs, status, section count, event ID, and audit ID that would be created, and rolls back by default. Do not commit selected real payload files.
 
+Manual selected-payload dry-run process:
+
+1. Complete the field review template and owner approval for the selected record before creating the JSON file.
+2. Place the selected JSON payload outside the repository, for example under a private local temp/work folder such as `/tmp/core-selected-payloads/` in Git Bash or another owner-approved local-only folder.
+3. Confirm the file exists before running the helper:
+
+```bash
+test -f /tmp/core-selected-payloads/selected-application-001.json
+```
+
+4. Run the rollback-only dry run:
+
+```bash
+./scripts/dry-run-selected-application-intake.sh /tmp/core-selected-payloads/selected-application-001.json
+```
+
+Expected output includes:
+
+- `buyer_id`
+- `family_id`
+- `application_id`
+- `application_status`
+- `section_count`
+- `event_id`
+- `audit_log_id`
+- `DRY RUN ONLY - ROLLED BACK`
+
+Review the output for:
+
+- Whether the application status is expected.
+- Whether the section count matches the reviewed payload shape.
+- Whether IDs were generated.
+- Whether any error occurred.
+- Whether the final rollback marker is present.
+
+Do not move the selected payload into the repository. Do not commit it. Do not run a live Zoho webhook. Do not run any commit/import mode; the helper intentionally has no commit mode in this phase.
+
 Do not:
 
 - Load real records through normal migrations.

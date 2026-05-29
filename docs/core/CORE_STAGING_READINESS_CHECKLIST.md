@@ -70,7 +70,10 @@ Do not import selected real data until every required item below is satisfied or
 
 ## Import Method Readiness
 
+- [ ] Selected real JSON payload is stored outside the repository in a private local-only folder.
+- [ ] Payload file existence is confirmed locally before the dry run.
 - [ ] Local dry run is completed first.
+- [ ] Dry run output is reviewed for application status, section count, generated IDs, errors, and `DRY RUN ONLY - ROLLED BACK`.
 - [ ] Staging import method is chosen.
 - [ ] Existing intake function compatibility is confirmed.
 - [ ] No seed-through-migration is used.

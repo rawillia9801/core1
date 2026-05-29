@@ -234,11 +234,12 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Add staging readiness checklist: `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`.
 - [x] Add first staging environment setup plan: `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`.
 - [x] Add selected real-data field review template: `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md`.
+- [x] Add rollback-only selected application dry-run intake helper.
 - [x] Decide first real data should be one or two owner-approved real application records only.
 - [ ] Export one or a few real Zoho application records safely.
 - [blocked] Redact or handle sensitive fields during development review using the field review template before any import.
 - [ ] Validate field shapes against `core_ingest_zoho_application`.
-- [ ] Run local/dev dry-run import.
+- [ ] Run local/dev dry-run import with one owner-approved local JSON payload stored outside the repository.
 - [blocked] Run staging import with owner-approved limited records only after exact records, field review, fields, staging environment plan, environment, import method, verification checklist, readiness checklist, and rollback plan are approved.
 - [ ] Verify received applications display correctly in staging.
 - [ ] Verify application details display correctly in staging.
