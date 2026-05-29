@@ -13,8 +13,8 @@ Core currently proves the local/development workflow, but it is not safe for sta
 - The root route is now a non-sensitive landing page.
 - The staff dashboard foundation is available at `/staff` and requires a Supabase Auth user mapped to an active staff `core_profiles` row.
 - Server-side dashboard reads currently use the Supabase service-role key.
-- Server actions use the static local/development actor setting `CORE_APPROVAL_ACTOR_PROFILE_ID`.
-- The current action actor is a configured profile ID, not the authenticated staff user who clicked the button.
+- Dashboard server actions for approval, reservation creation, deposit/payment recording, and reservation cancellation now use the authenticated staff profile ID as the RPC actor.
+- Current dashboard actions have initial role checks, but the access model still needs manual verification before selected-real-data staging.
 - RLS is deferred and is not production-ready for live client exposure.
 - The dashboard actions are local/development-only workflow foundations.
 - The guarded intake API is separately protected by a shared local/dev secret, not by a full live Zoho integration or staff auth model.
@@ -46,7 +46,7 @@ The repository now includes the smallest staff auth foundation:
 
 Because RLS policies are not enabled yet, `requireStaffProfile()` uses the service role server-side only to look up `core_profiles` by `auth_user_id`. This is transitional. It must not be copied into browser code, and it should be narrowed or replaced after RLS policies and server authorization tests exist.
 
-The existing approval, reservation, deposit/payment, and cancellation actions still use the local/development static actor setting `CORE_APPROVAL_ACTOR_PROFILE_ID`. Authenticated actor replacement is not complete.
+The existing approval, reservation, deposit/payment, and cancellation actions now pass the authenticated staff profile ID to controlled RPCs. The service role is still used server-side for transitional RPC/read access until RLS and production authorization policies exist.
 
 ## Route And Access Structure
 
@@ -70,7 +70,7 @@ Every server-side read path and write action should follow the same pattern:
 5. Pass the real `core_profiles.id` to database RPCs as the actor.
 6. Log and return safe errors for unauthenticated or unauthorized requests.
 
-The static `CORE_APPROVAL_ACTOR_PROFILE_ID` pattern should remain local/development-only and should not be the staging or production actor model.
+The static `CORE_APPROVAL_ACTOR_PROFILE_ID` pattern is no longer used by the staff dashboard actions and should not be the staging or production actor model.
 
 ## Recommended Role Permissions
 
@@ -145,8 +145,8 @@ Recommended implementation order:
 2. Add a protected staff route or route group.
 3. Add staff login and sign-out paths.
 4. Map the Supabase session user to `core_profiles.auth_user_id`.
-5. Replace static actor env usage in server actions with the authenticated profile actor.
-6. Add role checks to dashboard reads and server actions.
+5. Replace static actor env usage in server actions with the authenticated profile actor. Completed for approval, reservation creation, deposit/payment recording, and reservation cancellation.
+6. Add role checks to dashboard reads and server actions. Initial checks are in place for current dashboard actions; broader read authorization and future actions still need review.
 7. Add manual verification steps for unauthenticated, unauthorized, and authorized staff paths.
 8. Plan RLS policy tests.
 9. Only then plan selected-real-data staging.
@@ -165,9 +165,9 @@ Recommended implementation order:
 
 Continue the staff authentication boundary from this plan:
 
-1. Verify local Supabase Auth sign-in and an active `core_profiles.auth_user_id` mapping.
-2. Replace static local/dev actor usage with the authenticated staff profile actor.
-3. Add per-action role checks.
-4. Add manual verification steps for unauthenticated, unauthorized, and authorized staff paths.
+1. Manually verify unauthenticated, unauthorized, and authorized staff paths.
+2. Verify audit/event actor IDs are the authenticated staff profile IDs.
+3. Design and test RLS policies.
+4. Prepare selected-real-data staging only after access checks are reviewed.
 
 Do not import selected real data until those pieces are working and manually verified.

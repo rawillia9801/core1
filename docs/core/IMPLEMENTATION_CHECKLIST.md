@@ -159,7 +159,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Application approval rollback-safe SQL test added.
 - [x] Local/development dashboard approval action added.
 - [x] Dashboard approval action calls `core_approve_application` server-side.
-- [x] Dashboard approval action requires `CORE_APPROVAL_ACTOR_PROFILE_ID`.
+- [x] Dashboard approval action uses the authenticated staff profile actor.
 - [x] Dashboard approval action sets `p_queue_notification = false`.
 - [x] Dashboard approval action verified locally in browser.
 - [x] Dashboard approval action updates application and buyer approval status through the database function.
@@ -199,9 +199,11 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [~] Staff profile lookup maps Supabase Auth user to `core_profiles.auth_user_id`; it currently uses service role server-side as a transitional bridge until RLS exists.
 - [~] Separate local/dev service-role usage from staging/production access patterns.
 - [ ] Add admin/staff role assignment flow.
-- [ ] Add per-action server-side authorization checks for all actions.
-- [ ] Replace static local/development actor env usage with authenticated staff profile actors.
+- [x] Add per-action server-side authorization checks for current dashboard actions.
+- [x] Replace static local/development actor env usage with authenticated staff profile actors for approval, reservation creation, deposit/payment recording, and cancellation.
 - [x] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles for staff route access.
+- [ ] Manually verify event/audit actor IDs after authenticated dashboard writes.
+- [ ] Add read authorization review beyond the protected `/staff` route.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -379,7 +381,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
-- [ ] Staff authentication is only partially implemented; action actor replacement and role checks remain incomplete.
+- [ ] Staff authentication is partially implemented; RLS, read authorization review, and manual staging verification remain incomplete.
 - [ ] Zoho is not connected live.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
@@ -415,9 +417,9 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Verify local Supabase Auth sign-in with an active `core_profiles.auth_user_id` mapping.
-2. [ ] Replace static local/development actor usage with authenticated staff profile actors.
-3. [ ] Add per-action role checks for approval, reservation, payment, cancellation, and future financial adjustment actions.
+1. [ ] Manually verify authenticated dashboard actions and audit/event actor IDs.
+2. [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
+3. [ ] Add role checks for any future financial adjustment, go-home, or kennel actions before exposing them.
 4. [ ] Design and test RLS before any live client exposure.
 5. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
 6. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.

@@ -63,6 +63,14 @@ function ApprovalResult({ outcome }: { outcome: string | undefined }) {
     );
   }
 
+  if (outcome === "unauthorized") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Your staff role cannot approve applications.
+      </p>
+    );
+  }
+
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -123,6 +131,14 @@ function ReservationResult({ outcome }: { outcome: string | undefined }) {
     );
   }
 
+  if (outcome === "unauthorized") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Your staff role cannot create reservations.
+      </p>
+    );
+  }
+
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -167,6 +183,14 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
     );
   }
 
+  if (outcome === "unauthorized") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Your staff role cannot record deposits or payments.
+      </p>
+    );
+  }
+
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -207,6 +231,14 @@ function CancellationResult({ outcome }: { outcome: string | undefined }) {
     return (
       <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
         The selected reservation is not eligible for cancellation.
+      </p>
+    );
+  }
+
+  if (outcome === "unauthorized") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Your staff role cannot perform that cancellation action.
       </p>
     );
   }

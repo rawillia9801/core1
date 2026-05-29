@@ -13,7 +13,7 @@ It is local/dev only. Do not use production data, production credentials, real c
 - `/` is non-sensitive and does not display Core dashboard data.
 - `requireStaffProfile()` maps `auth.users.id` to `core_profiles.auth_user_id`.
 - Because RLS is not enabled yet, the profile lookup uses the service role server-side as a transitional bridge.
-- Existing dashboard write actions still use `CORE_APPROVAL_ACTOR_PROFILE_ID`; authenticated actor replacement is a later task.
+- Existing dashboard write actions now use the authenticated staff profile ID as the RPC actor.
 
 ## Required Local Environment Variables
 
@@ -24,7 +24,6 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
-CORE_APPROVAL_ACTOR_PROFILE_ID=70000000-0000-0000-0000-000000000001
 ```
 
 For local Supabase, get the URL, anon key, and service role key from:
@@ -34,6 +33,8 @@ supabase status
 ```
 
 Use local/dev values only.
+
+`CORE_APPROVAL_ACTOR_PROFILE_ID` is no longer required for the staff dashboard approval, reservation, payment, or cancellation actions. Those actions use the authenticated mapped staff profile.
 
 ## Create A Local Supabase Auth User
 
@@ -135,11 +136,10 @@ Expected result:
 
 - RLS is not enabled.
 - Staff profile lookup uses the service role server-side as a transitional bridge.
-- Existing dashboard write actions still use `CORE_APPROVAL_ACTOR_PROFILE_ID`.
-- Server actions do not yet use the authenticated staff profile as the RPC actor.
-- Per-action role checks are not implemented yet.
+- Dashboard approval, reservation, deposit/payment, and cancellation actions use the authenticated staff profile as the RPC actor.
+- Per-action role checks are implemented for the current dashboard actions.
 - Selected real-data staging remains blocked.
 
 ## Next Recommended Task
 
-After local sign-in and profile mapping are verified, replace `CORE_APPROVAL_ACTOR_PROFILE_ID` usage in server actions with the authenticated staff profile actor and add per-action role checks.
+Manually verify the authenticated staff actions, then design RLS and selected-real-data staging checks. Do not import selected real data until owner-approved staging boundaries are verified.

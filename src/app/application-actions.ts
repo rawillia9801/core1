@@ -2,6 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  canStaffPerformDashboardAction,
+  requireStaffProfile,
+  type StaffProfile,
+} from "@/lib/staff-auth";
 
 const APPROVABLE_STATUSES = new Set(["received", "needs_review"]);
 const CANCELLABLE_RESERVATION_STATUSES = new Set(["reserved", "pending"]);
@@ -48,28 +53,31 @@ function logCancellationFailure(reason: string, details?: Record<string, unknown
   }
 }
 
-function getLocalApprovalConfig() {
+function getDashboardActionConfig(
+  actionLabel: string,
+  logFailure: (reason: string, details?: Record<string, unknown>) => void,
+) {
   if (process.env.NODE_ENV === "production") {
-    throw new Error("Approval actions are disabled outside local/development use.");
+    throw new Error(`${actionLabel} actions are disabled until staging/production authorization is approved.`);
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  const supabaseUrl = (
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  )?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const actorProfileId = process.env.CORE_APPROVAL_ACTOR_PROFILE_ID;
 
-  if (!supabaseUrl || !serviceRoleKey || !actorProfileId || !UUID_PATTERN.test(actorProfileId)) {
-    logApprovalFailure("missing or invalid local approval configuration", {
+  if (!supabaseUrl || !serviceRoleKey) {
+    logFailure("missing local/development dashboard action configuration", {
+      actionLabel,
       hasSupabaseUrl: Boolean(supabaseUrl),
       hasServiceRoleKey: Boolean(serviceRoleKey),
-      hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
     });
-    throw new Error("Local approval configuration is incomplete.");
+    throw new Error("Local/development dashboard action configuration is incomplete.");
   }
 
   return {
     restUrl: `${supabaseUrl}/rest/v1`,
     serviceRoleKey,
-    actorProfileId,
   };
 }
 
@@ -81,16 +89,50 @@ function serverHeaders(serviceRoleKey: string) {
   };
 }
 
+async function requireAuthorizedDashboardStaff(
+  action: Parameters<typeof canStaffPerformDashboardAction>[1],
+  logFailure: (reason: string, details?: Record<string, unknown>) => void,
+  options: Parameters<typeof canStaffPerformDashboardAction>[2] = {},
+) {
+  const staff = await requireStaffProfile();
+
+  if (!canStaffPerformDashboardAction(staff, action, options)) {
+    logFailure("staff profile is not authorized for dashboard action", {
+      action,
+      staffProfileId: staff.id,
+      staffRole: staff.role,
+      ...options,
+    });
+    return null;
+  }
+
+  return staff;
+}
+
 export async function approveApplication(formData: FormData) {
   const applicationId = String(formData.get("applicationId") ?? "").trim();
   const decisionNotes = String(formData.get("decisionNotes") ?? "").trim().slice(0, 1000);
   let outcome = "error";
+  let staff: StaffProfile | null = null;
+
+  try {
+    staff = await requireAuthorizedDashboardStaff("approve_application", logApprovalFailure);
+  } catch (error) {
+    logApprovalFailure("approval staff auth check failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
+  }
+
+  if (!staff) {
+    redirect("/staff?approval=unauthorized");
+  }
 
   if (!UUID_PATTERN.test(applicationId)) {
     logApprovalFailure("invalid application id submitted", { applicationId });
   } else {
     try {
-      const { restUrl, serviceRoleKey, actorProfileId } = getLocalApprovalConfig();
+      const { restUrl, serviceRoleKey } = getDashboardActionConfig("Approval", logApprovalFailure);
       const applicationResponse = await fetch(
         `${restUrl}/core_applications?select=status&id=eq.${applicationId}`,
         {
@@ -126,7 +168,7 @@ export async function approveApplication(formData: FormData) {
             headers: serverHeaders(serviceRoleKey),
             body: JSON.stringify({
               p_application_id: applicationId,
-              p_actor_profile_id: actorProfileId,
+              p_actor_profile_id: staff.id,
               p_decision_notes: decisionNotes || null,
               p_queue_notification: false,
             }),
@@ -156,56 +198,6 @@ export async function approveApplication(formData: FormData) {
   }
 
   redirect(`/staff?approval=${outcome}`);
-}
-
-function getLocalPaymentConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Payment recording actions are disabled outside local/development use.");
-  }
-
-  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const actorProfileId = process.env.CORE_APPROVAL_ACTOR_PROFILE_ID;
-
-  if (!supabaseUrl || !serviceRoleKey || !actorProfileId || !UUID_PATTERN.test(actorProfileId)) {
-    logPaymentFailure("missing or invalid local payment configuration", {
-      hasSupabaseUrl: Boolean(supabaseUrl),
-      hasServiceRoleKey: Boolean(serviceRoleKey),
-      hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
-    });
-    throw new Error("Local payment recording configuration is incomplete.");
-  }
-
-  return {
-    restUrl: `${supabaseUrl}/rest/v1`,
-    serviceRoleKey,
-    actorProfileId,
-  };
-}
-
-function getLocalCancellationConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Cancellation actions are disabled outside local/development use.");
-  }
-
-  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const actorProfileId = process.env.CORE_APPROVAL_ACTOR_PROFILE_ID;
-
-  if (!supabaseUrl || !serviceRoleKey || !actorProfileId || !UUID_PATTERN.test(actorProfileId)) {
-    logCancellationFailure("missing or invalid local cancellation configuration", {
-      hasSupabaseUrl: Boolean(supabaseUrl),
-      hasServiceRoleKey: Boolean(serviceRoleKey),
-      hasValidActorProfileId: Boolean(actorProfileId && UUID_PATTERN.test(actorProfileId)),
-    });
-    throw new Error("Local cancellation configuration is incomplete.");
-  }
-
-  return {
-    restUrl: `${supabaseUrl}/rest/v1`,
-    serviceRoleKey,
-    actorProfileId,
-  };
 }
 
 function parseDollarAmountToCents(value: FormDataEntryValue | null) {
@@ -251,6 +243,20 @@ export async function createReservation(formData: FormData) {
   const saleType = String(formData.get("saleType") ?? "").trim().slice(0, 100);
   const notes = String(formData.get("notes") ?? "").trim().slice(0, 1000);
   let outcome = "error";
+  let staff: StaffProfile | null = null;
+
+  try {
+    staff = await requireAuthorizedDashboardStaff("create_reservation", logReservationFailure);
+  } catch (error) {
+    logReservationFailure("reservation staff auth check failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
+  }
+
+  if (!staff) {
+    redirect("/staff?reservation=unauthorized");
+  }
 
   if (!UUID_PATTERN.test(applicationId) || !UUID_PATTERN.test(puppyId)) {
     logReservationFailure("invalid application or puppy id submitted", {
@@ -279,7 +285,7 @@ export async function createReservation(formData: FormData) {
   }
 
   try {
-    const { restUrl, serviceRoleKey, actorProfileId } = getLocalApprovalConfig();
+    const { restUrl, serviceRoleKey } = getDashboardActionConfig("Reservation", logReservationFailure);
     const headers = serverHeaders(serviceRoleKey);
     const applicationResponse = await fetch(
       `${restUrl}/core_applications?select=status,buyer_id,family_id&id=eq.${applicationId}`,
@@ -365,7 +371,7 @@ export async function createReservation(formData: FormData) {
                     p_family_id: application.family_id,
                     p_puppy_id: puppyId,
                     p_application_id: applicationId,
-                    p_actor_profile_id: actorProfileId,
+                    p_actor_profile_id: staff.id,
                     p_contract_total_cents: contractTotalCents,
                     p_deposit_required_cents: deposit.value,
                     p_sale_type: saleType || null,
@@ -412,6 +418,20 @@ export async function recordReservationPayment(formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
   const ineligibleStatuses = new Set(["cancelled", "void", "released"]);
   let outcome = "error";
+  let staff: StaffProfile | null = null;
+
+  try {
+    staff = await requireAuthorizedDashboardStaff("record_reservation_payment", logPaymentFailure);
+  } catch (error) {
+    logPaymentFailure("payment staff auth check failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
+  }
+
+  if (!staff) {
+    redirect("/staff?payment=unauthorized");
+  }
 
   if (!UUID_PATTERN.test(reservationId)) {
     logPaymentFailure("invalid reservation id submitted", {
@@ -447,7 +467,7 @@ export async function recordReservationPayment(formData: FormData) {
   }
 
   try {
-    const { restUrl, serviceRoleKey, actorProfileId } = getLocalPaymentConfig();
+    const { restUrl, serviceRoleKey } = getDashboardActionConfig("Payment recording", logPaymentFailure);
     const headers = serverHeaders(serviceRoleKey);
     const reservationResponse = await fetch(
       `${restUrl}/core_reservations?select=status&id=eq.${reservationId}`,
@@ -481,7 +501,7 @@ export async function recordReservationPayment(formData: FormData) {
           headers,
           body: JSON.stringify({
             p_reservation_id: reservationId,
-            p_actor_profile_id: actorProfileId,
+            p_actor_profile_id: staff.id,
             p_entry_type: entryType,
             p_amount_cents: amountCents,
             p_payment_method: paymentMethod || null,
@@ -523,6 +543,22 @@ export async function cancelReservation(formData: FormData) {
   const releasePuppy = formData.get("releasePuppy") === "on";
   const releasedPuppyStatus = String(formData.get("releasedPuppyStatus") ?? "available").trim().toLowerCase();
   let outcome = "error";
+  let staff: StaffProfile | null = null;
+
+  try {
+    staff = await requireAuthorizedDashboardStaff("cancel_reservation", logCancellationFailure, {
+      releasePuppy,
+    });
+  } catch (error) {
+    logCancellationFailure("cancellation staff auth check failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
+  }
+
+  if (!staff) {
+    redirect("/staff?cancellation=unauthorized");
+  }
 
   if (!UUID_PATTERN.test(reservationId)) {
     logCancellationFailure("invalid reservation id submitted", {
@@ -550,7 +586,7 @@ export async function cancelReservation(formData: FormData) {
   }
 
   try {
-    const { restUrl, serviceRoleKey, actorProfileId } = getLocalCancellationConfig();
+    const { restUrl, serviceRoleKey } = getDashboardActionConfig("Cancellation", logCancellationFailure);
     const headers = serverHeaders(serviceRoleKey);
     const reservationResponse = await fetch(
       `${restUrl}/core_reservations?select=status&id=eq.${reservationId}`,
@@ -584,7 +620,7 @@ export async function cancelReservation(formData: FormData) {
           headers,
           body: JSON.stringify({
             p_reservation_id: reservationId,
-            p_actor_profile_id: actorProfileId,
+            p_actor_profile_id: staff.id,
             p_cancellation_reason: cancellationReason,
             p_release_puppy: releasePuppy,
             p_released_puppy_status: releasedPuppyStatus,

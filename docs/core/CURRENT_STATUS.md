@@ -134,7 +134,7 @@ This supplies visibility for the local intake and approval workflow without expo
 The database function `core_approve_application` is implemented and tested. The local/development dashboard approval action:
 
 - Calls the database RPC server-side.
-- Uses the configured local actor profile ID.
+- Uses the authenticated staff profile ID as the RPC actor.
 - Updates approved application/buyer state through the controlled function.
 - Writes operational event and audit records through the RPC.
 - Keeps notification queuing disabled in the dashboard action.
@@ -334,14 +334,17 @@ The first staff auth foundation is implemented:
 - `/` is now a non-sensitive landing page and does not display Core dashboard data.
 - The staff profile lookup uses the service role server-side as a transitional bridge until RLS policies exist.
 
-This is not a complete staging/production security boundary yet. Existing dashboard write actions still use `CORE_APPROVAL_ACTOR_PROFILE_ID` as the local/development actor. Authenticated actor replacement, per-action role checks, RLS policy work, and selected-real-data verification remain incomplete.
+Dashboard approval, reservation creation, deposit/payment recording, and reservation cancellation actions now require the authenticated staff session and pass the mapped `core_profiles.id` as the RPC actor. Initial role checks are in place: owner/admin can perform all current dashboard actions; staff can approve, create reservations, and record deposits/payments, but cannot release a puppy during cancellation.
+
+This is not a complete staging/production security boundary yet. RLS policy work, broader read authorization review, manual role-path verification, and selected-real-data verification remain incomplete.
 
 ## Remaining Work Before Staging Or Production
 
 Before any staff-facing staging or production use, Core still needs deliberate security and workflow decisions:
 
-- Authenticated actor replacement for approval, reservation, payment, cancellation, and future financial adjustment actions.
-- Per-action staff role checks.
+- Manual verification that authenticated dashboard actions write audit/event actor IDs from the signed-in staff profile.
+- Future authenticated actor and role checks for any new financial adjustment/go-home/kennel actions.
+- Broader read authorization review.
 - RLS policies and policy tests.
 - Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
 - A reviewed approach to stronger payment idempotency before processor integration.
@@ -350,4 +353,4 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Verify local Supabase Auth sign-in with an active `core_profiles.auth_user_id` mapping, then replace static local/development actor usage with the authenticated staff profile actor. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Manually verify authenticated dashboard actions end to end, including audit/event actor IDs and unauthorized role behavior. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.

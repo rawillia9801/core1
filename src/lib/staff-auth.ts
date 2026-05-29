@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "./supabase/server";
 
-const STAFF_ROLES = new Set(["owner", "admin", "staff"]);
+const STAFF_ROLES = ["owner", "admin", "staff"] as const;
+const STAFF_ROLE_SET = new Set<string>(STAFF_ROLES);
+
+export type StaffRole = (typeof STAFF_ROLES)[number];
 
 type CoreProfileRow = {
   id: string;
@@ -17,8 +20,24 @@ export type StaffProfile = {
   authUserId: string;
   displayName: string;
   email: string;
-  role: string;
+  role: StaffRole;
 };
+
+type DashboardAction =
+  | "approve_application"
+  | "create_reservation"
+  | "record_reservation_payment"
+  | "cancel_reservation";
+
+type DashboardActionOptions = {
+  releasePuppy?: boolean;
+};
+
+function logStaffAuthFailure(reason: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error("[core staff auth]", reason, details ?? {});
+  }
+}
 
 function staffProfileLookupHeaders(serviceRoleKey: string) {
   return {
@@ -71,6 +90,7 @@ export async function requireStaffProfile(): Promise<StaffProfile> {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    logStaffAuthFailure("unauthenticated staff route or action attempt");
     redirect("/login?next=/staff");
   }
 
@@ -78,7 +98,13 @@ export async function requireStaffProfile(): Promise<StaffProfile> {
   const role = profile?.role?.toLowerCase() ?? "";
   const status = profile?.status?.toLowerCase() ?? "";
 
-  if (!profile || status !== "active" || !STAFF_ROLES.has(role)) {
+  if (!profile || status !== "active" || !STAFF_ROLE_SET.has(role)) {
+    logStaffAuthFailure("missing, inactive, or unauthorized staff profile", {
+      authUserId: user.id,
+      hasProfile: Boolean(profile),
+      status,
+      role,
+    });
     redirect("/login?error=unauthorized");
   }
 
@@ -87,6 +113,30 @@ export async function requireStaffProfile(): Promise<StaffProfile> {
     authUserId: user.id,
     displayName: profile.display_name || user.email || "Core staff",
     email: profile.email || user.email || "No email on profile",
-    role,
+    role: role as StaffRole,
   };
+}
+
+export function canStaffPerformDashboardAction(
+  staff: StaffProfile,
+  action: DashboardAction,
+  options: DashboardActionOptions = {},
+) {
+  if (staff.role === "owner" || staff.role === "admin") {
+    return true;
+  }
+
+  if (staff.role !== "staff") {
+    return false;
+  }
+
+  if (action === "cancel_reservation") {
+    return options.releasePuppy !== true;
+  }
+
+  return (
+    action === "approve_application" ||
+    action === "create_reservation" ||
+    action === "record_reservation_payment"
+  );
 }
