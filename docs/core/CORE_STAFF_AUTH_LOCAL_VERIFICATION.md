@@ -124,6 +124,16 @@ Verified local checkpoint:
 - The mapped local staff profile is `70000000-0000-0000-0000-000000000001`.
 - `core_audit_log.actor_profile_id` uses that authenticated staff profile ID for at least `approve_application` and `record_reservation_payment`.
 
+Verified staff read-scope checkpoint:
+
+- `owner` active sees the full dashboard.
+- `admin` active sees the full dashboard.
+- `staff` active sees operational dashboard panels only.
+- `staff` active sees owner/admin restriction notes for sensitive panels.
+- `staff` active does not fetch or display financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
+- Role switching was tested with `scripts/set-local-staff-profile-access.sql`.
+- The mapped local profile was restored to `owner` active after verification.
+
 ## Confirm Unauthorized Users Are Blocked
 
 To test an authenticated user without a Core staff profile:
@@ -223,9 +233,10 @@ Expected behavior:
 - Dashboard approval, reservation, deposit/payment, and cancellation actions use the authenticated staff profile as the RPC actor.
 - Per-action role checks are implemented for the current dashboard actions.
 - Approval and payment-recording audit actor attribution has been verified locally.
-- Unauthorized role/status behavior still needs to be manually exercised using local fake data.
+- Owner/admin/staff dashboard read-scope behavior has been manually verified locally.
+- Unauthorized role/status behavior still needs to be manually exercised using local fake data, especially staff cancellation with puppy release.
 - Selected real-data staging remains blocked.
 
 ## Next Recommended Task
 
-Verify unauthorized role behavior, review read authorization beyond `/staff`, then design RLS and selected-real-data staging checks. Do not import selected real data until owner-approved staging boundaries are verified.
+Verify unauthorized role behavior, especially staff cancellation with puppy release, then review real Zoho application fields before staff-visible application details are used with selected real data. Do not import selected real data until owner-approved staging boundaries are verified.

@@ -208,8 +208,10 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Require authenticated active staff context before staff dashboard service-role reads run.
 - [x] Add role-based dashboard read filtering for staff versus owner/admin.
 - [x] Restrict staff users from fetching/seeing financial ledger activity, full audit/activity rows, phone lookup details, and the general event feed.
+- [x] Manually verify owner/admin/staff dashboard read scopes with the local role helper.
+- [x] Restore the local mapped profile to `owner` active after read-scope verification.
 - [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
-- [~] Add read authorization review beyond the protected `/staff` route; broad staff context and initial role filtering are in place, but manual browser verification is still pending.
+- [x] Add read authorization review beyond the protected `/staff` route for the current staff dashboard panels.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -424,14 +426,13 @@ Do not rerun all commands after every small change. Run the relevant validation 
 ## Immediate Next Ordered Tasks
 
 1. [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
-2. [ ] Manually verify owner/admin/staff dashboard read scopes in browser.
-3. [ ] Add role checks for any future financial adjustment, go-home, or kennel actions before exposing them.
-4. [ ] Review real Zoho application fields before staff-visible application details are used with selected real data.
-5. [ ] Design and test RLS before any live client exposure.
-6. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
-7. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
-8. [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
-9. [ ] Prepare production-safe integration and deployment handling.
+2. [ ] Add role checks for any future financial adjustment, go-home, or kennel actions before exposing them.
+3. [ ] Review real Zoho application fields before staff-visible application details are used with selected real data.
+4. [ ] Design and test RLS before any live client exposure.
+5. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.
+6. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
+7. [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
+8. [ ] Prepare production-safe integration and deployment handling.
 
 ## Stop Conditions
 

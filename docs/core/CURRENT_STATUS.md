@@ -343,7 +343,16 @@ Local verification confirms `/login` works, `/staff` loads for the mapped active
 - `approve_application`
 - `record_reservation_payment`
 
-This is not a complete staging/production security boundary yet. Service-role reads are still transitional server-side reads, staff-visible application detail fields still need review against real Zoho content, RLS policy work remains incomplete, and selected-real-data verification remains blocked.
+Role-based read-scope behavior has also been manually verified locally using `scripts/set-local-staff-profile-access.sql`:
+
+- `owner` active sees the full dashboard.
+- `admin` active sees the full dashboard.
+- `staff` active sees the operational dashboard only.
+- `staff` active sees owner/admin restriction notes for sensitive panels.
+- `staff` active does not fetch or display financial ledger activity, full audit/activity, phone lookup safety, or the general event feed.
+- The local profile was restored to `owner` active after verification.
+
+This is not a complete staging/production security boundary yet. Service-role reads are still transitional server-side reads, staff-visible application detail fields still need review against real Zoho content, RLS policy work remains incomplete, and selected-real-data staging remains blocked until scope is planned and approved.
 
 ## Remaining Work Before Staging Or Production
 
@@ -351,7 +360,6 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 - Unauthorized-role verification, especially staff cancellation with puppy release.
 - Future authenticated actor and role checks for any new financial adjustment/go-home/kennel actions.
-- Manual browser verification of owner/admin/staff read scopes.
 - Review of real Zoho application fields before staff-visible application details are used with selected real data.
 - RLS policies and policy tests.
 - Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
@@ -361,4 +369,4 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Verify owner/admin/staff read-scope behavior in browser and review real Zoho application fields before staff-visible application details are used with selected real data. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Review real Zoho application fields before staff-visible application details are used with selected real data, then plan an owner-approved selected-real-data staging scope. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.

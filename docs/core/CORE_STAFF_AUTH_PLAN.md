@@ -53,6 +53,15 @@ Local verification confirms staff login/profile mapping works and `core_audit_lo
 
 `scripts/set-local-staff-profile-access.sql` can be used in local/dev to switch the deterministic mapped staff profile between `owner`, `admin`, `staff`, `active`, `inactive`, and temporarily unmapped states for authorization testing. It does not create Auth users or store passwords.
 
+Manual read-scope verification confirms:
+
+- `owner` active sees the full dashboard.
+- `admin` active sees the full dashboard.
+- `staff` active sees operational panels only.
+- `staff` active sees owner/admin restriction notes for financial ledger activity, full audit/activity, phone lookup safety, and the general event feed.
+- The staff role does not fetch or display those sensitive datasets.
+- The local mapped profile was restored to `owner` active after verification.
+
 ## Route And Access Structure
 
 Recommended route shape:
@@ -135,6 +144,7 @@ Before importing or showing selected real data, all of the following should be t
 - Server-side reads reject unauthenticated users.
 - The staff dashboard read model requires authenticated staff context before service-role reads run.
 - Staff dashboard read filtering prevents staff users from fetching owner/admin-only financial ledger activity, audit/activity rows, phone lookup details, and the general event feed.
+- Owner/admin and staff read-scope behavior has been manually verified locally.
 - Server actions use the real staff profile actor, not a static local/dev actor.
 - Role checks exist before approval, reservation, payment, cancellation, and financial adjustment actions.
 - Email, payment processor, Twilio, document generation, and other live side effects remain off.
@@ -174,9 +184,8 @@ Recommended implementation order:
 Continue the staff authentication boundary from this plan:
 
 1. Verify unauthorized role behavior, especially staff cancellation with puppy release.
-2. Manually verify owner/admin/staff read-scope behavior in browser.
-3. Review real Zoho application fields before exposing application details to staff in selected staging.
-4. Design and test RLS policies.
-5. Prepare selected-real-data staging only after access checks are reviewed.
+2. Review real Zoho application fields before exposing application details to staff in selected staging.
+3. Design and test RLS policies.
+4. Prepare selected-real-data staging only after access checks are reviewed and owner-approved.
 
 Do not import selected real data until those pieces are working and manually verified.
