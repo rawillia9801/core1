@@ -361,7 +361,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 - Unauthorized-role verification, especially staff cancellation with puppy release.
 - Future authenticated actor and role checks for any new financial adjustment/go-home/kennel actions.
 - Review of real Zoho application fields before staff-visible application details are used with selected real data.
-- Owner approval of the selected-real-data staging plan, exact records, exact fields, staging environment, and import method.
+- Owner approval of the selected-real-data staging plan, staging readiness checklist, exact records, exact fields, staging environment, and import method.
 - RLS policies and policy tests.
 - Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
 - A reviewed approach to stronger payment idempotency before processor integration.
@@ -370,7 +370,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Review real Zoho application fields before staff-visible application details are used with selected real data, then owner-approve the exact first staging records and environment described in `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Review real Zoho application fields before staff-visible application details are used with selected real data, then owner-approve the exact first staging records, environment, and gate checklist described in `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md` and `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
 
 ## Selected Real-Data Staging Plan
 
@@ -379,3 +379,11 @@ Review real Zoho application fields before staff-visible application details are
 The plan recommends one or two owner-approved real application records only, with no bulk import, no live Zoho webhook, no payment data, no documents/signatures, no customer portal records, no Twilio/message records, and no live side effects.
 
 No selected real data has been imported yet. Staging import remains blocked until the owner approves the exact records, exact fields, staging environment, import method, and verification checklist.
+
+## Staging Readiness Checklist
+
+`docs/core/CORE_STAGING_READINESS_CHECKLIST.md` now defines the final documentation gate before selected real-data staging.
+
+It covers environment readiness, staff access readiness, action authorization readiness, data scope approval, field sensitivity review, import method readiness, side-effect lockout, post-import verification, rollback, go/no-go approvals, and hard stop conditions.
+
+No selected real data has been imported yet. Staging import remains blocked until the readiness checklist is satisfied and owner-approved.

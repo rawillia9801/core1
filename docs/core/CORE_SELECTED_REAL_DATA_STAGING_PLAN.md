@@ -166,6 +166,8 @@ If anything unexpected appears or any side effect occurs, stop the staging test 
 
 ## Go / No-Go Criteria
 
+Before any import, complete `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`.
+
 Go to the next tiny staging slice only if:
 
 - Owner approved the exact selected records.
@@ -199,3 +201,4 @@ Staging import remains blocked until the owner approves:
 - The staging environment.
 - The import method.
 - The verification checklist.
+- The staging readiness checklist.
