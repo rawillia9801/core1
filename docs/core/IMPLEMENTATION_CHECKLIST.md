@@ -120,7 +120,9 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Zoho application field mapping documentation added.
 - [x] `core_ingest_zoho_application` added for Zoho-shaped payloads.
 - [x] Core-native private application entry plan added: `docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
-- [blocked] Core-native application entry implementation has not started yet.
+- [x] Core-native manual application RPC added: `core_create_application_manual`.
+- [x] Core-native manual application rollback-safe SQL test added.
+- [blocked] Private `/staff/applications/new` UI has not started yet.
 - [x] Zoho API-name intake rollback-safe SQL test added.
 - [x] Zoho report/PDF-label intake compatibility added.
 - [x] Zoho report/PDF-label rollback-safe SQL test added.
@@ -129,7 +131,6 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Endpoint test documented as writing local dev records rather than rolling back.
 - [x] Intake creates buyer, family, application, application sections, event, and audit records.
 - [x] Local-only endpoint verification script added using fake report-label data.
-- [ ] Add Core-native application entry RPC and rollback-safe SQL test.
 - [ ] Add private `/staff/applications/new` owner/admin entry form.
 - [ ] Confirm exact live Zoho webhook/API payload before live connection.
 - [ ] Define failed-intake retry/dead-letter behavior.
@@ -425,6 +426,7 @@ cat supabase/tests/core_create_reservation_write_tool_tests.sql | docker exec -i
 cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_record_financial_adjustment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_create_application_manual_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint

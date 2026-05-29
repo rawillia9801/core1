@@ -124,6 +124,18 @@ Puppy release is explicit. If `p_release_puppy = false`, the linked puppy status
 
 The function writes a `reservation_cancelled` `core_events` row and `cancel_reservation` `core_audit_log` row. It writes `puppy_released` event/audit rows only when the puppy status actually changes.
 
+## Core-Native Application Entry
+
+`core_create_application_manual(...)` is the Core-native owner/admin manual application creation foundation. It exists so future private staff entry can move away from Zoho-shaped intake.
+
+The function creates or updates the buyer, reuses an existing family membership when available, creates a family/member link when needed, creates one `core_applications` row with status `received`, creates grouped `core_application_sections`, and writes `core_events` plus `core_audit_log`.
+
+Only active `owner` and `admin` profiles can call this RPC. Staff-created UI remains a later task at `/staff/applications/new`; public `/apply` remains deferred.
+
+This function does not approve applications, create reservations, collect payments, create ledger rows, queue or send email, create documents, invite portal users, or write back to Zoho.
+
+Zoho-shaped `core_ingest_zoho_application(...)` remains compatibility/import/dry-run support only.
+
 ## Go-Home Cardinality
 
 - A buyer or family may have many puppies and many reservations.

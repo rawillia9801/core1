@@ -139,7 +139,7 @@ Money must not be collected through this workflow. Payment preference is text co
 
 ## Recommended Database RPC
 
-Add a new Core-native database RPC later rather than using the Zoho-shaped function for the long-term path.
+The Core-native database RPC now exists for the private staff/owner path rather than using the Zoho-shaped function for the long-term path.
 
 Recommended name:
 
@@ -174,7 +174,7 @@ public.core_create_application_manual(
 )
 ```
 
-Expected behavior:
+Implemented behavior:
 
 - Validate required fields.
 - Validate actor profile for staff-created entry.
@@ -185,6 +185,7 @@ Expected behavior:
 - Write `core_events`.
 - Write `core_audit_log`.
 - Return `buyer_id`, `family_id`, `application_id`, `status`, `section_count`, `event_id`, and `audit_log_id`.
+- Reuse an existing buyer by normalized email or phone when a safe match already exists.
 
 The function should not:
 
@@ -259,18 +260,23 @@ Resend or another provider should not be connected as part of Core-native applic
 
 ## Tests Needed Later
 
-Add tests when implementation begins:
+The first rollback-safe SQL test exists at:
 
-- Rollback-safe SQL test for `core_create_application_manual`.
+```text
+supabase/tests/core_create_application_manual_tests.sql
+```
+
+It validates:
+
 - Required field validation.
 - Email-only contact path.
-- Phone-only contact path.
 - Existing buyer/family matching behavior.
 - Section count and section content.
 - Event and audit creation.
 - Invalid actor rejection.
 - Terms acknowledgement rejection.
-- No email/notification side effect unless explicitly enabled in a later task.
+- Owner/admin-only actor restriction.
+- No email/notification side effect.
 - No Zoho dependency.
 
 Manual or app-level checklist:
@@ -286,7 +292,7 @@ Manual or app-level checklist:
 
 Recommended order:
 
-1. Add database RPC migration and rollback-safe SQL test for `core_create_application_manual`.
+1. Add database RPC migration and rollback-safe SQL test for `core_create_application_manual`. Done.
 2. Add private `/staff/applications/new` form and server action.
 3. Confirm read visibility in the existing staff dashboard.
 4. Design notification queue behavior.
@@ -312,8 +318,8 @@ The following remain blocked until later explicit tasks:
 
 ## Current Status
 
-This is a design plan only.
+The database RPC foundation is implemented and tested.
 
-No Core-native application entry implementation has started.
+No private `/staff/applications/new` UI or server action has been built yet.
 
 Zoho-shaped intake remains available for compatibility, import, and dry-run support, but it is not the preferred future dependency for new Core-native application intake.

@@ -40,6 +40,12 @@ Any future write affecting `core_financial_ledger` must audit both `entry_type` 
 
 Financial correction work must remain additive. Prior ledger rows are not edited or deleted. If an adjustment relates to a prior ledger row, the controlled function records that relation in metadata for local/development use; stronger first-class reconciliation fields and indexes are deferred until live payment integration design.
 
+### Core-Native Application Entry Audit Context
+
+`core_create_application_manual(...)` is the controlled Core-native owner/admin application creation foundation. It creates or reuses buyer/family context, creates a received application, stores grouped application section responses, writes an `application_created_manual` operational event, and writes a `create_application_manual` audit row.
+
+The RPC does not send email, queue notifications, create reservations, create payments, create documents, invite portal users, or write back to Zoho. Zoho-shaped intake remains compatibility/import support only.
+
 ### Reservation Cancellation Audit Context
 
 `core_cancel_reservation(...)` is the controlled Core V1 cancellation foundation. It changes an eligible `reserved` or `pending` reservation to `cancelled`, records a required cancellation reason, and creates both a `reservation_cancelled` operational event and a `cancel_reservation` audit entry.

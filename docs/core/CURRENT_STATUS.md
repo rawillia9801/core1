@@ -119,7 +119,15 @@ Zoho-shaped intake is now treated as compatibility, import, and dry-run support 
 
 The plan recommends a future protected private staff route at `/staff/applications/new`, initially owner/admin only, backed by a new Core-native application RPC rather than continued expansion of `core_ingest_zoho_application`.
 
-No Core-native application entry implementation has started yet. Email sending remains blocked until notification queue and preview behavior are designed and approved.
+The Core-native manual application database RPC now exists:
+
+```text
+public.core_create_application_manual(...)
+```
+
+It creates or reuses buyer/family context, creates a received application, stores grouped application sections, and writes event/audit records without Zoho, email, payments, documents, reservations, or portal invitations.
+
+No private `/staff/applications/new` UI has been built yet. Email sending remains blocked until notification queue and preview behavior are designed and approved.
 
 ### Guarded Local/Development Endpoint
 
