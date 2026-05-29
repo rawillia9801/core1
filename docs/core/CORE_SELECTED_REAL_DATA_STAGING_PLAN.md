@@ -84,6 +84,14 @@ Preferred implementation path:
 - Keep import as a controlled one-time staging operation.
 - Write audit/event rows only as expected by the intake path.
 
+Dry-run helper:
+
+```bash
+./scripts/dry-run-selected-application-intake.sh path/to/selected-payload.json
+```
+
+The helper reads a local JSON payload file, calls the existing `core_ingest_zoho_application` database function inside a transaction, prints the buyer/family/application IDs, status, section count, event ID, and audit ID that would be created, and rolls back by default. Do not commit selected real payload files.
+
 Do not:
 
 - Load real records through normal migrations.
