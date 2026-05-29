@@ -202,7 +202,9 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Add per-action server-side authorization checks for current dashboard actions.
 - [x] Replace static local/development actor env usage with authenticated staff profile actors for approval, reservation creation, deposit/payment recording, and cancellation.
 - [x] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles for staff route access.
-- [ ] Manually verify event/audit actor IDs after authenticated dashboard writes.
+- [x] Locally verify staff login and active profile mapping.
+- [x] Locally verify `core_audit_log.actor_profile_id` uses the authenticated staff profile for approval and payment recording.
+- [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
 - [ ] Add read authorization review beyond the protected `/staff` route.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
@@ -417,8 +419,8 @@ Do not rerun all commands after every small change. Run the relevant validation 
 
 ## Immediate Next Ordered Tasks
 
-1. [ ] Manually verify authenticated dashboard actions and audit/event actor IDs.
-2. [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
+1. [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
+2. [ ] Review read authorization beyond the protected `/staff` route.
 3. [ ] Add role checks for any future financial adjustment, go-home, or kennel actions before exposing them.
 4. [ ] Design and test RLS before any live client exposure.
 5. [ ] Prepare a selected-real-data staging plan only after security boundaries are approved.

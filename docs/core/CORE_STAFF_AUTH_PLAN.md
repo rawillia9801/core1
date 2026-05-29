@@ -48,6 +48,8 @@ Because RLS policies are not enabled yet, `requireStaffProfile()` uses the servi
 
 The existing approval, reservation, deposit/payment, and cancellation actions now pass the authenticated staff profile ID to controlled RPCs. The service role is still used server-side for transitional RPC/read access until RLS and production authorization policies exist.
 
+Local verification confirms staff login/profile mapping works and `core_audit_log.actor_profile_id` uses the authenticated staff profile ID `70000000-0000-0000-0000-000000000001` for at least approval and payment recording actions.
+
 ## Route And Access Structure
 
 Recommended route shape:
@@ -165,8 +167,8 @@ Recommended implementation order:
 
 Continue the staff authentication boundary from this plan:
 
-1. Manually verify unauthenticated, unauthorized, and authorized staff paths.
-2. Verify audit/event actor IDs are the authenticated staff profile IDs.
+1. Verify unauthorized role behavior, especially staff cancellation with puppy release.
+2. Review read authorization beyond the protected `/staff` route.
 3. Design and test RLS policies.
 4. Prepare selected-real-data staging only after access checks are reviewed.
 

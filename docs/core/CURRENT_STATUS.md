@@ -336,13 +336,18 @@ The first staff auth foundation is implemented:
 
 Dashboard approval, reservation creation, deposit/payment recording, and reservation cancellation actions now require the authenticated staff session and pass the mapped `core_profiles.id` as the RPC actor. Initial role checks are in place: owner/admin can perform all current dashboard actions; staff can approve, create reservations, and record deposits/payments, but cannot release a puppy during cancellation.
 
-This is not a complete staging/production security boundary yet. RLS policy work, broader read authorization review, manual role-path verification, and selected-real-data verification remain incomplete.
+Local verification confirms `/login` works, `/staff` loads for the mapped active staff profile, and `core_audit_log` now records `actor_profile_id = 70000000-0000-0000-0000-000000000001` for at least:
+
+- `approve_application`
+- `record_reservation_payment`
+
+This is not a complete staging/production security boundary yet. RLS policy work, broader read authorization review, unauthorized-role verification, and selected-real-data verification remain incomplete.
 
 ## Remaining Work Before Staging Or Production
 
 Before any staff-facing staging or production use, Core still needs deliberate security and workflow decisions:
 
-- Manual verification that authenticated dashboard actions write audit/event actor IDs from the signed-in staff profile.
+- Unauthorized-role verification, especially staff cancellation with puppy release.
 - Future authenticated actor and role checks for any new financial adjustment/go-home/kennel actions.
 - Broader read authorization review.
 - RLS policies and policy tests.
@@ -353,4 +358,4 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Manually verify authenticated dashboard actions end to end, including audit/event actor IDs and unauthorized role behavior. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Verify unauthorized role behavior and review read authorization beyond the protected `/staff` route. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.

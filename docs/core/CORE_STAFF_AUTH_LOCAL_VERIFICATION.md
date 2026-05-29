@@ -117,6 +117,13 @@ Expected visible indicators:
 - Dashboard data renders below the banner.
 - The page still warns that selected real data remains blocked until action actor mapping and authorization are verified.
 
+Verified local checkpoint:
+
+- `/login` works.
+- `/staff` loads for the mapped active staff profile.
+- The mapped local staff profile is `70000000-0000-0000-0000-000000000001`.
+- `core_audit_log.actor_profile_id` uses that authenticated staff profile ID for at least `approve_application` and `record_reservation_payment`.
+
 ## Confirm Unauthorized Users Are Blocked
 
 To test an authenticated user without a Core staff profile:
@@ -138,8 +145,9 @@ Expected result:
 - Staff profile lookup uses the service role server-side as a transitional bridge.
 - Dashboard approval, reservation, deposit/payment, and cancellation actions use the authenticated staff profile as the RPC actor.
 - Per-action role checks are implemented for the current dashboard actions.
+- Approval and payment-recording audit actor attribution has been verified locally.
 - Selected real-data staging remains blocked.
 
 ## Next Recommended Task
 
-Manually verify the authenticated staff actions, then design RLS and selected-real-data staging checks. Do not import selected real data until owner-approved staging boundaries are verified.
+Verify unauthorized role behavior, review read authorization beyond `/staff`, then design RLS and selected-real-data staging checks. Do not import selected real data until owner-approved staging boundaries are verified.
