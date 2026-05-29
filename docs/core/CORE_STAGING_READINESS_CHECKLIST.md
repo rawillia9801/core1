@@ -58,6 +58,7 @@ Do not import selected real data until every required item below is satisfied or
 
 ## Field Sensitivity Review
 
+- [ ] Field review template is completed: `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md`.
 - [ ] Application fields are reviewed before import.
 - [ ] Staff-visible fields are approved.
 - [ ] Owner/admin-only fields are identified.

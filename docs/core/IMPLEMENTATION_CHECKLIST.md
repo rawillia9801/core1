@@ -233,12 +233,13 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Add selected real-data staging plan: `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`.
 - [x] Add staging readiness checklist: `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`.
 - [x] Add first staging environment setup plan: `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`.
+- [x] Add selected real-data field review template: `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md`.
 - [x] Decide first real data should be one or two owner-approved real application records only.
 - [ ] Export one or a few real Zoho application records safely.
-- [ ] Redact or handle sensitive fields during development review.
+- [blocked] Redact or handle sensitive fields during development review using the field review template before any import.
 - [ ] Validate field shapes against `core_ingest_zoho_application`.
 - [ ] Run local/dev dry-run import.
-- [blocked] Run staging import with owner-approved limited records only after exact records, fields, staging environment plan, environment, import method, verification checklist, readiness checklist, and rollback plan are approved.
+- [blocked] Run staging import with owner-approved limited records only after exact records, field review, fields, staging environment plan, environment, import method, verification checklist, readiness checklist, and rollback plan are approved.
 - [ ] Verify received applications display correctly in staging.
 - [ ] Verify application details display correctly in staging.
 - [ ] Verify no emails/messages/payments are triggered by import.
@@ -432,7 +433,7 @@ Do not rerun all commands after every small change. Run the relevant validation 
 2. [ ] Add role checks for any future financial adjustment, go-home, or kennel actions before exposing them.
 3. [ ] Review real Zoho application fields before staff-visible application details are used with selected real data.
 4. [ ] Design and test RLS before any live client exposure.
-5. [ ] Owner-approve exact selected-real-data records, fields, first staging environment plan, staging environment, import method, readiness checklist, verification checklist, and rollback plan.
+5. [ ] Owner-approve exact selected-real-data records, field review, fields, first staging environment plan, staging environment, import method, readiness checklist, verification checklist, and rollback plan.
 6. [ ] Define live payment processor reconciliation and idempotency before payment processor connection.
 7. [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
 8. [ ] Prepare production-safe integration and deployment handling.

@@ -47,6 +47,8 @@ Every selected record must be approved by the owner before staging import.
 
 ## Redaction And Sensitivity Review
 
+Use `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` before importing selected records.
+
 Before importing selected records, review the exported application fields.
 
 Classify fields into:
@@ -198,6 +200,7 @@ Staging import remains blocked until the owner approves:
 
 - The exact records.
 - The exact fields.
+- The completed field review.
 - The staging environment.
 - The import method.
 - The verification checklist.

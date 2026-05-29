@@ -361,7 +361,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 - Unauthorized-role verification, especially staff cancellation with puppy release.
 - Future authenticated actor and role checks for any new financial adjustment/go-home/kennel actions.
 - Review of real Zoho application fields before staff-visible application details are used with selected real data.
-- Owner approval of the selected-real-data staging plan, first staging environment plan, staging readiness checklist, exact records, exact fields, staging environment, and import method.
+- Owner approval of the selected-real-data staging plan, first staging environment plan, staging readiness checklist, selected real-data field review, exact records, exact fields, staging environment, and import method.
 - RLS policies and policy tests.
 - Financial adjustment/refund/fee/chargeback dashboard controls, after authorization boundaries are designed.
 - A reviewed approach to stronger payment idempotency before processor integration.
@@ -370,7 +370,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Review real Zoho application fields before staff-visible application details are used with selected real data, then owner-approve the exact first staging records, environment, and gate checklist described in `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`, `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`, and `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Review real Zoho application fields with `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` before staff-visible application details are used with selected real data, then owner-approve the exact first staging records, environment, and gate checklist described in `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`, `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`, and `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
 
 ## Selected Real-Data Staging Plan
 
@@ -395,3 +395,11 @@ No selected real data has been imported yet. Staging import remains blocked unti
 The plan recommends a protected app hosting environment, such as Vercel staging/preview, with a separate Supabase project/database, Supabase Auth enabled, mapped staff profiles, environment variables stored outside the repository, and all live integrations disabled.
 
 No staging deployment has happened yet. No selected real data has been imported yet. Real-data import remains blocked until the staging environment checklist is satisfied and owner-approved.
+
+## Selected Real-Data Field Review Template
+
+`docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` now defines the field-by-field review process for the first selected real application records.
+
+The template covers source field meaning, sensitivity level, import/exclude/defer/transform decisions, staff visibility, owner/admin-only visibility, redaction/transformation needs, and owner approval.
+
+No selected real data has been imported yet. Real-data import remains blocked until exact records and exact fields are reviewed and owner-approved.
