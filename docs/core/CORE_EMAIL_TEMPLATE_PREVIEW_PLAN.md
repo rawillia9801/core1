@@ -50,19 +50,13 @@ Template versioning can remain lightweight at first. If templates begin changing
 
 ## Preview Workflow
 
-Future preview UI should be owner/admin only, for example:
+The first preview UI now exists and is owner/admin only:
 
 ```text
 /staff/notifications
 ```
 
-or:
-
-```text
-/staff/email-preview
-```
-
-The first preview surface should:
+The preview surface:
 
 - Show queued notifications.
 - Show notification type and status.
@@ -141,7 +135,7 @@ Application, approval, reservation, payment, cancellation, go-home, and document
 
 1. Confirm queue-only notification RPC exists. Done.
 2. Add this template and preview plan. Done.
-3. Add owner/admin notification preview UI with no sending.
+3. Add owner/admin notification preview UI with no sending. Done.
 4. Add disabled/preview provider behavior.
 5. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
 6. Add test-send-to-owner only.

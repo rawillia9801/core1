@@ -461,12 +461,20 @@ export default async function Home({
                 >
                   <div className="space-y-3">
                     {staff.role === "owner" || staff.role === "admin" ? (
-                      <Link
-                        href="/staff/applications/new"
-                        className="inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
-                      >
-                        New Core Application
-                      </Link>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href="/staff/applications/new"
+                          className="inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
+                        >
+                          New Core Application
+                        </Link>
+                        <Link
+                          href="/staff/notifications"
+                          className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
+                        >
+                          Notification Preview
+                        </Link>
+                      </div>
                     ) : null}
                     <ApplicationEntryResult outcome={application} />
                     <ApprovalResult outcome={approval} />

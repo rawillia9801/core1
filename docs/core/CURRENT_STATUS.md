@@ -161,6 +161,14 @@ This is queue-only. No Resend or email provider is connected, no provider packag
 
 The plan keeps email sending blocked. It recommends owner/admin preview first, then disabled/preview provider behavior, then Hostinger SMTP configuration later with sending disabled by default, then test-send-to-owner only before any selected customer sends.
 
+The first owner/admin notification preview page now exists:
+
+```text
+/staff/notifications
+```
+
+It reads queued `core_notifications` records server-side, summarizes recipient/context/template/subject/body preview fields, and provides no send buttons or provider settings. Staff-role users are blocked from this preview page.
+
 ### Guarded Local/Development Endpoint
 
 A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.
@@ -420,7 +428,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Continue with either the owner/admin notification preview UI or the next controlled go-home workflow step. Do not prioritize live Zoho integration now that Core-native private application entry is proven locally. Do not use production data, connect Hostinger SMTP, connect Resend/email, connect a payment processor, or expose customer/staff workflows until the staging and access-control gates are satisfied.
+Continue with either disabled/preview email provider behavior or the next controlled go-home workflow step. Do not prioritize live Zoho integration now that Core-native private application entry is proven locally. Do not use production data, connect Hostinger SMTP, connect Resend/email, connect a payment processor, or expose customer/staff workflows until the staging and access-control gates are satisfied.
 
 ## Selected Real-Data Staging Plan
 
