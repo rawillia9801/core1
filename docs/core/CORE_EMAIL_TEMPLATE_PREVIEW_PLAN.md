@@ -18,8 +18,10 @@ Core already has communication foundations:
 - Core-native staff application entry now queues `application_received` preview records when the applicant email is present.
 - Local verification confirmed the queued preview appears in `/staff/notifications` and `sent_at` remains null.
 - Initial email template seed records now exist as preview-only draft records for the approved transactional template keys.
+- The owner/admin notification preview page now shows seeded email templates alongside queued notification previews.
+- A disabled/preview email provider foundation now exists in `src/lib/email/provider.ts`.
 
-Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, or delivery-attempt table is connected.
+Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, delivery-attempt table, or send button is connected.
 
 ## Template Keys
 
@@ -77,6 +79,7 @@ The first preview UI now exists and is owner/admin only:
 
 The preview surface:
 
+- Show seeded email templates.
 - Show queued notifications.
 - Show notification type and status.
 - Show recipient email and any staging override recipient.
@@ -89,6 +92,32 @@ The preview surface:
 - Provide no send button initially.
 
 Preview should prove that templates and merge data are understandable before any provider can deliver email.
+
+## Disabled And Preview Provider Foundation
+
+The internal provider module now exists at:
+
+```text
+src/lib/email/provider.ts
+```
+
+This is a safety foundation only. It defines the provider boundary and refuses delivery by default.
+
+Supported provider names are modeled as:
+
+- `disabled`
+- `preview`
+- `smtp`
+- `resend`
+
+Current behavior:
+
+- `disabled` refuses delivery and returns a blocked result.
+- `preview` renders/returns a preview result without sending.
+- `smtp` is recognized but blocked because SMTP delivery is not implemented or enabled.
+- `resend` is recognized but blocked because Resend delivery is not implemented or enabled.
+
+The provider foundation does not read or require SMTP credentials, does not import provider packages, does not create delivery attempts, does not add a send worker, and does not update notification status.
 
 ## Safety Rules
 
@@ -110,7 +139,7 @@ Core email safety rules should be conservative:
 
 ## Hostinger SMTP Later
 
-Hostinger SMTP can be the first real delivery provider, but only behind a provider abstraction.
+Hostinger SMTP can be the first real delivery provider, but only behind the provider abstraction.
 
 Future SMTP configuration should use environment variables only. Do not commit or document values.
 
@@ -139,14 +168,14 @@ SMTP sending should not be added until preview, approval, staging override, and 
 
 ## Provider Abstraction
 
-Future provider code should use a small internal interface instead of spreading SMTP or Resend logic across actions.
+Future provider code should use the small internal interface instead of spreading SMTP or Resend logic across actions.
 
 Recommended providers:
 
-- `disabled`: refuses all sends and is the default safety provider.
-- `preview`: renders and logs preview output without delivery.
-- `smtp`: sends through Hostinger SMTP or another SMTP server when explicitly enabled.
-- `resend`: optional later provider if Core outgrows SMTP or needs better delivery tooling.
+- `disabled`: refuses all sends and is the default safety provider. Foundation added.
+- `preview`: renders and logs/previews output without delivery. Foundation added.
+- `smtp`: sends through Hostinger SMTP or another SMTP server when explicitly enabled. Blocked.
+- `resend`: optional later provider if Core outgrows SMTP or needs better delivery tooling. Blocked.
 
 Application, approval, reservation, payment, cancellation, go-home, and document workflows should queue notifications first. They should not send directly from form actions.
 
@@ -156,11 +185,12 @@ Application, approval, reservation, payment, cancellation, go-home, and document
 2. Add this template and preview plan. Done.
 3. Add owner/admin notification preview UI with no sending. Done.
 4. Add initial draft/preview-only template seed foundation. Done.
-5. Add disabled/preview provider behavior.
-6. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
-7. Add test-send-to-owner only.
-8. Add send-attempt/delivery logging if the current schema is not enough.
-9. Enable selected transactional sends one workflow at a time after owner approval.
+5. Show seeded templates alongside queued previews. Done.
+6. Add disabled/preview provider behavior. Done.
+7. Add send-attempt/delivery logging design and/or table if needed before any delivery.
+8. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
+9. Add test-send-to-owner only.
+10. Enable selected transactional sends one workflow at a time after owner approval.
 
 ## Still Blocked
 
