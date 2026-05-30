@@ -127,7 +127,9 @@ public.core_create_application_manual(...)
 
 It creates or reuses buyer/family context, creates a received application, stores grouped application sections, and writes event/audit records without Zoho, email, payments, documents, reservations, or portal invitations.
 
-No private `/staff/applications/new` UI has been built yet. Email sending remains blocked until notification queue and preview behavior are designed and approved.
+The protected private route `/staff/applications/new` now exists for owner/admin users. It validates form input server-side, calls `core_create_application_manual`, passes the authenticated staff profile ID as actor, redirects back to `/staff?application=created` on success, and lets the existing dashboard read model show the new received application.
+
+Public `/apply` has not been built. Email sending remains blocked until notification queue and preview behavior are designed and approved.
 
 ### Guarded Local/Development Endpoint
 

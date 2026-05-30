@@ -11,7 +11,7 @@ This plan defines the first Core-native application entry path:
 - Keep Zoho-shaped intake as compatibility, import, and dry-run support.
 - Do not connect email sending, live Zoho, customer portal access, documents, payments, or public intake yet.
 
-The first recommended route is:
+The first private route is implemented:
 
 ```text
 /staff/applications/new
@@ -65,7 +65,7 @@ Do not keep extending `core_ingest_zoho_application` as the main future intake p
 
 ## Recommended First Route
 
-Create a protected staff route later:
+The protected staff route exists:
 
 ```text
 /staff/applications/new
@@ -81,7 +81,7 @@ Initial access:
 - No Zoho writeback.
 - No documents, signatures, payments, or reservations.
 
-This route should create a received application that can then flow through the existing review, approval, reservation, payment, cancellation, activity, and read-scope workflows.
+This route creates a received application that can then flow through the existing review, approval, reservation, payment, cancellation, activity, and read-scope workflows.
 
 ## Minimum Viable Application Fields
 
@@ -293,8 +293,8 @@ Manual or app-level checklist:
 Recommended order:
 
 1. Add database RPC migration and rollback-safe SQL test for `core_create_application_manual`. Done.
-2. Add private `/staff/applications/new` form and server action.
-3. Confirm read visibility in the existing staff dashboard.
+2. Add private `/staff/applications/new` form and server action. Done.
+3. Confirm read visibility in the existing staff dashboard. Done for the route/link/read path; browser workflow verification remains local/manual.
 4. Design notification queue behavior.
 5. Add local/staging email preview only.
 6. Add public `/apply` later.
@@ -320,6 +320,6 @@ The following remain blocked until later explicit tasks:
 
 The database RPC foundation is implemented and tested.
 
-No private `/staff/applications/new` UI or server action has been built yet.
+The private `/staff/applications/new` UI and server action are implemented for owner/admin staff users. It calls `core_create_application_manual`, redirects back to `/staff?application=created` on success, and does not send email, queue notifications, call Zoho, create payments, create documents, or create portal access.
 
 Zoho-shaped intake remains available for compatibility, import, and dry-run support, but it is not the preferred future dependency for new Core-native application intake.

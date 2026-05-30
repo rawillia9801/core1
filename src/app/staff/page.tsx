@@ -8,6 +8,7 @@ export default async function StaffPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    application?: string;
     approval?: string;
     reservation?: string;
     payment?: string;

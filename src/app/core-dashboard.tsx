@@ -5,6 +5,7 @@ import {
   recordReservationPayment,
 } from "./application-actions";
 import { getDashboardData } from "./dashboard-data";
+import Link from "next/link";
 import type { StaffProfile } from "@/lib/staff-auth";
 
 export const dynamic = "force-dynamic";
@@ -212,6 +213,34 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
   return null;
 }
 
+function ApplicationEntryResult({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "created") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Core-native application created. No email was sent and no Zoho writeback occurred.
+      </p>
+    );
+  }
+
+  if (outcome === "unauthorized") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Manual application entry is restricted to owner/admin.
+      </p>
+    );
+  }
+
+  if (outcome === "error") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Manual application creation failed. Check local server logs for details.
+      </p>
+    );
+  }
+
+  return null;
+}
+
 function CancellationResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "success") {
     return (
@@ -268,11 +297,17 @@ export default async function Home({
   searchParams,
   staff,
 }: {
-  searchParams: Promise<{ approval?: string; reservation?: string; payment?: string; cancellation?: string }>;
+  searchParams: Promise<{
+    application?: string;
+    approval?: string;
+    reservation?: string;
+    payment?: string;
+    cancellation?: string;
+  }>;
   staff: StaffProfile;
 }) {
   const dashboard = await getDashboardData(staff);
-  const { approval, reservation, payment, cancellation } = await searchParams;
+  const { application, approval, reservation, payment, cancellation } = await searchParams;
   const latestApplicationReference = dashboard.applicationSections[0]?.applicationReference;
 
   return (
@@ -422,9 +457,18 @@ export default async function Home({
               <div className="space-y-6">
                 <SectionCard
                   title="Received Applications"
-                  description="Latest local Core applications imported from guarded intake or smoke data."
+                  description="Latest local Core applications from Core-native entry, guarded intake, or smoke data."
                 >
                   <div className="space-y-3">
+                    {staff.role === "owner" || staff.role === "admin" ? (
+                      <Link
+                        href="/staff/applications/new"
+                        className="inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
+                      >
+                        New Core Application
+                      </Link>
+                    ) : null}
+                    <ApplicationEntryResult outcome={application} />
                     <ApprovalResult outcome={approval} />
                     <ReservationResult outcome={reservation} />
                     {dashboard.applications.length > 0 ? (

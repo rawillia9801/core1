@@ -122,7 +122,9 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Core-native private application entry plan added: `docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
 - [x] Core-native manual application RPC added: `core_create_application_manual`.
 - [x] Core-native manual application rollback-safe SQL test added.
-- [blocked] Private `/staff/applications/new` UI has not started yet.
+- [x] Private `/staff/applications/new` owner/admin entry form added.
+- [x] Private manual application server action calls `core_create_application_manual`.
+- [x] Manual application entry sends no email, queues no notification, and performs no Zoho writeback.
 - [x] Zoho API-name intake rollback-safe SQL test added.
 - [x] Zoho report/PDF-label intake compatibility added.
 - [x] Zoho report/PDF-label rollback-safe SQL test added.
@@ -131,7 +133,6 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Endpoint test documented as writing local dev records rather than rolling back.
 - [x] Intake creates buyer, family, application, application sections, event, and audit records.
 - [x] Local-only endpoint verification script added using fake report-label data.
-- [ ] Add private `/staff/applications/new` owner/admin entry form.
 - [ ] Confirm exact live Zoho webhook/API payload before live connection.
 - [ ] Define failed-intake retry/dead-letter behavior.
 - [ ] Define duplicate application handling for repeated Zoho submissions.
