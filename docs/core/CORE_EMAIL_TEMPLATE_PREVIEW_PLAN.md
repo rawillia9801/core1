@@ -17,12 +17,13 @@ Core already has communication foundations:
 - Queueing writes `core_events` and `core_audit_log`.
 - Core-native staff application entry now queues `application_received` preview records when the applicant email is present.
 - Local verification confirmed the queued preview appears in `/staff/notifications` and `sent_at` remains null.
+- Initial email template seed records now exist as preview-only draft records for the approved transactional template keys.
 
 Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, or delivery-attempt table is connected.
 
 ## Template Keys
 
-Initial transactional template keys should align with the queue allowlist:
+Initial transactional template keys align with the queue allowlist:
 
 - `application_received`
 - `application_approved`
@@ -36,16 +37,32 @@ Initial transactional template keys should align with the queue allowlist:
 
 These keys should stay transactional and operational. Marketing-style emails require separate consent, preference, and unsubscribe planning.
 
+## Template Seed Foundation
+
+The migration `20260526290000_core_email_template_seed.sql` seeds initial `email` channel template records for the template keys above.
+
+These seeded templates are intentionally conservative:
+
+- `status = 'draft'`
+- `metadata.preview_only = true`
+- `metadata.send_enabled = false`
+- `metadata.provider_connected = false`
+- `metadata.owner_admin_approval_required = true`
+
+The seed foundation does not connect a provider, send email, approve customer delivery, or create send attempts. It only provides reusable template records that can later be rendered and previewed.
+
+The rollback-safe test `core_email_template_seed_tests.sql` verifies that seeded templates exist, remain draft/preview-only/send-disabled/provider-disconnected, include subject/body text, and that the cancellation template includes refund-safety language.
+
 ## Template Fields
 
-Templates should include, or continue to model, at least:
+Templates include, or continue to model, at least:
 
 - `template_key`
 - `channel`
 - `subject_template`
 - `body_template`
 - active or draft status
-- owner/admin approval status
+- owner/admin approval status through metadata for now
 - version metadata if needed later
 
 Template versioning can remain lightweight at first. If templates begin changing frequently or audited customer communication becomes important, add explicit immutable versions later rather than overwriting historical send context.
@@ -138,11 +155,12 @@ Application, approval, reservation, payment, cancellation, go-home, and document
 1. Confirm queue-only notification RPC exists. Done.
 2. Add this template and preview plan. Done.
 3. Add owner/admin notification preview UI with no sending. Done.
-4. Add disabled/preview provider behavior.
-5. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
-6. Add test-send-to-owner only.
-7. Add send-attempt/delivery logging if the current schema is not enough.
-8. Enable selected transactional sends one workflow at a time after owner approval.
+4. Add initial draft/preview-only template seed foundation. Done.
+5. Add disabled/preview provider behavior.
+6. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
+7. Add test-send-to-owner only.
+8. Add send-attempt/delivery logging if the current schema is not enough.
+9. Enable selected transactional sends one workflow at a time after owner approval.
 
 ## Still Blocked
 
@@ -152,7 +170,7 @@ The following remain blocked until later explicit tasks:
 - SMTP credentials.
 - Resend or any other email provider package.
 - Customer email sending.
-- Automatic action-triggered emails.
+- Automatic action-triggered sends.
 - Staging sends without override recipient.
 - Payment emails before receipt and reconciliation language is approved.
 - Cancellation emails that imply refund.
