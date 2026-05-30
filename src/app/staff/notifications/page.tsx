@@ -30,6 +30,27 @@ type MessageTemplateRow = {
   updated_at: string | null;
 };
 
+type DeliveryAttemptRow = {
+  id: string;
+  notification_id: string | null;
+  template_id: string | null;
+  provider: string | null;
+  channel: string | null;
+  status: string | null;
+  recipient_email: string | null;
+  recipient_phone: string | null;
+  subject: string | null;
+  idempotency_key: string | null;
+  external_message_id: string | null;
+  attempt_number: number | null;
+  attempted_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+  response_payload: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+};
+
 type NotificationPreview = {
   id: string;
   notificationType: string;
@@ -66,6 +87,27 @@ type TemplatePreview = {
   providerConnected: string;
   approvalRequired: string;
   updatedAt: string;
+};
+
+type DeliveryAttemptPreview = {
+  id: string;
+  notificationId: string;
+  templateId: string;
+  provider: string;
+  channel: string;
+  status: string;
+  recipientEmail: string;
+  recipientPhone: string;
+  subject: string;
+  idempotencyKey: string;
+  externalMessageId: string;
+  attemptNumber: string;
+  attemptedAt: string;
+  completedAt: string;
+  errorMessage: string;
+  sent: string;
+  metadataSummary: string[];
+  createdAt: string;
 };
 
 const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -182,6 +224,23 @@ function metadataSummary(payload: Record<string, unknown> | null) {
     .map(([key, value]) => `${key}: ${String(value)}`);
 }
 
+function flatMetadataSummary(metadata: Record<string, unknown> | null) {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return [];
+  }
+
+  return Object.entries(metadata)
+    .filter(([, value]) => {
+      return (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      );
+    })
+    .slice(0, 8)
+    .map(([key, value]) => `${key}: ${String(value)}`);
+}
+
 function templateMetadataSummary(metadata: Record<string, unknown> | null) {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
     return [];
@@ -212,6 +271,14 @@ function mergeFieldsSummary(metadata: Record<string, unknown> | null) {
   return fields.length > 0 ? fields.join(", ") : "Not listed";
 }
 
+function sentSummary(responsePayload: Record<string, unknown> | null) {
+  if (!responsePayload || typeof responsePayload !== "object") {
+    return "false";
+  }
+
+  return safeFlag(responsePayload.sent);
+}
+
 function toTemplatePreview(template: MessageTemplateRow): TemplatePreview {
   const metadata = template.metadata ?? {};
 
@@ -232,6 +299,29 @@ function toTemplatePreview(template: MessageTemplateRow): TemplatePreview {
     providerConnected: safeFlag(metadata.provider_connected),
     approvalRequired: safeFlag(metadata.owner_admin_approval_required),
     updatedAt: formatDateTime(template.updated_at ?? template.created_at),
+  };
+}
+
+function toAttemptPreview(attempt: DeliveryAttemptRow): DeliveryAttemptPreview {
+  return {
+    id: attempt.id,
+    notificationId: shortId(attempt.notification_id),
+    templateId: shortId(attempt.template_id),
+    provider: attempt.provider || "unknown",
+    channel: attempt.channel || "unknown",
+    status: attempt.status || "unknown",
+    recipientEmail: attempt.recipient_email || "Not provided",
+    recipientPhone: attempt.recipient_phone || "Not provided",
+    subject: clipped(attempt.subject, 240),
+    idempotencyKey: attempt.idempotency_key || "Not provided",
+    externalMessageId: attempt.external_message_id || "Not provided",
+    attemptNumber: String(attempt.attempt_number ?? "Not set"),
+    attemptedAt: formatDateTime(attempt.attempted_at),
+    completedAt: formatDateTime(attempt.completed_at),
+    errorMessage: attempt.error_message || "None",
+    sent: sentSummary(attempt.response_payload),
+    metadataSummary: flatMetadataSummary(attempt.metadata),
+    createdAt: formatDateTime(attempt.created_at),
   };
 }
 
@@ -278,6 +368,7 @@ async function getNotificationPreviews() {
     return {
       previews: [] as NotificationPreview[],
       templates: [] as TemplatePreview[],
+      attempts: [] as DeliveryAttemptPreview[],
       warning:
         "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Notification previews require server-side local/staging configuration.",
     };
@@ -306,6 +397,17 @@ async function getNotificationPreviews() {
       channel: "eq.email",
       order: "template_key.asc",
       limit: "50",
+    },
+  );
+  const deliveryAttempts = await readRows<DeliveryAttemptRow>(
+    restUrl,
+    serviceRoleKey,
+    "core_notification_delivery_attempts",
+    {
+      select:
+        "id,notification_id,template_id,provider,channel,status,recipient_email,recipient_phone,subject,idempotency_key,external_message_id,attempt_number,attempted_at,completed_at,error_message,response_payload,metadata,created_at",
+      order: "created_at.desc",
+      limit: "25",
     },
   );
   const templateIds = Array.from(
@@ -345,6 +447,7 @@ async function getNotificationPreviews() {
       ),
     ),
     templates: seededTemplates.map(toTemplatePreview),
+    attempts: deliveryAttempts.map(toAttemptPreview),
     warning: null,
   };
 }
@@ -399,7 +502,7 @@ export default async function StaffNotificationsPage() {
     );
   }
 
-  const { previews, templates, warning } = await getNotificationPreviews();
+  const { previews, templates, attempts, warning } = await getNotificationPreviews();
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -414,10 +517,11 @@ export default async function StaffNotificationsPage() {
                 Email Preview Queue
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                Owner/admin read-only preview of queued Core notifications and
-                draft seeded email templates. This page shows what future
-                transactional emails might use for recipient, context, subject,
-                and body preview.
+                Owner/admin read-only preview of queued Core notifications,
+                draft seeded email templates, and blocked/previewed delivery
+                attempt logs. This page shows what future transactional emails
+                might use for recipient, context, subject, body preview, and
+                provider-attempt audit history.
               </p>
             </div>
             <Link
@@ -541,6 +645,105 @@ export default async function StaffNotificationsPage() {
               <p className="mt-2">
                 Pull and apply the template seed migration before expecting this
                 section to show the preview-only draft template foundation.
+              </p>
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-950">
+                Delivery Attempt Logs
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                DELIVERY ATTEMPT LOGS - NO EMAIL SENDING CONNECTED. Showing recent
+                blocked/previewed rows from `core_notification_delivery_attempts`.
+              </p>
+            </div>
+            <p className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-100">
+              {attempts.length} attempt{attempts.length === 1 ? "" : "s"}
+            </p>
+          </div>
+
+          {attempts.length > 0 ? (
+            <div className="space-y-4">
+              {attempts.map((attempt) => (
+                <article
+                  key={attempt.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-100">
+                          {attempt.provider}
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">
+                          {attempt.channel}
+                        </span>
+                        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-100">
+                          {attempt.status}
+                        </span>
+                        <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-100">
+                          sent: {attempt.sent}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm font-semibold text-slate-950">
+                        {attempt.subject}
+                      </p>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-500">
+                      Created {attempt.createdAt}
+                    </p>
+                  </div>
+
+                  <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <Detail label="Recipient Email" value={attempt.recipientEmail} />
+                    <Detail label="Recipient Phone" value={attempt.recipientPhone} />
+                    <Detail label="Attempt Number" value={attempt.attemptNumber} />
+                    <Detail label="Notification" value={attempt.notificationId} mono />
+                    <Detail label="Template" value={attempt.templateId} mono />
+                    <Detail label="Attempted" value={attempt.attemptedAt} />
+                    <Detail label="Completed" value={attempt.completedAt} />
+                    <Detail label="External Message" value={attempt.externalMessageId} />
+                    <Detail label="Error" value={attempt.errorMessage} />
+                    <Detail label="Attempt ID" value={attempt.id.slice(0, 8)} mono />
+                  </dl>
+
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Idempotency Key
+                    </p>
+                    <p className="mt-2 break-all font-mono text-sm leading-6 text-slate-700">
+                      {attempt.idempotencyKey}
+                    </p>
+                  </div>
+
+                  {attempt.metadataSummary.length > 0 ? (
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Safe Attempt Metadata
+                      </p>
+                      <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                        {attempt.metadataSummary.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
+              <p className="font-semibold text-slate-800">
+                No delivery attempt logs found.
+              </p>
+              <p className="mt-2">
+                Use the local preview-attempt script after a queued notification
+                exists to record a blocked or previewed delivery-attempt row. This
+                still does not send email.
               </p>
             </div>
           )}
