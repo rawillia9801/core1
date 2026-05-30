@@ -7,9 +7,10 @@ DB_USER="${DB_USER:-postgres}"
 PROVIDER="${EMAIL_PROVIDER:-disabled}"
 
 case "$PROVIDER" in
-  disabled|preview|smtp|resend) ;;
+  disabled|preview|smtp) ;;
   *)
     echo "Unsupported EMAIL_PROVIDER for preview attempt logging: $PROVIDER" >&2
+    echo "Allowed values: disabled, preview, smtp. Hostinger SMTP is the only planned real delivery provider." >&2
     exit 1
     ;;
 esac
@@ -88,14 +89,14 @@ with latest_notification as (
       'status', status,
       'reason', case
         when provider = 'preview' then 'Preview attempt logged without sending.'
-        else 'Delivery blocked; provider is not connected or sending is disabled.'
+        when provider = 'smtp' then 'Hostinger SMTP is planned but not connected; delivery is blocked.'
+        else 'Delivery blocked; provider is disabled or sending is disabled.'
       end
     ),
     jsonb_build_object(
       'created_by', 'scripts/record-preview-notification-attempt.sh',
       'email_sending_connected', false,
-      'hostinger_smtp_connected', false,
-      'resend_connected', false
+      'hostinger_smtp_connected', false
     )
   from prepared_attempt
   on conflict (idempotency_key) where idempotency_key is not null
