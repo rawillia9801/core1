@@ -285,6 +285,8 @@ Manual or app-level checklist:
 - Staff role is blocked unless approved.
 - Successful entry appears in the application dashboard.
 - Application detail sections are readable.
+- Fake local Core-native entry can move through approval, reservation creation, and deposit/payment recording.
+- Ledger-derived balance decreases after the recorded deposit/payment.
 - No email is sent.
 - No reservation/payment/document/customer portal record is created.
 
@@ -294,11 +296,12 @@ Recommended order:
 
 1. Add database RPC migration and rollback-safe SQL test for `core_create_application_manual`. Done.
 2. Add private `/staff/applications/new` form and server action. Done.
-3. Confirm read visibility in the existing staff dashboard. Done for the route/link/read path; browser workflow verification remains local/manual.
-4. Design notification queue behavior.
-5. Add local/staging email preview only.
-6. Add public `/apply` later.
-7. Add email provider integration later.
+3. Confirm read visibility in the existing staff dashboard. Done.
+4. Manually verify Core-native application entry through approval, reservation creation, and deposit/payment ledger balance decrease. Done with fake local data.
+5. Design notification queue/email preview behavior or continue controlled go-home workflow.
+6. Add local/staging email preview only.
+7. Add public `/apply` later.
+8. Add email provider integration later.
 
 ## Still Blocked
 
@@ -321,5 +324,16 @@ The following remain blocked until later explicit tasks:
 The database RPC foundation is implemented and tested.
 
 The private `/staff/applications/new` UI and server action are implemented for owner/admin staff users. It calls `core_create_application_manual`, redirects back to `/staff?application=created` on success, and does not send email, queue notifications, call Zoho, create payments, create documents, or create portal access.
+
+The private Core-native application workflow has been manually verified end-to-end with fake local data:
+
+- Create Core-native application in `/staff/applications/new`.
+- Confirm the application appears in `/staff`.
+- Approve the application.
+- Create a reservation from that application.
+- Record a deposit/payment.
+- Confirm the ledger-derived balance decreases.
+
+This proves manual application entry no longer requires Zoho for the local staff workflow. It does not prove public intake, email sending, payment processor integration, documents, customer portal behavior, or production readiness.
 
 Zoho-shaped intake remains available for compatibility, import, and dry-run support, but it is not the preferred future dependency for new Core-native application intake.

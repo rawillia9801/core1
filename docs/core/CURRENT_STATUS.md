@@ -113,11 +113,11 @@ The intake path writes Core buyer/family/application/application-section context
 
 Zoho-shaped intake is now treated as compatibility, import, and dry-run support rather than the preferred future dependency for new Core-native application intake.
 
-### Core-Native Application Entry Plan
+### Core-Native Application Entry
 
 `docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md` defines the recommended replacement path for Zoho-dependent application intake.
 
-The plan recommends a future protected private staff route at `/staff/applications/new`, initially owner/admin only, backed by a new Core-native application RPC rather than continued expansion of `core_ingest_zoho_application`.
+The protected private staff route at `/staff/applications/new` now exists, initially owner/admin only, backed by a Core-native application RPC rather than continued expansion of `core_ingest_zoho_application`.
 
 The Core-native manual application database RPC now exists:
 
@@ -129,7 +129,19 @@ It creates or reuses buyer/family context, creates a received application, store
 
 The protected private route `/staff/applications/new` now exists for owner/admin users. It validates form input server-side, calls `core_create_application_manual`, passes the authenticated staff profile ID as actor, redirects back to `/staff?application=created` on success, and lets the existing dashboard read model show the new received application.
 
-Public `/apply` has not been built. Email sending remains blocked until notification queue and preview behavior are designed and approved.
+This Core-native private application entry workflow has been manually verified end-to-end with fake local data:
+
+- A fake application was created directly in Core from `/staff/applications/new`.
+- No Zoho intake, webhook, or writeback was used.
+- The application appeared in `/staff`.
+- The Core-native application was approved.
+- A reservation was created from that application.
+- A deposit/payment was recorded.
+- The ledger-derived balance decreased correctly.
+
+The proven local workflow is now: Core-native application entry -> approval -> reservation -> payment ledger.
+
+Public `/apply` has not been built. Email/Resend notification sending remains deferred. Customer portal, documents, payment processor, and live integrations remain blocked.
 
 ### Notification Queue Foundation
 
@@ -402,7 +414,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Review real Zoho application fields with `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` before staff-visible application details are used with selected real data, then owner-approve the exact first staging records, environment, and gate checklist described in `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`, `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`, and `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`. Do not use production data, connect a payment processor, or expose customer/staff workflows until access control and staging boundaries are implemented and verified.
+Continue with either notification queue/email preview planning or the next controlled go-home workflow step. Do not prioritize live Zoho integration now that Core-native private application entry is proven locally. Do not use production data, connect Resend/email, connect a payment processor, or expose customer/staff workflows until the staging and access-control gates are satisfied.
 
 ## Selected Real-Data Staging Plan
 

@@ -125,6 +125,8 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Private `/staff/applications/new` owner/admin entry form added.
 - [x] Private manual application server action calls `core_create_application_manual`.
 - [x] Manual application entry sends no email, queues no notification, and performs no Zoho writeback.
+- [x] Private Core-native application entry manually verified end-to-end with fake local data.
+- [x] Verified Core-native application entry can flow through approval, reservation creation, and deposit/payment ledger balance decrease.
 - [x] Zoho API-name intake rollback-safe SQL test added.
 - [x] Zoho report/PDF-label intake compatibility added.
 - [x] Zoho report/PDF-label rollback-safe SQL test added.
