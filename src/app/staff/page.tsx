@@ -9,6 +9,7 @@ const workspaceLinks = [
   { href: "/staff", label: "Dashboard" },
   { href: "/staff/applications", label: "Applications" },
   { href: "/staff/reservations", label: "Reservations" },
+  { href: "/staff/payments", label: "Payments" },
   { href: "/staff/notifications", label: "Notifications" },
 ] as const;
 
