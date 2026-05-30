@@ -155,6 +155,12 @@ It creates `core_notifications` rows with status `queued`, stores recipient/temp
 
 This is queue-only. No Resend or email provider is connected, no provider package or API key has been added, and no emails are sent. Existing application/payment/reservation actions do not automatically queue notifications yet.
 
+### Email Template And Preview Plan
+
+`docs/core/CORE_EMAIL_TEMPLATE_PREVIEW_PLAN.md` now defines the safe path from queued notifications toward future transactional email previews.
+
+The plan keeps email sending blocked. It recommends owner/admin preview first, then disabled/preview provider behavior, then Hostinger SMTP configuration later with sending disabled by default, then test-send-to-owner only before any selected customer sends.
+
 ### Guarded Local/Development Endpoint
 
 A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.
@@ -414,7 +420,7 @@ Before any staff-facing staging or production use, Core still needs deliberate s
 
 ## Next Recommended Task
 
-Continue with either notification queue/email preview planning or the next controlled go-home workflow step. Do not prioritize live Zoho integration now that Core-native private application entry is proven locally. Do not use production data, connect Resend/email, connect a payment processor, or expose customer/staff workflows until the staging and access-control gates are satisfied.
+Continue with either the owner/admin notification preview UI or the next controlled go-home workflow step. Do not prioritize live Zoho integration now that Core-native private application entry is proven locally. Do not use production data, connect Hostinger SMTP, connect Resend/email, connect a payment processor, or expose customer/staff workflows until the staging and access-control gates are satisfied.
 
 ## Selected Real-Data Staging Plan
 

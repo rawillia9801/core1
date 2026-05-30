@@ -309,12 +309,14 @@ It should be updated whenever work lands in the repository. It is intentionally 
 
 ### 3.5 Communications Workflow
 
-- [ ] Define applicant email template workflow.
+- [x] Define Core email template and preview plan: `docs/core/CORE_EMAIL_TEMPLATE_PREVIEW_PLAN.md`.
 - [ ] Define what Core may send automatically versus staff-approved.
 - [x] Add controlled notification queue database foundation: `core_queue_notification`.
 - [x] Add rollback-safe notification queue SQL test.
+- [ ] Add owner/admin notification or email preview UI before sending.
 - [ ] Add notification queue review UI before sending.
 - [ ] Add email provider integration only after template and approval rules are defined.
+- [ ] Keep Hostinger SMTP disconnected until preview, override-recipient, send logging, and test-send rules are approved.
 - [ ] Keep Twilio disconnected until phone verification/routing is built.
 - [ ] Log all generated messages and staff/customer interactions.
 
