@@ -4,7 +4,7 @@
 
 Core needs a safe email template and preview workflow before any SMTP or provider sending is connected.
 
-This plan defines how Core should manage transactional email templates, queued notification previews, approval rules, and future provider handoff. It does not approve email sending, connect Hostinger SMTP, connect Resend, add provider keys, or enable automatic customer notifications.
+This plan defines how Core should manage transactional email templates, queued notification previews, approval rules, delivery-attempt logging, and future provider handoff. It does not approve email sending, connect Hostinger SMTP, connect Resend, add provider keys, or enable automatic customer notifications.
 
 ## Current Foundation
 
@@ -20,8 +20,9 @@ Core already has communication foundations:
 - Initial email template seed records now exist as preview-only draft records for the approved transactional template keys.
 - The owner/admin notification preview page now shows seeded email templates alongside queued notification previews.
 - A disabled/preview email provider foundation now exists in `src/lib/email/provider.ts`.
+- A delivery-attempt audit table foundation now exists as `core_notification_delivery_attempts`.
 
-Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, delivery-attempt table, or send button is connected.
+Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, live delivery attempt, or send button is connected.
 
 ## Template Keys
 
@@ -117,7 +118,50 @@ Current behavior:
 - `smtp` is recognized but blocked because SMTP delivery is not implemented or enabled.
 - `resend` is recognized but blocked because Resend delivery is not implemented or enabled.
 
-The provider foundation does not read or require SMTP credentials, does not import provider packages, does not create delivery attempts, does not add a send worker, and does not update notification status.
+The provider foundation does not read or require SMTP credentials, does not import provider packages, does not create delivery attempts by itself, does not add a send worker, and does not update notification status.
+
+## Delivery Attempt Foundation
+
+The migration `20260526300000_core_notification_delivery_attempts.sql` adds:
+
+```text
+core_notification_delivery_attempts
+```
+
+This table is an audit/logging foundation for future provider attempt records. It is intentionally not a send worker and not a provider connection.
+
+It supports recording future attempt context such as:
+
+- `notification_id`
+- `template_id`
+- `provider`
+- `channel`
+- `status`
+- `recipient_email`
+- `subject`
+- `idempotency_key`
+- `external_message_id`
+- request/response payload metadata
+
+Allowed providers are currently:
+
+- `disabled`
+- `preview`
+- `smtp`
+- `resend`
+
+Allowed statuses are currently:
+
+- `blocked`
+- `previewed`
+- `pending`
+- `sent`
+- `failed`
+- `skipped`
+
+The current foundation should only be used for blocked or previewed records until a later explicit provider task approves real sending. Table existence never authorizes delivery.
+
+The rollback-safe test `core_notification_delivery_attempts_tests.sql` verifies preview/blocked attempt logging behavior, provider/channel/status validation, email validation, duplicate idempotency-key rejection, and that delivery-attempt rows do not mark a notification as sent.
 
 ## Safety Rules
 
@@ -164,7 +208,7 @@ EMAIL_SEND_ENABLED=false
 EMAIL_PREVIEW_ONLY=true
 ```
 
-SMTP sending should not be added until preview, approval, staging override, and send logging are implemented.
+SMTP sending should not be added until preview, approval, staging override, send logging, and test-send rules are implemented.
 
 ## Provider Abstraction
 
@@ -187,10 +231,11 @@ Application, approval, reservation, payment, cancellation, go-home, and document
 4. Add initial draft/preview-only template seed foundation. Done.
 5. Show seeded templates alongside queued previews. Done.
 6. Add disabled/preview provider behavior. Done.
-7. Add send-attempt/delivery logging design and/or table if needed before any delivery.
-8. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
-9. Add test-send-to-owner only.
-10. Enable selected transactional sends one workflow at a time after owner approval.
+7. Add delivery-attempt audit table foundation. Done.
+8. Add preview/blocked attempt logging workflow.
+9. Add SMTP provider configuration while keeping `EMAIL_SEND_ENABLED=false`.
+10. Add test-send-to-owner only.
+11. Enable selected transactional sends one workflow at a time after owner approval.
 
 ## Still Blocked
 
