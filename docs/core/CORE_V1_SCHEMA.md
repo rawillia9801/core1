@@ -136,6 +136,16 @@ This function does not approve applications, create reservations, collect paymen
 
 Zoho-shaped `core_ingest_zoho_application(...)` remains compatibility/import/dry-run support only.
 
+## Notification Queue Foundation
+
+`core_queue_notification(...)` is the controlled notification queue foundation for future transactional email workflows.
+
+It creates `core_notifications` rows with status `queued`, stores recipient/template/preview/context in the notification payload, and writes `core_events` plus `core_audit_log`.
+
+Only the `email` channel is allowed in this first foundation. The RPC requires an active actor profile and a valid recipient email address. Notification types are allowlisted for application, reservation, payment, cancellation, go-home, document, and staff alert workflows.
+
+This function does not send email, connect Resend or any provider, write provider IDs, mark anything delivered, create provider delivery attempts, or expose customer portal messaging. Future actions may queue notifications only after templates and safety rules are approved.
+
 ## Go-Home Cardinality
 
 - A buyer or family may have many puppies and many reservations.

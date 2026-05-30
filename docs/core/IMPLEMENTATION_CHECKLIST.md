@@ -309,7 +309,9 @@ It should be updated whenever work lands in the repository. It is intentionally 
 
 - [ ] Define applicant email template workflow.
 - [ ] Define what Core may send automatically versus staff-approved.
-- [ ] Add notification queue review before sending.
+- [x] Add controlled notification queue database foundation: `core_queue_notification`.
+- [x] Add rollback-safe notification queue SQL test.
+- [ ] Add notification queue review UI before sending.
 - [ ] Add email provider integration only after template and approval rules are defined.
 - [ ] Keep Twilio disconnected until phone verification/routing is built.
 - [ ] Log all generated messages and staff/customer interactions.
@@ -428,6 +430,7 @@ cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i su
 cat supabase/tests/core_record_financial_adjustment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_application_manual_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_queue_notification_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint

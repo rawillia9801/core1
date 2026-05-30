@@ -46,6 +46,12 @@ Financial correction work must remain additive. Prior ledger rows are not edited
 
 The RPC does not send email, queue notifications, create reservations, create payments, create documents, invite portal users, or write back to Zoho. Zoho-shaped intake remains compatibility/import support only.
 
+### Notification Queue Audit Context
+
+`core_queue_notification(...)` is the controlled Core V1 notification queue foundation. It creates a `core_notifications` row with status `queued`, records recipient/template/preview/context in the payload, writes a `notification_queued` operational event, and writes a `queue_notification` audit row.
+
+This RPC is queue-only. It does not connect Resend or any email provider, send email, create provider delivery attempts, store provider message IDs, mark delivery success, or retry delivery. Future application, approval, payment, reservation, cancellation, go-home, and document workflows may queue notifications only after template, preview, recipient override, and send-safety rules are approved.
+
 ### Reservation Cancellation Audit Context
 
 `core_cancel_reservation(...)` is the controlled Core V1 cancellation foundation. It changes an eligible `reserved` or `pending` reservation to `cancelled`, records a required cancellation reason, and creates both a `reservation_cancelled` operational event and a `cancel_reservation` audit entry.

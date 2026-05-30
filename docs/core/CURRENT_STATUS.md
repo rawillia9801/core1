@@ -131,6 +131,18 @@ The protected private route `/staff/applications/new` now exists for owner/admin
 
 Public `/apply` has not been built. Email sending remains blocked until notification queue and preview behavior are designed and approved.
 
+### Notification Queue Foundation
+
+The controlled notification queue database RPC now exists:
+
+```text
+public.core_queue_notification(...)
+```
+
+It creates `core_notifications` rows with status `queued`, stores recipient/template/preview/context in payload, and writes event/audit records. It currently allows only email-channel queue records from an active actor profile and a safe notification type allowlist.
+
+This is queue-only. No Resend or email provider is connected, no provider package or API key has been added, and no emails are sent. Existing application/payment/reservation actions do not automatically queue notifications yet.
+
 ### Guarded Local/Development Endpoint
 
 A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.
