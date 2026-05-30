@@ -314,6 +314,7 @@ It should be updated whenever work lands in the repository. It is intentionally 
 - [x] Add controlled notification queue database foundation: `core_queue_notification`.
 - [x] Add rollback-safe notification queue SQL test.
 - [x] Add owner/admin notification or email preview UI before sending: `/staff/notifications`.
+- [x] Queue preview-only `application_received` notification after Core-native staff application entry when applicant email exists.
 - [ ] Add notification queue review UI before sending.
 - [ ] Add email provider integration only after template and approval rules are defined.
 - [ ] Keep Hostinger SMTP disconnected until preview, override-recipient, send logging, and test-send rules are approved.

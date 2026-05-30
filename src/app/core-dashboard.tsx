@@ -217,7 +217,23 @@ function ApplicationEntryResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "created") {
     return (
       <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-        Core-native application created. No email was sent and no Zoho writeback occurred.
+        Core-native application created. Application received notification queued for preview only; no email was sent and no Zoho writeback occurred.
+      </p>
+    );
+  }
+
+  if (outcome === "created-no-notification") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Core-native application created. No applicant email was supplied, so no email-channel notification was queued.
+      </p>
+    );
+  }
+
+  if (outcome === "created-notification-warning") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Core-native application created, but the preview-only notification could not be queued. No email was sent.
       </p>
     );
   }

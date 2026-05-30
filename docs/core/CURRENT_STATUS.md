@@ -169,6 +169,8 @@ The first owner/admin notification preview page now exists:
 
 It reads queued `core_notifications` records server-side, summarizes recipient/context/template/subject/body preview fields, and provides no send buttons or provider settings. Staff-role users are blocked from this preview page.
 
+Core-native staff application entry now queues a preview-only `application_received` notification after `core_create_application_manual` succeeds when the applicant email is present. If the applicant email is missing, the application is still created and no email-channel notification is queued. If queueing fails after application creation, the application remains created and the dashboard shows a warning. No email is sent.
+
 ### Guarded Local/Development Endpoint
 
 A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.

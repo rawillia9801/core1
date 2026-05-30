@@ -8,11 +8,23 @@ const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 type ManualApplicationOutcome =
   | "created"
+  | "created-no-notification"
+  | "created-notification-warning"
   | "unauthorized"
   | "invalid_contact"
   | "invalid_terms"
   | "invalid_input"
   | "error";
+
+type ManualApplicationRpcResult = {
+  buyer_id: string | null;
+  family_id: string | null;
+  application_id: string | null;
+  application_status: string | null;
+  section_count: number | null;
+  event_id: string | null;
+  audit_log_id: string | null;
+};
 
 function logManualApplicationFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
@@ -88,6 +100,63 @@ function readAllowedText(formData: FormData, field: string, allowed: Set<string>
   }
 
   return { valid: true, value };
+}
+
+async function queueApplicationReceivedNotification({
+  restUrl,
+  serviceRoleKey,
+  staffProfileId,
+  recipientEmail,
+  buyerId,
+  familyId,
+  applicationId,
+  applicantFullName,
+}: {
+  restUrl: string;
+  serviceRoleKey: string;
+  staffProfileId: string;
+  recipientEmail: string;
+  buyerId: string | null;
+  familyId: string | null;
+  applicationId: string | null;
+  applicantFullName: string;
+}) {
+  const notificationResponse = await fetch(`${restUrl}/rpc/core_queue_notification`, {
+    method: "POST",
+    headers: serverHeaders(serviceRoleKey),
+    body: JSON.stringify({
+      p_actor_profile_id: staffProfileId,
+      p_notification_type: "application_received",
+      p_channel: "email",
+      p_recipient_email: recipientEmail,
+      p_buyer_id: buyerId,
+      p_family_id: familyId,
+      p_application_id: applicationId,
+      p_template_key: "application_received",
+      p_subject: "Application received - Southwest Virginia Chihuahua",
+      p_body_preview: "We received your puppy application and will review it soon.",
+      p_metadata: {
+        source: "core_manual_staff_entry",
+        applicant_full_name: applicantFullName,
+        preview_only: true,
+        email_sending_connected: false,
+      },
+    }),
+    cache: "no-store",
+  });
+
+  if (!notificationResponse.ok) {
+    const responseBody = await notificationResponse.text().catch(() => "");
+    logManualApplicationFailure("application_received notification queue failed after application creation", {
+      applicationId,
+      httpStatus: notificationResponse.status,
+      responseBody,
+    });
+
+    return false;
+  }
+
+  return true;
 }
 
 export async function createManualApplication(formData: FormData) {
@@ -204,9 +273,34 @@ export async function createManualApplication(formData: FormData) {
     });
 
     if (rpcResponse.ok) {
+      const rpcRows = (await rpcResponse.json().catch(() => [])) as ManualApplicationRpcResult[];
+      const createdApplication = rpcRows[0] ?? null;
+      let notificationQueued = true;
+      let notificationSkipped = false;
+
+      if (email.value) {
+        notificationQueued = await queueApplicationReceivedNotification({
+          restUrl,
+          serviceRoleKey,
+          staffProfileId: staff.id,
+          recipientEmail: email.value,
+          buyerId: createdApplication?.buyer_id ?? null,
+          familyId: createdApplication?.family_id ?? null,
+          applicationId: createdApplication?.application_id ?? null,
+          applicantFullName: applicantFullName.value,
+        });
+      } else {
+        notificationSkipped = true;
+      }
+
       revalidatePath("/staff");
+      revalidatePath("/staff/notifications");
       revalidatePath("/staff/applications/new");
-      outcome = "created";
+      outcome = notificationSkipped
+        ? "created-no-notification"
+        : notificationQueued
+          ? "created"
+          : "created-notification-warning";
     } else {
       const responseBody = await rpcResponse.text().catch(() => "");
       logManualApplicationFailure("manual application RPC failed", {

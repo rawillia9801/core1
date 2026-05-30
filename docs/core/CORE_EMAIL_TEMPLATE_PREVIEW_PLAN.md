@@ -15,6 +15,7 @@ Core already has communication foundations:
 - `core_queue_notification(...)` creates queue-only notification rows with status `queued`.
 - Queue records can include recipient, template key, subject preview, body preview, related application/reservation/ledger context, and metadata.
 - Queueing writes `core_events` and `core_audit_log`.
+- Core-native staff application entry now queues `application_received` preview records when the applicant email is present.
 
 Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, or delivery-attempt table is connected.
 
