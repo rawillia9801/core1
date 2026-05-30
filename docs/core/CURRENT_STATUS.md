@@ -171,6 +171,8 @@ It reads queued `core_notifications` records server-side, summarizes recipient/c
 
 Core-native staff application entry now queues a preview-only `application_received` notification after `core_create_application_manual` succeeds when the applicant email is present. If the applicant email is missing, the application is still created and no email-channel notification is queued. If queueing fails after application creation, the application remains created and the dashboard shows a warning. No email is sent.
 
+This has been manually verified locally with fake data. Creating a Core-native application for `notification.queue.test@example.invalid` queued an `application_received` email notification, `/staff/notifications` displayed the preview, and the notification `sent_at` remained null.
+
 ### Guarded Local/Development Endpoint
 
 A guarded Next.js endpoint exists at `src/app/api/intake/zoho-application/route.ts`. It is intended for local/development testing with fake payloads only. A local helper script exists for posting fake report-label data without pasting a long request command or embedding any private key.

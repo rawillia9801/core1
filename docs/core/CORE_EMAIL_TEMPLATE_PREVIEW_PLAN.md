@@ -16,6 +16,7 @@ Core already has communication foundations:
 - Queue records can include recipient, template key, subject preview, body preview, related application/reservation/ledger context, and metadata.
 - Queueing writes `core_events` and `core_audit_log`.
 - Core-native staff application entry now queues `application_received` preview records when the applicant email is present.
+- Local verification confirmed the queued preview appears in `/staff/notifications` and `sent_at` remains null.
 
 Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, or delivery-attempt table is connected.
 
