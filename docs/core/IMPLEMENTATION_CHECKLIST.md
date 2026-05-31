@@ -21,25 +21,38 @@ It must be updated when work lands so the project does not drift.
 Current active lane:
 
 ```text
-queue-only notifications
-  -> seeded draft templates
-  -> owner/admin preview page
-  -> disabled/preview provider boundary
-  -> delivery-attempt log table verification
-  -> preview/blocked attempt logging workflow
-  -> show attempt logs in /staff/notifications
-  -> define staff-approved vs automatic communication rules
-  -> test-send-to-owner later
-  -> Hostinger SMTP later, disabled by default
+staff auth/read cleanup
+  -> keep shared staff sidebar layout
+  -> keep ready staff routes real and future routes disabled
+  -> verify warm draft email templates locally
+  -> verify notification delivery-attempt lane remains preview/blocked only
+  -> reduce repeated dashboard data reads if performance is still slow
+  -> only then continue the next checklist build item
 ```
 
-Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, or UI polish until the safety gates are complete.
+Communication safety lane status:
+
+```text
+queue-only notifications                          done
+seeded draft templates                            done
+owner/admin preview page                          done
+disabled/preview provider boundary                done
+delivery-attempt log table verification            done
+preview/blocked attempt logging workflow           done
+show attempt logs in /staff/notifications          done
+staff-approved vs automatic communication rules    done
+warm customer-facing template copy                 done, local verification pending
+test-send-to-owner                                 later, not started
+Hostinger SMTP                                     later, disabled by default
+```
+
+Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, or polish-only work until the safety gates are complete.
 
 ## Phase Summary
 
 | Phase | Goal | Status | Rough Distance |
 | --- | --- | --- | --- |
-| Phase 1 | Local/dev workflow proof | `[~]` Underway | 1-2 weeks for remaining local foundation |
+| Phase 1 | Local/dev workflow proof | `[~]` Underway | Remaining local foundation and performance cleanup |
 | Phase 2 | Staff-only staging with selected real data | `[ ]` Not started | 3-6 weeks total from current checkpoint |
 | Phase 3 | Production internal staff use | `[ ]` Not started | 2-3 months total from current checkpoint |
 | Phase 4A | Minimal customer-facing application path | `[ ]` Not started | About 2 months if tightly scoped |
@@ -78,7 +91,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Future tool-safety tables represented without enabling AI writes.
 - [x] Main transaction-wrapped smoke test exists.
 - [x] Main smoke test passes and rolls back.
-- [x] `npm run lint` passes.
+- [x] `npm run lint` passes from prior local checks.
 
 ### 1.2 Application Intake Foundation
 
@@ -145,18 +158,18 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Financial adjustment rollback-safe SQL test added.
 - [x] Adjustment RPC maps `balance_effect` internally and keeps deposit/payment recording separate.
 - [x] Read-only Financial Ledger Activity panel added for deposits, payments, credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
-- [x] Ledger activity panel distinguishes money received, balance-reducing credit, internal ledger exception, balance-increasing charge, and neutral adjustment rows.
+- [x] Ledger panel labels refunds/chargebacks as internal ledger records rather than processor movement.
+- [x] Dedicated `/staff/payments` page added for local ledger entry and read-only ledger review.
 - [ ] Add further payment recording validation before any staff-facing use.
 - [ ] Add dashboard UI for creating financial adjustments only after staff authorization boundaries are designed.
 - [ ] Define live payment processor reconciliation and idempotency before live refund/chargeback operations.
-- [ ] Connect payment processor only after ledger write rules and security are complete.
+- [blocked] Connect payment processor only after ledger write rules and security are complete.
 
-### 1.5 Read-Only Dashboard Foundation
+### 1.5 Staff Workspace And Dashboard Foundation
 
 - [x] Read-only dashboard plan and acceptance criteria documented.
 - [x] Static dashboard shell added.
 - [x] Dashboard reads local Supabase/Core data for foundation verification.
-- [x] Dashboard navigation sections started.
 - [x] Placeholder and not-connected/empty-style shell states started.
 - [x] Shell visibly states that production data and live integrations are not connected.
 - [x] Received Applications panel reads local Core applications.
@@ -169,8 +182,16 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Financial Ledger Activity panel displays ledger rows read-only.
 - [x] Ledger panel labels refunds/chargebacks as internal ledger records rather than processor movement.
 - [x] Go-home read panel consumes the effective go-home view.
+- [x] Dedicated `/staff/applications` page added for application review, approval, and reservation creation.
+- [x] Dedicated `/staff/reservations` page added for reservation review, payment entry, and guarded cancellation.
+- [x] Dedicated `/staff/payments` page added for local payment entry and ledger activity.
+- [x] Dedicated `/staff/notifications` page added for communication preview, rules, templates, and attempt logs.
+- [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
+- [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
+- [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
 - [ ] Add approved read-only data coverage for litter context within reservation workflow views.
 - [ ] Add proper loading/empty/error states for all read panels.
+- [ ] Reduce repeated dashboard data reads if `/staff` or child route performance remains slow after `.next` cache clearing.
 - [ ] Replace temporary/local-only data assumptions before staging.
 
 ### 1.6 Communications Workflow
@@ -188,17 +209,21 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Show seeded templates clearly in `/staff/notifications` alongside queued previews.
 - [x] Add disabled/preview email provider foundation: `src/lib/email/provider.ts`.
 - [x] Verify disabled/preview provider foundation with `npm run lint` locally.
-- [x] Add delivery-attempt audit table foundation in GitHub: `core_notification_delivery_attempts`.
-- [x] Add rollback-safe delivery-attempt SQL test in GitHub.
-- [blocked] Delivery-attempt foundation local verification has not been confirmed in chat yet.
-- [ ] Add preview/blocked attempt logging workflow after delivery-attempt foundation is verified locally.
-- [ ] Show delivery attempts in `/staff/notifications` after logging workflow exists.
-- [ ] Define what Core may send automatically versus staff-approved.
-- [ ] Add email provider integration only after template, approval, override-recipient, send logging, and test-send rules are defined.
-- [blocked] Keep Hostinger SMTP disconnected until preview, override-recipient, send logging, and test-send rules are approved.
-- [blocked] Keep Resend disconnected.
-- [blocked] Keep customer email sending disabled.
+- [x] Add delivery-attempt audit table foundation: `core_notification_delivery_attempts`.
+- [x] Add rollback-safe delivery-attempt SQL test.
+- [x] Verify delivery-attempt foundation locally with focused SQL test.
+- [x] Add preview/blocked attempt logging script: `scripts/record-preview-notification-attempt.sh`.
+- [x] Record a blocked preview attempt locally with `sent = false` and `NO EMAIL SENT` output.
+- [x] Show delivery attempts in `/staff/notifications`.
+- [x] Define staff-approved versus automatic communication rules in `src/lib/email/communication-rules.ts`.
+- [x] Remove Resend from the active provider/script direction; Hostinger SMTP is the only planned real email provider.
+- [x] Add warm draft template migration with more complete Southwest Virginia Chihuahua customer copy and no customer-facing internal system name.
+- [x] Add warm template smoke test covering draft/preview-only flags, no customer-facing internal system name, non-tiny bodies, unique IDs, and refund safety copy.
+- [blocked] Warm template migration/test still needs local application/verification if not already run.
 - [ ] Log all generated messages and staff/customer interactions.
+- [ ] Design test-send-to-owner only after warm templates and preview/blocked delivery logs are verified.
+- [blocked] Keep Hostinger SMTP disconnected until preview, override-recipient, send logging, and test-send rules are approved.
+- [blocked] Keep customer email sending disabled.
 
 ### 1.7 Go-Home Foundation
 
@@ -251,6 +276,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Restrict staff users from fetching/seeing financial ledger activity, full audit/activity rows, phone lookup details, and the general event feed.
 - [x] Manually verify owner/admin/staff dashboard read scopes with the local role helper.
 - [x] Restore the local mapped profile to `owner` active after read-scope verification.
+- [x] Request-memoize staff auth/profile lookup to reduce duplicate layout/page reads while keeping server actions independently authorized.
 - [ ] Add admin/staff role assignment flow.
 - [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
 - [ ] Add a staging environment separate from local dev.
@@ -358,7 +384,6 @@ Estimated target for full replacement: 4-6+ months total from current checkpoint
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
 - [ ] Hostinger SMTP is not connected.
-- [ ] Resend is not connected.
 - [ ] Payments are not connected to a payment processor.
 - [ ] No production data import has occurred.
 - [ ] Document generation is not implemented.
@@ -372,20 +397,28 @@ Estimated target for full replacement: 4-6+ months total from current checkpoint
 
 From Git Bash in the repository root, use focused validation only. Do not rerun everything after every small change.
 
-Already verified from recent command output:
-
-```bash
-cat supabase/migrations/20260526290000_core_email_template_seed.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-cat supabase/tests/core_email_template_seed_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-npm run lint
-```
-
-Next focused validation needed only for the delivery-attempt foundation:
+Previously verified from user command output:
 
 ```bash
 cat supabase/migrations/20260526300000_core_notification_delivery_attempts.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_notification_delivery_attempts_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+./scripts/record-preview-notification-attempt.sh
 npm run lint
+```
+
+Next focused validation needed for warm template refresh and latest auth/layout changes:
+
+```bash
+cat supabase/migrations/20260526330000_warm_email_templates.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/warm_email_templates_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+npm run lint
+```
+
+If Next.js throws `Unexpected end of JSON input` after cache compaction, clear only the local build cache:
+
+```bash
+rm -rf .next
+npm run dev
 ```
 
 Do not run `supabase db reset --local` for this validation.
@@ -393,12 +426,11 @@ Do not run `supabase db reset --local` for this validation.
 ## Immediate Next Ordered Tasks
 
 1. [ ] Pull latest changes.
-2. [ ] Verify delivery-attempt migration/test locally.
-3. [ ] Update docs checkpoint after that verification.
-4. [ ] Add preview/blocked attempt logging helper.
-5. [ ] Show delivery attempts in `/staff/notifications`.
-6. [ ] Define staff-approved versus automatic communication rules.
-7. [ ] Only then design test-send-to-owner.
+2. [ ] Apply and verify warm template migration/test locally.
+3. [ ] Run `npm run lint` after latest staff auth/layout changes.
+4. [ ] Browser-check `/login`, `/staff`, `/staff/applications`, `/staff/reservations`, `/staff/payments`, and `/staff/notifications`.
+5. [ ] If route performance is still slow after `.next` clearing, reduce repeated `getDashboardData` server reads next.
+6. [ ] Only after the above are stable, choose the next checklist build item. Recommended next build: go-home staff workspace page, not test-send or SMTP.
 
 ## Stop Conditions
 
@@ -406,7 +438,7 @@ Stop and review before continuing if any task attempts to:
 
 - Import production data.
 - Enable RLS without policy tests.
-- Connect Twilio, Zoho, Hostinger SMTP, Resend, email sending, payment processor, Home Assistant, cameras, or smart mirror.
+- Connect Twilio, Zoho, Hostinger SMTP, email sending, payment processor, Home Assistant, cameras, or smart mirror.
 - Build customer-facing behavior without access rules.
 - Add AI write capability without tool-safety design.
 - Change financial balance semantics.
