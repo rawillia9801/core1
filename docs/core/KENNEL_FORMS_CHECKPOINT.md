@@ -11,6 +11,53 @@
 - The Dogs, Litters, and Puppies sidebar links are enabled.
 - The forms create real Core records only.
 - The forms are owner/admin only.
+- Add buttons are visible on:
+  - `/staff/dogs`
+  - `/staff/litters`
+  - `/staff/puppies`
+- Edit links are visible on dog, litter, and puppy record cards.
+- Edit/archive pages exist for:
+  - `/staff/dogs/[dogId]/edit`
+  - `/staff/litters/[litterId]/edit`
+  - `/staff/puppies/[puppyId]/edit`
+
+## Audited Update / Archive Layer
+
+The edit/archive layer was moved behind controlled database RPCs:
+
+- `core_update_dog(...)`
+- `core_archive_dog(...)`
+- `core_update_litter(...)`
+- `core_archive_litter(...)`
+- `core_update_puppy(...)`
+- `core_archive_puppy(...)`
+
+A rollback-safe SQL test passed locally for the audited update/archive flow.
+
+Verified results:
+
+- `dog_update_check = 1`
+- `dog_archive_check = 1`
+- `litter_archive_check = 1`
+- `puppy_archive_check = 1`
+- `event_check = 6`
+- `audit_check = 6`
+- `ROLLBACK`
+
+## Obsolete Tests Removed
+
+The two earlier broken/obsolete kennel create tests were removed so future test runs are clearer:
+
+- `supabase/tests/core_kennel_create_records_tests.sql`
+- `supabase/tests/core_kennel_create_records_fixed_tests.sql`
+
+The valid create test remains:
+
+- `supabase/tests/core_kennel_create_records_v2_tests.sql`
+
+The valid update/archive test is:
+
+- `supabase/tests/core_kennel_update_archive_records_tests.sql`
 
 ## Still To Verify In Browser
 
@@ -18,11 +65,35 @@
 - Save one litter record.
 - Save one puppy record.
 - Confirm each saved record appears on its matching staff page.
+- Edit one dog record.
+- Edit one litter record.
+- Edit one puppy record.
+- Verify archive-style actions only mark records inactive/archived/hidden and do not hard-delete linked history.
 
 ## Safety Boundary
 
-The kennel forms are internal Core actions only. They do not contact customers, publish public pages, create documents, or connect to outside services.
+The kennel forms are internal Core actions only. They do not contact customers, publish public pages, create documents, move payments, or connect to outside services.
+
+Archive-style delete behavior is intentionally non-destructive:
+
+- Dog delete marks the dog `inactive`.
+- Litter delete marks the litter `archived`.
+- Puppy delete marks the puppy `unavailable` and `hidden`.
 
 ## Known Cleanup
 
 Remove the unused `unscheduledGoHomes` line from `src/app/staff/go-home/page.tsx`, then run `npm run lint`.
+
+## Next Ordered Step
+
+Browser-verify the kennel record loop:
+
+1. Add dog.
+2. Add litter.
+3. Add puppy.
+4. Edit dog.
+5. Edit litter.
+6. Edit puppy.
+7. Verify archive-style behavior.
+
+Do not move to public website publishing, customer emails, documents, payments, or AI write autonomy until this loop is browser-verified.
