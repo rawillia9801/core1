@@ -30,7 +30,8 @@ type DashboardAction =
   | "approve_application"
   | "create_reservation"
   | "record_reservation_payment"
-  | "cancel_reservation";
+  | "cancel_reservation"
+  | "update_go_home_detail";
 
 type DashboardActionOptions = {
   releasePuppy?: boolean;
@@ -136,6 +137,10 @@ export function canStaffPerformDashboardAction(
 
   if (action === "cancel_reservation") {
     return options.releasePuppy !== true;
+  }
+
+  if (action === "update_go_home_detail") {
+    return false;
   }
 
   return (
