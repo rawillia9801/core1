@@ -32,7 +32,7 @@ type ReservationRow = {
   family_id: string | null;
   reservation_status: string | null;
   puppy_name: string | null;
-  puppy_label: string | null;
+  puppy_collar_color: string | null;
   balance_due_cents: number | null;
 };
 
@@ -89,6 +89,10 @@ function familyName(family: FamilyRow, members: FamilyMemberRow[], buyersById: M
   return buyer ? `${buyerName(buyer)} Family` : `Family ${family.id.slice(0, 8)}`;
 }
 
+function puppyDisplay(reservation: ReservationRow) {
+  return reservation.puppy_name || reservation.puppy_collar_color || "Puppy not named";
+}
+
 function formatMoney(cents: number | null) {
   if (typeof cents !== "number") return "Not recorded";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
@@ -134,7 +138,7 @@ export default async function StaffFamiliesPage() {
       limit: "1000",
     }),
     readRows<ReservationRow>("core_reservation_summary_view", {
-      select: "family_id,reservation_status,puppy_name,puppy_label,balance_due_cents",
+      select: "family_id,reservation_status,puppy_name,puppy_collar_color,balance_due_cents",
       limit: "1000",
     }),
     readRows<ApplicationRow>("core_applications", {
@@ -239,7 +243,7 @@ export default async function StaffFamiliesPage() {
 
                     <div className="mt-5 grid gap-3 lg:grid-cols-2">
                       <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950"><p className="font-semibold">Application context</p><p className="mt-1 text-blue-800">{latestApplication ? `${display(latestApplication.status, "status unknown")} · ${formatDate(latestApplication.submitted_at)}` : "No linked application found."}</p></div>
-                      <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-950"><p className="font-semibold">Reservation context</p><p className="mt-1 text-emerald-800">{latestReservation ? `${display(latestReservation.puppy_name ?? latestReservation.puppy_label, "Puppy not named")} · ${display(latestReservation.reservation_status, "status unknown")} · ${formatMoney(latestReservation.balance_due_cents)}` : "No linked reservation found."}</p></div>
+                      <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-950"><p className="font-semibold">Reservation context</p><p className="mt-1 text-emerald-800">{latestReservation ? `${puppyDisplay(latestReservation)} · ${display(latestReservation.reservation_status, "status unknown")} · ${formatMoney(latestReservation.balance_due_cents)}` : "No linked reservation found."}</p></div>
                     </div>
 
                     {family.notes ? <p className="mt-4 text-sm leading-6 text-slate-600">{family.notes}</p> : null}
