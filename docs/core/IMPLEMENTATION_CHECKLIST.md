@@ -21,14 +21,16 @@ It must be updated when work lands so the project does not drift.
 Current active lane:
 
 ```text
-staff auth/read cleanup
-  -> keep shared staff sidebar layout
-  -> keep ready staff routes real and future routes disabled
-  -> verify warm draft email templates locally
-  -> verify notification delivery-attempt lane remains preview/blocked only
-  -> reduce repeated dashboard data reads if performance is still slow
-  -> only then continue the next checklist build item
+Core-native staff operating system foundation
+  -> application/reservation/payment workflow verified
+  -> preview-only communication safety verified
+  -> go-home detail update verified
+  -> go-home checklist SQL test next
+  -> wire go-home checklist into /staff/go-home next
+  -> then continue Core-native staff workflows only
 ```
+
+Core is the active system. Zoho One is cancelled and is not part of the active lineup. Any Zoho-shaped intake or documentation is legacy/import compatibility only, not a live dependency, bridge, writeback target, or planned operating workflow.
 
 Communication safety lane status:
 
@@ -41,22 +43,22 @@ delivery-attempt log table verification            done
 preview/blocked attempt logging workflow           done
 show attempt logs in /staff/notifications          done
 staff-approved vs automatic communication rules    done
-warm customer-facing template copy                 done, local verification pending
+warm customer-facing template copy                 done and locally verified
 test-send-to-owner                                 later, not started
 Hostinger SMTP                                     later, disabled by default
 ```
 
-Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, or polish-only work until the safety gates are complete.
+Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, or polish-only work until the matching safety gates are complete.
 
 ## Phase Summary
 
 | Phase | Goal | Status | Rough Distance |
 | --- | --- | --- | --- |
-| Phase 1 | Local/dev workflow proof | `[~]` Underway | Remaining local foundation and performance cleanup |
-| Phase 2 | Staff-only staging with selected real data | `[ ]` Not started | 3-6 weeks total from current checkpoint |
+| Phase 1 | Local/dev workflow proof | `[~]` Underway | Core staff workflows expanding safely |
+| Phase 2 | Staff-only staging with selected real data | `[ ]` Not started | 3-6 weeks total from stable local checkpoint |
 | Phase 3 | Production internal staff use | `[ ]` Not started | 2-3 months total from current checkpoint |
 | Phase 4A | Minimal customer-facing application path | `[ ]` Not started | About 2 months if tightly scoped |
-| Phase 4B | Full customer-facing Core replacement | `[ ]` Not started | 4-6+ months total from current checkpoint |
+| Phase 4B | Full customer-facing Core replacement | `[ ]` Not started | 4-6+ months total |
 
 ## Phase 0 — Repository And Guardrails
 
@@ -95,12 +97,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ### 1.2 Application Intake Foundation
 
-- [x] Zoho application field mapping documentation added.
-- [x] `core_ingest_zoho_application` added for Zoho-shaped payloads.
-- [x] Zoho API-name intake rollback-safe SQL test added.
-- [x] Zoho report/PDF-label intake compatibility added.
-- [x] Zoho report/PDF-label rollback-safe SQL test added.
-- [x] Zoho-shaped intake now treated as compatibility/import/dry-run support, not the preferred future dependency.
+- [x] Legacy Zoho-shaped application field mapping documentation exists for compatibility/import reference only.
+- [x] `core_ingest_zoho_application` exists for Zoho-shaped compatibility/import/dry-run support only.
+- [x] Zoho-shaped intake tests exist as compatibility tests only.
 - [x] Core-native private application entry plan added: `docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
 - [x] Core-native manual application RPC added: `core_create_application_manual`.
 - [x] Core-native manual application rollback-safe SQL test added.
@@ -112,9 +111,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Guarded local/development endpoint tested with fake report-label payload.
 - [x] Intake creates buyer, family, application, application sections, event, and audit records.
 - [x] Local-only endpoint verification script added using fake report-label data.
-- [ ] Confirm exact live Zoho webhook/API payload before any live connection.
-- [ ] Define failed-intake retry/dead-letter behavior.
-- [ ] Define duplicate application handling for repeated Zoho submissions.
+- [ ] Define failed-intake retry/dead-letter behavior for Core-native intake.
+- [ ] Define duplicate application handling for repeated Core-native submissions.
 
 ### 1.3 Controlled Local/Dev Write Foundations
 
@@ -140,8 +138,13 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Reservation cancellation rollback-safe SQL test added.
 - [x] Cancellation preserves ledger rows and does not imply refunds, fees, chargebacks, documents, or messages.
 - [x] Puppy release on cancellation is explicit and protected when another active reservation exists.
+- [x] Controlled go-home detail update RPC added: `core_update_go_home_detail`.
+- [x] Controlled go-home detail update rollback-safe SQL test added.
+- [x] `/staff/go-home` owner/admin go-home detail form added.
+- [x] Go-home detail update manually verified locally: form save created one effective read-model row and triggered no external systems.
+- [~] Go-home checklist item RPC/table added; SQL test and UI wiring are next.
 - [ ] Define broader server-side write-tool authorization/error pattern.
-- [ ] Add low-risk kennel tools only after application/reservation/payment flow is stable.
+- [ ] Add low-risk kennel tools only after application/reservation/payment/go-home flow is stable.
 - [ ] Prevent direct AI/database writes.
 
 ### 1.4 Financial Foundation
@@ -186,6 +189,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dedicated `/staff/reservations` page added for reservation review, payment entry, and guarded cancellation.
 - [x] Dedicated `/staff/payments` page added for local payment entry and ledger activity.
 - [x] Dedicated `/staff/notifications` page added for communication preview, rules, templates, and attempt logs.
+- [x] Dedicated `/staff/go-home` page added for go-home detail review and owner/admin controlled updates.
 - [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
@@ -219,7 +223,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Remove Resend from the active provider/script direction; Hostinger SMTP is the only planned real email provider.
 - [x] Add warm draft template migration with more complete Southwest Virginia Chihuahua customer copy and no customer-facing internal system name.
 - [x] Add warm template smoke test covering draft/preview-only flags, no customer-facing internal system name, non-tiny bodies, unique IDs, and refund safety copy.
-- [blocked] Warm template migration/test still needs local application/verification if not already run.
+- [x] Warm template migration/test verified locally.
 - [ ] Log all generated messages and staff/customer interactions.
 - [ ] Design test-send-to-owner only after warm templates and preview/blocked delivery logs are verified.
 - [blocked] Keep Hostinger SMTP disconnected until preview, override-recipient, send logging, and test-send rules are approved.
@@ -238,8 +242,12 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] `balance_cleared_status` documented as operational readiness only.
 - [x] `core_go_home_effective_view` added.
 - [x] Effective read model test covers `group_default`, `individual_override`, and `ungrouped_detail`.
-- [ ] Add local/dev go-home update action only after reservation flow is stable.
-- [ ] Add staff-facing go-home checklist workflow.
+- [x] Local/dev go-home update action added after reservation flow stabilized.
+- [x] `core_update_go_home_detail(...)` added and tested.
+- [x] `/staff/go-home` enabled in navigation.
+- [x] `/staff/go-home` owner/admin Set Go-Home Detail form added.
+- [x] Manual browser save verified a visible effective go-home row.
+- [~] `core_go_home_checklist_items` table and `core_upsert_go_home_checklist_item(...)` added; SQL test and UI wiring are next.
 - [ ] Add go-home communication/document handoff rules.
 
 ### 1.8 Phone Lookup Safety
@@ -266,7 +274,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [~] Staff profile lookup maps Supabase Auth user to `core_profiles.auth_user_id`; it currently uses service role server-side as a transitional bridge until RLS exists.
 - [~] Separate local/dev service-role usage from staging/production access patterns.
 - [x] Add per-action server-side authorization checks for current dashboard actions.
-- [x] Replace static local/development actor env usage with authenticated staff profile actors for approval, reservation creation, deposit/payment recording, and cancellation.
+- [x] Replace static local/development actor env usage with authenticated staff profile actors for approval, reservation creation, deposit/payment recording, cancellation, and go-home detail update.
 - [x] Map `auth.users.id` to active `core_profiles.auth_user_id` staff profiles for staff route access.
 - [x] Locally verify staff login and active profile mapping.
 - [x] Locally verify `core_audit_log.actor_profile_id` uses the authenticated staff profile for approval and payment recording.
@@ -278,7 +286,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Restore the local mapped profile to `owner` active after read-scope verification.
 - [x] Request-memoize staff auth/profile lookup to reduce duplicate layout/page reads while keeping server actions independently authorized.
 - [ ] Add admin/staff role assignment flow.
-- [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release.
+- [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release and go-home updates.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -303,7 +311,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Add selected real-data field review template: `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md`.
 - [x] Add rollback-only selected application dry-run intake helper.
 - [x] Decide first real data should be one or two owner-approved real application records only.
-- [ ] Export one or a few real Zoho/application records safely, only if still needed.
+- [ ] Use owner-approved Core-native records for staging when ready.
 - [blocked] Redact or handle sensitive fields during development review using the field review template before any import.
 - [ ] Validate field shapes against Core intake path chosen for staging.
 - [ ] Run local/dev dry-run import with one owner-approved local JSON payload stored outside the repository.
@@ -321,13 +329,11 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Add staff activity/audit review surface.
 - [ ] Verify reservation creation with real-like data in staging.
 - [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.
-- [ ] Add controlled go-home group/detail update action.
-- [ ] Add go-home readiness checklist workflow.
+- [x] Add controlled go-home group/detail update action foundation locally.
+- [~] Add go-home readiness checklist workflow foundation locally.
 - [ ] Add balance clearance workflow display without copying financial truth.
 - [ ] Add shared multi-puppy pickup/delivery workflow.
 - [ ] Add go-home event/audit review.
-- [ ] Decide if approved applications should update Zoho during transition or remain Core-only.
-- [ ] Keep current Zoho workflow in place during Core internal testing if still active.
 - [ ] Decide module-by-module cutover order.
 
 ## Phase 4A — Minimal Customer-Facing Application Path
@@ -380,7 +386,7 @@ Estimated target for full replacement: 4-6+ months total from current checkpoint
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
-- [ ] Zoho is not connected live.
+- [ ] Zoho is not connected live and is not part of the active lineup.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
 - [ ] Hostinger SMTP is not connected.
@@ -397,20 +403,21 @@ Estimated target for full replacement: 4-6+ months total from current checkpoint
 
 From Git Bash in the repository root, use focused validation only. Do not rerun everything after every small change.
 
-Previously verified from user command output:
-
-```bash
-cat supabase/migrations/20260526300000_core_notification_delivery_attempts.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-cat supabase/tests/core_notification_delivery_attempts_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-./scripts/record-preview-notification-attempt.sh
-npm run lint
-```
-
-Next focused validation needed for warm template refresh and latest auth/layout changes:
+Recently verified from user command output:
 
 ```bash
 cat supabase/migrations/20260526330000_warm_email_templates.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/warm_email_templates_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/migrations/20260526340000_core_update_go_home_detail.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_update_go_home_detail_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+npm run lint
+```
+
+Next focused validation needed:
+
+```bash
+cat supabase/migrations/20260526350000_core_go_home_checklist_items.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+cat supabase/tests/core_go_home_checklist_items_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
 ```
 
@@ -426,11 +433,11 @@ Do not run `supabase db reset --local` for this validation.
 ## Immediate Next Ordered Tasks
 
 1. [ ] Pull latest changes.
-2. [ ] Apply and verify warm template migration/test locally.
-3. [ ] Run `npm run lint` after latest staff auth/layout changes.
-4. [ ] Browser-check `/login`, `/staff`, `/staff/applications`, `/staff/reservations`, `/staff/payments`, and `/staff/notifications`.
-5. [ ] If route performance is still slow after `.next` clearing, reduce repeated `getDashboardData` server reads next.
-6. [ ] Only after the above are stable, choose the next checklist build item. Recommended next build: go-home staff workspace page, not test-send or SMTP.
+2. [ ] Apply and verify go-home checklist migration/test locally.
+3. [ ] Wire go-home checklist item controls into `/staff/go-home`.
+4. [ ] Run `npm run lint` after UI/server-action changes.
+5. [ ] Browser-check `/staff/go-home` and save a checklist item.
+6. [ ] Continue Core-native staff workflows only.
 
 ## Stop Conditions
 
