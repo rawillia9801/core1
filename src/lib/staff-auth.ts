@@ -32,7 +32,10 @@ type DashboardAction =
   | "record_reservation_payment"
   | "cancel_reservation"
   | "update_go_home_detail"
-  | "upsert_go_home_checklist_item";
+  | "upsert_go_home_checklist_item"
+  | "create_dog"
+  | "create_litter"
+  | "create_puppy";
 
 type DashboardActionOptions = {
   releasePuppy?: boolean;
@@ -141,6 +144,10 @@ export function canStaffPerformDashboardAction(
   }
 
   if (action === "update_go_home_detail") {
+    return false;
+  }
+
+  if (action === "create_dog" || action === "create_litter" || action === "create_puppy") {
     return false;
   }
 
