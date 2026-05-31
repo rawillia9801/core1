@@ -20,6 +20,7 @@
   - `/staff/dogs/[dogId]/edit`
   - `/staff/litters/[litterId]/edit`
   - `/staff/puppies/[puppyId]/edit`
+- The known unused `unscheduledGoHomes` variable was removed from `src/app/staff/go-home/page.tsx`.
 
 ## Audited Update / Archive Layer
 
@@ -59,8 +60,9 @@ The valid update/archive test is:
 
 - `supabase/tests/core_kennel_update_archive_records_tests.sql`
 
-## Still To Verify In Browser
+## Still To Verify Locally
 
+- Run `npm run lint` after pulling the go-home cleanup commit.
 - Save one dog record.
 - Save one litter record.
 - Save one puppy record.
@@ -80,13 +82,16 @@ Archive-style delete behavior is intentionally non-destructive:
 - Litter delete marks the litter `archived`.
 - Puppy delete marks the puppy `unavailable` and `hidden`.
 
-## Known Cleanup
-
-Remove the unused `unscheduledGoHomes` line from `src/app/staff/go-home/page.tsx`, then run `npm run lint`.
-
 ## Next Ordered Step
 
-Browser-verify the kennel record loop:
+Pull latest and verify lint:
+
+```bash
+git pull
+npm run lint
+```
+
+Then browser-verify the kennel record loop:
 
 1. Add dog.
 2. Add litter.
