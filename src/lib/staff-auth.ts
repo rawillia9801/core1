@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "./supabase/server";
 
@@ -48,7 +49,7 @@ function staffProfileLookupHeaders(serviceRoleKey: string) {
   };
 }
 
-async function readStaffProfileByAuthUserId(authUserId: string) {
+const readStaffProfileByAuthUserId = cache(async (authUserId: string) => {
   const supabaseUrl = (
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/$/, "");
@@ -83,9 +84,9 @@ async function readStaffProfileByAuthUserId(authUserId: string) {
   const rows = (await response.json()) as CoreProfileRow[];
 
   return rows[0] ?? null;
-}
+});
 
-export async function requireStaffProfile(): Promise<StaffProfile> {
+export const requireStaffProfile = cache(async (): Promise<StaffProfile> => {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -118,7 +119,7 @@ export async function requireStaffProfile(): Promise<StaffProfile> {
     role: role as StaffRole,
     status: "active",
   };
-}
+});
 
 export function canStaffPerformDashboardAction(
   staff: StaffProfile,
