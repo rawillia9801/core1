@@ -21,7 +21,7 @@ const primaryNavigation = [
   { href: "/staff/notifications", label: "Notifications", ready: true },
   { href: "/staff/phone-lookup", label: "Phone Lookup", ready: false },
   { href: "/staff/kennel-logs", label: "Kennel Logs", ready: false },
-  { href: "/staff/events", label: "Events", ready: false },
+  { href: "/staff/events", label: "Events", ready: true },
 ] as const;
 
 export default async function StaffLayout({ children }: { children: ReactNode }) {
