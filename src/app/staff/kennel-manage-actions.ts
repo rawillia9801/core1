@@ -11,8 +11,6 @@ const LITTER_STATUSES = new Set(["planned", "expected", "born", "active", "close
 const PUPPY_STATUSES = new Set(["unavailable", "available", "hold", "reserved", "placed", "kept", "deceased"]);
 const PUBLIC_LISTING_STATUSES = new Set(["private", "public", "hidden", "coming_soon"]);
 
-type KennelTable = "core_dogs" | "core_litters" | "core_puppies";
-
 type KennelPath = "/staff/dogs" | "/staff/litters" | "/staff/puppies";
 
 function logKennelManageFailure(reason: string, details?: Record<string, unknown>) {
@@ -38,12 +36,11 @@ function getActionConfig() {
   return { restUrl: `${supabaseUrl}/rest/v1`, serviceRoleKey };
 }
 
-function serverHeaders(serviceRoleKey: string, prefer?: string) {
+function serverHeaders(serviceRoleKey: string) {
   return {
     apikey: serviceRoleKey,
     authorization: `Bearer ${serviceRoleKey}`,
     "content-type": "application/json",
-    ...(prefer ? { Prefer: prefer } : {}),
   };
 }
 
@@ -127,21 +124,22 @@ function cleanOptionalInteger(value: FormDataEntryValue | null) {
   return { valid: true, value: numberValue };
 }
 
-async function patchRow(table: KennelTable, id: string, payload: Record<string, unknown>) {
+async function postRpc(functionName: string, body: Record<string, unknown>) {
   const { restUrl, serviceRoleKey } = getActionConfig();
-  const url = new URL(`${restUrl}/${table}`);
-  url.searchParams.set("id", `eq.${id}`);
-
-  const response = await fetch(url, {
-    method: "PATCH",
-    headers: serverHeaders(serviceRoleKey, "return=minimal"),
-    body: JSON.stringify(payload),
+  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
+    method: "POST",
+    headers: serverHeaders(serviceRoleKey),
+    body: JSON.stringify(body),
     cache: "no-store",
   });
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    logKennelManageFailure("kennel row patch failed", { table, id, status: response.status, body });
+    const responseBody = await response.text().catch(() => "");
+    logKennelManageFailure("kennel management RPC failed", {
+      functionName,
+      httpStatus: response.status,
+      responseBody,
+    });
     return false;
   }
 
@@ -149,7 +147,7 @@ async function patchRow(table: KennelTable, id: string, payload: Record<string, 
 }
 
 export async function updateDog(formData: FormData) {
-  await requireOwnerOrAdmin("/staff/dogs", "dog");
+  const staff = await requireOwnerOrAdmin("/staff/dogs", "dog");
 
   const dogId = cleanRequiredUuid(formData.get("dogId"));
   const callName = cleanText(formData.get("callName"), 120);
@@ -174,16 +172,18 @@ export async function updateDog(formData: FormData) {
     redirect("/staff/dogs?dog=invalid_input");
   }
 
-  const ok = await patchRow("core_dogs", dogId.value, {
-    call_name: callName.value || null,
-    registered_name: registeredName.value || null,
-    sex: sex || null,
-    color: color.value || null,
-    coat_type: coatType.value || null,
-    birth_at: birthAt.value,
-    status,
-    external_reference: externalReference.value || null,
-    notes: notes.value || null,
+  const ok = await postRpc("core_update_dog", {
+    p_dog_id: dogId.value,
+    p_actor_profile_id: staff.id,
+    p_call_name: callName.value || null,
+    p_registered_name: registeredName.value || null,
+    p_sex: sex || null,
+    p_color: color.value || null,
+    p_coat_type: coatType.value || null,
+    p_birth_at: birthAt.value,
+    p_status: status,
+    p_external_reference: externalReference.value || null,
+    p_notes: notes.value || null,
   });
 
   revalidatePath("/staff/dogs");
@@ -192,21 +192,25 @@ export async function updateDog(formData: FormData) {
 }
 
 export async function archiveDog(formData: FormData) {
-  await requireOwnerOrAdmin("/staff/dogs", "dog");
+  const staff = await requireOwnerOrAdmin("/staff/dogs", "dog");
   const dogId = cleanRequiredUuid(formData.get("dogId"));
 
   if (!dogId.valid) {
     redirect("/staff/dogs?dog=invalid_input");
   }
 
-  const ok = await patchRow("core_dogs", dogId.value, { status: "inactive" });
+  const ok = await postRpc("core_archive_dog", {
+    p_dog_id: dogId.value,
+    p_actor_profile_id: staff.id,
+  });
+
   revalidatePath("/staff/dogs");
   revalidatePath("/staff/litters");
   redirect(`/staff/dogs?dog=${ok ? "deleted" : "error"}`);
 }
 
 export async function updateLitter(formData: FormData) {
-  await requireOwnerOrAdmin("/staff/litters", "litter");
+  const staff = await requireOwnerOrAdmin("/staff/litters", "litter");
 
   const litterId = cleanRequiredUuid(formData.get("litterId"));
   const litterName = cleanText(formData.get("litterName"), 160);
@@ -238,19 +242,21 @@ export async function updateLitter(formData: FormData) {
     redirect("/staff/litters?litter=invalid_counts");
   }
 
-  const ok = await patchRow("core_litters", litterId.value, {
-    litter_name: litterName.value || null,
-    dam_id: damId.value,
-    sire_id: sireId.value,
-    expected_birth_at: expectedBirthAt.value,
-    birth_at: birthAt.value,
-    total_puppies: totalPuppies.value,
-    female_count: femaleCount.value,
-    male_count: maleCount.value,
-    status,
-    details_pending: detailsPending,
-    external_reference: externalReference.value || null,
-    notes: notes.value || null,
+  const ok = await postRpc("core_update_litter", {
+    p_litter_id: litterId.value,
+    p_actor_profile_id: staff.id,
+    p_litter_name: litterName.value || null,
+    p_dam_id: damId.value,
+    p_sire_id: sireId.value,
+    p_expected_birth_at: expectedBirthAt.value,
+    p_birth_at: birthAt.value,
+    p_total_puppies: totalPuppies.value,
+    p_female_count: femaleCount.value,
+    p_male_count: maleCount.value,
+    p_status: status,
+    p_details_pending: detailsPending,
+    p_external_reference: externalReference.value || null,
+    p_notes: notes.value || null,
   });
 
   revalidatePath("/staff/litters");
@@ -259,21 +265,25 @@ export async function updateLitter(formData: FormData) {
 }
 
 export async function archiveLitter(formData: FormData) {
-  await requireOwnerOrAdmin("/staff/litters", "litter");
+  const staff = await requireOwnerOrAdmin("/staff/litters", "litter");
   const litterId = cleanRequiredUuid(formData.get("litterId"));
 
   if (!litterId.valid) {
     redirect("/staff/litters?litter=invalid_input");
   }
 
-  const ok = await patchRow("core_litters", litterId.value, { status: "archived" });
+  const ok = await postRpc("core_archive_litter", {
+    p_litter_id: litterId.value,
+    p_actor_profile_id: staff.id,
+  });
+
   revalidatePath("/staff/litters");
   revalidatePath("/staff/puppies");
   redirect(`/staff/litters?litter=${ok ? "deleted" : "error"}`);
 }
 
 export async function updatePuppy(formData: FormData) {
-  await requireOwnerOrAdmin("/staff/puppies", "puppy");
+  const staff = await requireOwnerOrAdmin("/staff/puppies", "puppy");
 
   const puppyId = cleanRequiredUuid(formData.get("puppyId"));
   const litterId = cleanOptionalUuid(formData.get("litterId"));
@@ -301,19 +311,21 @@ export async function updatePuppy(formData: FormData) {
     redirect("/staff/puppies?puppy=invalid_input");
   }
 
-  const ok = await patchRow("core_puppies", puppyId.value, {
-    litter_id: litterId.value,
-    name: name.value || null,
-    collar_color: collarColor.value || null,
-    sex: sex || null,
-    color: color.value || null,
-    coat_type: coatType.value || null,
-    birth_at: birthAt.value,
-    status,
-    health_status: healthStatus.value || null,
-    public_listing_status: publicListingStatus,
-    external_reference: externalReference.value || null,
-    notes: notes.value || null,
+  const ok = await postRpc("core_update_puppy", {
+    p_puppy_id: puppyId.value,
+    p_actor_profile_id: staff.id,
+    p_litter_id: litterId.value,
+    p_name: name.value || null,
+    p_collar_color: collarColor.value || null,
+    p_sex: sex || null,
+    p_color: color.value || null,
+    p_coat_type: coatType.value || null,
+    p_birth_at: birthAt.value,
+    p_status: status,
+    p_health_status: healthStatus.value || null,
+    p_public_listing_status: publicListingStatus,
+    p_external_reference: externalReference.value || null,
+    p_notes: notes.value || null,
   });
 
   revalidatePath("/staff/puppies");
@@ -322,17 +334,18 @@ export async function updatePuppy(formData: FormData) {
 }
 
 export async function archivePuppy(formData: FormData) {
-  await requireOwnerOrAdmin("/staff/puppies", "puppy");
+  const staff = await requireOwnerOrAdmin("/staff/puppies", "puppy");
   const puppyId = cleanRequiredUuid(formData.get("puppyId"));
 
   if (!puppyId.valid) {
     redirect("/staff/puppies?puppy=invalid_input");
   }
 
-  const ok = await patchRow("core_puppies", puppyId.value, {
-    status: "unavailable",
-    public_listing_status: "hidden",
+  const ok = await postRpc("core_archive_puppy", {
+    p_puppy_id: puppyId.value,
+    p_actor_profile_id: staff.id,
   });
+
   revalidatePath("/staff/puppies");
   revalidatePath("/staff/litters");
   redirect(`/staff/puppies?puppy=${ok ? "deleted" : "error"}`);
