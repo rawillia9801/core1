@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 const primaryNavigation = [
   { href: "/staff", label: "Dashboard", ready: true },
   { href: "/staff/applications", label: "Applications", ready: true },
-  { href: "/staff/buyers", label: "Buyers", ready: false },
-  { href: "/staff/families", label: "Families", ready: false },
+  { href: "/staff/buyers", label: "Buyers", ready: true },
+  { href: "/staff/families", label: "Families", ready: true },
   { href: "/staff/dogs", label: "Dogs", ready: true },
   { href: "/staff/litters", label: "Litters", ready: true },
   { href: "/staff/puppies", label: "Puppies", ready: true },
