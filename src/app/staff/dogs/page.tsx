@@ -73,13 +73,11 @@ function Badge({ children }: { children: React.ReactNode }) {
 }
 
 function ResultMessage({ value }: { value?: string }) {
-  if (value === "success") {
-    return <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Dog record created in Core.</p>;
-  }
-
+  if (value === "success") return <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Dog record created in Core.</p>;
+  if (value === "updated") return <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Dog record updated in Core.</p>;
+  if (value === "deleted") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Dog record was marked inactive in Core.</p>;
   if (!value) return null;
-
-  return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Dog create result: {value}</p>;
+  return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Dog action result: {value}</p>;
 }
 
 export default async function StaffDogsPage({ searchParams }: { searchParams: Promise<{ dog?: string }> }) {
@@ -99,7 +97,7 @@ export default async function StaffDogsPage({ searchParams }: { searchParams: Pr
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Dogs</p>
               <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Dogs Workspace</h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">Real Core dog records for dams, sires, adults, and retired dogs. Add actions create real Core rows only.</p>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">Real Core dog records for dams, sires, adults, and retired dogs. Add/edit actions update real Core rows only.</p>
             </div>
             <Link href="/staff/dogs/new" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Add Dog</Link>
           </div>
@@ -107,7 +105,7 @@ export default async function StaffDogsPage({ searchParams }: { searchParams: Pr
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Real data only</p>
-          <p className="mt-2 text-sm leading-6">This page reads and creates real Core dog records. It does not send messages, create documents, move payments, update public listings, or touch external systems.</p>
+          <p className="mt-2 text-sm leading-6">This page reads and updates real Core dog records. It does not send messages, create documents, move payments, update public listings, or touch external systems.</p>
         </section>
 
         <ResultMessage value={dog} />
@@ -137,6 +135,7 @@ export default async function StaffDogsPage({ searchParams }: { searchParams: Pr
                     <div><dt className="text-xs font-semibold uppercase text-slate-400">Birth date</dt><dd>{formatDate(row.birth_at)}</dd></div>
                     <div><dt className="text-xs font-semibold uppercase text-slate-400">External ref</dt><dd>{display(row.external_reference)}</dd></div>
                   </dl>
+                  <div className="mt-5 flex flex-wrap gap-2"><Link href={`/staff/dogs/${row.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit</Link></div>
                   {row.notes ? <p className="mt-4 text-sm leading-6 text-slate-600">{row.notes}</p> : null}
                 </article>
               ))}
