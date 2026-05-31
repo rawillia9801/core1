@@ -34,6 +34,7 @@ Core-native private application entry
   -> dog/litter/puppy edit/archive browser-tested
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
+  -> Documents read-only workspace added
 ```
 
 The safe communications workflow remains preview-only:
@@ -96,6 +97,8 @@ The following are implemented and have been manually or test verified in local/d
 - Events is enabled in the staff sidebar.
 - `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace.
 - Phone Lookup is enabled in the staff sidebar.
+- `/staff/documents` has been added as a read-only owner/admin document metadata inventory.
+- Documents is enabled in the staff sidebar.
 
 ## Recently Added / In Progress
 
@@ -160,7 +163,7 @@ The current lane is Core-native staff workflow completion:
 ```text
 checkpoint verified kennel/buyer/family/event workspaces
   -> Phone Lookup Safety read-only owner/admin workspace added
-  -> build Documents read-only workspace if schema is present
+  -> Documents read-only owner/admin workspace added
   -> build Messages read-only workspace if schema is present
   -> continue staff-only Core workflows
 ```
@@ -169,20 +172,16 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ## Recommended Next 7 Tasks
 
-1. **Browser-check Phone Lookup Safety**
-   - Confirm `/staff/phone-lookup` loads for owner/admin.
+1. **Browser-check Documents**
+   - Confirm `/staff/documents` loads for owner/admin.
    - Confirm staff role sees only the restricted message.
-   - Confirm no Twilio, external lookup, messages, or customer contact exists.
+   - Confirm no document generation, signature request, upload, email, portal link, or external provider behavior exists.
 
-2. **Build Documents read-only workspace if schema is present**
-   - Read existing Core document records only.
-   - Do not generate documents or connect a signature provider.
-
-3. **Build Messages read-only workspace if schema is present**
+2. **Build Messages read-only workspace if schema is present**
    - Read existing Core communication/message records only.
    - Do not send email, SMS, or customer messages.
 
-4. **Continue staff-only workflows only**
+3. **Continue staff-only workflows only**
    - Keep all new pages authenticated, read-first, real-data-only, and side-effect free unless a later explicit write task is approved.
 
 ## Estimate To Internal Local Completion
@@ -193,8 +192,7 @@ Estimated remaining time: **1 to 2 weeks** of focused work.
 
 Main remaining items:
 
-- Browser-check Phone Lookup Safety read-only workspace.
-- Build Documents read-only workspace if schema is present.
+- Browser-check Documents read-only workspace.
 - Build Messages read-only workspace if schema is present.
 - Finish unauthorized-role verification for current actions.
 - Keep owner/admin audit visibility restricted.
@@ -277,10 +275,9 @@ The biggest schedule risks are:
 Stay on this exact order:
 
 ```text
-1. Browser-check Phone Lookup Safety as a read-only owner/admin workspace.
-2. Build Documents as a read-only workspace if the schema is present.
-3. Build Messages as a read-only workspace if the schema is present.
-4. Continue Core-native staff workflows only.
+1. Browser-check Documents as a read-only owner/admin workspace.
+2. Build Messages as a read-only workspace if the schema is present.
+3. Continue Core-native staff workflows only.
 ```
 
 Do not connect Hostinger SMTP yet.

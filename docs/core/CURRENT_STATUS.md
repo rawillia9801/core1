@@ -78,6 +78,8 @@ Verified local behavior:
 - Events is enabled in the staff sidebar.
 - `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace using existing Core phone lookup views.
 - Phone Lookup is enabled in the staff sidebar.
+- `/staff/documents` has been added as a read-only owner/admin document metadata inventory using existing Core document tables.
+- Documents is enabled in the staff sidebar.
 
 ## Current Verified Communications Workflow
 
@@ -216,6 +218,7 @@ Implemented staff auth/access pieces:
 - Owner/admin users keep full current dashboard read surface.
 - Staff users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
 - `/staff/phone-lookup` is restricted to owner/admin; staff-role users see a restricted message and do not fetch phone lookup rows.
+- `/staff/documents` is restricted to owner/admin; staff-role users see a restricted message and do not fetch document rows.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
 - Go-home checklist updates are allowed for operational staff.
@@ -262,8 +265,8 @@ Core-native staff operating system foundation
   -> kennel add/edit/archive browser-tested
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
-  -> Documents read-only workspace next
-  -> Messages read-only workspace after that
+  -> Documents read-only workspace added
+  -> Messages read-only workspace next
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
@@ -271,8 +274,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ## Current Recommended Next Task
 
 1. Pull latest changes.
-2. Browser-check `/staff/phone-lookup` as owner/admin and confirm the read-only boundary text, summary cards, records/empty state, and readiness lane.
-3. Continue the non-drifting read-only lane with Documents, then Messages, unless blocked by missing schema.
+2. Browser-check `/staff/documents` as owner/admin and confirm the read-only boundary text, summary cards, records/empty state, and readiness lane.
+3. Continue the non-drifting read-only lane with Messages unless blocked by missing schema.
 4. Run `npm run lint`.
 
 ## Time Estimate

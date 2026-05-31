@@ -29,8 +29,8 @@ Core-native staff operating system foundation
   -> kennel add/edit/archive browser-tested
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
-  -> Documents read-only workspace next
-  -> Messages read-only workspace after that
+  -> Documents read-only workspace added
+  -> Messages read-only workspace next
   -> then continue Core-native staff workflows only
 ```
 
@@ -200,6 +200,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Events is enabled in the staff sidebar.
 - [x] Dedicated `/staff/phone-lookup` page added as a read-only owner/admin Phone Lookup Safety workspace.
 - [x] Phone Lookup is enabled in the staff sidebar.
+- [x] Dedicated `/staff/documents` page added as a read-only owner/admin document metadata inventory.
+- [x] Documents is enabled in the staff sidebar.
 - [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
@@ -273,6 +275,17 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Build server-side phone lookup endpoint.
 - [ ] Add staff routing behavior for ambiguous matches.
 - [blocked] Connect Twilio only after endpoint and verification workflow are tested.
+
+### 1.9 Documents Read-Only Workspace
+
+- [x] `core_documents` and `core_document_versions` schema confirmed in the Core baseline.
+- [x] `/staff/documents` added as a read-only owner/admin workspace.
+- [x] Documents sidebar link enabled after the page was built.
+- [x] Page reads existing Core document metadata and document version metadata only.
+- [x] Page does not generate documents, request signatures, upload files, expose portal links, send email, or call external providers.
+- [x] Staff role is restricted from document inventory details.
+- [ ] Browser-check `/staff/documents` as owner/admin.
+- [ ] Design future document generation/signature/upload/storage rules only after explicit approval.
 
 ## Phase 2 — Staff-Only Staging With Selected Real Data
 
@@ -445,10 +458,10 @@ Do not run `supabase db reset --local` for this validation.
 ## Immediate Next Ordered Tasks
 
 1. [ ] Pull latest changes.
-2. [ ] Browser-check `/staff/phone-lookup` as owner/admin.
-3. [ ] Keep Phone Lookup Safety read-only and owner/admin restricted; do not connect Twilio or send messages.
+2. [ ] Browser-check `/staff/documents` as owner/admin.
+3. [ ] Keep Documents read-only and owner/admin restricted; do not generate, sign, upload, email, or expose portal links.
 4. [ ] Run `npm run lint` after UI changes.
-5. [ ] Continue with Documents read-only workspace, then Messages read-only workspace, unless blocked by missing schema.
+5. [ ] Continue with Messages read-only workspace unless blocked by missing schema.
 
 ## Stop Conditions
 
