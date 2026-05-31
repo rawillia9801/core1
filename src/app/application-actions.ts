@@ -10,7 +10,13 @@ import {
 
 const APPROVABLE_STATUSES = new Set(["received", "needs_review"]);
 const CANCELLABLE_RESERVATION_STATUSES = new Set(["reserved", "pending"]);
+const GO_HOME_INELIGIBLE_RESERVATION_STATUSES = new Set(["cancelled", "void", "released"]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const GO_HOME_METHODS = new Set(["pickup", "delivery", "meetup", "transport"]);
+const GO_HOME_STATUSES = new Set(["pending", "scheduled", "confirmed", "ready", "completed", "delayed", "cancelled"]);
+const GO_HOME_CHECKLIST_STATUSES = new Set(["not_started", "in_progress", "needs_review", "complete"]);
+const GO_HOME_BALANCE_STATUSES = new Set(["unknown", "not_cleared", "pending_review", "cleared"]);
 
 type ApplicationStatusRow = {
   status: string | null;
@@ -50,6 +56,12 @@ function logPaymentFailure(reason: string, details?: Record<string, unknown>) {
 function logCancellationFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
     console.error("[core cancellation]", reason, details ?? {});
+  }
+}
+
+function logGoHomeFailure(reason: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error("[core go-home]", reason, details ?? {});
   }
 }
 
@@ -233,6 +245,22 @@ function parseOptionalNonNegativeDollars(value: FormDataEntryValue | null) {
   }
 
   return { valid: true, value: cents };
+}
+
+function parseOptionalLocalDateTime(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim();
+
+  if (!text) {
+    return { valid: true, value: null };
+  }
+
+  const parsed = new Date(text);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return { valid: false, value: null };
+  }
+
+  return { valid: true, value: parsed.toISOString() };
 }
 
 export async function createReservation(formData: FormData) {
@@ -650,4 +678,142 @@ export async function cancelReservation(formData: FormData) {
   }
 
   redirect(`/staff?cancellation=${outcome}`);
+}
+
+export async function updateGoHomeDetail(formData: FormData) {
+  const reservationId = String(formData.get("reservationId") ?? "").trim();
+  const method = String(formData.get("method") ?? "").trim().toLowerCase();
+  const plannedAt = parseOptionalLocalDateTime(formData.get("plannedAt"));
+  const location = String(formData.get("location") ?? "").trim();
+  const status = String(formData.get("status") ?? "pending").trim().toLowerCase();
+  const checklistStatus = String(formData.get("checklistStatus") ?? "").trim().toLowerCase();
+  const balanceClearedStatus = String(formData.get("balanceClearedStatus") ?? "").trim().toLowerCase();
+  const contactNotes = String(formData.get("contactNotes") ?? "").trim();
+  const individualNotes = String(formData.get("individualNotes") ?? "").trim();
+  let outcome = "error";
+  let staff: StaffProfile | null = null;
+
+  try {
+    staff = await requireAuthorizedDashboardStaff("update_go_home_detail", logGoHomeFailure);
+  } catch (error) {
+    logGoHomeFailure("go-home staff auth check failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
+  }
+
+  if (!staff) {
+    redirect("/staff/go-home?goHome=unauthorized");
+  }
+
+  if (!UUID_PATTERN.test(reservationId)) {
+    logGoHomeFailure("invalid reservation id submitted", { reservationId });
+    redirect("/staff/go-home?goHome=invalid_input");
+  }
+
+  if (method && !GO_HOME_METHODS.has(method)) {
+    logGoHomeFailure("invalid go-home method submitted", { reservationId, method });
+    redirect("/staff/go-home?goHome=invalid_input");
+  }
+
+  if (!plannedAt.valid) {
+    logGoHomeFailure("invalid go-home date/time submitted", { reservationId });
+    redirect("/staff/go-home?goHome=invalid_datetime");
+  }
+
+  if (!status || !GO_HOME_STATUSES.has(status)) {
+    logGoHomeFailure("invalid go-home status submitted", { reservationId, status });
+    redirect("/staff/go-home?goHome=invalid_input");
+  }
+
+  if (checklistStatus && !GO_HOME_CHECKLIST_STATUSES.has(checklistStatus)) {
+    logGoHomeFailure("invalid checklist status submitted", { reservationId, checklistStatus });
+    redirect("/staff/go-home?goHome=invalid_input");
+  }
+
+  if (balanceClearedStatus && !GO_HOME_BALANCE_STATUSES.has(balanceClearedStatus)) {
+    logGoHomeFailure("invalid balance cleared status submitted", { reservationId, balanceClearedStatus });
+    redirect("/staff/go-home?goHome=invalid_input");
+  }
+
+  if (location.length > 500 || contactNotes.length > 1000 || individualNotes.length > 1000) {
+    logGoHomeFailure("bounded go-home input exceeded maximum length", {
+      reservationId,
+      locationTooLong: location.length > 500,
+      contactNotesTooLong: contactNotes.length > 1000,
+      individualNotesTooLong: individualNotes.length > 1000,
+    });
+    redirect("/staff/go-home?goHome=invalid_input");
+  }
+
+  try {
+    const { restUrl, serviceRoleKey } = getDashboardActionConfig("Go-home update", logGoHomeFailure);
+    const headers = serverHeaders(serviceRoleKey);
+    const reservationResponse = await fetch(
+      `${restUrl}/core_reservations?select=status&id=eq.${reservationId}`,
+      { headers, cache: "no-store" },
+    );
+
+    if (!reservationResponse.ok) {
+      const responseBody = await reservationResponse.text().catch(() => "");
+      logGoHomeFailure("reservation lookup failed", {
+        reservationId,
+        httpStatus: reservationResponse.status,
+        responseBody,
+      });
+    } else {
+      const rows = (await reservationResponse.json()) as ReservationStatusRow[];
+      const reservation = rows[0];
+      const reservationStatus = reservation?.status?.toLowerCase();
+
+      if (!reservation) {
+        logGoHomeFailure("reservation lookup returned no row", { reservationId });
+        outcome = "not_found";
+      } else if (!reservationStatus || GO_HOME_INELIGIBLE_RESERVATION_STATUSES.has(reservationStatus)) {
+        logGoHomeFailure("reservation is not eligible for go-home update", {
+          reservationId,
+          status: reservation.status,
+        });
+        outcome = "not_eligible";
+      } else {
+        const rpcResponse = await fetch(`${restUrl}/rpc/core_update_go_home_detail`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            p_reservation_id: reservationId,
+            p_actor_profile_id: staff.id,
+            p_method: method || null,
+            p_planned_at: plannedAt.value,
+            p_location: location || null,
+            p_status: status,
+            p_checklist_status: checklistStatus || null,
+            p_balance_cleared_status: balanceClearedStatus || null,
+            p_contact_notes: contactNotes || null,
+            p_individual_notes: individualNotes || null,
+          }),
+          cache: "no-store",
+        });
+
+        if (rpcResponse.ok) {
+          revalidatePath("/staff");
+          revalidatePath("/staff/go-home");
+          outcome = "success";
+        } else {
+          const responseBody = await rpcResponse.text().catch(() => "");
+          logGoHomeFailure("go-home RPC failed", {
+            reservationId,
+            httpStatus: rpcResponse.status,
+            responseBody,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    logGoHomeFailure("go-home action threw an error", {
+      reservationId,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+
+  redirect(`/staff/go-home?goHome=${outcome}`);
 }
