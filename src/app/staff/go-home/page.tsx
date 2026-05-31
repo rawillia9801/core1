@@ -219,7 +219,6 @@ export default async function StaffGoHomePage({
   const dashboard = await getDashboardData(staff);
   const { goHome, checklist } = await searchParams;
   const scheduledGoHomes = dashboard.goHomes.filter((goHomeRow) => goHomeRow.time !== "Not scheduled");
-  const unscheduledGoHomes = dashboard.goHomes.filter((goHomeRow) => goHomeRow.time === "Not scheduled");
   const activeReservations = dashboard.reservations.filter(
     (reservation) => !["cancelled", "void", "released"].includes(reservation.status.toLowerCase()),
   );
