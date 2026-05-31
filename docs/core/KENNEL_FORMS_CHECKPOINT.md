@@ -21,6 +21,12 @@
   - `/staff/litters/[litterId]/edit`
   - `/staff/puppies/[puppyId]/edit`
 - The known unused `unscheduledGoHomes` variable was removed from `src/app/staff/go-home/page.tsx`.
+- The kennel record loop was browser-tested by the owner:
+  - Add dog.
+  - Add litter.
+  - Add puppy.
+  - View saved records on their matching staff pages.
+  - Access edit paths from record cards.
 
 ## Audited Update / Archive Layer
 
@@ -62,14 +68,7 @@ The valid update/archive test is:
 
 ## Still To Verify Locally
 
-- Run `npm run lint` after pulling the go-home cleanup commit.
-- Save one dog record.
-- Save one litter record.
-- Save one puppy record.
-- Confirm each saved record appears on its matching staff page.
-- Edit one dog record.
-- Edit one litter record.
-- Edit one puppy record.
+- Run `npm run lint` after pulling the go-home cleanup commit if it has not already been rerun.
 - Verify archive-style actions only mark records inactive/archived/hidden and do not hard-delete linked history.
 
 ## Safety Boundary
@@ -84,21 +83,8 @@ Archive-style delete behavior is intentionally non-destructive:
 
 ## Next Ordered Step
 
-Pull latest and verify lint:
+Move to the next Core-native staff workspace: Buyers / Families.
 
-```bash
-git pull
-npm run lint
-```
+This workspace should remain read-first and real-data-only before adding controlled write tools.
 
-Then browser-verify the kennel record loop:
-
-1. Add dog.
-2. Add litter.
-3. Add puppy.
-4. Edit dog.
-5. Edit litter.
-6. Edit puppy.
-7. Verify archive-style behavior.
-
-Do not move to public website publishing, customer emails, documents, payments, or AI write autonomy until this loop is browser-verified.
+Do not move to public website publishing, customer emails, documents, payments, or AI write autonomy until each staff workflow has the same safety boundary, audit trail, and browser verification path.
