@@ -31,6 +31,9 @@ Core-native private application entry
   -> go-home checklist SQL/UI foundation
   -> dog/litter/puppy create RPC verification
   -> dog/litter/puppy create forms added
+  -> dog/litter/puppy edit/archive browser-tested
+  -> buyers/families/events read-only workspaces verified
+  -> Phone Lookup Safety read-only workspace added
 ```
 
 The safe communications workflow remains preview-only:
@@ -84,10 +87,19 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/dogs`, `/staff/litters`, and `/staff/puppies` read real Core rows only.
 - `/staff/dogs/new`, `/staff/litters/new`, and `/staff/puppies/new` create real Core records through owner/admin-only server actions.
 - Dogs, Litters, and Puppies are enabled in the staff sidebar.
+- Dog, litter, and puppy edit/archive pages exist and have been browser-tested.
+- Audited kennel update/archive SQL verification passed with `event_check = 6` and `audit_check = 6`.
+- Obsolete broken kennel tests were removed.
+- `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
+- `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
+- `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
+- Events is enabled in the staff sidebar.
+- `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace.
+- Phone Lookup is enabled in the staff sidebar.
 
 ## Recently Added / In Progress
 
-The kennel record management loop is currently active.
+The kennel record management loop is now verified locally.
 
 Recently added:
 
@@ -100,12 +112,13 @@ Recently added:
 - Puppy record Edit links on `/staff/puppies`.
 - Dog edit page foundation at `/staff/dogs/[dogId]/edit`.
 
-Still in progress:
+Verified:
 
-- Complete browser verification for Add Dog, Add Litter, and Add Puppy.
-- Complete edit/archive pages for litters and puppies.
-- Browser-verify edit/archive behavior for dogs, litters, and puppies.
-- Ensure edit/archive actions write sufficient event/audit records before staging.
+- Add Dog, Add Litter, and Add Puppy create real Core records.
+- Dog, litter, and puppy edit/archive pages work.
+- Kennel update/archive actions write event/audit rows.
+- The focused audited kennel update/archive test passed with `event_check = 6` and `audit_check = 6`.
+- Obsolete broken kennel tests were removed.
 
 Current delete behavior is intentionally archive-style, not hard deletion:
 
@@ -119,8 +132,7 @@ This avoids accidentally destroying linked history.
 
 ## Known Cleanup
 
-- `/staff/go-home/page.tsx` still has one known unused variable warning for `unscheduledGoHomes` until that line is removed locally.
-- Because that warning exists, `npm run lint` will continue to report one warning until cleanup.
+- The known `/staff/go-home/page.tsx` unused variable warning was removed.
 
 ## Still Not Connected
 
@@ -146,11 +158,10 @@ The following remain intentionally disconnected:
 The current lane is Core-native staff workflow completion:
 
 ```text
-finish kennel add/edit/archive loop
-  -> browser-verify dog/litter/puppy creates
-  -> browser-verify dog/litter/puppy edits/archive actions
-  -> clean known go-home lint warning
-  -> update checkpoint docs
+checkpoint verified kennel/buyer/family/event workspaces
+  -> Phone Lookup Safety read-only owner/admin workspace added
+  -> build Documents read-only workspace if schema is present
+  -> build Messages read-only workspace if schema is present
   -> continue staff-only Core workflows
 ```
 
@@ -158,37 +169,21 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ## Recommended Next 7 Tasks
 
-1. **Finish kennel edit/archive pages**
-   - Complete `/staff/litters/[litterId]/edit`.
-   - Complete `/staff/puppies/[puppyId]/edit`.
-   - Confirm `/staff/dogs/[dogId]/edit` opens and saves.
+1. **Browser-check Phone Lookup Safety**
+   - Confirm `/staff/phone-lookup` loads for owner/admin.
+   - Confirm staff role sees only the restricted message.
+   - Confirm no Twilio, external lookup, messages, or customer contact exists.
 
-2. **Browser-save real local kennel records**
-   - Add one real local dog through `/staff/dogs/new`.
-   - Add one real local litter through `/staff/litters/new`.
-   - Add one real local puppy through `/staff/puppies/new`.
-   - Confirm each row appears on its matching page.
+2. **Build Documents read-only workspace if schema is present**
+   - Read existing Core document records only.
+   - Do not generate documents or connect a signature provider.
 
-3. **Browser-verify edit/archive behavior**
-   - Edit one dog.
-   - Edit one litter.
-   - Edit one puppy.
-   - Mark one record inactive/archived/hidden only after confirming the safe archive behavior.
+3. **Build Messages read-only workspace if schema is present**
+   - Read existing Core communication/message records only.
+   - Do not send email, SMS, or customer messages.
 
-4. **Add audit/event coverage for kennel updates**
-   - Create actions already write event/audit rows through RPCs.
-   - Edit/archive actions currently use guarded table patching and should gain explicit event/audit logging before staging.
-
-5. **Clean known lint warning**
-   - Remove the unused `unscheduledGoHomes` line from `src/app/staff/go-home/page.tsx`.
-   - Run `npm run lint`.
-
-6. **Update checkpoint docs after browser verification**
-   - Update `CURRENT_STATUS.md`.
-   - Update `IMPLEMENTATION_CHECKLIST.md` or add a smaller checkpoint if the connector blocks a large replacement.
-
-7. **Continue staff-only workflows only**
-   - Likely next candidates after kennel management are Buyers/Families or go-home handoff rules.
+4. **Continue staff-only workflows only**
+   - Keep all new pages authenticated, read-first, real-data-only, and side-effect free unless a later explicit write task is approved.
 
 ## Estimate To Internal Local Completion
 
@@ -198,12 +193,11 @@ Estimated remaining time: **1 to 2 weeks** of focused work.
 
 Main remaining items:
 
-- Finish litter/puppy edit/archive pages.
-- Browser-verify kennel create/edit/archive paths.
-- Add explicit event/audit logging for kennel update/archive actions before staging.
-- Clean known lint warning.
+- Browser-check Phone Lookup Safety read-only workspace.
+- Build Documents read-only workspace if schema is present.
+- Build Messages read-only workspace if schema is present.
 - Finish unauthorized-role verification for current actions.
-- Add a few missing staff workspace surfaces such as Buyers/Families or event/audit review if needed before staging.
+- Keep owner/admin audit visibility restricted.
 
 ## Estimate To Staff-Only Staging
 
@@ -283,13 +277,10 @@ The biggest schedule risks are:
 Stay on this exact order:
 
 ```text
-1. Finish kennel edit/archive pages.
-2. Browser-save real local dog/litter/puppy records.
-3. Browser-verify edit/archive behavior.
-4. Add explicit audit/event logging for edit/archive actions before staging.
-5. Clean the known go-home lint warning.
-6. Update docs after verification.
-7. Continue Core-native staff workflows only.
+1. Browser-check Phone Lookup Safety as a read-only owner/admin workspace.
+2. Build Documents as a read-only workspace if the schema is present.
+3. Build Messages as a read-only workspace if the schema is present.
+4. Continue Core-native staff workflows only.
 ```
 
 Do not connect Hostinger SMTP yet.

@@ -45,6 +45,8 @@ Core-native private application entry
   -> effective go-home read model display
   -> go-home checklist item SQL verification
   -> kennel dog/litter/puppy create RPC verification
+  -> kennel dog/litter/puppy add/edit/archive browser verification
+  -> buyers/families/events read-only staff workspaces
 ```
 
 Verified local behavior:
@@ -65,6 +67,17 @@ Verified local behavior:
 - `core_go_home_checklist_items` migration and rollback-safe test were applied/verified locally.
 - `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` were applied and verified locally through the self-contained v2 SQL test.
 - The kennel create test confirmed dam, sire, litter, puppy, event, and audit records with rollback.
+- `/staff/dogs`, `/staff/litters`, and `/staff/puppies` are built and browser-tested.
+- Dog, litter, and puppy add forms create real Core records.
+- Dog, litter, and puppy edit/archive pages are built and browser-tested.
+- Kennel update/archive SQL verification passed with `event_check = 6` and `audit_check = 6`.
+- Obsolete broken kennel tests were removed.
+- `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
+- `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
+- `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
+- Events is enabled in the staff sidebar.
+- `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace using existing Core phone lookup views.
+- Phone Lookup is enabled in the staff sidebar.
 
 ## Current Verified Communications Workflow
 
@@ -133,7 +146,7 @@ Implemented and verified:
 
 Known cleanup:
 
-- `/staff/go-home/page.tsx` still has one known lint warning for unused `unscheduledGoHomes` until that line is removed manually.
+- The known go-home unused variable warning was removed.
 
 ## Current Kennel Records Workflow Status
 
@@ -153,13 +166,24 @@ Implemented and verified:
 - `/staff/puppies/new` exists and creates real puppy records through `createPuppy` -> `core_create_puppy(...)`.
 - Dogs, Litters, and Puppies are enabled in the staff sidebar.
 - Kennel create actions are owner/admin only.
+- Kennel add/edit/archive loop has been browser-tested.
+- Kennel update/archive verification passed with `event_check = 6` and `audit_check = 6`.
+- Obsolete broken kennel tests were removed.
 
-Pending verification:
+No kennel staff page creates customer messages, documents, payments, public website updates, or external integration actions.
 
-- Browser-save one real local dog through `/staff/dogs/new`.
-- Browser-save one real local litter through `/staff/litters/new`.
-- Browser-save one real local puppy through `/staff/puppies/new`.
-- Run `npm run lint` after the known `/staff/go-home` line cleanup.
+## Current Buyer, Family, And Event Workspace Status
+
+Implemented and verified:
+
+- `/staff/buyers` works.
+- `/staff/families` works.
+- `/staff/events` works.
+- Events is enabled in the staff sidebar.
+- Buyers and Families are read-only, real-data-only staff workspaces.
+- Events/Audit is read-only.
+- These pages perform no external side effects: no Zoho, Twilio, email, payment, document, portal, public website, or customer-contact action.
+- Owner/admin audit visibility remains restricted.
 
 ## Current Database Foundations
 
@@ -191,6 +215,7 @@ Implemented staff auth/access pieces:
 - Dashboard reads require authenticated active staff context before broad service-role reads run.
 - Owner/admin users keep full current dashboard read surface.
 - Staff users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
+- `/staff/phone-lookup` is restricted to owner/admin; staff-role users see a restricted message and do not fetch phone lookup rows.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
 - Go-home checklist updates are allowed for operational staff.
@@ -234,8 +259,11 @@ Core-native staff operating system foundation
   -> go-home checklist SQL/UI wired
   -> kennel dog/litter/puppy create RPCs verified
   -> kennel create forms added
-  -> browser-save real kennel rows next
-  -> then continue Core-native staff workflows only
+  -> kennel add/edit/archive browser-tested
+  -> buyers/families/events read-only workspaces verified
+  -> Phone Lookup Safety read-only workspace added
+  -> Documents read-only workspace next
+  -> Messages read-only workspace after that
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
@@ -243,12 +271,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ## Current Recommended Next Task
 
 1. Pull latest changes.
-2. Browser-test `/staff/dogs/new` by saving one real local dog record.
-3. Browser-test `/staff/litters/new` by saving one real local litter record.
-4. Browser-test `/staff/puppies/new` by saving one real local puppy record.
-5. Confirm the saved rows appear on `/staff/dogs`, `/staff/litters`, and `/staff/puppies`.
-6. Remove the known unused `unscheduledGoHomes` line from `/staff/go-home/page.tsx` when accessible locally.
-7. Run `npm run lint`.
+2. Browser-check `/staff/phone-lookup` as owner/admin and confirm the read-only boundary text, summary cards, records/empty state, and readiness lane.
+3. Continue the non-drifting read-only lane with Documents, then Messages, unless blocked by missing schema.
+4. Run `npm run lint`.
 
 ## Time Estimate
 

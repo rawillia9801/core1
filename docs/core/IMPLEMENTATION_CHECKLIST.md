@@ -25,8 +25,12 @@ Core-native staff operating system foundation
   -> application/reservation/payment workflow verified
   -> preview-only communication safety verified
   -> go-home detail update verified
-  -> go-home checklist SQL test next
-  -> wire go-home checklist into /staff/go-home next
+  -> go-home checklist verified and wired
+  -> kennel add/edit/archive browser-tested
+  -> buyers/families/events read-only workspaces verified
+  -> Phone Lookup Safety read-only workspace added
+  -> Documents read-only workspace next
+  -> Messages read-only workspace after that
   -> then continue Core-native staff workflows only
 ```
 
@@ -190,6 +194,12 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dedicated `/staff/payments` page added for local payment entry and ledger activity.
 - [x] Dedicated `/staff/notifications` page added for communication preview, rules, templates, and attempt logs.
 - [x] Dedicated `/staff/go-home` page added for go-home detail review and owner/admin controlled updates.
+- [x] Dedicated `/staff/buyers` page works as a read-only, real-data-only workspace with no external side effects.
+- [x] Dedicated `/staff/families` page works as a read-only, real-data-only workspace with no external side effects.
+- [x] Dedicated `/staff/events` page works as a read-only Events/Audit workspace with no external side effects.
+- [x] Events is enabled in the staff sidebar.
+- [x] Dedicated `/staff/phone-lookup` page added as a read-only owner/admin Phone Lookup Safety workspace.
+- [x] Phone Lookup is enabled in the staff sidebar.
 - [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
@@ -257,6 +267,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] `core_phone_lookup_view` updated to redact sensitive context for ambiguous phone numbers.
 - [x] Ambiguous phone matches require verification and recommend staff routing.
 - [x] Smoke tests cover single phone match, duplicate buyer/family phone match, and family-linked profile phone match.
+- [x] Build read-only owner/admin `/staff/phone-lookup` safety workspace from existing Core views.
+- [x] Staff role is restricted from phone lookup details.
 - [ ] Design actual verification workflow.
 - [ ] Build server-side phone lookup endpoint.
 - [ ] Add staff routing behavior for ambiguous matches.
@@ -433,11 +445,10 @@ Do not run `supabase db reset --local` for this validation.
 ## Immediate Next Ordered Tasks
 
 1. [ ] Pull latest changes.
-2. [ ] Apply and verify go-home checklist migration/test locally.
-3. [ ] Wire go-home checklist item controls into `/staff/go-home`.
-4. [ ] Run `npm run lint` after UI/server-action changes.
-5. [ ] Browser-check `/staff/go-home` and save a checklist item.
-6. [ ] Continue Core-native staff workflows only.
+2. [ ] Browser-check `/staff/phone-lookup` as owner/admin.
+3. [ ] Keep Phone Lookup Safety read-only and owner/admin restricted; do not connect Twilio or send messages.
+4. [ ] Run `npm run lint` after UI changes.
+5. [ ] Continue with Documents read-only workspace, then Messages read-only workspace, unless blocked by missing schema.
 
 ## Stop Conditions
 
