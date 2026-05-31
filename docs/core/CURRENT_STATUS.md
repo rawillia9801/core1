@@ -43,6 +43,8 @@ Core-native private application entry
   -> visible ledger-derived balance reduction
   -> go-home detail update
   -> effective go-home read model display
+  -> go-home checklist item SQL verification
+  -> kennel dog/litter/puppy create RPC verification
 ```
 
 Verified local behavior:
@@ -60,6 +62,9 @@ Verified local behavior:
 - Owner/admin can save a go-home detail through `/staff/go-home`.
 - The saved go-home detail appears back through `core_go_home_effective_view`.
 - The go-home update path was locally verified with migration, rollback-safe SQL test, lint, browser load, form save, and visible saved row.
+- `core_go_home_checklist_items` migration and rollback-safe test were applied/verified locally.
+- `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` were applied and verified locally through the self-contained v2 SQL test.
+- The kennel create test confirmed dam, sire, litter, puppy, event, and audit records with rollback.
 
 ## Current Verified Communications Workflow
 
@@ -115,19 +120,46 @@ Implemented and verified:
 - One current go-home detail per reservation is enforced.
 - `core_go_home_effective_view` resolves group defaults, individual overrides, and ungrouped detail records.
 - `/staff/go-home` is enabled in the staff sidebar.
-- `/staff/go-home` shows go-home counts, scheduled/unscheduled status, readiness lane, and upcoming records.
+- `/staff/go-home` shows go-home counts, scheduled status, readiness lane, upcoming records, checklist form, and checklist records.
 - `core_update_go_home_detail(...)` creates or updates an ungrouped reservation go-home detail.
 - The go-home update RPC writes `core_events` and `core_audit_log`.
 - The go-home update RPC performs no email, SMS, document, payment, transport, or external integration action.
 - `/staff/go-home` has an owner/admin-only Set Go-Home Detail form.
 - Staff-role users can view the page but cannot update go-home details.
+- `core_go_home_checklist_items` table foundation exists.
+- `core_upsert_go_home_checklist_item(...)` controlled checklist item RPC exists.
+- Go-home checklist rollback-safe SQL test passed locally.
+- Go-home checklist UI is wired into `/staff/go-home`.
 
-Added but pending local verification:
+Known cleanup:
 
-- `core_go_home_checklist_items` table foundation.
-- `core_upsert_go_home_checklist_item(...)` controlled checklist item RPC.
+- `/staff/go-home/page.tsx` still has one known lint warning for unused `unscheduledGoHomes` until that line is removed manually.
 
-The next task is to add and verify the rollback-safe SQL test for go-home checklist items, then wire checklist item controls into `/staff/go-home`.
+## Current Kennel Records Workflow Status
+
+Implemented and verified:
+
+- `core_create_dog(...)` creates real Core dog records.
+- `core_create_litter(...)` creates real Core litter records and can link sire/dam.
+- `core_create_puppy(...)` creates real Core puppy records and can link to a litter.
+- Kennel create RPCs write `core_events` and `core_audit_log`.
+- Kennel create RPCs perform no customer messages, documents, payments, public website updates, or external integration actions.
+- Self-contained v2 rollback-safe kennel create test passed locally with `dam_check = 1`, `sire_check = 1`, `litter_check = 1`, `puppy_check = 1`, `event_check = 4`, and `audit_check = 4`.
+- `/staff/dogs` exists and reads real `core_dogs` records only.
+- `/staff/dogs/new` exists and creates real dog records through `createDog` -> `core_create_dog(...)`.
+- `/staff/litters` exists and reads real `core_litters`, `core_dogs`, and `core_puppies` records only.
+- `/staff/litters/new` exists and creates real litter records through `createLitter` -> `core_create_litter(...)`.
+- `/staff/puppies` exists and reads real `core_puppies` records only.
+- `/staff/puppies/new` exists and creates real puppy records through `createPuppy` -> `core_create_puppy(...)`.
+- Dogs, Litters, and Puppies are enabled in the staff sidebar.
+- Kennel create actions are owner/admin only.
+
+Pending verification:
+
+- Browser-save one real local dog through `/staff/dogs/new`.
+- Browser-save one real local litter through `/staff/litters/new`.
+- Browser-save one real local puppy through `/staff/puppies/new`.
+- Run `npm run lint` after the known `/staff/go-home` line cleanup.
 
 ## Current Database Foundations
 
@@ -145,7 +177,8 @@ Implemented Core database foundations include:
 - Disabled/preview email provider module.
 - `core_notification_delivery_attempts` for blocked/preview delivery logging.
 - `core_update_go_home_detail(...)` for controlled go-home detail updates.
-- `core_go_home_checklist_items` and `core_upsert_go_home_checklist_item(...)` added in GitHub, pending local test and UI wiring.
+- `core_go_home_checklist_items` and `core_upsert_go_home_checklist_item(...)` for operational go-home checklist items.
+- `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` for real owner/admin kennel record creation.
 
 ## Current Auth And Access Boundary
 
@@ -160,6 +193,8 @@ Implemented staff auth/access pieces:
 - Staff users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
+- Go-home checklist updates are allowed for operational staff.
+- Dog, litter, and puppy create actions are owner/admin only.
 
 Still incomplete:
 
@@ -184,6 +219,7 @@ The following remain intentionally disconnected:
 - Customer portal.
 - Public `/apply`.
 - Production data import.
+- Public website publishing from Core.
 - Home Assistant, cameras, smart mirror, and automations.
 
 ## Correct Non-Drift Lane
@@ -195,20 +231,24 @@ Core-native staff operating system foundation
   -> application/reservation/payment workflow verified
   -> preview-only communication safety verified
   -> go-home detail update verified
-  -> go-home checklist SQL test next
-  -> wire go-home checklist into /staff/go-home next
+  -> go-home checklist SQL/UI wired
+  -> kennel dog/litter/puppy create RPCs verified
+  -> kennel create forms added
+  -> browser-save real kennel rows next
   -> then continue Core-native staff workflows only
 ```
 
-Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, or UI polish until the relevant safety gates are complete.
+Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
 
 ## Current Recommended Next Task
 
-1. Add rollback-safe SQL test for `core_upsert_go_home_checklist_item(...)`.
-2. Apply and verify `20260526350000_core_go_home_checklist_items.sql` locally.
-3. Run the new go-home checklist test locally.
-4. Wire checklist item controls into `/staff/go-home`.
-5. Run `npm run lint`.
+1. Pull latest changes.
+2. Browser-test `/staff/dogs/new` by saving one real local dog record.
+3. Browser-test `/staff/litters/new` by saving one real local litter record.
+4. Browser-test `/staff/puppies/new` by saving one real local puppy record.
+5. Confirm the saved rows appear on `/staff/dogs`, `/staff/litters`, and `/staff/puppies`.
+6. Remove the known unused `unscheduledGoHomes` line from `/staff/go-home/page.tsx` when accessible locally.
+7. Run `npm run lint`.
 
 ## Time Estimate
 
