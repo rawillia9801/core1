@@ -12,7 +12,7 @@ const primaryNavigation = [
   { href: "/staff/families", label: "Families", ready: false },
   { href: "/staff/dogs", label: "Dogs", ready: false },
   { href: "/staff/litters", label: "Litters", ready: false },
-  { href: "/staff/puppies", label: "Puppies", ready: false },
+  { href: "/staff/puppies", label: "Puppies", ready: true },
   { href: "/staff/reservations", label: "Reservations", ready: true },
   { href: "/staff/payments", label: "Payments", ready: true },
   { href: "/staff/go-home", label: "Go-Home", ready: true },
