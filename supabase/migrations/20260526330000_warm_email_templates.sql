@@ -25,19 +25,37 @@ with template_seed (
       'application_received',
       'Application received',
       'email',
-      'We received your puppy application',
-      'Hi {{applicant_name}},
+      'Your puppy application has been received',
+      'Tiny hearts. Lifelong love.
 
-Thank you so much for sending in your puppy application. We are grateful that you are considering Southwest Virginia Chihuahua and one of our puppies for your family.
+Hi {{applicant_name}},
 
-Your application has been received and will be reviewed carefully. We look at each application with the puppy, household, timing, and long-term fit in mind. If anything is missing or if we need a little more detail, we will reach out before any next step is taken.
+We received your puppy application with Southwest Virginia Chihuahua.
 
-At this stage, no puppy has been reserved and no payment is due from this message alone. The next step is simply review and follow-up.
+Thank you for taking the time to share your information with us. Choosing the right puppy and the right family is personal to us, so we review every application carefully and look at household fit, timing, puppy availability, and long-term placement needs before moving forward.
 
-Warmly,
-Southwest Virginia Chihuahua',
+Application Details
+Applicant: {{applicant_name}}
+Email: {{applicant_email}}
+Application ID: {{application_id}}
+
+What happens next?
+
+- We will review your application and contact you if anything else is needed.
+- If approved, we will follow up with puppy availability, reservation details, and next steps.
+- You can use your puppy portal for updates, documents, payment details, and messages as your puppy moves forward.
+
+If anything on your application needs to be changed, you can reply to this email or contact us directly. We are happy to help.
+
+With care,
+Southwest Virginia Chihuahua
+
+Southwest Virginia Chihuahua
+Smart Chihuahua Care
+
+This email was sent because an application was submitted using your contact information.',
       'draft',
-      '{"preview_only": true, "send_enabled": false, "provider_connected": false, "owner_admin_approval_required": true, "category": "transactional", "merge_fields": ["applicant_name", "application_id", "business_name"], "seeded_by": "20260526330000_warm_email_templates"}'::jsonb
+      '{"preview_only": true, "send_enabled": false, "provider_connected": false, "owner_admin_approval_required": true, "category": "transactional", "merge_fields": ["applicant_name", "applicant_email", "application_id", "business_name"], "seeded_by": "20260526330000_warm_email_templates", "style_reference": "warm_puppy_application_received_card"}'::jsonb
     ),
     (
       '63000000-0000-0000-0000-000000000002'::uuid,
