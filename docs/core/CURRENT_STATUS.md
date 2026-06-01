@@ -86,6 +86,7 @@ Verified local behavior:
 - Kennel Logs is enabled in the staff sidebar.
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked against migrations after implementation.
 - `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
+- `/staff/proposed-actions` has been added as a read-only owner/admin Proposed Action Queue review workspace. Approved proposed actions do not execute business changes.
 
 ## Current Verified Communications Workflow
 
@@ -211,6 +212,7 @@ Implemented Core database foundations include:
 - `core_update_go_home_detail(...)` for controlled go-home detail updates.
 - `core_go_home_checklist_items` and `core_upsert_go_home_checklist_item(...)` for operational go-home checklist items.
 - `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` for real owner/admin kennel record creation.
+- `core_proposed_actions` plus `core_create_proposed_action(...)`, `core_approve_proposed_action(...)`, and `core_reject_proposed_action(...)` for proposal/review records only. Approval does not execute the underlying business action.
 
 ## Current Auth And Access Boundary
 
@@ -227,6 +229,7 @@ Implemented staff auth/access pieces:
 - `/staff/documents` is restricted to owner/admin; staff-role users see a restricted message and do not fetch document rows.
 - `/staff/messages` is restricted to owner/admin; staff-role users see a restricted message and do not fetch communication rows.
 - `/staff/kennel-logs` is restricted to owner/admin; staff-role users see a restricted message and do not fetch kennel history rows.
+- `/staff/proposed-actions` is restricted to owner/admin; staff-role users see a restricted message and do not fetch proposal rows.
 - `/staff/command` uses role-aware reads; owner/admin can see audit/financial/phone-sensitive summaries while staff does not fetch restricted audit or phone lookup rows.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
@@ -280,6 +283,7 @@ Core-native staff operating system foundation
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
+  -> Proposed Action Queue foundation added for proposal/review only
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
@@ -287,17 +291,17 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ## Current Recommended Next Task
 
 1. Pull latest changes.
-2. Browser-check `/staff/messages`, `/staff/kennel-logs`, and `/staff/command` as owner/admin.
-3. Review `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` before any proposed-action implementation.
+2. Apply the proposed-action migration and run the focused rollback-safe SQL test.
+3. Browser-check `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` as owner/admin.
 4. Run `npm run lint`.
 
 ## Future Command Console Planning
 
-`docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document for a future intelligent Core Command Console. It does not mark the console as built. No AI provider, model API call, autonomous action, proposed-action table, or AI write behavior has been added.
+`docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document for a future intelligent Core Command Console. It does not mark the console as a live AI operator. No AI provider, model API call, autonomous action, business action execution, or AI write behavior has been added.
 
 `/staff/command` now exists as a read-only shell only. It uses existing Core reads, shows a disabled planning input, summarizes real Core records, and clearly marks AI provider, writes, external systems, and action queues as off.
 
-`docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning for a future proposed-action lifecycle. It does not implement proposed-action tables, approval UI, AI providers, APIs, or execution behavior.
+`docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning for a future proposed-action lifecycle. The database and read-only staff review foundation now exists, but it is proposal/review only. No AI provider, API, autonomous write, business action execution, external side effect, or approval UI button behavior has been added.
 
 ## Time Estimate
 

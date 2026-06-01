@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   canViewAuditActivity,
   canViewPhoneLookup,
@@ -597,7 +598,7 @@ export default async function StaffCommandPage() {
               <SignalCard
                 title="Autonomous writes"
                 value="Off"
-                detail="No AI provider, write tools, or action queue connected."
+                detail="No AI provider, write tools, or command-created proposal behavior connected."
               />
               <SignalCard
                 title="Approval model"
@@ -687,11 +688,18 @@ export default async function StaffCommandPage() {
             </section>
 
             <section className="rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-950 shadow-sm">
-              <h2 className="text-lg font-black">Approval Queue Placeholder</h2>
+              <h2 className="text-lg font-black">Approval Queue Foundation</h2>
               <p className="mt-3 text-sm leading-7">
-                Proposed action approval queue is not implemented yet. This
-                shell creates no queue rows and executes no actions.
+                Proposed action review records are available in a separate
+                owner/admin workspace. This command shell still creates no
+                queue rows and executes no actions.
               </p>
+              <Link
+                href="/staff/proposed-actions"
+                className="mt-4 inline-flex rounded-2xl border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-950 shadow-sm"
+              >
+                Open Proposed Actions
+              </Link>
             </section>
           </section>
         </section>
