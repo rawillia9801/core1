@@ -33,6 +33,8 @@ Core-native staff operating system foundation
   -> Messages read-only workspace added
   -> Kennel Logs read-only workspace added
   -> Core Command Console planning doc added
+  -> Core Command Console read-only shell added
+  -> Proposed Action Approval Model planning doc added
   -> then continue Core-native staff workflows only
 ```
 
@@ -208,6 +210,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Messages is enabled in the staff sidebar.
 - [x] Dedicated `/staff/kennel-logs` page added as a read-only owner/admin kennel history workspace.
 - [x] Kennel Logs is enabled in the staff sidebar.
+- [x] `/staff/messages` and `/staff/kennel-logs` selected columns cross-checked against migrations after implementation.
+- [x] Dedicated `/staff/command` page added as a read-only Command Console shell.
+- [x] Command is enabled in the staff sidebar.
 - [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
@@ -316,7 +321,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ### 1.12 Future Core Command Console
 
 - [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
-- [ ] Build read-only Command Console shell only after approval.
+- [x] Read-only `/staff/command` shell added with no AI provider, no writes, no proposed-action records, and no external systems.
+- [x] Proposed Action Approval Model planning document added: `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md`.
+- [x] Build read-only Command Console shell only after approval.
+- [ ] Plan proposed action schema after approval.
 - [blocked] AI provider calls, model integrations, autonomous actions, and AI write tools remain blocked.
 
 ## Phase 2 — Staff-Only Staging With Selected Real Data
@@ -492,8 +500,9 @@ Do not run `supabase db reset --local` for this validation.
 1. [ ] Pull latest changes.
 2. [ ] Browser-check `/staff/messages` as owner/admin.
 3. [ ] Browser-check `/staff/kennel-logs` as owner/admin.
-4. [ ] Run `npm run lint` after UI changes.
-5. [ ] Review the Command Console plan before any future console implementation.
+4. [ ] Browser-check `/staff/command` as owner/admin.
+5. [ ] Run `npm run lint` after UI changes.
+6. [ ] Review the Proposed Action Approval Model before any proposed-action implementation.
 
 ## Stop Conditions
 

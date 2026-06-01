@@ -123,4 +123,6 @@ Do not implement the Command Console until these are reviewed:
 
 ## Current Status
 
-This is a planning document only. The Core Command Console is not built. No AI provider, model API call, proposed-action table, or AI write behavior has been added.
+The read-only `/staff/command` shell exists as an additional staff workspace. It does not replace `/staff`, does not connect an AI provider, does not call model APIs, does not create proposed actions, and does not write to the database.
+
+The next safe planning artifact is `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md`, which defines the future proposal, review, approval, execution, and audit model before any proposed-action implementation exists.

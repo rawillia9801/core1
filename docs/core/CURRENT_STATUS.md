@@ -84,6 +84,8 @@ Verified local behavior:
 - Messages is enabled in the staff sidebar.
 - `/staff/kennel-logs` has been added as a read-only owner/admin kennel event/audit history workspace.
 - Kennel Logs is enabled in the staff sidebar.
+- `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked against migrations after implementation.
+- `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
 
 ## Current Verified Communications Workflow
 
@@ -225,6 +227,7 @@ Implemented staff auth/access pieces:
 - `/staff/documents` is restricted to owner/admin; staff-role users see a restricted message and do not fetch document rows.
 - `/staff/messages` is restricted to owner/admin; staff-role users see a restricted message and do not fetch communication rows.
 - `/staff/kennel-logs` is restricted to owner/admin; staff-role users see a restricted message and do not fetch kennel history rows.
+- `/staff/command` uses role-aware reads; owner/admin can see audit/financial/phone-sensitive summaries while staff does not fetch restricted audit or phone lookup rows.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
 - Go-home checklist updates are allowed for operational staff.
@@ -275,6 +278,8 @@ Core-native staff operating system foundation
   -> Messages read-only workspace added
   -> Kennel Logs read-only workspace added
   -> Core Command Console planning doc added
+  -> Core Command Console read-only shell added
+  -> Proposed Action Approval Model planning doc added
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
@@ -282,13 +287,17 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ## Current Recommended Next Task
 
 1. Pull latest changes.
-2. Browser-check `/staff/messages` and `/staff/kennel-logs` as owner/admin and confirm the read-only boundary text, summary cards, records/empty state, and readiness lane.
-3. Review `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` before any future Command Console implementation.
+2. Browser-check `/staff/messages`, `/staff/kennel-logs`, and `/staff/command` as owner/admin.
+3. Review `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` before any proposed-action implementation.
 4. Run `npm run lint`.
 
 ## Future Command Console Planning
 
 `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document for a future intelligent Core Command Console. It does not mark the console as built. No AI provider, model API call, autonomous action, proposed-action table, or AI write behavior has been added.
+
+`/staff/command` now exists as a read-only shell only. It uses existing Core reads, shows a disabled planning input, summarizes real Core records, and clearly marks AI provider, writes, external systems, and action queues as off.
+
+`docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning for a future proposed-action lifecycle. It does not implement proposed-action tables, approval UI, AI providers, APIs, or execution behavior.
 
 ## Time Estimate
 

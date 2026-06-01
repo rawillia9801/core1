@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 const primaryNavigation = [
   { href: "/staff", label: "Dashboard", ready: true },
+  { href: "/staff/command", label: "Command", ready: true },
   { href: "/staff/applications", label: "Applications", ready: true },
   { href: "/staff/buyers", label: "Buyers", ready: true },
   { href: "/staff/families", label: "Families", ready: true },
