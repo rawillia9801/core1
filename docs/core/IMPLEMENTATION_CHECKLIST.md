@@ -30,7 +30,9 @@ Core-native staff operating system foundation
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
-  -> Messages read-only workspace next
+  -> Messages read-only workspace added
+  -> Kennel Logs read-only workspace added
+  -> Core Command Console planning doc added
   -> then continue Core-native staff workflows only
 ```
 
@@ -202,6 +204,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Phone Lookup is enabled in the staff sidebar.
 - [x] Dedicated `/staff/documents` page added as a read-only owner/admin document metadata inventory.
 - [x] Documents is enabled in the staff sidebar.
+- [x] Dedicated `/staff/messages` page added as a read-only owner/admin communications metadata workspace.
+- [x] Messages is enabled in the staff sidebar.
+- [x] Dedicated `/staff/kennel-logs` page added as a read-only owner/admin kennel history workspace.
+- [x] Kennel Logs is enabled in the staff sidebar.
 - [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
@@ -286,6 +292,32 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Staff role is restricted from document inventory details.
 - [ ] Browser-check `/staff/documents` as owner/admin.
 - [ ] Design future document generation/signature/upload/storage rules only after explicit approval.
+
+### 1.10 Messages Read-Only Workspace
+
+- [x] `core_conversations`, `core_messages`, `core_notifications`, and `core_notification_delivery_attempts` schema confirmed.
+- [x] `/staff/messages` added as a read-only owner/admin workspace.
+- [x] Messages sidebar link enabled after the page was built.
+- [x] Page reads existing Core communication, notification, and delivery-attempt metadata only.
+- [x] Page does not send email, send SMS, create replies, create notifications, write messages, or call external providers.
+- [x] Staff role is restricted from message inventory details.
+- [ ] Browser-check `/staff/messages` as owner/admin.
+
+### 1.11 Kennel Logs Read-Only Workspace
+
+- [x] Kennel event types and audit actions confirmed from existing Core migrations.
+- [x] `/staff/kennel-logs` added as a read-only owner/admin workspace.
+- [x] Kennel Logs sidebar link enabled after the page was built.
+- [x] Page reads existing Core kennel `core_events` and `core_audit_log` rows only.
+- [x] Page does not edit, archive, publish listings, send messages, generate documents, move payments, or call external systems.
+- [x] Staff role is restricted from kennel history details.
+- [ ] Browser-check `/staff/kennel-logs` as owner/admin.
+
+### 1.12 Future Core Command Console
+
+- [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
+- [ ] Build read-only Command Console shell only after approval.
+- [blocked] AI provider calls, model integrations, autonomous actions, and AI write tools remain blocked.
 
 ## Phase 2 — Staff-Only Staging With Selected Real Data
 
@@ -458,10 +490,10 @@ Do not run `supabase db reset --local` for this validation.
 ## Immediate Next Ordered Tasks
 
 1. [ ] Pull latest changes.
-2. [ ] Browser-check `/staff/documents` as owner/admin.
-3. [ ] Keep Documents read-only and owner/admin restricted; do not generate, sign, upload, email, or expose portal links.
+2. [ ] Browser-check `/staff/messages` as owner/admin.
+3. [ ] Browser-check `/staff/kennel-logs` as owner/admin.
 4. [ ] Run `npm run lint` after UI changes.
-5. [ ] Continue with Messages read-only workspace unless blocked by missing schema.
+5. [ ] Review the Command Console plan before any future console implementation.
 
 ## Stop Conditions
 

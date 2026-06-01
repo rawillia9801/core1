@@ -80,6 +80,10 @@ Verified local behavior:
 - Phone Lookup is enabled in the staff sidebar.
 - `/staff/documents` has been added as a read-only owner/admin document metadata inventory using existing Core document tables.
 - Documents is enabled in the staff sidebar.
+- `/staff/messages` has been added as a read-only owner/admin communications metadata workspace using existing Core conversation, message, notification, and delivery-attempt tables.
+- Messages is enabled in the staff sidebar.
+- `/staff/kennel-logs` has been added as a read-only owner/admin kennel event/audit history workspace.
+- Kennel Logs is enabled in the staff sidebar.
 
 ## Current Verified Communications Workflow
 
@@ -219,6 +223,8 @@ Implemented staff auth/access pieces:
 - Staff users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
 - `/staff/phone-lookup` is restricted to owner/admin; staff-role users see a restricted message and do not fetch phone lookup rows.
 - `/staff/documents` is restricted to owner/admin; staff-role users see a restricted message and do not fetch document rows.
+- `/staff/messages` is restricted to owner/admin; staff-role users see a restricted message and do not fetch communication rows.
+- `/staff/kennel-logs` is restricted to owner/admin; staff-role users see a restricted message and do not fetch kennel history rows.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
 - Go-home checklist updates are allowed for operational staff.
@@ -266,7 +272,9 @@ Core-native staff operating system foundation
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
-  -> Messages read-only workspace next
+  -> Messages read-only workspace added
+  -> Kennel Logs read-only workspace added
+  -> Core Command Console planning doc added
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
@@ -274,9 +282,13 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ## Current Recommended Next Task
 
 1. Pull latest changes.
-2. Browser-check `/staff/documents` as owner/admin and confirm the read-only boundary text, summary cards, records/empty state, and readiness lane.
-3. Continue the non-drifting read-only lane with Messages unless blocked by missing schema.
+2. Browser-check `/staff/messages` and `/staff/kennel-logs` as owner/admin and confirm the read-only boundary text, summary cards, records/empty state, and readiness lane.
+3. Review `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` before any future Command Console implementation.
 4. Run `npm run lint`.
+
+## Future Command Console Planning
+
+`docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document for a future intelligent Core Command Console. It does not mark the console as built. No AI provider, model API call, autonomous action, proposed-action table, or AI write behavior has been added.
 
 ## Time Estimate
 

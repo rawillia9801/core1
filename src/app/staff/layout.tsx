@@ -17,10 +17,10 @@ const primaryNavigation = [
   { href: "/staff/payments", label: "Payments", ready: true },
   { href: "/staff/go-home", label: "Go-Home", ready: true },
   { href: "/staff/documents", label: "Documents", ready: true },
-  { href: "/staff/messages", label: "Messages", ready: false },
+  { href: "/staff/messages", label: "Messages", ready: true },
   { href: "/staff/notifications", label: "Notifications", ready: true },
   { href: "/staff/phone-lookup", label: "Phone Lookup", ready: true },
-  { href: "/staff/kennel-logs", label: "Kennel Logs", ready: false },
+  { href: "/staff/kennel-logs", label: "Kennel Logs", ready: true },
   { href: "/staff/events", label: "Events", ready: true },
 ] as const;
 

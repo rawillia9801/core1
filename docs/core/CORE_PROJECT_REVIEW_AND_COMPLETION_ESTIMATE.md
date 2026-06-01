@@ -35,6 +35,9 @@ Core-native private application entry
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
+  -> Messages read-only workspace added
+  -> Kennel Logs read-only workspace added
+  -> Command Console plan added
 ```
 
 The safe communications workflow remains preview-only:
@@ -99,6 +102,11 @@ The following are implemented and have been manually or test verified in local/d
 - Phone Lookup is enabled in the staff sidebar.
 - `/staff/documents` has been added as a read-only owner/admin document metadata inventory.
 - Documents is enabled in the staff sidebar.
+- `/staff/messages` has been added as a read-only owner/admin communications metadata workspace.
+- Messages is enabled in the staff sidebar.
+- `/staff/kennel-logs` has been added as a read-only owner/admin kennel event/audit history workspace.
+- Kennel Logs is enabled in the staff sidebar.
+- `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document only; no AI console has been built.
 
 ## Recently Added / In Progress
 
@@ -164,7 +172,9 @@ The current lane is Core-native staff workflow completion:
 checkpoint verified kennel/buyer/family/event workspaces
   -> Phone Lookup Safety read-only owner/admin workspace added
   -> Documents read-only owner/admin workspace added
-  -> build Messages read-only workspace if schema is present
+  -> Messages read-only owner/admin workspace added
+  -> Kennel Logs read-only owner/admin workspace added
+  -> review Command Console plan before implementation
   -> continue staff-only Core workflows
 ```
 
@@ -172,14 +182,15 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ## Recommended Next 7 Tasks
 
-1. **Browser-check Documents**
-   - Confirm `/staff/documents` loads for owner/admin.
+1. **Browser-check Messages and Kennel Logs**
+   - Confirm `/staff/messages` loads for owner/admin.
+   - Confirm `/staff/kennel-logs` loads for owner/admin.
    - Confirm staff role sees only the restricted message.
-   - Confirm no document generation, signature request, upload, email, portal link, or external provider behavior exists.
+   - Confirm no sends, replies, writes, public publishing, customer messages, or external provider behavior exists.
 
-2. **Build Messages read-only workspace if schema is present**
-   - Read existing Core communication/message records only.
-   - Do not send email, SMS, or customer messages.
+2. **Review Command Console plan**
+   - Confirm the future console starts read-only.
+   - Confirm no AI provider, autonomous action, or direct database write behavior is approved.
 
 3. **Continue staff-only workflows only**
    - Keep all new pages authenticated, read-first, real-data-only, and side-effect free unless a later explicit write task is approved.
@@ -192,8 +203,8 @@ Estimated remaining time: **1 to 2 weeks** of focused work.
 
 Main remaining items:
 
-- Browser-check Documents read-only workspace.
-- Build Messages read-only workspace if schema is present.
+- Browser-check Messages and Kennel Logs read-only workspaces.
+- Review Command Console safety plan.
 - Finish unauthorized-role verification for current actions.
 - Keep owner/admin audit visibility restricted.
 
@@ -275,8 +286,8 @@ The biggest schedule risks are:
 Stay on this exact order:
 
 ```text
-1. Browser-check Documents as a read-only owner/admin workspace.
-2. Build Messages as a read-only workspace if the schema is present.
+1. Browser-check Messages and Kennel Logs as read-only owner/admin workspaces.
+2. Review the Core Command Console plan before implementation.
 3. Continue Core-native staff workflows only.
 ```
 
