@@ -89,6 +89,8 @@ Verified local behavior:
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked against migrations after implementation.
 - `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
 - `/staff/proposed-actions` has been added as a read-only owner/admin Proposed Action Queue review workspace. Approved proposed actions do not execute business changes.
+- Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
+- The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.
 
 ## Current Verified Communications Workflow
 
@@ -292,10 +294,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ## Current Recommended Next Task
 
-1. Pull latest changes.
-2. Apply the proposed-action migration and run the focused rollback-safe SQL test.
-3. Browser-check `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` as owner/admin.
-4. Run `npm run lint`.
+1. Continue safe owner/operator workflow verification under existing `/staff` routes.
+2. Browser-check `/staff/documents` as owner/admin.
+3. Keep the Command Console and Proposed Actions review surfaces read-only until a later approved proposed-action execution task exists.
+4. Run `npm run lint` after any implementation changes.
 
 ## Future Command Console Planning
 

@@ -308,7 +308,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Page reads existing Core communication, notification, and delivery-attempt metadata only.
 - [x] Page does not send email, send SMS, create replies, create notifications, write messages, or call external providers.
 - [x] Staff role is restricted from message inventory details.
-- [ ] Browser-check `/staff/messages` as owner/admin.
+- [x] Browser-check `/staff/messages` as owner/admin after real local `/login` sign-in.
 
 ### 1.11 Kennel Logs Read-Only Workspace
 
@@ -318,7 +318,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Page reads existing Core kennel `core_events` and `core_audit_log` rows only.
 - [x] Page does not edit, archive, publish listings, send messages, generate documents, move payments, or call external systems.
 - [x] Staff role is restricted from kennel history details.
-- [ ] Browser-check `/staff/kennel-logs` as owner/admin.
+- [x] Browser-check `/staff/kennel-logs` as owner/admin after real local `/login` sign-in.
 
 ### 1.12 Future Core Command Console
 
@@ -326,7 +326,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Read-only `/staff/command` shell added with no AI provider, no writes, no proposed-action records, and no external systems.
 - [x] Proposed Action Approval Model planning document added: `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md`.
 - [x] Build read-only Command Console shell only after approval.
-- [ ] Plan proposed action schema after approval.
+- [x] Browser-check `/staff/command` as owner/admin after real local `/login` sign-in.
+- [x] Browser-check `/staff/proposed-actions` as owner/admin after real local `/login` sign-in; review/approval state does not execute business changes.
 - [blocked] AI provider calls, model integrations, autonomous actions, and AI write tools remain blocked.
 
 ## Phase 2 — Owner/Operator Staging With Selected Core Records
@@ -500,11 +501,12 @@ Do not run `supabase db reset --local` for this validation.
 ## Immediate Next Ordered Tasks
 
 1. [ ] Pull latest changes.
-2. [ ] Browser-check `/staff/messages` as owner/admin.
-3. [ ] Browser-check `/staff/kennel-logs` as owner/admin.
-4. [ ] Browser-check `/staff/command` as owner/admin.
+2. [x] Browser-check `/staff/messages` as owner/admin.
+3. [x] Browser-check `/staff/kennel-logs` as owner/admin.
+4. [x] Browser-check `/staff/command` and `/staff/proposed-actions` as owner/admin.
 5. [ ] Run `npm run lint` after UI changes.
-6. [ ] Review the Proposed Action Approval Model before any proposed-action implementation.
+6. [ ] Browser-check `/staff/documents` as owner/admin.
+7. [ ] Keep proposed-action execution blocked until a separate approved implementation task.
 
 ## Stop Conditions
 

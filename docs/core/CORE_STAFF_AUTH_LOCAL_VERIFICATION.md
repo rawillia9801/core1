@@ -134,6 +134,16 @@ Verified staff read-scope checkpoint:
 - Role switching was tested with `scripts/set-local-staff-profile-access.sql`.
 - The mapped local profile was restored to `owner` active after verification.
 
+Verified owner/admin protected page checkpoint:
+
+- A local-only Supabase Auth user was mapped to the deterministic local owner profile with `scripts/map-local-staff-auth-user.sql`.
+- The mapped profile was restored to `owner` and `active`.
+- Real `/login` sign-in was used; no app auth bypass, route rewrite, production/staging assumption, `.env.local` edit, committed credential, or fake UI success was used.
+- `/staff/messages` loaded for the mapped owner and remained a read-only communication metadata workspace. It did not send email, send SMS, create replies, create notifications, write messages, or call external providers.
+- `/staff/kennel-logs` loaded for the mapped owner and remained read-only kennel history. It did not edit/archive records, publish listings, send messages, generate documents, move payments, or call outside systems.
+- `/staff/command` loaded for the mapped owner and remained a read-only planning shell. It did not connect an AI provider, write to the database, create proposed actions, send messages, move money, generate documents, publish anything, or call external systems.
+- `/staff/proposed-actions` loaded for the mapped owner and remained review-only. Approved proposal state does not execute business changes, and no AI provider, write tool, payment movement, message sending, document generation, public publishing, or external system call is connected.
+
 ## Confirm Unauthorized Users Are Blocked
 
 To test an authenticated user without a Core staff profile:
@@ -234,6 +244,7 @@ Expected behavior:
 - Per-action role checks are implemented for the current dashboard actions.
 - Approval and payment-recording audit actor attribution has been verified locally.
 - Owner/admin/staff dashboard read-scope behavior has been manually verified locally.
+- Owner/admin browser access to `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` has been verified locally after real `/login` sign-in.
 - Unauthorized role/status behavior still needs to be manually exercised using local fake data, especially staff cancellation with puppy release.
 - Selected real-data staging remains blocked.
 
