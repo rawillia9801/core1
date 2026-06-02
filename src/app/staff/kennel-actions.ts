@@ -173,7 +173,10 @@ export async function createDog(formData: FormData) {
     throw error;
   }
 
-  if (!staff) redirectWith("/staff/dogs", "dog", "unauthorized");
+  if (!staff) {
+    redirectWith("/staff/dogs", "dog", "unauthorized");
+    throw new Error("Unauthorized dog create attempt");
+  }
 
   if (!callName.valid || !registeredName.valid || !color.valid || !coatType.valid || !externalReference.valid || !notes.valid || !birthAt.valid) {
     redirectWith("/staff/dogs", "dog", "invalid_input");
@@ -231,7 +234,10 @@ export async function createLitter(formData: FormData) {
     throw error;
   }
 
-  if (!staff) redirectWith("/staff/litters", "litter", "unauthorized");
+  if (!staff) {
+    redirectWith("/staff/litters", "litter", "unauthorized");
+    throw new Error("Unauthorized litter create attempt");
+  }
 
   if (!litterName.valid || !damId.valid || !sireId.valid || !expectedBirthAt.valid || !birthAt.valid || !totalPuppies.valid || !femaleCount.valid || !maleCount.valid || !externalReference.valid || !notes.valid) {
     redirectWith("/staff/litters", "litter", "invalid_input");
@@ -296,7 +302,10 @@ export async function createPuppy(formData: FormData) {
     throw error;
   }
 
-  if (!staff) redirectWith("/staff/puppies", "puppy", "unauthorized");
+  if (!staff) {
+    redirectWith("/staff/puppies", "puppy", "unauthorized");
+    throw new Error("Unauthorized puppy create attempt");
+  }
 
   if (!litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !externalReference.valid || !notes.valid) {
     redirectWith("/staff/puppies", "puppy", "invalid_input");

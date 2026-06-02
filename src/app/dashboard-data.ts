@@ -413,7 +413,7 @@ function formatResponseLabel(key: string) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function formatResponseValue(value: unknown) {
+function formatResponseValue(value: unknown): string {
   if (value === null || value === undefined || value === "") {
     return "—";
   }
