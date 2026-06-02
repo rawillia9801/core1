@@ -2,11 +2,13 @@
 
 ## Purpose
 
-This checklist is the final gate before importing any selected real data into a Core staging environment.
+This checklist is the final gate before staging any selected real data in a Core staging environment.
 
 It is not a production launch checklist. It applies only to a tiny, owner-approved selected-real-data staging test, currently limited to one or two real application records.
 
-Do not import selected real data until every required item below is satisfied or explicitly marked not applicable by the owner.
+Do not stage selected real data until every required item below is satisfied or explicitly marked not applicable by the owner.
+
+Zoho One has been cancelled. Zoho must not be used as an import source, export source, dry-run source, compatibility path, sync source, writeback target, or dependency for staging.
 
 ## Environment Readiness
 
@@ -54,12 +56,12 @@ Do not import selected real data until every required item below is satisfied or
 - [ ] No document/signature records are included.
 - [ ] No message/Twilio records are included.
 - [ ] No customer portal records are included.
-- [ ] No unrelated Zoho modules are included.
+- [ ] No Zoho modules, exports, or payloads are included.
 
 ## Field Sensitivity Review
 
 - [ ] Field review template is completed: `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md`.
-- [ ] Application fields are reviewed before import.
+- [ ] Application fields are reviewed before selected-record staging.
 - [ ] Staff-visible fields are approved.
 - [ ] Owner/admin-only fields are identified.
 - [ ] Unnecessary private fields are excluded where possible.
@@ -74,14 +76,14 @@ Do not import selected real data until every required item below is satisfied or
 - [ ] Payload file existence is confirmed locally before the dry run.
 - [ ] Local dry run is completed first.
 - [ ] Dry run output is reviewed for application status, section count, generated IDs, errors, and `DRY RUN ONLY - ROLLED BACK`.
-- [ ] Staging import method is chosen.
-- [ ] Existing intake function compatibility is confirmed.
+- [ ] Core-native staging method is chosen.
+- [ ] Existing Core-native intake or owner/operator entry path is confirmed.
 - [ ] No seed-through-migration is used.
 - [ ] No real payload is committed to Git.
 - [ ] No live Zoho webhook is connected.
 - [ ] No recurring Zoho sync is connected.
 - [ ] No production writeback is enabled.
-- [ ] Expected audit/event rows for the import path are understood.
+- [ ] Expected audit/event rows for the Core-native staging path are understood.
 
 ## Side-Effect Lockout
 
@@ -131,16 +133,16 @@ Confirm all remain off:
 - [ ] No payment is triggered.
 - [ ] No document/signature is triggered.
 - [ ] No message/SMS/email is triggered.
-- [ ] Rollback approach is approved by the owner before import.
+- [ ] Rollback approach is approved by the owner before selected-record staging.
 
 ## Go / No-Go Decision
 
-Required approvals before import:
+Required approvals before selected-record staging:
 
 - [ ] Owner approves exact records.
 - [ ] Owner approves exact fields.
 - [ ] Owner approves staging environment.
-- [ ] Owner approves import method.
+- [ ] Owner approves Core-native staging method.
 - [ ] Owner approves verification checklist.
 - [ ] Owner approves rollback plan.
 
@@ -180,6 +182,6 @@ Stop immediately if:
 
 This checklist exists as a documentation gate.
 
-No selected real data has been imported yet.
+No selected real data has been staged yet.
 
-Selected-real-data import remains blocked until this checklist is satisfied and owner-approved.
+Selected-real-data staging remains blocked until this checklist is satisfied and owner-approved.

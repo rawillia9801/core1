@@ -1,8 +1,10 @@
-# Core Application Intake Endpoint
+# Historical Application Intake Endpoint
 
 ## Purpose
 
-The guarded intake endpoint is the first app-layer bridge between Zoho-shaped application payloads and the Core database intake function.
+This document is historical reference for a cancelled Zoho-shaped local intake experiment. It is not an active Core path.
+
+Zoho One has been cancelled. This endpoint must not be treated as an import source, bridge, compatibility workflow, dry-run import helper, sync target, writeback target, dependency check, future dependency, or planned operational workflow.
 
 Endpoint:
 
@@ -18,17 +20,14 @@ public.core_ingest_zoho_application(p_payload jsonb, p_actor_profile_id uuid)
 
 ## Current Scope
 
-This endpoint is for local/development validation first.
+No current Core work should build on this endpoint.
 
-It can accept either:
-
-- Zoho API-name payloads, or
-- Zoho report/PDF-label payloads.
+Historical tests used fake Zoho-shaped API-name or report/PDF-label payloads only to understand old data shape.
 
 It does not:
 
-- Connect live Zoho automatically.
-- Import production data by itself.
+- Connect live Zoho.
+- Import production data.
 - Approve applications.
 - Create reservations.
 - Send email.
@@ -36,9 +35,9 @@ It does not:
 - Enable RLS.
 - Expose application records through GET.
 
-## Verified Local Endpoint Test
+## Historical Local Endpoint Test
 
-The guarded local/development endpoint has been tested successfully with a fake Zoho report-label payload.
+The guarded local/development endpoint was previously tested with a fake Zoho-shaped report-label payload. This is historical only and should not be used as the active intake lane.
 
 Verified response characteristics:
 
@@ -97,13 +96,13 @@ From Git Bash, with the local development app running, use the fake-payload help
 ./scripts/test-local-intake-endpoint.sh
 ```
 
-The script posts fake report-label data only to `http://localhost:3000/api/intake/zoho-application` using external reference `LOCAL-SCRIPT-ENDPOINT-TEST-001`. It uses `CORE_INTAKE_SECRET` when set, or the local-only default `local-test-secret-only` otherwise:
+The script posted fake report-label data only to `http://localhost:3000/api/intake/zoho-application` using external reference `LOCAL-SCRIPT-ENDPOINT-TEST-001`. Do not extend this into active Zoho tooling.
 
 ```bash
 CORE_INTAKE_SECRET=your-local-test-secret ./scripts/test-local-intake-endpoint.sh
 ```
 
-The script does not contain or read a Supabase service role key, and it does not connect to live Zoho. Endpoint tests write fake records to the local development database.
+The script does not contain or read a Supabase service role key, and it does not connect to live Zoho. Endpoint tests write fake records to the local development database. Do not use this as an active import or dry-run import pattern.
 
 Example request:
 
@@ -170,14 +169,6 @@ Do not create production cleanup scripts from local test data patterns.
 
 ## Production Safety Notes
 
-Before using this endpoint with live Zoho:
+Do not use this endpoint with live Zoho. Do not build live Zoho webhook handling, Zoho sync, Zoho dry-run imports, Zoho writeback, Zoho compatibility workflows, or Zoho dependency checks.
 
-1. Confirm the exact Zoho webhook payload shape.
-2. Confirm the secret delivery mechanism.
-3. Add rate limiting or deployment-level protection.
-4. Verify RLS/access model and service role boundaries.
-5. Decide whether imported historical approved applications should remain historical or call the formal approval workflow.
-6. Add monitoring for failed intake attempts.
-7. Add a dead-letter/retry strategy for webhook failures.
-
-Do not connect the live Zoho form directly until a test payload has been posted successfully in local/dev.
+Future application intake should be Core-native unless a separate owner-approved non-Zoho source is explicitly defined.

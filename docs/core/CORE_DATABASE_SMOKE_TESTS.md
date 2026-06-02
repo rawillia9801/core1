@@ -55,8 +55,7 @@ cat supabase/tests/core_record_reservation_payment_tests.sql | docker exec -i su
 cat supabase/tests/core_record_financial_adjustment_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_cancel_reservation_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 cat supabase/tests/core_create_application_manual_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-cat supabase/tests/core_zoho_application_intake_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-cat supabase/tests/core_zoho_application_report_label_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
+# Historical Zoho-shaped tests are not part of the active Core validation lane.
 npm run lint
 ```
 
@@ -88,8 +87,8 @@ This helper differs from the rollback-safe smoke tests: it intentionally commits
 | `core_record_reservation_payment_tests.sql` | Validates controlled posted deposits/payments, decreasing balance semantics, event/audit records, and duplicate-reference rejection without connecting payments. |
 | `core_record_financial_adjustment_tests.sql` | Validates controlled financial exceptions for credits, refunds, chargebacks, fees, finance charges, neutral adjustments, balance-effect mapping, event/audit records, and duplicate-reference rejection without connecting payments. |
 | `core_cancel_reservation_tests.sql` | Validates controlled reservation cancellation, explicit puppy release behavior, ledger preservation, event/audit records, and rejection of unsafe cancellation inputs. |
-| `core_zoho_application_intake_tests.sql` | Validates fake Zoho API-name payload intake into Core without a live Zoho connection. |
-| `core_zoho_application_report_label_tests.sql` | Validates fake report/PDF-label payload compatibility without a live Zoho connection. |
+| `core_zoho_application_intake_tests.sql` | Historical cancelled-direction test; do not use as active validation. |
+| `core_zoho_application_report_label_tests.sql` | Historical cancelled-direction test; do not use as active validation. |
 
 ## What The Checks Prove
 
@@ -108,7 +107,7 @@ This helper differs from the rollback-safe smoke tests: it intentionally commits
 | Ledger constraints | Invalid `balance_effect` values and negative post-correction `amount_cents` values are rejected. |
 | Phone lookup view | Normalized phone `+12765550101` finds `Sarah Test Buyer` and her reservation context. |
 | Ambiguous phone lookup | A second buyer/family plus a family-linked profile using `+12765550101` make lookup ambiguous and suppress buyer, puppy, payment, and go-home context. |
-| Phone routing flags | Ambiguous lookup requires verification and recommends staff routing. |
+| Phone routing flags | Ambiguous lookup requires verification and recommends owner/operator routing. |
 | Buyer summary view | Buyer context includes one application, one reservation, Luna, and calculated balance. |
 | Puppy summary view | Puppy context includes its litter, buyer/reservation, and calculated balance. |
 | Reservation summary view | Transaction context contains buyer, puppy, totals, and calculated balance. |

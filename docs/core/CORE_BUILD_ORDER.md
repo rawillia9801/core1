@@ -2,12 +2,13 @@
 
 ## Guardrail
 
-Cherolee Core should be built in small, verifiable phases. Each phase depends on a trustworthy canonical model and explicit owner approval before any production data movement or sensitive action.
+Cherolee Core should be built in small, verifiable phases. Core is the operating system and daily command layer for Cristy's owner-operated business and kennel. Each phase depends on a trustworthy canonical model and explicit owner approval before any production data movement or sensitive action.
 
 ## Phase 0: Inventory And Freeze
 
-- Inventory existing Supabase, Zoho, Twilio, document, and payment sources.
-- Identify legacy duplicates and determine which systems may supply migration data.
+- Inventory existing Supabase, document, payment, and communication records that may inform Core-native modeling.
+- Treat Zoho files, screenshots, PDFs, field names, and old notes as historical reference only. Zoho is not an import source, migration source, bridge, dependency, sync target, writeback target, or future workflow.
+- Identify legacy duplicates and determine which non-Zoho records may supply owner-approved reference data.
 - Freeze destructive cleanup: do not delete, rename, truncate, or repurpose existing tables.
 - Document production access, privacy requirements, and migration approval points.
 
@@ -20,11 +21,11 @@ Cherolee Core should be built in small, verifiable phases. Each phase depends on
 
 Current task ends in this phase. No production records are wired by this baseline.
 
-## Phase 2: Read-Only Dashboard
+## Phase 2: Read-Only Owner/Operator Dashboard
 
 - Build simple operational reads backed by canonical views.
 - Include empty/error/loading states and privacy-conscious server access.
-- Use test or approved imported data only after a mapping and validation task.
+- Use test data or owner-approved Core-native records only after a validation task.
 - Do not add broad write actions while read models are still settling.
 
 ## Phase 3: First Write Tools
@@ -43,8 +44,8 @@ Current task ends in this phase. No production records are wired by this baselin
 
 ## Phase 5: Applications Into Core
 
-- Map application sources and review incomplete/duplicate contacts.
-- Import only through an approved, repeatable migration procedure.
+- Build Core-native application intake and review paths.
+- Review incomplete/duplicate contacts from Core-native records or owner-approved historical reference.
 - Add application review workflows incrementally.
 - Do not automatically approve prospective buyers.
 
@@ -82,4 +83,4 @@ Current task ends in this phase. No production records are wired by this baselin
 
 ## Not Yet
 
-This baseline does not build a full admin dashboard, Puppy Portal, website replacement, AI console, live payments, Zoho retirement, production Twilio routing, automated customer decisions, refunds, price changes, Home Assistant control, camera AI, or smart mirror experience.
+This baseline does not build a full customer portal, website replacement, AI console, live payments, Zoho tooling, production Twilio routing, automated customer decisions, refunds, price changes, Home Assistant control, camera AI, or smart mirror experience.

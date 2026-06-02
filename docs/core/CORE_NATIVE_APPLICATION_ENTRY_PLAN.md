@@ -2,14 +2,14 @@
 
 ## Purpose
 
-Core should move away from relying on Zoho for new puppy application intake.
+Core does not rely on Zoho for puppy application intake. Zoho One has been cancelled; Zoho is historical reference only.
 
 This plan defines the first Core-native application entry path:
 
 - Build private staff/owner application entry first.
 - Add a future public application form later.
-- Keep Zoho-shaped intake as compatibility, import, and dry-run support.
-- Do not connect email sending, live Zoho, customer portal access, documents, payments, or public intake yet.
+- Treat Zoho-shaped intake artifacts as historical cancelled-direction leftovers only.
+- Do not connect email sending, Zoho tooling, customer portal access, documents, payments, or public intake yet.
 
 The first private route is implemented:
 
@@ -53,7 +53,7 @@ Core-generic behavior already present:
 - Event and audit records.
 - Rollback-safe testability.
 
-Zoho-specific behavior still present:
+Historical Zoho-specific behavior still present:
 
 - Source field names such as `Application_ID`, `Applicant_Name`, `Application_Review_Status`, and report labels.
 - Source metadata keys that preserve Zoho values.
@@ -61,7 +61,7 @@ Zoho-specific behavior still present:
 - Dedupe logic tied to Zoho application IDs.
 - Compatibility assumptions for exported Zoho forms and reports.
 
-Do not keep extending `core_ingest_zoho_application` as the main future intake path. It should remain an import/compatibility function so Core can understand historical or exported Zoho-shaped payloads without making Zoho the long-term product dependency.
+Do not keep extending `core_ingest_zoho_application`. It is not the main future intake path, not an import/compatibility function for active work, and not a dependency. Old Zoho-shaped values may be historical reference only.
 
 ## Recommended First Route
 
@@ -139,7 +139,7 @@ Money must not be collected through this workflow. Payment preference is text co
 
 ## Recommended Database RPC
 
-The Core-native database RPC now exists for the private staff/owner path rather than using the Zoho-shaped function for the long-term path.
+The Core-native database RPC now exists for the private owner/operator path rather than using the Zoho-shaped function.
 
 Recommended name:
 
@@ -212,8 +212,7 @@ It should not:
 
 - Send email.
 - Queue notification until notification queue rules exist.
-- Connect live Zoho.
-- Write back to Zoho.
+- Build Zoho import, sync, bridge, compatibility, dependency-check, or writeback tooling.
 - Import production data.
 - Create customer portal access.
 
@@ -238,7 +237,7 @@ Later requirements:
 - Notification queue before any customer email.
 - Owner/admin review before approval.
 
-Public intake should probably call a related Core-native RPC, such as `core_submit_application`, with `actor_type = public` or system context. It should not reuse staff-only actor assumptions.
+Public intake should probably call a related Core-native RPC, such as `core_submit_application`, with `actor_type = public` or system context. It should not reuse owner/operator-only actor assumptions.
 
 ## Relationship To Email Notifications
 
@@ -277,7 +276,7 @@ It validates:
 - Terms acknowledgement rejection.
 - Owner/admin-only actor restriction.
 - No email/notification side effect.
-- No Zoho dependency.
+- No Zoho dependency, import path, compatibility path, sync, or writeback.
 
 Manual or app-level checklist:
 
@@ -296,7 +295,7 @@ Recommended order:
 
 1. Add database RPC migration and rollback-safe SQL test for `core_create_application_manual`. Done.
 2. Add private `/staff/applications/new` form and server action. Done.
-3. Confirm read visibility in the existing staff dashboard. Done.
+3. Confirm read visibility in the existing owner/operator dashboard under `/staff`. Done.
 4. Manually verify Core-native application entry through approval, reservation creation, and deposit/payment ledger balance decrease. Done with fake local data.
 5. Design notification queue/email preview behavior or continue controlled go-home workflow.
 6. Add local/staging email preview only.
@@ -310,7 +309,7 @@ The following remain blocked until later explicit tasks:
 - Public `/apply`.
 - Email sending.
 - Resend or any email provider connection.
-- Live Zoho connection.
+- Zoho connection, import, sync, bridge, compatibility path, dependency check, or writeback.
 - Real-data import.
 - Customer portal.
 - Documents/signatures.
@@ -334,6 +333,6 @@ The private Core-native application workflow has been manually verified end-to-e
 - Record a deposit/payment.
 - Confirm the ledger-derived balance decreases.
 
-This proves manual application entry no longer requires Zoho for the local staff workflow. It does not prove public intake, email sending, payment processor integration, documents, customer portal behavior, or production readiness.
+This proves manual application entry no longer requires Zoho for the local owner/operator workflow. It does not prove public intake, email sending, payment processor integration, documents, customer portal behavior, or production readiness.
 
-Zoho-shaped intake remains available for compatibility, import, and dry-run support, but it is not the preferred future dependency for new Core-native application intake.
+Zoho-shaped intake is historical only and must not be used for compatibility, import, dry-run support, dependency checks, or new Core-native application intake.

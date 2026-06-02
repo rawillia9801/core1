@@ -4,9 +4,9 @@
 
 This plan describes the first selected-real-data staging environment for Cherolee Core.
 
-This is not a feature-building task, UI task, production launch, live integration setup, or real-data import task. It is a concrete setup plan for a safe staging environment that can later receive one or two owner-approved real application records after all gates are satisfied.
+This is not a feature-building task, UI task, production launch, live integration setup, Zoho task, or real-data import task. It is a concrete setup plan for a safe staging environment that can later receive one or two owner-approved Core-native real application records after all gates are satisfied.
 
-No selected real data should be imported until the staging environment, readiness checklist, exact records, exact fields, import method, verification checklist, and rollback plan are owner-approved.
+No selected real data should be staged until the staging environment, readiness checklist, exact records, exact fields, Core-native setup method, verification checklist, and rollback plan are owner-approved.
 
 ## Recommended Staging Environment Shape
 
@@ -34,7 +34,7 @@ The first staging environment needs only:
 
 Do not enable live integrations:
 
-- No live Zoho.
+- No Zoho workflow of any kind.
 - No Twilio.
 - No email sending.
 - No payment processor.
@@ -57,7 +57,7 @@ SUPABASE_SERVICE_ROLE_KEY
 CORE_INTAKE_SECRET
 ```
 
-`CORE_INTAKE_SECRET` is only needed if guarded staging intake testing is explicitly allowed. It must not be used for live Zoho webhook traffic yet.
+`CORE_INTAKE_SECRET` is not part of the active staging lane unless a separate non-Zoho guarded intake test is explicitly approved. It must not be used for Zoho webhook traffic.
 
 Rules:
 
@@ -119,7 +119,7 @@ These must remain off:
 
 ## First Staging Verification Steps Before Real Data
 
-Before importing even one selected real application:
+Before staging even one selected real application:
 
 1. Deploy the app to the staging target.
 2. Configure staging environment variables in hosting settings.
@@ -143,13 +143,13 @@ Sequence:
 1. Run a local dry run first with the exact selected payload shape.
 2. Use one or two owner-approved real application records only.
 3. Exclude payments, documents, messages, Twilio records, customer portal records, and unrelated modules.
-4. Review field sensitivity before import.
+4. Review field sensitivity before staging.
 5. Confirm owner/admin-only fields.
 6. Confirm staff-visible fields.
 7. Review results locally as owner/admin before staff visibility.
-8. Only after approval, repeat the controlled import in staging.
+8. Only after approval, repeat the controlled Core-native setup in staging.
 
-Do not connect a live Zoho webhook. Use manual export or controlled one-time export only.
+Do not connect a live Zoho webhook. Do not use Zoho export, sync, writeback, import, or dry-run import as the staging path.
 
 ## Rollback Plan
 
@@ -158,23 +158,23 @@ If anything is wrong:
 - Delete staging records or reset the staging database.
 - Remove or rotate staging environment variables if exposure is suspected.
 - Disable the staging deployment if route exposure appears.
-- Stop any import workflow immediately.
+- Stop any selected-record staging workflow immediately.
 - Confirm no customer contact occurred.
 - Confirm no payment, document, message, or notification was triggered.
 - Confirm no production record or Zoho record was modified.
 
-Rollback must be owner-approved before first staging import.
+Rollback must be owner-approved before first selected-record staging.
 
 ## Go / No-Go Checklist
 
-Required approvals before first selected-real-data import:
+Required approvals before first selected-real-data staging:
 
 - [ ] Owner approves the staging environment.
 - [ ] Owner approves exact selected records.
 - [ ] Owner approves exact selected fields.
 - [ ] Owner approves staff-visible fields.
 - [ ] Owner approves owner/admin-only fields.
-- [ ] Owner approves import method.
+- [ ] Owner approves Core-native staging method.
 - [ ] Owner approves readiness checklist.
 - [ ] Owner approves verification checklist.
 - [ ] Owner approves rollback plan.
@@ -185,7 +185,7 @@ Hard blockers:
 - [ ] `/staff` is reachable without login.
 - [ ] Staff can see restricted sensitive panels.
 - [ ] Secrets are in Git, docs, chat, screenshots, or client code.
-- [ ] Live Zoho/Twilio/email/payment/document/customer portal behavior is enabled.
+- [ ] Zoho/Twilio/email/payment/document/customer portal behavior is enabled.
 - [ ] Selected records or fields are not owner-approved.
 - [ ] Import method requires committing real data.
 - [ ] RLS is being treated as complete when it is still deferred.
@@ -193,7 +193,7 @@ Hard blockers:
 ## What Remains Deferred
 
 - RLS implementation and policy tests.
-- Live Zoho integration.
+- Zoho integration.
 - Twilio integration.
 - Email sending.
 - Payment processor.
@@ -209,6 +209,6 @@ This plan exists as a staging setup guide.
 
 No deployment has been performed by this plan.
 
-No selected real data has been imported.
+No selected real data has been staged.
 
-Selected-real-data import remains blocked until the staging environment and readiness checklist are satisfied and owner-approved.
+Selected-real-data staging remains blocked until the staging environment and readiness checklist are satisfied and owner-approved.

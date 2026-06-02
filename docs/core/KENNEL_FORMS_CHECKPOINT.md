@@ -4,7 +4,7 @@
 
 - Real record creation functions were added for dogs, litters, and puppies.
 - A rollback-safe SQL test passed locally for the dog, litter, and puppy create flow.
-- The staff pages now include add forms for:
+- The existing technical `/staff` pages now include add forms for:
   - `/staff/dogs/new`
   - `/staff/litters/new`
   - `/staff/puppies/new`
@@ -25,7 +25,7 @@
   - Add dog.
   - Add litter.
   - Add puppy.
-  - View saved records on their matching staff pages.
+  - View saved records on their matching owner/operator pages.
   - Access edit paths from record cards.
 
 ## Audited Update / Archive Layer
@@ -83,8 +83,8 @@ Archive-style delete behavior is intentionally non-destructive:
 
 ## Next Ordered Step
 
-Move to the next Core-native staff workspace: Buyers / Families.
+Move to the next Core-native owner/operator workspace: Buyers / Families.
 
 This workspace should remain read-first and real-data-only before adding controlled write tools.
 
-Do not move to public website publishing, customer emails, documents, payments, or AI write autonomy until each staff workflow has the same safety boundary, audit trail, and browser verification path.
+Do not move to public website publishing, customer emails, documents, payments, or AI write autonomy until each owner/operator workflow has the same safety boundary, audit trail, and browser verification path.

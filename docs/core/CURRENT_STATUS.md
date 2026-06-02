@@ -26,9 +26,11 @@ The duplicate OneDrive checkout is not the working repository for Core tasks.
 
 ## Current Direction
 
-Core is the active operating system for Southwest Virginia Chihuahua. Zoho One is no longer part of the active build lineup.
+Core is the active operating system, daily command layer, and future decision assistant for Southwest Virginia Chihuahua. This is currently a one-person owner-operated business: Cristy is the owner/operator and final authority. Future helpers may be added later only if needed, but the product direction should not pretend there is a staff team.
 
-Zoho-related code or documentation may remain only as legacy/import compatibility or historical reference. It is not a bridge, dependency, planned sync target, or live workflow.
+The existing `/staff` routes may remain as technical route names for now so the application does not break. Product language should increasingly use Owner Console, Operator Dashboard, Core Command Center, Core OS, Core Assistant, owner/operator, and command center framing where appropriate.
+
+Zoho One has been cancelled. Zoho is historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active part of Core.
 
 ## Current Verified Local Workflow
 
@@ -46,7 +48,7 @@ Core-native private application entry
   -> go-home checklist item SQL verification
   -> kennel dog/litter/puppy create RPC verification
   -> kennel dog/litter/puppy add/edit/archive browser verification
-  -> buyers/families/events read-only staff workspaces
+  -> buyers/families/events read-only owner/operator workspaces
 ```
 
 Verified local behavior:
@@ -216,15 +218,15 @@ Implemented Core database foundations include:
 
 ## Current Auth And Access Boundary
 
-Implemented staff auth/access pieces:
+Implemented owner/operator auth/access pieces:
 
 - Supabase Auth packages installed.
-- `/login` provides staff email/password sign-in.
-- `/staff` requires an authenticated Supabase user mapped to an active `core_profiles` staff profile.
+- `/login` provides owner/operator email/password sign-in through the existing technical staff-auth route.
+- `/staff` requires an authenticated Supabase user mapped to an active `core_profiles` profile.
 - `/` is a non-sensitive landing page.
 - Dashboard reads require authenticated active staff context before broad service-role reads run.
 - Owner/admin users keep full current dashboard read surface.
-- Staff users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
+- Future helper/staff-role users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
 - `/staff/phone-lookup` is restricted to owner/admin; staff-role users see a restricted message and do not fetch phone lookup rows.
 - `/staff/documents` is restricted to owner/admin; staff-role users see a restricted message and do not fetch document rows.
 - `/staff/messages` is restricted to owner/admin; staff-role users see a restricted message and do not fetch communication rows.
@@ -253,7 +255,7 @@ The following remain intentionally disconnected:
 - Email send buttons.
 - Automatic customer email delivery.
 - Twilio.
-- Zoho live webhook/writeback or sync.
+- Zoho in any active form, including live webhook, writeback, sync, import, dry-run import, compatibility workflow, or planned dependency.
 - Payment processor.
 - Document generation/signature provider.
 - Customer portal.
@@ -267,7 +269,7 @@ The following remain intentionally disconnected:
 Current active lane:
 
 ```text
-Core-native staff operating system foundation
+Core-native owner/operator operating system foundation
   -> application/reservation/payment workflow verified
   -> preview-only communication safety verified
   -> go-home detail update verified
@@ -275,7 +277,7 @@ Core-native staff operating system foundation
   -> kennel dog/litter/puppy create RPCs verified
   -> kennel create forms added
   -> kennel add/edit/archive browser-tested
-  -> buyers/families/events read-only workspaces verified
+  -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
   -> Messages read-only workspace added
@@ -286,7 +288,7 @@ Core-native staff operating system foundation
   -> Proposed Action Queue foundation added for proposal/review only
 ```
 
-Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, or polish-only work until the relevant safety gates are complete.
+Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, Zoho tooling, or polish-only work until the relevant safety gates are complete.
 
 ## Current Recommended Next Task
 
@@ -309,7 +311,7 @@ This estimate separates a minimal customer-facing step from a full customer-faci
 
 ```text
 Local internal foundation:                  in progress
-Staff-only staging:                        3-6 weeks total from a stable local checkpoint
+Owner/operator staging:                   3-6 weeks total from a stable local checkpoint
 Internal production staff use:             2-3 months total from current checkpoint
 Minimal customer-facing application path:  about 2 months if tightly scoped
 Full customer-facing Core replacement:     4-6+ months total

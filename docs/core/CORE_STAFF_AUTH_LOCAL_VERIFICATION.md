@@ -4,7 +4,7 @@
 
 This document explains how to verify the local/development staff auth foundation added in commit `bd5c019`.
 
-It is local/dev only. Do not use production data, production credentials, real customer emails, live Zoho, Twilio, payment processor, email sending, documents, Home Assistant, or cameras.
+It is local/dev only. Do not use production data, production credentials, real customer emails, Zoho, Twilio, payment processor, email sending, documents, Home Assistant, or cameras.
 
 ## What Exists
 
@@ -239,4 +239,4 @@ Expected behavior:
 
 ## Next Recommended Task
 
-Verify unauthorized role behavior, especially staff cancellation with puppy release, then review real Zoho application fields before staff-visible application details are used with selected real data. Do not import selected real data until owner-approved staging boundaries are verified.
+Verify unauthorized role behavior, especially future-helper/staff cancellation with puppy release, then review owner-approved application fields before selected real data is staged. Do not stage selected real data until owner-approved staging boundaries are verified.

@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This checklist is the steering document for Core. It tracks the work from local/development proof, to staff-only staging, to internal production use, and then customer-facing launch.
+This checklist is the steering document for Core. It tracks the work from local/development proof, to owner/operator staging, to internal production use, and then customer-facing launch.
+
+Core is the operating system and daily command layer for a one-person owner-operated business. Cristy is the owner/operator and final authority. Future helpers are optional later users only if needed. The existing `/staff` routes can remain as technical route names for now, but planning language should frame the product as an Owner Console, Operator Dashboard, Core Command Center, Core OS, and Core Assistant rather than as a staff-team dashboard.
 
 It must be updated when work lands so the project does not drift.
 
@@ -21,7 +23,7 @@ It must be updated when work lands so the project does not drift.
 Current active lane:
 
 ```text
-Core-native staff operating system foundation
+Core-native owner/operator operating system foundation
   -> application/reservation/payment workflow verified
   -> preview-only communication safety verified
   -> go-home detail update verified
@@ -35,10 +37,10 @@ Core-native staff operating system foundation
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
-  -> then continue Core-native staff workflows only
+  -> then continue Core-native owner/operator workflows only
 ```
 
-Core is the active system. Zoho One is cancelled and is not part of the active lineup. Any Zoho-shaped intake or documentation is legacy/import compatibility only, not a live dependency, bridge, writeback target, or planned operating workflow.
+Core is the active system. Zoho One is cancelled and is not part of the active lineup. Any Zoho-shaped files, tests, screenshots, PDFs, field names, or old notes are historical reference only. They are not an import path, migration source, bridge, compatibility workflow, dry-run import lane, sync source, writeback target, dependency check, planned dependency, or future operating workflow.
 
 Communication safety lane status:
 
@@ -50,7 +52,7 @@ disabled/preview provider boundary                done
 delivery-attempt log table verification            done
 preview/blocked attempt logging workflow           done
 show attempt logs in /staff/notifications          done
-staff-approved vs automatic communication rules    done
+owner/operator-approved vs automatic communication rules    done
 warm customer-facing template copy                 done and locally verified
 test-send-to-owner                                 later, not started
 Hostinger SMTP                                     later, disabled by default
@@ -62,9 +64,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 | Phase | Goal | Status | Rough Distance |
 | --- | --- | --- | --- |
-| Phase 1 | Local/dev workflow proof | `[~]` Underway | Core staff workflows expanding safely |
-| Phase 2 | Staff-only staging with selected real data | `[ ]` Not started | 3-6 weeks total from stable local checkpoint |
-| Phase 3 | Production internal staff use | `[ ]` Not started | 2-3 months total from current checkpoint |
+| Phase 1 | Local/dev workflow proof | `[~]` Underway | Core owner/operator workflows expanding safely |
+| Phase 2 | Owner/operator staging with selected Core records | `[ ]` Not started | 3-6 weeks total from stable local checkpoint |
+| Phase 3 | Production owner/operator use | `[ ]` Not started | 2-3 months total from current checkpoint |
 | Phase 4A | Minimal customer-facing application path | `[ ]` Not started | About 2 months if tightly scoped |
 | Phase 4B | Full customer-facing Core replacement | `[ ]` Not started | 4-6+ months total |
 
@@ -105,9 +107,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ### 1.2 Application Intake Foundation
 
-- [x] Legacy Zoho-shaped application field mapping documentation exists for compatibility/import reference only.
-- [x] `core_ingest_zoho_application` exists for Zoho-shaped compatibility/import/dry-run support only.
-- [x] Zoho-shaped intake tests exist as compatibility tests only.
+- [x] Historical Zoho-shaped application notes exist only to understand old data shape. They must not drive new tooling.
+- [x] Existing Zoho-shaped intake artifacts are cancelled-direction leftovers and must not be extended, used as an active import path, treated as compatibility workflow, or used for future dependency checks.
+- [x] Zoho-shaped intake tests are historical leftovers only; do not add or run Zoho-based validation as the active Core path.
 - [x] Core-native private application entry plan added: `docs/core/CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
 - [x] Core-native manual application RPC added: `core_create_application_manual`.
 - [x] Core-native manual application rollback-safe SQL test added.
@@ -176,7 +178,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Define live payment processor reconciliation and idempotency before live refund/chargeback operations.
 - [blocked] Connect payment processor only after ledger write rules and security are complete.
 
-### 1.5 Staff Workspace And Dashboard Foundation
+### 1.5 Owner/Operator Workspace And Dashboard Foundation
 
 - [x] Read-only dashboard plan and acceptance criteria documented.
 - [x] Static dashboard shell added.
@@ -227,8 +229,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Add controlled notification queue database foundation: `core_queue_notification`.
 - [x] Add rollback-safe notification queue SQL test.
 - [x] Add owner/admin notification or email preview UI before sending: `/staff/notifications`.
-- [x] Queue preview-only `application_received` notification after Core-native staff application entry when applicant email exists.
-- [x] Manually verify Core-native staff application entry queues an `application_received` preview record and leaves `sent_at` null.
+- [x] Queue preview-only `application_received` notification after Core-native owner/operator application entry when applicant email exists.
+- [x] Manually verify Core-native owner/operator application entry queues an `application_received` preview record and leaves `sent_at` null.
 - [x] Add initial preview-only draft email template seed migration.
 - [x] Add rollback-safe email template seed SQL test.
 - [x] Apply template seed migration locally.
@@ -242,7 +244,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Add preview/blocked attempt logging script: `scripts/record-preview-notification-attempt.sh`.
 - [x] Record a blocked preview attempt locally with `sent = false` and `NO EMAIL SENT` output.
 - [x] Show delivery attempts in `/staff/notifications`.
-- [x] Define staff-approved versus automatic communication rules in `src/lib/email/communication-rules.ts`.
+- [x] Define owner/operator-approved versus automatic communication rules in `src/lib/email/communication-rules.ts`.
 - [x] Remove Resend from the active provider/script direction; Hostinger SMTP is the only planned real email provider.
 - [x] Add warm draft template migration with more complete Southwest Virginia Chihuahua customer copy and no customer-facing internal system name.
 - [x] Add warm template smoke test covering draft/preview-only flags, no customer-facing internal system name, non-tiny bodies, unique IDs, and refund safety copy.
@@ -327,7 +329,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Plan proposed action schema after approval.
 - [blocked] AI provider calls, model integrations, autonomous actions, and AI write tools remain blocked.
 
-## Phase 2 — Staff-Only Staging With Selected Real Data
+## Phase 2 — Owner/Operator Staging With Selected Core Records
 
 ### 2.1 Authentication And Access Boundary
 
@@ -367,7 +369,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Review all read models for sensitive data leakage.
 - [ ] Review all server actions for authorization and audit coverage.
 
-### 2.3 Selected Real Data Import/Display
+### 2.3 Selected Real Data Display
 
 - [x] Define what selected real data means for first staging test.
 - [x] Add selected real-data staging plan: `docs/core/CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`.
@@ -379,13 +381,13 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Use owner-approved Core-native records for staging when ready.
 - [blocked] Redact or handle sensitive fields during development review using the field review template before any import.
 - [ ] Validate field shapes against Core intake path chosen for staging.
-- [ ] Run local/dev dry-run import with one owner-approved local JSON payload stored outside the repository.
-- [blocked] Run staging import with owner-approved limited records only after exact records, field review, fields, staging environment plan, environment, import method, verification checklist, readiness checklist, and rollback plan are approved.
+- [ ] Enter or stage owner-approved Core-native records through approved Core workflows when ready.
+- [blocked] Stage selected real records only after exact records, field review, fields, staging environment plan, environment, verification checklist, readiness checklist, and rollback plan are approved.
 - [ ] Verify received applications display correctly in staging.
 - [ ] Verify application details display correctly in staging.
-- [ ] Verify no emails/messages/payments are triggered by import.
+- [ ] Verify no emails/messages/payments are triggered by selected record setup.
 
-## Phase 3 — Production Internal Staff Use
+## Phase 3 — Production Owner/Operator Use
 
 - [ ] Use Core to review real applications internally.
 - [ ] Use Core to approve applications internally.
@@ -407,9 +409,9 @@ This is the tighter estimate track. It is not the full portal replacement.
 
 - [ ] Public `/apply` route.
 - [ ] Public application submission into Core-native intake.
-- [ ] Staff review path after public application submission.
+- [ ] Owner/operator review path after public application submission.
 - [ ] Basic application-received notification queue.
-- [ ] Staff-approved or preview-only email confirmation rules.
+- [ ] Owner/operator-approved or preview-only email confirmation rules.
 - [ ] Minimal public privacy/terms visibility.
 - [ ] Customer-facing RLS/public write boundary tests.
 
@@ -443,15 +445,15 @@ This is the larger portal/documents/payments/signatures track.
 - [ ] Define website chat/customer inquiry workflow.
 - [ ] Define email reply workflow.
 - [ ] Define what Core may answer automatically.
-- [ ] Define what must route to staff.
-- [ ] Keep sensitive decisions staff-approved.
+- [ ] Define what must route to Cristy or any future helper.
+- [ ] Keep sensitive decisions owner/operator-approved.
 
 Estimated target for full replacement: 4-6+ months total from current checkpoint.
 
 ## Still Not Connected Live
 
 - [ ] Production RLS is not enabled.
-- [ ] Zoho is not connected live and is not part of the active lineup.
+- [ ] Zoho is historical reference only and is not connected, planned, imported from, synced with, written back to, or treated as a dependency.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.
 - [ ] Hostinger SMTP is not connected.

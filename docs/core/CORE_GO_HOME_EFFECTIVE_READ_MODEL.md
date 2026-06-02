@@ -9,7 +9,7 @@ Raw storage tables remain separate:
 - `core_go_home_groups` stores shared pickup/delivery appointment data.
 - `core_go_home_details` stores one reservation-level go-home detail, puppy-specific readiness, checklist state, notes, and explicit exceptions.
 
-Dashboards, portal screens, phone lookup, and future go-home screens should read resolved appointment values from `core_go_home_effective_view` instead of choosing between raw group/detail fields themselves.
+Owner/operator dashboards, portal screens, phone lookup, and future go-home screens should read resolved appointment values from `core_go_home_effective_view` instead of choosing between raw group/detail fields themselves.
 
 ## Source Rules
 
@@ -35,7 +35,7 @@ For ungrouped details:
 
 ## Financial Boundary
 
-`balance_cleared_status` is operational readiness only. It can help staff decide whether a puppy is ready to go home, but it never replaces financial truth.
+`balance_cleared_status` is operational readiness only. It can help the owner/operator decide whether a puppy is ready to go home, but it never replaces financial truth.
 
 Financial truth remains:
 
@@ -51,18 +51,18 @@ The effective read model feeds the go-home fields used by:
 - `core_puppy_summary_view`
 - `core_dashboard_today_view`
 
-`core_phone_lookup_view` already reads reservation context through the reservation/buyer summaries. Ambiguous phone lookups still redact buyer, puppy, payment, and go-home context until a later verification or staff-routing workflow is built.
+`core_phone_lookup_view` already reads reservation context through the reservation/buyer summaries. Ambiguous phone lookups still redact buyer, puppy, payment, and go-home context until a later owner/operator verification workflow is built.
 
 ## Not Built Here
 
 This read-model task does not build:
 
-- UI or dashboard screens
+- UI or owner/operator dashboard screens
 - write tools
 - go-home history tables
 - production RLS
 - Twilio integration
-- Zoho integration
+- Zoho tooling, which is cancelled and historical-reference only
 - customer messaging
 - Home Assistant/camera/smart mirror features
-- production data import
+- production data staging or migration

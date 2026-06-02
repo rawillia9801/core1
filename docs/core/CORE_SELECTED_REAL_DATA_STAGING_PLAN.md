@@ -10,7 +10,9 @@ The goal is deliberately small:
 - Verify staff authentication, role-based read scopes, and server-side read boundaries with real-shaped data.
 - Confirm no live side effects occur.
 
-This is not a bulk migration, production cutover, live Zoho connection, payment workflow, customer portal launch, or production-readiness claim.
+This is not a bulk migration, production cutover, Zoho workflow, payment workflow, customer portal launch, or production-readiness claim.
+
+Zoho One has been cancelled. Zoho must not be used as a selected-real-data import source, export source, dry-run source, staging bridge, sync source, writeback target, or dependency.
 
 ## Recommended First Data Slice
 
@@ -33,7 +35,7 @@ The first slice should answer one question: can Core safely display selected rea
 Allowed first sources:
 
 - Manual export of one or two owner-approved application records.
-- Controlled Zoho export of the same tiny owner-approved application set.
+- Zoho export or Zoho-shaped payload.
 
 Not allowed yet:
 
@@ -43,19 +45,19 @@ Not allowed yet:
 - Production writeback to Zoho.
 - Any integration that can contact customers or alter live records.
 
-Every selected record must be approved by the owner before staging import.
+Every selected record must be approved by the owner before staging setup.
 
 ## Redaction And Sensitivity Review
 
-Use `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` before importing selected records.
+Use `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` before entering or staging selected records.
 
-Before importing selected records, review the exported application fields.
+Before entering or staging selected records, review the application fields.
 
 Classify fields into:
 
 - Staff-visible operational review fields.
 - Owner/admin-only sensitive fields.
-- Fields that should not be imported for the first staging test.
+- Fields that should not be entered or staged for the first staging test.
 
 Pay close attention to:
 
@@ -76,23 +78,23 @@ Recommended sequence:
 1. Run a local dry run first with the exact selected payload shape.
 2. Review local results in `/staff` as owner/admin and staff.
 3. Confirm sensitive fields are not visible to staff unless approved.
-4. Only after owner approval, run the same controlled import in staging.
+4. Only after owner approval, enter or stage the same controlled Core-native record set in staging.
 
 Preferred implementation path:
 
 - Use the existing Core intake/database function if compatible with the selected payload shape.
-- Keep import as a controlled one-time staging operation.
+- Keep selected record setup as a controlled one-time staging operation.
 - Write audit/event rows only as expected by the intake path.
 
 Dry-run helper:
 
 ```bash
-./scripts/dry-run-selected-application-intake.sh path/to/selected-payload.json
+# Historical dry-run intake scripts are not part of the active Core path.
 ```
 
-The helper reads a local JSON payload file, calls the existing `core_ingest_zoho_application` database function inside a transaction, prints the buyer/family/application IDs, status, section count, event ID, and audit ID that would be created, and rolls back by default. Do not commit selected real payload files.
+Historical dry-run helpers that call `core_ingest_zoho_application` must not be used as the active Core path. Do not commit selected real payload files.
 
-Manual selected-payload dry-run process:
+Manual selected-record review process:
 
 1. Complete the field review template and owner approval for the selected record before creating the JSON file.
 2. Place the selected JSON payload outside the repository, for example under a private local temp/work folder such as `/tmp/core-selected-payloads/` in Git Bash or another owner-approved local-only folder.
@@ -105,7 +107,7 @@ test -f /tmp/core-selected-payloads/selected-application-001.json
 4. Run the rollback-only dry run:
 
 ```bash
-./scripts/dry-run-selected-application-intake.sh /tmp/core-selected-payloads/selected-application-001.json
+# Use Core-native owner/operator workflows when selected-record staging is approved.
 ```
 
 Expected output includes:
@@ -127,7 +129,7 @@ Review the output for:
 - Whether any error occurred.
 - Whether the final rollback marker is present.
 
-Do not move the selected payload into the repository. Do not commit it. Do not run a live Zoho webhook. Do not run any commit/import mode; the helper intentionally has no commit mode in this phase.
+Do not move selected payloads into the repository. Do not commit them. Do not run a live Zoho webhook. Do not run any Zoho import mode.
 
 Do not:
 
@@ -141,7 +143,7 @@ Do not:
 
 The staging environment must be separate from local development.
 
-Required before staging import:
+Required before selected-record staging:
 
 - Protected `/staff` route works in staging.
 - Supabase Auth works for staging staff users.
@@ -151,7 +153,7 @@ Required before staging import:
 - Secrets are stored only in environment configuration, not in Git, docs, chat, screenshots, or client code.
 - Service-role usage remains server-side only.
 
-RLS is still deferred for this specific bridge, but it is required before broader live/client exposure.
+RLS is still required before broader live/client exposure.
 
 ## Safety Requirements
 
@@ -170,11 +172,11 @@ The first staging test must keep all live side effects off:
 - No automatic payments, refunds, fees, chargebacks, or credits.
 - No production Zoho writeback.
 
-The staging test is read/display verification plus controlled import only.
+The staging test is read/display verification plus controlled owner-approved record setup only.
 
 ## Verification Checklist
 
-After local dry run and again after approved staging import:
+After local review and again after approved staging setup:
 
 - Selected application appears in the Received Applications panel.
 - Application sections display correctly.
@@ -185,7 +187,7 @@ After local dry run and again after approved staging import:
 - Staff cannot see phone lookup safety/ambiguity details.
 - Staff cannot see the general event feed.
 - Staff-visible application answers match the approved field review.
-- Audit/event rows are created only as expected by the controlled import path.
+- Audit/event rows are created only as expected by the controlled Core-native path.
 - No email was sent.
 - No SMS or Twilio action occurred.
 - No payment processor action occurred.
@@ -202,18 +204,18 @@ Because this is staging-only:
 - No customer contact should be triggered.
 - No external provider state should need cleanup.
 
-Before import, record:
+Before staging selected records, record:
 
 - Which records were selected.
 - Which environment received them.
-- Which import method was used.
+- Which Core-native entry or staging method was used.
 - Who approved the staging slice.
 
 If anything unexpected appears or any side effect occurs, stop the staging test and do not add more records.
 
 ## Go / No-Go Criteria
 
-Before any import, complete `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`.
+Before staging selected records, complete `docs/core/CORE_STAGING_READINESS_CHECKLIST.md`.
 
 Go to the next tiny staging slice only if:
 
@@ -232,21 +234,21 @@ Block moving forward if:
 - Any live email, SMS, payment, document, or portal behavior triggers.
 - Staff access can bypass read-scope restrictions.
 - Audit/event records are missing or unexpected.
-- The import method requires storing real payloads in Git.
+- The staging method requires storing real payloads in Git.
 - The selected data scope is unclear or not owner-approved.
 
 ## Current Status
 
 This plan exists as a staging safety checkpoint.
 
-No selected real data has been imported yet.
+No selected real data has been staged yet.
 
-Staging import remains blocked until the owner approves:
+Selected-record staging remains blocked until the owner approves:
 
 - The exact records.
 - The exact fields.
 - The completed field review.
 - The staging environment.
-- The import method.
+- The Core-native staging method.
 - The verification checklist.
 - The staging readiness checklist.

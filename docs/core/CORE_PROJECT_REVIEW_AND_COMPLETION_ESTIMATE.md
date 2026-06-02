@@ -15,7 +15,7 @@ It should be read alongside:
 
 ## Current Position
 
-Core is now a Core-native staff operating system foundation. Zoho One is no longer part of the active lineup.
+Core is now a Core-native owner/operator operating system foundation. Zoho One is cancelled and must remain historical reference only, not an import source, migration lane, bridge, sync target, writeback target, compatibility workflow, dependency, or future operational path.
 
 The proven local workflow is now broader than application intake:
 
@@ -60,7 +60,7 @@ No real email is being sent.
 
 The following are implemented and have been manually or test verified in local/development:
 
-- Staff login works locally.
+- Owner/operator login works locally through the existing technical staff auth route.
 - Active mapped owner profile can access `/staff`.
 - Core-native private application entry works at `/staff/applications/new`.
 - Core-native application entry does not require Zoho.
@@ -92,26 +92,26 @@ The following are implemented and have been manually or test verified in local/d
   - `ROLLBACK`
 - `/staff/dogs`, `/staff/litters`, and `/staff/puppies` read real Core rows only.
 - `/staff/dogs/new`, `/staff/litters/new`, and `/staff/puppies/new` create real Core records through owner/admin-only server actions.
-- Dogs, Litters, and Puppies are enabled in the staff sidebar.
+- Dogs, Litters, and Puppies are enabled in the existing technical sidebar.
 - Dog, litter, and puppy edit/archive pages exist and have been browser-tested.
 - Audited kennel update/archive SQL verification passed with `event_check = 6` and `audit_check = 6`.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
-- Events is enabled in the staff sidebar.
+- Events is enabled in the existing technical sidebar.
 - `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace.
 - Phone Lookup is enabled in the staff sidebar.
 - `/staff/documents` has been added as a read-only owner/admin document metadata inventory.
 - Documents is enabled in the staff sidebar.
 - `/staff/messages` has been added as a read-only owner/admin communications metadata workspace.
-- Messages is enabled in the staff sidebar.
+- Messages is enabled in the existing technical sidebar.
 - `/staff/kennel-logs` has been added as a read-only owner/admin kennel event/audit history workspace.
-- Kennel Logs is enabled in the staff sidebar.
+- Kennel Logs is enabled in the existing technical sidebar.
 - `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document only; no AI console has been built.
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked after implementation.
-- `/staff/command` exists as a read-only command shell only. It does not connect an AI provider or replace `/staff`.
-- `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning only. No proposed-action implementation exists.
+- `/staff/command` exists as a read-only Core Command Center shell only. It does not connect an AI provider or replace `/staff`.
+- `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
 
 ## Recently Added / In Progress
 
@@ -160,7 +160,7 @@ The following remain intentionally disconnected:
 - Email send buttons.
 - Automatic customer email delivery.
 - Twilio.
-- Zoho live webhook/writeback or sync.
+- Zoho import, live webhook, bridge, compatibility workflow, writeback, dependency check, dry-run helper, or sync.
 - Payment processor.
 - Document generation/signature provider.
 - Customer portal.
@@ -171,7 +171,7 @@ The following remain intentionally disconnected:
 
 ## Non-Drift Lane
 
-The current lane is Core-native staff workflow completion:
+The current lane is Core-native owner/operator workflow completion:
 
 ```text
 checkpoint verified kennel/buyer/family/event workspaces
@@ -181,7 +181,7 @@ checkpoint verified kennel/buyer/family/event workspaces
   -> Kennel Logs read-only owner/admin workspace added
   -> Command Console read-only shell added
   -> Proposed Action Approval Model plan added
-  -> continue staff-only Core workflows
+  -> continue owner/operator Core workflows under existing technical routes
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, public website publishing, AI write capability, or unrelated integrations until the matching safety gates are complete.
@@ -202,12 +202,12 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 3. **Review Proposed Action Approval Model**
    - Confirm future writes use proposed action, owner/admin approval, controlled RPC/server action execution, and event/audit logging.
 
-4. **Continue staff-only workflows only**
+4. **Continue owner/operator workflows only**
    - Keep all new pages authenticated, read-first, real-data-only, and side-effect free unless a later explicit write task is approved.
 
 ## Estimate To Internal Local Completion
 
-This means a local/staff-only Core that can handle application intake, approval, reservation, ledger payments, notification preview, go-home planning, go-home checklist items, and basic kennel record management, without live integrations.
+This means a local owner/operator Core OS that can handle application intake, approval, reservation, ledger payments, notification preview, go-home planning, go-home checklist items, and basic kennel record management, without live integrations.
 
 Estimated remaining time: **1 to 2 weeks** of focused work.
 
@@ -218,9 +218,9 @@ Main remaining items:
 - Finish unauthorized-role verification for current actions.
 - Keep owner/admin audit visibility restricted.
 
-## Estimate To Staff-Only Staging
+## Estimate To Owner/Operator Staging
 
-This means protected staging app hosting, separate staging Supabase project/database, mapped staff auth, selected-real-data readiness, and no live side effects.
+This means protected staging app hosting, separate staging Supabase project/database, mapped owner/operator auth, selected-real-data readiness, and no live side effects.
 
 Estimated remaining time after local completion: **2 to 4 weeks**.
 
@@ -228,15 +228,15 @@ Main remaining items:
 
 - Staging environment setup.
 - Staging Supabase project/database.
-- Staff Auth mapping in staging.
+- Owner/operator auth mapping in staging.
 - RLS design/tests or continued server-only boundary decision for staging.
 - Selected real application and kennel field review.
 - Owner-approved limited import or manual entry of selected real records.
 - Verification that no emails/messages/payments/documents/public website updates are triggered.
 
-## Estimate To Internal Production Staff Use
+## Estimate To Internal Production Owner/Operator Use
 
-This means Core can be used internally for real operations by the owner/admin with restricted staff roles, but still not customer-facing.
+This means Core can be used internally for real operations by Cristy as owner/operator, with future helper roles only if needed, but still not customer-facing.
 
 Estimated remaining time after staging: **4 to 8 weeks**.
 
@@ -274,9 +274,9 @@ Main remaining items:
 From the current checkpoint, assuming focused progress and no major redesign:
 
 ```text
-Local internal foundation:        in progress; about 1-2 focused weeks to stabilize current staff workflows
-Staff-only staging:              3-6 weeks total from stable local checkpoint
-Internal production staff use:   2-3 months total from current checkpoint
+Local internal foundation:        in progress; about 1-2 focused weeks to stabilize current owner/operator workflows
+Owner/operator staging:           3-6 weeks total from stable local checkpoint
+Internal production Core OS use:  2-3 months total from current checkpoint
 Customer-facing Core:            4-6+ months total
 ```
 
@@ -298,7 +298,7 @@ Stay on this exact order:
 ```text
 1. Browser-check Messages, Kennel Logs, and Command as read-only owner/admin workspaces.
 2. Review the Proposed Action Approval Model before implementation.
-3. Continue Core-native staff workflows only.
+3. Continue Core-native owner/operator workflows only.
 ```
 
 Do not connect Hostinger SMTP yet.

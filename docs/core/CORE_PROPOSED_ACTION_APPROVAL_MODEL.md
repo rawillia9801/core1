@@ -2,16 +2,16 @@
 
 ## Purpose
 
-This document defines the future approval bridge between read-only AI assistance and controlled Core action execution.
+This document defines the approval bridge between read-only Core assistance, future proposed actions, and controlled Core action execution. Core is intended to become the operating system and daily command layer for Cristy's owner-operated business and kennel, but not a reckless autonomous actor.
 
-It does not implement database tables, UI, AI providers, APIs, or write behavior. It exists to lock the autonomy safety model before any proposed-action code is created.
+It locks the autonomy safety model for proposed-action work. The current database/read-only review foundation may store and display proposal records, but approval still does not execute underlying business changes.
 
 The intended path is:
 
 ```text
 Read/summarize
   -> propose exact action
-  -> owner/admin approve
+  -> Cristy or an explicitly authorized owner/admin approves
   -> controlled RPC/server action writes
   -> event/audit rows recorded
   -> no silent writes
@@ -27,9 +27,10 @@ Read/summarize
 - AI cannot request signatures.
 - AI cannot publish puppies or public website listings.
 - AI cannot modify records without owner/admin approval.
+- Core may create or prepare proposed actions only through approved, validated workflows.
 - All writes must go through controlled server actions or database RPCs.
 - Every execution must write event/audit rows.
-- Staff role limitations must be enforced server-side.
+- Technical role limitations must be enforced server-side.
 - There must be no generic arbitrary SQL or generic write endpoint.
 - There must be no direct AI database credentials.
 
@@ -102,7 +103,7 @@ The eventual schema should avoid storing secrets or raw provider credentials. Sn
 ## Approval Rules
 
 - Owner/admin can approve proposed actions.
-- Staff may draft certain actions later but cannot approve sensitive actions.
+- Future helper/staff-role users may draft certain actions later if needed but cannot approve sensitive actions.
 - Payment, document, customer communication, and public listing actions need stricter gates.
 - Some actions may require a preview-only stage before approval.
 - High-risk actions may require more detailed confirmation language.
@@ -110,13 +111,13 @@ The eventual schema should avoid storing secrets or raw provider credentials. Sn
 
 ## Execution Rules
 
-- Approved actions execute through existing controlled RPCs or server actions.
+- Approved executable actions, when separately implemented, must execute through existing controlled RPCs or server actions.
 - Validation must re-run at execution time.
 - The target record should be rechecked before execution to avoid stale changes.
 - No generic database write function is allowed.
 - No arbitrary SQL is allowed.
 - No direct AI database credentials are allowed.
-- Execution must preserve role checks and staff auth boundaries.
+- Execution must preserve role checks and owner/operator auth boundaries.
 - External side effects must be explicit and blocked until their provider workflow is approved.
 
 ## Audit And Event Requirements
@@ -164,7 +165,7 @@ When implementation is approved, the first milestone should be:
 
 1. Database schema for proposed actions.
 2. Read-only approval queue.
-3. Manual draft action creation by owner/admin only.
+3. Manual draft action creation by owner/operator only.
 4. No AI provider connected.
 5. No execution behavior yet.
 
@@ -178,11 +179,10 @@ This staged approach proves storage, review, visibility, and permissions before 
 - Customer portal actions.
 - Public listing publishing.
 - AI provider/API integration.
-- Proposed-action database tables.
-- Approval UI.
+- Executable approval buttons.
 - Execution engine.
 - Generic write tools.
 
 ## Current Status
 
-Planning only. No proposed-action records, tables, APIs, UI, AI provider calls, write tools, or autonomous behavior have been implemented.
+The proposed-action database and read-only owner/admin review workspace exist for proposal/review records. Approval records do not execute business changes. No AI provider calls, autonomous write tools, external sending, payment movement, document/signature generation, public publishing, or customer-facing side effects have been implemented.

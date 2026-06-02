@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use this template before importing one or two real application records into Core staging.
+Use this template before staging one or two real application records in Core staging.
 
 The template helps decide:
 
@@ -11,7 +11,7 @@ The template helps decide:
 - Which fields are owner/admin-only.
 - Which fields should be excluded, deferred, transformed, or redacted.
 
-This template does not approve bulk import, live Zoho connection, live integrations, customer portal visibility, payment processing, document generation, or production use.
+This template does not approve bulk import, Zoho, live integrations, customer portal visibility, payment processing, document generation, or production use.
 
 No selected real data should be imported until the exact records and exact fields are reviewed and owner-approved.
 
@@ -30,7 +30,7 @@ For each field:
 7. Decide whether to import, exclude, defer, or transform.
 8. Decide role visibility.
 9. Note any redaction or transformation needed.
-10. Require owner approval before import.
+10. Require owner approval before selected-record staging.
 
 If field meaning, sensitivity, or visibility is unclear, stop and do not import that field.
 
@@ -40,8 +40,8 @@ Copy this table for the selected application export.
 
 | Source system | Source field name | Example value category, not actual private value | Core destination table/field or section | Business purpose | Sensitivity level | Import decision | Staff visibility | Redaction or transformation needed | Notes / owner approval |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Zoho | Example: Applicant Name | Person name | `core_buyers` / application section | Identify applicant | Moderate | Import | Staff visible if approved | Normalize name fields | Owner approval required |
-| Zoho | Example: Household Notes | Free-text household details | Application section | Application review | High | Defer or transform | Owner/admin only by default | Remove unnecessary private details | Owner approval required |
+| Historical reference | Example: Applicant Name | Person name | `core_buyers` / application section | Identify applicant | Moderate | Stage through Core-native path | Owner/operator visible if approved | Normalize name fields | Owner approval required |
+| Historical reference | Example: Household Notes | Free-text household details | Application section | Application review | High | Defer or transform | Owner/operator only by default | Remove unnecessary private details | Owner approval required |
 
 Allowed sensitivity levels:
 

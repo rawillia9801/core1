@@ -79,6 +79,6 @@ It verifies:
 
 A later Applications page can call a server-side action that calls this function. That server action must still handle authentication, authorization, input validation, error formatting, and safe user feedback.
 
-## Future Zoho Path
+## Historical Zoho Note
 
-Zoho integration should not call this function blindly. A later Zoho import/sync task should map Zoho application records into Core and decide whether each imported status is a historical fact, a pending review, or an action requiring owner approval.
+Zoho One has been cancelled. Do not build a Zoho import, sync, bridge, compatibility workflow, writeback, dry-run import, or dependency check around this function. Historical Zoho notes may help understand old statuses only; Core-native application review is the active path.

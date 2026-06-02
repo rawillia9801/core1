@@ -8,11 +8,11 @@ This document defines the safe shape of a later legacy-data migration effort. Co
 
 | Business Concept | Canonical Destination | Possible Legacy Sources To Inventory |
 | --- | --- | --- |
-| Customer/person | `core_buyers` | Zoho contacts, `buyers`, `bp_buyers` |
+| Customer/person | `core_buyers` | Core-native records, `buyers`, `bp_buyers`; Zoho notes are historical reference only |
 | Family/household | `core_families`, `core_family_members` | Portal household or contact associations |
-| Application | `core_applications`, `core_application_sections` | Zoho applications or form records |
+| Application | `core_applications`, `core_application_sections` | Core-native application records; Zoho field notes are historical reference only |
 | Adult dog/litter/puppy | `core_dogs`, `core_litters`, `core_puppies` | `dogs`, `litters`, `puppies`, `bp_*` variants |
-| Official puppy transaction | `core_reservations` | Zoho adoptions/sales records after reconciliation |
+| Official puppy transaction | `core_reservations` | Core-native reservation records after reconciliation |
 | Money | `core_financial_ledger` | Payment, deposit, refund, ledger exports |
 | Documents | `core_documents`, `core_document_versions` | Contract and file metadata systems |
 | Communications | `core_conversations`, `core_messages`, `core_phone_calls` | Twilio/email/CRM communication exports |
@@ -24,9 +24,9 @@ Possible legacy source names are examples to inventory, not permission to read, 
 1. Inventory source objects, record counts, identifiers, timestamps, and ownership.
 2. Define source precedence for duplicates and conflict resolution rules.
 3. Define normalization rules for email, phone, statuses, amounts, and external identifiers.
-4. Produce a dry-run mapping report with unmatched, incomplete, and duplicate records.
+4. Produce an owner-reviewed mapping report with unmatched, incomplete, and duplicate records.
 5. Validate reservation-to-ledger reconciliation and sample balances with the owner.
-6. Receive explicit approval before importing any production records.
+6. Receive explicit approval before staging any production records in Core.
 7. Import repeatably with audit/integration tracking and post-import validation.
 
 ## Migration Cautions

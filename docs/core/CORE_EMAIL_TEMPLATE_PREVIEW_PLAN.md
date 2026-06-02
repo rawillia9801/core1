@@ -87,7 +87,7 @@ The preview surface:
 - Show rendered subject.
 - Show rendered body preview.
 - Show source event/context, such as application, reservation, buyer, family, or ledger entry.
-- Show whether the notification came from fake seed data, dry-run import, staging data, or real approved workflow data when that context exists.
+- Show whether the notification came from fake seed data, staging data, or real approved workflow data when that context exists.
 - Show event/audit links or short IDs when useful.
 - Avoid raw JSON blobs by summarizing safe fields.
 - Provide no send button initially.
@@ -168,7 +168,7 @@ The rollback-safe test `core_notification_delivery_attempts_tests.sql` verifies 
 Core email safety rules should be conservative:
 
 - No emails from fake seed data.
-- No emails from dry-run imports.
+- No emails from historical dry-run/import artifacts.
 - No emails from staging unless explicitly enabled.
 - Staging must require an override recipient before any send.
 - Customer emails are disabled by default.

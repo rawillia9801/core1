@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Core V1 defines a new canonical Supabase Postgres model for Cherolee Core. It does not import production records, replace existing workflows, or delete any existing table. Existing Zoho/Supabase duplicates remain possible migration sources until a later approved mapping project.
+Core V1 defines a new canonical Supabase Postgres model for Cherolee Core. It does not import production records, replace existing workflows, or delete any existing table. Zoho is historical reference only and is not a migration source, import source, bridge, compatibility path, sync target, writeback target, or planned dependency.
 
 The initial SQL baseline lives in `supabase/migrations/20260526140000_core_v1_baseline.sql`. Required Core V1 corrections and controlled write foundations live in the subsequent migrations, including `20260526150000_core_financial_ledger_balance_effect.sql`, `20260526240000_core_record_reservation_payment_write_tool.sql`, `20260526250000_core_cancel_reservation_write_tool.sql`, and `20260526260000_core_record_financial_adjustment_write_tool.sql`.
 
@@ -126,15 +126,15 @@ The function writes a `reservation_cancelled` `core_events` row and `cancel_rese
 
 ## Core-Native Application Entry
 
-`core_create_application_manual(...)` is the Core-native owner/admin manual application creation foundation. It exists so future private staff entry can move away from Zoho-shaped intake.
+`core_create_application_manual(...)` is the Core-native owner/operator manual application creation foundation. It is the active intake direction.
 
 The function creates or updates the buyer, reuses an existing family membership when available, creates a family/member link when needed, creates one `core_applications` row with status `received`, creates grouped `core_application_sections`, and writes `core_events` plus `core_audit_log`.
 
 Only active `owner` and `admin` profiles can call this RPC. Staff-created UI remains a later task at `/staff/applications/new`; public `/apply` remains deferred.
 
-This function does not approve applications, create reservations, collect payments, create ledger rows, queue or send email, create documents, invite portal users, or write back to Zoho.
+This function does not approve applications, create reservations, collect payments, create ledger rows, queue or send email, create documents, invite portal users, or write back to any external system.
 
-Zoho-shaped `core_ingest_zoho_application(...)` remains compatibility/import/dry-run support only.
+Zoho-shaped `core_ingest_zoho_application(...)` is a cancelled-direction historical artifact only. Do not extend it, build tests around it, or use it as an active import/dry-run/compatibility path.
 
 ## Notification Queue Foundation
 
@@ -177,8 +177,9 @@ This function does not send email, connect Resend or any provider, write provide
 ## Legacy Migration Notes
 
 - This baseline creates only `core_` canonical objects and does not drop or alter legacy tables.
-- Existing tables such as `buyers`, `bp_buyers`, `puppies`, `bp_puppies`, `litters`, payment tables, or Zoho-derived objects are not assumed authoritative.
-- A later migration-map task should define source precedence, normalization rules, duplicates, validation checks, rollback/hold steps, and owner approval before importing production records.
+- Existing tables such as `buyers`, `bp_buyers`, `puppies`, `bp_puppies`, `litters`, or payment tables are not assumed authoritative.
+- Zoho-derived objects are historical reference only and are not migration sources.
+- A later owner-approved data review task should define source precedence, normalization rules, duplicates, validation checks, rollback/hold steps, and owner approval before any production records are staged in Core.
 - Nullable relationships are deliberate so incomplete source records can be staged without fabricating relationships.
 
 ## Deliberately Deferred

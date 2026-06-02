@@ -2,9 +2,9 @@
 
 ## Purpose
 
-The Core Command Console is the future primary interface for Cherolee Core. It should feel intelligent, alive, and futuristic while remaining safe, permissioned, and auditable.
+The Core Command Console is the future primary interface for Cherolee Core. Core is the operating system, daily command layer, and future decision assistant for Cristy's owner-operated business and kennel. It should feel intelligent, alive, and futuristic while remaining safe, permissioned, and auditable.
 
-The console is not a shortcut around Core's safety model. It is a staff interface that can help understand records, prepare work, and surface next actions. Any write-capable behavior must stay explicit, reviewed, and logged.
+The console is not a shortcut around Core's safety model. It is an owner/operator command center that can help understand records, prepare work, recommend next actions, and keep the daily operating picture clear. Any write-capable behavior must stay explicit, reviewed, and logged.
 
 ## Non-Negotiable Safety Model
 
@@ -14,7 +14,7 @@ The safety model is:
 AI understands request
   -> AI prepares proposed action
   -> AI shows exact changes
-  -> owner/admin approves
+  -> Cristy or an explicitly authorized owner/admin approves
   -> Core writes record through audited RPC/server action
   -> Core logs event and audit row
 ```
@@ -23,10 +23,10 @@ Rules:
 
 - AI cannot silently change records.
 - AI proposes actions; it does not execute them directly.
-- Owner/admin approval is required for write execution.
+- Cristy, as owner/operator and final authority, or an explicitly authorized owner/admin, must approve write execution.
 - Writes must go through controlled RPCs or server actions.
 - Every write must create `core_events` and `core_audit_log` rows.
-- Staff role limitations must be enforced server-side.
+- Technical role limitations must be enforced server-side.
 - The browser UI cannot be the only enforcement boundary.
 - Direct database writes from AI, chat, or browser code are prohibited.
 
@@ -41,8 +41,8 @@ Allowed read-only capabilities:
 - Summarize kennel status.
 - Summarize go-home readiness.
 - Summarize payments and ledger status for owner/admin only.
-- Surface warnings, blockers, and next recommended staff actions.
-- Link users to the existing staff workspaces for the actual review surface.
+- Surface warnings, blockers, and next recommended owner/operator actions.
+- Link users to the existing technical `/staff` workspaces for the actual review surface while route names remain unchanged.
 
 This first milestone should not connect an AI provider. It can be a designed shell that proves layout, safety indicators, and staff route protection before intelligence is connected.
 
@@ -55,7 +55,7 @@ Later, after the approval model and proposed-action storage are designed, the co
 - Draft payment reminder text without sending.
 - Draft document package plans without generating documents.
 - Draft customer messages without sending.
-- Queue proposed actions for owner/admin approval.
+- Queue proposed actions for owner/operator approval.
 
 These are drafts only until a permitted owner/admin approves the final action.
 
@@ -89,19 +89,19 @@ Suggested areas:
 - "No external systems connected" markers where appropriate.
 - Clear proposed-change previews before any approval.
 
-The console should complement existing staff workspaces first. It should not replace them until the read, proposal, approval, and audit model is proven.
+The console should complement existing owner/operator workspaces first. It should not replace them until the read, proposal, approval, and audit model is proven.
 
 ## First Build Milestone
 
 First milestone:
 
 - Read-only console shell only.
-- Staff-only route.
+- Protected owner/operator route, currently under the existing technical `/staff` route tree.
 - No AI provider connected.
 - No model API calls.
 - No proposed-action writes.
 - No external system integrations.
-- No replacement of existing staff workspaces.
+- No replacement of existing technical `/staff` workspaces.
 - Prefer no fake operational data. If static example text is ever used, it must be clearly labeled as non-operational mock UI copy.
 
 The first shell should show the safety model and connect users to the existing read-only/workflow pages.
@@ -114,8 +114,8 @@ Do not implement the Command Console until these are reviewed:
 - Tool approval model designed.
 - Proposed-action table/schema designed.
 - Audit/event model confirmed.
-- Owner/admin approval UI designed.
-- Role limits defined for owner, admin, and staff.
+- Owner/operator approval UI designed.
+- Technical role limits defined for owner, admin, and any future helper/staff role.
 - Sensitive read scopes confirmed.
 - No external sending connected.
 - No public/customer-facing behavior connected.

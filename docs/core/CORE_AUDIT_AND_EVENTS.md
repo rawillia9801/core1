@@ -44,7 +44,7 @@ Financial correction work must remain additive. Prior ledger rows are not edited
 
 `core_create_application_manual(...)` is the controlled Core-native owner/admin application creation foundation. It creates or reuses buyer/family context, creates a received application, stores grouped application section responses, writes an `application_created_manual` operational event, and writes a `create_application_manual` audit row.
 
-The RPC does not send email, queue notifications, create reservations, create payments, create documents, invite portal users, or write back to Zoho. Zoho-shaped intake remains compatibility/import support only.
+The historical Zoho-shaped intake RPC does not send email, queue notifications, create reservations, create payments, create documents, invite portal users, or write back to Zoho. Zoho-shaped intake is cancelled-direction history only and must not be extended into an active import, compatibility, sync, dry-run, or writeback path.
 
 ### Notification Queue Audit Context
 

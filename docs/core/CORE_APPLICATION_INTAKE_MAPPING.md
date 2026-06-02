@@ -1,12 +1,12 @@
-# Core Application Intake Mapping
+# Historical Application Field Reference
 
 ## Purpose
 
-This document maps the current Zoho Puppy Application fields into the Core V1 data model. It is a planning and implementation guide for a later import/webhook endpoint.
+This document is historical reference for old Zoho Puppy Application field shapes. It is not a planning guide for a later import, webhook, bridge, compatibility workflow, sync, writeback, or dependency.
 
-This mapping is based on the Zoho Applications module field list provided from the live Zoho setup.
+Zoho One has been cancelled. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, dry-run import lane, sync target, writeback target, planned dependency, future dependency, or active part of Core.
 
-## Current Source
+## Historical Source
 
 Current form source:
 
@@ -20,11 +20,11 @@ Known public form URL reference:
 https://forms.swvachihuahua.com/southwestvirginiachihuahua/form/PuppyApplication/formperma/MxCOxyG77E3yShC2GCnwbjiMu1z3vqR8Gql1nug9gTY
 ```
 
-The URL is a reference only. Core should not depend on screen scraping this form. A later integration should use an approved Zoho webhook, Zoho API export, or controlled CSV/import process.
+The URL is a historical reference only. Core should not depend on screen scraping this form, Zoho webhooks, Zoho APIs, Zoho exports, Zoho imports, or Zoho-shaped compatibility workflows.
 
-## Core Intake Targets
+## Core Reference Targets
 
-A Zoho application can map into several Core tables:
+Old application information may help understand the kinds of data Core-native application records should capture:
 
 | Core Target | Purpose |
 | --- | --- |
@@ -39,11 +39,11 @@ A Zoho application can map into several Core tables:
 
 ## Field Mapping
 
-| Zoho Field Label | Zoho API Name | Zoho Type | Core Target | Mapping Notes |
+| Historical Field Label | Historical API Name | Historical Type | Possible Core Concept | Notes |
 | --- | --- | --- | --- | --- |
 | Applicant Name | `Applicant_Name` | Single Line | `core_buyers.first_name`, `core_buyers.last_name`, `core_applications.metadata` | Split only if safe; preserve original full value in metadata. |
 | Application Approved Email Sent | `Application_Approved_Email_Sent` | Boolean | `core_applications.metadata`, optional `core_notifications` | Historical flag only; does not prove Core sent email. |
-| Application ID | `Application_ID` | Auto Number | `core_applications.external_reference` | Preserve Zoho auto-number for dedupe/import trace. |
+| Application ID | `Application_ID` | Auto Number | `core_applications.external_reference` | Historical reference only; do not build Zoho dedupe/import tooling. |
 | Application Image | `Record_Image` | Application Image | `core_applications.metadata` | Do not import file/image until storage rules exist. |
 | Application Name | `Name` | Single Line | `core_applications.metadata`, display/search field later | Preserve exact Zoho value. |
 | Application Owner | `Owner` | Lookup | `core_applications.metadata` | Map to Core profile only after staff identity mapping exists. |
@@ -52,7 +52,7 @@ A Zoho application can map into several Core tables:
 | Approval Notes | `Approval_Notes` | Multi Line | `core_applications.decision_notes` or `core_application_sections` | Use decision_notes only for final review notes; preserve raw text. |
 | Approved Date | `Approved_Date` | Date | `core_applications.reviewed_at` | If status is approved, convert date to timestamp carefully. |
 | Budget Range | `Budget_Range` | Pick List | `core_application_sections` | Preference/application answer, not buyer master data. |
-| Buyer | `Created_Buyers` | Lookup | `core_applications.buyer_id`, `core_buyers.external_reference` | Requires Zoho buyer-to-Core buyer matching. |
+| Buyer | `Created_Buyers` | Lookup | `core_applications.buyer_id`, `core_buyers.external_reference` | Historical relationship hint only; do not build Zoho buyer matching. |
 | Color Preference | `Color_Preference` | Multiselect | `core_buyer_preferences` or `core_application_sections` | Prefer application_sections until preference model is finalized. |
 | Connected To | `Connected_To__s` | MultiModuleLookup | `core_applications.metadata` | Preserve raw relationship links. Do not resolve automatically yet. |
 | Created By | `Created_By` | Single Line | `core_applications.metadata` | Historical source metadata. |
@@ -65,7 +65,7 @@ A Zoho application can map into several Core tables:
 | Follow-Up Needed | `Follow_Up_Needed` | Boolean | `core_applications.metadata`, future task/notification | Do not auto-message yet. |
 | Has Other Pets | `Has_Other_Pets` | Boolean | `core_application_sections` | Household/fit answer. |
 | Interest Type | `Interest_Type` | Pick List | `core_application_sections` | Application answer. |
-| Linked Deal | `Linked_Deal` | Lookup | `core_applications.metadata` | Preserve Zoho link; map to Core reservation only after migration review. |
+| Linked Deal | `Linked_Deal` | Lookup | `core_applications.metadata` | Historical relationship hint only; do not build Zoho reservation mapping. |
 | Modified By | `Modified_By` | Single Line | `core_applications.metadata` | Historical source metadata. |
 | Other Pets Details | `Other_Pets_Details` | Multi Line | `core_application_sections` | Household/fit answer. |
 | Phone | `Phone` | Phone | `core_buyers.phone`, `core_buyers.phone_normalized` | Normalize for phone lookup safety. |
@@ -79,20 +79,20 @@ A Zoho application can map into several Core tables:
 
 ## Suggested Core Status Normalization
 
-Zoho has both `Application_Review_Status` and `Status`. Core should not blindly trust both as separate truth fields.
+Historical Zoho records had both `Application_Review_Status` and `Status`. Core should not blindly treat old external statuses as authoritative.
 
 Suggested normalized `core_applications.status` values:
 
 | Core Status | Meaning |
 | --- | --- |
-| `received` | Application was submitted/imported and has not been reviewed. |
-| `needs_review` | Staff review or follow-up is required. |
-| `approved` | Application has been approved by a controlled workflow or trusted historical import. |
+| `received` | Application was submitted into Core and has not been reviewed. |
+| `needs_review` | Owner/operator review or follow-up is required. |
+| `approved` | Application has been approved by a controlled Core workflow. |
 | `declined` | Application was declined. |
 | `withdrawn` | Applicant withdrew or became inactive. |
-| `archived` | Historical/import-only record not part of active workflow. |
+| `archived` | Historical or inactive record not part of active workflow. |
 
-Raw Zoho status fields should still be preserved in `core_applications.metadata` during import.
+Raw historical status fields may be kept only as owner-approved reference metadata if manually entered into Core. Do not build a Zoho import path.
 
 ## Application Sections
 
@@ -107,43 +107,33 @@ Suggested sections:
 | `household_fit` | Has Other Pets, Other Pets Details. |
 | `declarations` | Declarations Signed, E-Signature File reference. |
 | `review` | Application Review Status, Approval Notes, Approved Date, Follow-Up Needed, Follow-Up Date, Review Notes. |
-| `zoho_metadata` | Application ID, Application Name, Owner, Created By, Modified By, Connected To, Linked Deal, Status, Tag, email-sent flags. |
+| `historical_metadata` | Application ID, Application Name, Owner, Created By, Modified By, Connected To, Linked Deal, Status, Tag, email-sent flags. |
 
-## Future Intake Flow
+## Cancelled Intake Flow
 
-A later approved intake workflow should follow this order:
+Do not build a Zoho intake flow. The previous idea of receiving Zoho webhook/API/export payloads is cancelled.
 
-1. Receive Zoho webhook/API/export payload.
-2. Validate source and payload shape.
-3. Normalize email and phone.
-4. Match or create `core_buyers` using careful dedupe rules.
-5. Match or create `core_families` when household data is available.
-6. Create or update `core_applications` using Zoho `Application_ID` as external reference.
-7. Store form answers in `core_application_sections`.
-8. Write `core_events` with `event_type = application_received` or `application_imported`.
-9. Write `core_audit_log` for the import/write action.
-10. Optionally queue a received notification, without sending anything automatically.
+Future intake should be Core-native unless a separate non-Zoho source is explicitly approved.
 
-## Dedupe Rules Needed Before Live Import
+## Dedupe Rules For Core-Native Records
 
-Before live imports, Core needs written rules for:
+Core still needs written rules for:
 
 - Email match.
 - Phone match.
-- Buyer lookup from Zoho `Created_Buyers`.
 - Family/household grouping.
 - Duplicate application submissions.
-- Conflicts between Zoho Status and Application Review Status.
-- Whether a historical approved Zoho application should call the approval workflow or be imported as historical state.
 
 ## Not Automated Yet
 
-This mapping does not enable:
+This historical reference does not enable:
 
-- Live Zoho webhook.
-- Live Zoho API pull.
-- File import.
-- E-signature import.
+- Zoho webhook.
+- Zoho API pull.
+- Zoho import or dry-run import.
+- Zoho sync or writeback.
+- File import from Zoho.
+- E-signature import from Zoho.
 - Email sending.
 - Automatic approval.
 - Automatic reservation creation.
@@ -152,15 +142,4 @@ This mapping does not enable:
 
 ## Next Safe Implementation Step
 
-Create a local-only import function or script for one fake Zoho application payload that writes:
-
-- one buyer,
-- one family,
-- one application,
-- application sections,
-- one event,
-- one audit log,
-
-inside a rollback-safe smoke test.
-
-Do not connect live Zoho until the fake-payload path is validated.
+Continue Core-native owner/operator application workflows. Do not create Zoho import functions, Zoho-shaped dry-run scripts, Zoho compatibility tests, Zoho sync, or Zoho writeback.
