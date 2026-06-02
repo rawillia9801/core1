@@ -5,6 +5,7 @@ import {
   canViewSensitiveFinancials,
   requireStaffProfile,
 } from "@/lib/staff-auth";
+import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,23 @@ type PhoneLookupSummaryRow = {
   verification_required: boolean | null;
 };
 
+type ProposedActionRow = {
+  id: string;
+  status: string | null;
+  risk_level: string | null;
+};
+
+type SystemNode = {
+  label: string;
+  value: string | number;
+  status: string;
+  icon: string;
+  pulse: boolean;
+  tone: string;
+  position: string;
+  line: string;
+};
+
 function getSupabaseRestConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -95,11 +113,7 @@ function getSupabaseRestConfig() {
     : null;
 }
 
-function buildUrl(
-  restUrl: string,
-  table: string,
-  params: Record<string, string>,
-) {
+function buildUrl(restUrl: string, table: string, params: Record<string, string>) {
   const url = new URL(`${restUrl}/${table}`);
   Object.entries(params).forEach(([key, value]) =>
     url.searchParams.set(key, value),
@@ -173,7 +187,7 @@ function formatDateTime(value: string | null | undefined) {
 
 function formatMoney(cents: number | null) {
   if (typeof cents !== "number") {
-    return "Restricted or not recorded";
+    return "Restricted";
   }
 
   return new Intl.NumberFormat("en-US", {
@@ -194,72 +208,216 @@ function formatKey(value: string | null | undefined) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function StatusPill({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function StatusChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/70 bg-white/70 px-4 py-3 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-      <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-slate-400">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
-    </div>
-  );
-}
-
-function MetricCard({
-  label,
-  value,
-  note,
-}: {
-  label: string;
-  value: number | string;
-  note: string;
-}) {
-  return (
-    <div className="rounded-[1.7rem] border border-white/80 bg-white/80 p-5 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {label}
-      </p>
-      <p className="mt-3 text-3xl font-black tracking-tight text-slate-950">
-        {value}
-      </p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{note}</p>
-    </div>
-  );
-}
-
-function SignalCard({
-  title,
-  value,
-  detail,
-}: {
-  title: string;
-  value: string | number;
-  detail: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-bold text-slate-950">{title}</p>
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
-          {value}
-        </span>
+    <div className="rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] ring-1 ring-sky-100/80 backdrop-blur">
+      <div className="flex items-center gap-2">
+        <span className="core-command-blink h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.85)]" />
+        <p className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-slate-400">
+          {label}
+        </p>
       </div>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{detail}</p>
+      <p className="mt-1 text-sm font-bold text-slate-950">{value}</p>
+    </div>
+  );
+}
+
+function GlassPanel({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <section
+      className={`rounded-[2rem] border border-white/75 bg-white/78 shadow-[0_24px_70px_rgba(15,23,42,0.09)] ring-1 ring-slate-200/60 backdrop-blur-xl ${className}`}
+    >
+      {children}
+    </section>
+  );
+}
+
+function TinyPill({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-white/70 px-3 py-1 text-[0.7rem] font-black uppercase tracking-[0.13em] text-cyan-900 shadow-sm">
+      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.9)]" />
+      {children}
+    </span>
+  );
+}
+
+function HelperRow({ icon, text }: { icon: string; text: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/70 p-3 text-sm font-semibold text-slate-700">
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-sky-50 text-sm text-sky-700 ring-1 ring-sky-100">
+        {icon}
+      </span>
+      {text}
     </div>
   );
 }
 
 function ReadinessItem({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-cyan-100 bg-cyan-50/80 p-4 text-sm font-semibold text-cyan-950">
+    <div className="rounded-2xl border border-cyan-100 bg-white/70 p-4 text-sm font-bold text-cyan-950 shadow-sm">
+      <div className="mb-2 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
       {text}
     </div>
+  );
+}
+
+function OutputRow({
+  title,
+  detail,
+  time,
+  badge,
+}: {
+  title: string;
+  detail: string;
+  time: string;
+  badge: string;
+}) {
+  return (
+    <article className="group rounded-2xl border border-slate-200/80 bg-white/70 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_18px_45px_rgba(14,165,233,0.12)]">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex gap-3">
+          <span className="mt-1 h-3 w-3 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,0.85)]" />
+          <div>
+            <p className="font-black text-slate-950">{title}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">{detail}</p>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              {time}
+            </p>
+          </div>
+        </div>
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700 ring-1 ring-blue-100">
+          {badge}
+        </span>
+      </div>
+    </article>
+  );
+}
+
+function SummaryLine({ label, value, note }: { label: string; value: string | number; note: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white/70 p-4">
+      <div>
+        <p className="text-sm font-black text-slate-950">{label}</p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">{note}</p>
+      </div>
+      <span className="rounded-2xl bg-slate-950 px-3 py-2 text-sm font-black text-white shadow-sm">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function CommandNode({ node }: { node: SystemNode }) {
+  return (
+    <div className={`absolute ${node.position}`}>
+      <div
+        className={`pointer-events-none absolute ${node.line} core-command-connector hidden rounded-full bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent xl:block`}
+      />
+      <div
+        className={`relative z-10 grid h-28 w-28 place-items-center rounded-full border border-white/80 bg-white/82 p-3 text-center shadow-[0_18px_40px_rgba(15,23,42,0.12)] ring-1 backdrop-blur-xl ${node.tone} ${node.pulse ? "core-command-node-pulse" : ""}`}
+      >
+        <div>
+          <div className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-white/80 text-lg shadow-sm">
+            {node.icon}
+          </div>
+          <p className="mt-2 text-[0.64rem] font-black uppercase tracking-[0.11em] text-slate-500">
+            {node.label}
+          </p>
+          <p className="text-xl font-black text-slate-950">{node.value}</p>
+          <p className="text-[0.64rem] font-bold text-slate-500">{node.status}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CommandCloud({ nodes }: { nodes: SystemNode[] }) {
+  return (
+    <GlassPanel className="relative overflow-hidden p-5 sm:p-7">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(56,189,248,0.24),transparent_33%),radial-gradient(circle_at_26%_22%,rgba(129,140,248,0.19),transparent_28%),radial-gradient(circle_at_73%_78%,rgba(45,212,191,0.17),transparent_30%)]" />
+      <div className="relative min-h-[760px] xl:min-h-[620px]">
+        <div className="absolute left-1/2 top-[46%] z-20 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2">
+          <div className="core-command-cloud relative overflow-hidden rounded-[3.2rem] border border-white/80 bg-white/70 p-7 shadow-[0_28px_90px_rgba(37,99,235,0.18)] ring-1 ring-cyan-100/80 backdrop-blur-2xl sm:p-9">
+            <div className="pointer-events-none absolute inset-0 core-command-orbit bg-[linear-gradient(115deg,transparent_0%,rgba(125,211,252,0.18)_35%,transparent_55%),radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.9),transparent_24%),radial-gradient(circle_at_74%_72%,rgba(45,212,191,0.16),transparent_24%)]" />
+            <div className="pointer-events-none absolute inset-6 rounded-[2.5rem] border border-cyan-100/70" />
+            <div className="relative text-center">
+              <p className="text-xs font-black uppercase tracking-[0.32em] text-cyan-700">
+                Core Intelligence Hub
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">
+                Core is online and ready to help.
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
+                Your read-only command brain for business, kennel, family, and future smart-home operations.
+              </p>
+
+              <div className="mt-6 rounded-[1.6rem] border border-cyan-100 bg-white/85 p-3 shadow-[0_18px_60px_rgba(14,165,233,0.16)]">
+                <div className="flex items-center gap-3 rounded-[1.25rem] border border-slate-200 bg-slate-950 px-4 py-3 text-left text-white shadow-inner">
+                  <div className="hidden h-9 w-9 shrink-0 place-items-center rounded-full bg-cyan-400/15 text-cyan-200 ring-1 ring-cyan-300/30 sm:grid">
+                    ✦
+                  </div>
+                  <input
+                    aria-label="Command preview"
+                    className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-300 outline-none placeholder:text-slate-400"
+                    disabled
+                    placeholder="Ask Core anything... summarize today, review puppies, prepare next steps"
+                  />
+                  <button
+                    type="button"
+                    disabled
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-cyan-300 text-slate-950 opacity-70 shadow-[0_0_24px_rgba(34,211,238,0.45)]"
+                    aria-label="Command shell disabled"
+                  >
+                    →
+                  </button>
+                </div>
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  Planning shell only — no AI provider connected.
+                </p>
+              </div>
+
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                <TinyPill>Safety: Safe</TinyPill>
+                <TinyPill>Planning: Ready</TinyPill>
+                <TinyPill>Monitoring: Active</TinyPill>
+                <TinyPill>Approval: Required</TinyPill>
+              </div>
+              <p className="mt-4 text-sm font-semibold text-slate-600">
+                Core reads only. Sensitive actions require review and approval.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden xl:block">
+          {nodes.map((node) => (
+            <CommandNode key={node.label} node={node} />
+          ))}
+        </div>
+
+        <div className="grid gap-3 pt-[520px] sm:grid-cols-2 lg:grid-cols-3 xl:hidden">
+          {nodes.map((node) => (
+            <div
+              key={node.label}
+              className={`rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm ring-1 ${node.tone}`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-lg shadow-sm">
+                  {node.icon}
+                </span>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                    {node.label}
+                  </p>
+                  <p className="text-2xl font-black text-slate-950">{node.value}</p>
+                  <p className="text-xs font-semibold text-slate-500">{node.status}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </GlassPanel>
   );
 }
 
@@ -281,6 +439,7 @@ export default async function StaffCommandPage() {
     auditResult,
     documentResult,
     phoneResult,
+    proposedActionResult,
   ] = await Promise.all([
     readRows<ApplicationRow>("core_applications", {
       select: "id,status,submitted_at,created_at",
@@ -339,6 +498,13 @@ export default async function StaffCommandPage() {
           limit: "500",
         })
       : Promise.resolve({ rows: [] as PhoneLookupSummaryRow[], warning: null }),
+    canViewAudit
+      ? readRows<ProposedActionRow>("core_proposed_actions", {
+          select: "id,status,risk_level",
+          order: "created_at.desc",
+          limit: "100",
+        })
+      : Promise.resolve({ rows: [] as ProposedActionRow[], warning: null }),
   ]);
 
   const applications = applicationResult.rows;
@@ -352,6 +518,7 @@ export default async function StaffCommandPage() {
   const audits = auditResult.rows;
   const documents = documentResult.rows;
   const phoneRows = phoneResult.rows;
+  const proposedActions = proposedActionResult.rows;
 
   const activeReservationCount = reservations.filter(
     (row) => !["cancelled", "void", "released", "completed"].includes(normalized(row.reservation_status)),
@@ -395,6 +562,10 @@ export default async function StaffCommandPage() {
   const successfulAuditCount = audits.filter(
     (row) => normalized(row.outcome) === "success",
   ).length;
+  const proposedNeedsReviewCount = countByStatus(proposedActions, ["needs_review"]);
+  const proposedHighRiskCount = proposedActions.filter((row) =>
+    ["high", "blocked"].includes(normalized(row.risk_level)),
+  ).length;
 
   const warning =
     applicationResult.warning ??
@@ -407,46 +578,165 @@ export default async function StaffCommandPage() {
     eventResult.warning ??
     auditResult.warning ??
     documentResult.warning ??
-    phoneResult.warning;
+    phoneResult.warning ??
+    proposedActionResult.warning;
+
+  const nodes: SystemNode[] = [
+    {
+      label: "Applications",
+      value: applications.length,
+      status: `${pendingApplicationCount} review`,
+      icon: "✉",
+      pulse: pendingApplicationCount > 0,
+      tone: "ring-blue-200/80",
+      position: "left-[5%] top-[10%]",
+      line: "left-[88px] top-[54px] h-[2px] w-[210px] rotate-[16deg]",
+    },
+    {
+      label: "Notifications",
+      value: queuedNotificationCount,
+      status: `${unsentNotificationCount} unsent`,
+      icon: "•",
+      pulse: queuedNotificationCount > 0 || unsentNotificationCount > 0,
+      tone: "ring-cyan-200/80",
+      position: "left-[1%] top-[39%]",
+      line: "left-[92px] top-[54px] h-[2px] w-[250px] rotate-[-2deg]",
+    },
+    {
+      label: "Messages",
+      value: "Read",
+      status: "calm",
+      icon: "◌",
+      pulse: false,
+      tone: "ring-slate-200/80",
+      position: "left-[8%] bottom-[11%]",
+      line: "left-[86px] top-[34px] h-[2px] w-[210px] rotate-[-18deg]",
+    },
+    {
+      label: "Phone Lookup",
+      value: canViewPhone ? ambiguousPhoneCount : "—",
+      status: canViewPhone ? "verify" : "locked",
+      icon: "☎",
+      pulse: canViewPhone && ambiguousPhoneCount > 0,
+      tone: "ring-amber-200/80",
+      position: "left-[22%] bottom-[3%]",
+      line: "left-[70px] top-[10px] h-[2px] w-[135px] rotate-[-42deg]",
+    },
+    {
+      label: "Puppies",
+      value: puppies.length,
+      status: `${availablePuppyCount} open`,
+      icon: "◇",
+      pulse: false,
+      tone: "ring-violet-200/80",
+      position: "left-[44%] bottom-[1%]",
+      line: "left-[44px] top-[-84px] h-[2px] w-[128px] rotate-[-88deg]",
+    },
+    {
+      label: "Go-Home",
+      value: goHomeScheduledCount,
+      status: `${goHomeUnscheduledCount} unscheduled`,
+      icon: "⌂",
+      pulse: goHomeUnscheduledCount > 0,
+      tone: "ring-emerald-200/80",
+      position: "right-[23%] bottom-[3%]",
+      line: "right-[70px] top-[10px] h-[2px] w-[140px] rotate-[42deg]",
+    },
+    {
+      label: "Documents",
+      value: canViewAudit ? documents.length : "—",
+      status: canViewAudit ? `${draftDocumentCount} pending` : "locked",
+      icon: "▣",
+      pulse: canViewAudit && draftDocumentCount > 0,
+      tone: "ring-sky-200/80",
+      position: "right-[8%] bottom-[11%]",
+      line: "right-[86px] top-[34px] h-[2px] w-[210px] rotate-[18deg]",
+    },
+    {
+      label: "Reservations",
+      value: activeReservationCount,
+      status: "active",
+      icon: "◆",
+      pulse: false,
+      tone: "ring-blue-200/80",
+      position: "right-[1%] top-[39%]",
+      line: "right-[92px] top-[54px] h-[2px] w-[250px] rotate-[2deg]",
+    },
+    {
+      label: "Dogs",
+      value: dogs.length,
+      status: "records",
+      icon: "✦",
+      pulse: false,
+      tone: "ring-indigo-200/80",
+      position: "right-[5%] top-[10%]",
+      line: "right-[88px] top-[54px] h-[2px] w-[210px] rotate-[-16deg]",
+    },
+    {
+      label: "Litters",
+      value: litters.length,
+      status: `${plannedLitterCount} planned`,
+      icon: "✧",
+      pulse: plannedLitterCount > 0,
+      tone: "ring-teal-200/80",
+      position: "right-[22%] top-[2%]",
+      line: "right-[70px] top-[78px] h-[2px] w-[120px] rotate-[-44deg]",
+    },
+    {
+      label: "Safety",
+      value: "Safe",
+      status: "locked",
+      icon: "✓",
+      pulse: false,
+      tone: "ring-emerald-200/80",
+      position: "left-[22%] top-[2%]",
+      line: "left-[70px] top-[78px] h-[2px] w-[120px] rotate-[44deg]",
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dbeafe,_transparent_34%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_45%,_#f0fdfa_100%)] px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1600px] space-y-6">
-        <section className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur sm:p-8">
-          <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr] xl:items-end">
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_#dbeafe,_transparent_30%),radial-gradient(circle_at_90%_10%,rgba(125,211,252,0.24),transparent_26%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_43%,_#f0fdfa_100%)] px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1700px] space-y-6">
+        <GlassPanel className="relative overflow-hidden p-6 sm:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(56,189,248,0.18)_38%,transparent_58%)]" />
+          <div className="relative grid gap-6 xl:grid-cols-[1.18fr_0.82fr] xl:items-end">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.35em] text-blue-700">
-                Cherolee Core
+                Core Command Console
               </p>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
-                Core Command Console
+                Core is online and ready to help.
               </h1>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
-                Read-only intelligence layer for Southwest Virginia Chihuahua
-                operations. This shell summarizes Core records and shows the
-                future command surface without connecting AI providers or write
-                tools.
+              <p className="mt-4 max-w-4xl text-base leading-8 text-slate-600">
+                Your read-only command brain for business, kennel, family, and future smart-home operations. Ask Core to summarize, organize, prepare, or review — approval is required before anything sensitive changes.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <StatusPill label="AI provider" value="Not connected" />
-              <StatusPill label="Writes" value="Approval required" />
-              <StatusPill label="External systems" value="Off" />
-              <StatusPill label="Mode" value="Read-only" />
+              <StatusChip label="AI provider" value="Not connected" />
+              <StatusChip label="Writes" value="Approval required" />
+              <StatusChip label="External systems" value="Off" />
+              <StatusChip label="Mode" value="Read-only" />
             </div>
           </div>
-        </section>
+        </GlassPanel>
 
-        <section className="rounded-[2rem] border border-cyan-200/70 bg-cyan-50/80 p-6 text-cyan-950 shadow-sm ring-1 ring-white/60 backdrop-blur">
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-700">
-            Safety state
-          </p>
-          <p className="mt-2 text-sm leading-7">
-            The console reads existing Core data only. It does not call OpenAI
-            or any model provider, does not create proposed actions, does not
-            write to the database, does not send messages, does not move money,
-            does not generate documents, and does not publish anything.
-          </p>
+        <section className="rounded-[2rem] border border-cyan-200/70 bg-cyan-50/80 p-6 text-cyan-950 shadow-[0_18px_45px_rgba(14,165,233,0.08)] ring-1 ring-white/60 backdrop-blur">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-700">
+                Safety State: Safe
+              </p>
+              <p className="mt-2 max-w-5xl text-sm leading-7">
+                Core is observing existing records only. It cannot send messages, move money, generate documents, publish listings, control devices, or write changes from this console.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <TinyPill>No AI provider</TinyPill>
+              <TinyPill>No write tools</TinyPill>
+              <TinyPill>No external sending</TinyPill>
+              <TinyPill>Approval model documented</TinyPill>
+            </div>
+          </div>
         </section>
 
         {warning ? (
@@ -455,270 +745,132 @@ export default async function StaffCommandPage() {
           </section>
         ) : null}
 
-        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[2rem] border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
-            <div className="rounded-[1.4rem] border border-cyan-300/30 bg-white/5 p-5">
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-200">
-                Planning shell only
-              </p>
-              <label
-                htmlFor="command-input-preview"
-                className="mt-4 block text-sm font-semibold text-slate-200"
-              >
-                Command input preview
-              </label>
-              <textarea
-                id="command-input-preview"
-                className="mt-3 min-h-36 w-full resize-none rounded-2xl border border-cyan-300/20 bg-slate-900/80 p-4 text-sm leading-6 text-slate-400 outline-none"
-                disabled
-                value={
-                  "Planning shell only - no AI provider connected. Future requests will summarize, propose, and wait for owner/admin approval before any controlled RPC/server action can write."
-                }
-                readOnly
-              />
-              <p className="mt-3 text-xs leading-6 text-slate-400">
-                No form submission, API route, model call, tool call, or action
-                queue exists here.
-              </p>
-            </div>
-          </div>
+        <CommandCloud nodes={nodes} />
 
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard
-              label="Applications"
-              value={applications.length}
-              note={`${pendingApplicationCount} pending or needs review`}
-            />
-            <MetricCard
-              label="Active reservations"
-              value={activeReservationCount}
-              note={`${openBalanceCount} with open balance marker`}
-            />
-            <MetricCard label="Dogs" value={dogs.length} note="Core dog records" />
-            <MetricCard
-              label="Litters"
-              value={litters.length}
-              note={`${plannedLitterCount} planned / ${bornLitterCount} born`}
-            />
-            <MetricCard
-              label="Puppies"
-              value={puppies.length}
-              note={`${availablePuppyCount} available / ${reservedPuppyCount} reserved`}
-            />
-            <MetricCard
-              label="Notifications"
-              value={queuedNotificationCount}
-              note={`${unsentNotificationCount} not marked sent`}
-            />
-            <MetricCard
-              label="Go-home scheduled"
-              value={goHomeScheduledCount}
-              note={`${goHomeUnscheduledCount} without schedule`}
-            />
-            <MetricCard
-              label="Documents"
-              value={canViewAudit ? documents.length : "Restricted"}
-              note={canViewAudit ? `${draftDocumentCount} draft/pending` : "Owner/admin only"}
-            />
-          </section>
+        <section className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
+          <GlassPanel className="p-6">
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">
+              Helpful assistant surface
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              What Core can help with right now
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-slate-600">
+              Core can prepare and organize. Sensitive actions stay under owner/admin control.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <HelperRow icon="↻" text="Summarize today’s activity" />
+              <HelperRow icon="◇" text="Review kennel status" />
+              <HelperRow icon="!" text="Show applications needing review" />
+              <HelperRow icon="⌂" text="Check go-home readiness" />
+              <HelperRow icon="✓" text="Review proposed actions" />
+              <HelperRow icon="•" text="Surface safety warnings" />
+            </div>
+          </GlassPanel>
+
+          <GlassPanel className="p-6">
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-slate-500">
+              Future locked capabilities
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <HelperRow icon="♬" text="Voice commands" />
+              <HelperRow icon="◉" text="Smart kennel monitoring" />
+              <HelperRow icon="⌁" text="Smart home controls" />
+              <HelperRow icon="⏱" text="Automated reminders" />
+              <HelperRow icon="✉" text="Customer messaging" />
+              <HelperRow icon="▣" text="Document preparation" />
+            </div>
+            <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-7 text-amber-950">
+              Future voice and smart-home controls will use the same approval model. No live voice, device, or provider control is connected here.
+            </p>
+          </GlassPanel>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-4">
-          <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-            <h2 className="text-lg font-black text-slate-950">Needs Review</h2>
-            <div className="mt-5 space-y-3">
-              <SignalCard
-                title="Applications"
-                value={pendingApplicationCount}
-                detail="Received, pending, or needs-review application records."
-              />
-              <SignalCard
-                title="Notifications"
-                value={unsentNotificationCount}
-                detail="Notification rows not marked sent. No delivery is connected here."
-              />
-              <SignalCard
-                title="Phone ambiguity"
-                value={canViewPhone ? ambiguousPhoneCount : "Restricted"}
-                detail="Owner/admin phone lookup ambiguity count from Core views."
-              />
+        <section className="grid gap-6 xl:grid-cols-[1.22fr_0.78fr]">
+          <GlassPanel className="p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">
+                  Core Outputs
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                  Operational output console
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">Core Outputs</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-200">Recent Actions</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-200">Operational Insights</span>
+              </div>
             </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-            <h2 className="text-lg font-black text-slate-950">Kennel Snapshot</h2>
-            <div className="mt-5 space-y-3">
-              <SignalCard
-                title="Dogs"
-                value={dogs.length}
-                detail="Adult and breeding dog records in Core."
-              />
-              <SignalCard
-                title="Litters"
-                value={litters.length}
-                detail={`${plannedLitterCount} planned/expected and ${bornLitterCount} born.`}
-              />
-              <SignalCard
-                title="Puppies"
-                value={puppies.length}
-                detail={`${availablePuppyCount} available and ${reservedPuppyCount} reserved markers.`}
-              />
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-            <h2 className="text-lg font-black text-slate-950">Customer Pipeline</h2>
-            <div className="mt-5 space-y-3">
-              <SignalCard
-                title="Reservations"
-                value={activeReservationCount}
-                detail="Active reservation status rows in the summary view."
-              />
-              <SignalCard
-                title="Balance due"
-                value={canViewFinancials ? formatMoney(totalBalanceDue) : "Restricted"}
-                detail="Ledger-derived total visible to owner/admin only."
-              />
-              <SignalCard
-                title="Go-home"
-                value={goHomeScheduledCount}
-                detail="Scheduled effective go-home rows."
-              />
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-            <h2 className="text-lg font-black text-slate-950">System Safety</h2>
-            <div className="mt-5 space-y-3">
-              <SignalCard
-                title="External systems"
-                value="Off"
-                detail="No Zoho, Twilio, SMTP, payment, portal, document, or public publishing connection."
-              />
-              <SignalCard
-                title="Autonomous writes"
-                value="Off"
-                detail="No AI provider, write tools, or command-created proposal behavior connected."
-              />
-              <SignalCard
-                title="Approval model"
-                value="Planned"
-                detail="Future action approval model is documented, not implemented."
-              />
-            </div>
-          </section>
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-            <div className="mb-5">
-              <h2 className="text-lg font-black text-slate-950">Recent Activity</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Latest rows from `core_events`. This is read-only timeline
-                context.
-              </p>
-            </div>
-            {events.length > 0 ? (
-              <div className="space-y-3">
-                {events.map((event) => (
-                  <article
+            <div className="mt-6 space-y-3">
+              {events.length > 0 ? (
+                events.map((event) => (
+                  <OutputRow
                     key={event.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="font-bold text-slate-950">
-                          {display(event.summary, formatKey(event.event_type))}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {formatDateTime(event.event_at)} /{" "}
-                          {display(event.source, "source unknown")}
-                        </p>
-                      </div>
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
-                        {formatKey(event.event_type)}
-                      </span>
-                    </div>
-                    <p className="mt-3 text-sm text-slate-600">
-                      {display(event.related_table)} / {shortId(event.related_id)}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-                No Core events found yet.
-              </div>
-            )}
-          </section>
-
-          <section className="space-y-6">
-            <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
-              <h2 className="text-lg font-black text-slate-950">
-                Audit Outcome Summary
-              </h2>
-              {canViewAudit ? (
-                <div className="mt-5 space-y-3">
-                  <SignalCard
-                    title="Recent audits"
-                    value={audits.length}
-                    detail={`${successfulAuditCount} recent success outcomes.`}
+                    title={display(event.summary, formatKey(event.event_type))}
+                    detail={`${display(event.related_table)} / ${shortId(event.related_id)} · ${display(event.source, "source unknown")}`}
+                    time={formatDateTime(event.event_at)}
+                    badge={formatKey(event.event_type)}
                   />
-                  {audits.slice(0, 4).map((audit) => (
-                    <div
-                      key={audit.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm"
-                    >
-                      <p className="font-bold text-slate-950">
-                        {formatKey(audit.action)}
-                      </p>
-                      <p className="mt-1 text-slate-500">
-                        {formatKey(audit.outcome)} /{" "}
-                        {formatDateTime(audit.created_at)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                ))
               ) : (
-                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
-                  Full audit activity is owner/admin-only and was not fetched
-                  for this profile.
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-5 text-sm leading-6 text-slate-600">
+                  Core has no recent output yet. As records change, activity will appear here.
                 </div>
               )}
-            </section>
+            </div>
+          </GlassPanel>
+
+          <div className="space-y-6">
+            <GlassPanel className="p-6">
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">
+                System At A Glance
+              </p>
+              <div className="mt-5 space-y-3">
+                <SummaryLine label="Safety State" value="Safe" note="External systems off and writes locked" />
+                <SummaryLine label="Active Reservations" value={activeReservationCount} note={`${openBalanceCount} open balance marker`} />
+                <SummaryLine label="Dogs" value={dogs.length} note="Core dog records" />
+                <SummaryLine label="Litters" value={litters.length} note={`${plannedLitterCount} planned / ${bornLitterCount} born`} />
+                <SummaryLine label="Puppies" value={puppies.length} note={`${availablePuppyCount} available / ${reservedPuppyCount} reserved`} />
+                <SummaryLine label="Go-Home Scheduled" value={goHomeScheduledCount} note={`${goHomeUnscheduledCount} without schedule`} />
+                <SummaryLine label="Notifications" value={queuedNotificationCount} note={`${unsentNotificationCount} not marked sent`} />
+                <SummaryLine label="Documents Pending" value={canViewAudit ? draftDocumentCount : "—"} note={canViewAudit ? `${documents.length} document rows visible` : "Owner/admin only"} />
+                <SummaryLine label="Proposed Actions" value={canViewAudit ? proposedActions.length : "—"} note={canViewAudit ? `${proposedNeedsReviewCount} waiting / ${proposedHighRiskCount} high-risk` : "Owner/admin only"} />
+              </div>
+            </GlassPanel>
 
             <section className="rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-950 shadow-sm">
-              <h2 className="text-lg font-black">Approval Queue Foundation</h2>
+              <h2 className="text-lg font-black">Approval Queue</h2>
               <p className="mt-3 text-sm leading-7">
-                Proposed action review records are available in a separate
-                owner/admin workspace. This command shell still creates no
-                queue rows and executes no actions.
+                Proposed actions are review records only. Approval does not execute business changes yet.
               </p>
               <Link
                 href="/staff/proposed-actions"
-                className="mt-4 inline-flex rounded-2xl border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-950 shadow-sm"
+                className="mt-4 inline-flex rounded-2xl border border-amber-300 bg-white px-4 py-2 text-sm font-black text-amber-950 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 Open Proposed Actions
               </Link>
             </section>
-          </section>
+          </div>
         </section>
 
-        <section className="rounded-[2rem] border border-white/80 bg-white/85 p-6 shadow-sm ring-1 ring-slate-200/70 backdrop-blur">
+        <GlassPanel className="p-6">
           <div className="mb-5">
             <h2 className="text-lg font-black text-slate-950">Readiness Lane</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
               The console can summarize Core. It cannot act for Core.
             </p>
           </div>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
             <ReadinessItem text="Read-only summary connected" />
             <ReadinessItem text="No AI provider connected" />
             <ReadinessItem text="No write tools enabled" />
             <ReadinessItem text="No external sending enabled" />
-            <ReadinessItem text="Future action approval model documented" />
+            <ReadinessItem text="Proposed action model available" />
+            <ReadinessItem text="Voice/smart-home future only" />
           </div>
-        </section>
+        </GlassPanel>
       </div>
     </main>
   );
