@@ -56,15 +56,18 @@ The effective read model feeds the go-home fields used by:
 - `core_buyer_summary_view`
 - `core_puppy_summary_view`
 - `core_dashboard_today_view`
+- `/staff/reservations/[reservationId]`
 
 `core_phone_lookup_view` already reads reservation context through the reservation/buyer summaries. Ambiguous phone lookups still redact buyer, puppy, payment, and go-home context until a later owner/operator verification workflow is built.
 
 ## Not Built Here
 
-This read-model task does not build:
+The reservation detail page reads the effective model for internal readiness only. It does not schedule transport, send reminders, create documents, change payment state, update public listings, or contact customers.
 
-- UI or owner/operator dashboard screens
-- write tools
+This read-model foundation does not build:
+
+- customer-facing UI
+- additional write tools beyond the separately documented go-home detail/checklist foundations
 - go-home history tables
 - production RLS
 - Twilio integration

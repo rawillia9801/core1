@@ -32,6 +32,7 @@ Core-native private application entry
   -> reservation creation
   -> deposit/payment ledger entry
   -> visible ledger-derived balance reduction
+  -> reservation detail readiness review
   -> go-home detail update
   -> effective go-home read model display
   -> go-home checklist SQL/UI foundation
@@ -75,6 +76,7 @@ The following are implemented and have been manually or test verified in local/d
 - Reservation creation works through controlled RPC/server action.
 - Deposit/payment recording works through controlled RPC/server action.
 - Ledger-derived balance decreases after a payment/deposit.
+- `/staff/reservations/[reservationId]` shows read-only internal readiness detail with financial, document, go-home, checklist, blocker, event, and audit context.
 - `/staff/notifications` displays queued notification previews.
 - Core-native application entry queues preview-only `application_received` notifications when applicant email exists.
 - Seeded draft email templates display in `/staff/notifications`.
@@ -120,6 +122,7 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/command` exists as a read-only Core Command Center shell only. It does not connect an AI provider or replace `/staff`.
 - `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
 - `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.
+- The reservation detail readiness workflow is internal Core visibility only and does not send email, SMS, payment requests, document links, customer portal messages, public listing changes, or external provider calls.
 
 ## Recently Added / In Progress
 
@@ -187,6 +190,7 @@ checkpoint verified kennel/buyer/family/event workspaces
   -> Documents read-only owner/admin workspace added
   -> Messages read-only owner/admin workspace added
   -> Kennel Logs read-only owner/admin workspace added
+  -> Reservation detail readiness workflow added
   -> Command Console read-only shell added
   -> Proposed Action Approval Model plan added
   -> continue owner/operator Core workflows under existing technical routes
@@ -221,8 +225,8 @@ Estimated remaining time: **1 to 2 weeks** of focused work.
 
 Main remaining items:
 
-- Browser-check Documents.
 - Verify unauthorized-role boundaries for current owner/admin-only actions.
+- Verify unauthorized-role boundaries for reservation detail restricted reads.
 - Keep Proposed Actions limited to review-state records.
 - Finish unauthorized-role verification for current actions.
 - Keep owner/admin audit visibility restricted.

@@ -34,6 +34,7 @@ Core-native owner/operator operating system foundation
   -> preview-only communication safety verified
   -> go-home detail update verified
   -> go-home checklist verified and wired
+  -> reservation detail readiness workflow added
   -> kennel add/edit/archive browser-tested
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
@@ -204,6 +205,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Go-home read panel consumes the effective go-home view.
 - [x] Dedicated `/staff/applications` page added for application review, approval, and reservation creation.
 - [x] Dedicated `/staff/reservations` page added for reservation review, payment entry, and guarded cancellation.
+- [x] Dedicated `/staff/reservations/[reservationId]` page added for read-only reservation readiness detail with ledger-derived financial truth, document metadata, go-home readiness, checklist items, blockers, internal links, events, and audit history.
 - [x] Dedicated `/staff/payments` page added for local payment entry and ledger activity.
 - [x] Dedicated `/staff/notifications` page added for communication preview, rules, templates, and attempt logs.
 - [x] Dedicated `/staff/go-home` page added for go-home detail review and owner/admin controlled updates.
@@ -225,7 +227,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Shared staff sidebar layout added with ready routes linked and future routes visible but disabled.
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
-- [ ] Add approved read-only data coverage for litter context within reservation workflow views.
+- [x] Add approved read-only data coverage for litter context within reservation detail readiness view.
 - [ ] Add proper loading/empty/error states for all read panels.
 - [ ] Reduce repeated dashboard data reads if `/staff` or child route performance remains slow after `.next` cache clearing.
 - [ ] Replace temporary/local-only data assumptions before staging.

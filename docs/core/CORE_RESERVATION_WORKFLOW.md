@@ -54,9 +54,19 @@ This workflow does not:
 - Invite the buyer to the portal.
 - Generate a contract.
 - Enable RLS.
-- Build UI buttons.
+- Build live customer-facing UI.
 
 Payments, receipts, portal invitation, contract generation, and customer messaging are separate workflows.
+
+## Current Internal Read Surface
+
+The reservations list links to `/staff/reservations/[reservationId]` for internal Core readiness review.
+
+That detail page is read-only. It summarizes buyer/family context, puppy/litter context, ledger-derived financial truth, document readiness metadata, go-home readiness, checklist items, deterministic blockers, internal links, event history, and audit history.
+
+It does not call `core_create_reservation(...)`, payment RPCs, cancellation RPCs, email/SMS providers, document providers, portal invitation behavior, public listing updates, or external integrations.
+
+Financial truth on the detail page remains derived from `core_financial_ledger` and `core_payment_balance_view`; it is not copied onto buyers or treated as processor activity.
 
 ## Active Reservation Rule
 
@@ -91,9 +101,11 @@ It verifies:
 - A duplicate active reservation attempt is rejected.
 - The transaction rolls back.
 
-## Future UI Path
+## Current UI Path
 
-A later Reservations or Applications page can call a server-side action that calls this function. That server action must still handle authentication, authorization, validation, error display, and safe user feedback.
+The current Reservations and Applications pages can call server-side actions that call this function where already implemented. Those server actions must still handle authentication, authorization, validation, error display, and safe user feedback.
+
+The reservation detail readiness page does not add a write path.
 
 ## Future Payment Path
 

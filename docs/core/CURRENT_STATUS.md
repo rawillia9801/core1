@@ -49,6 +49,7 @@ Core-native private application entry
   -> reservation creation
   -> deposit/payment ledger entry
   -> visible ledger-derived balance reduction
+  -> reservation detail readiness review
   -> go-home detail update
   -> effective go-home read model display
   -> go-home checklist item SQL verification
@@ -67,6 +68,7 @@ Verified local behavior:
 - A reservation can be created from the approved application.
 - Deposit/payment entries can be recorded through the controlled dashboard action.
 - Ledger-derived balance decreases correctly after payment/deposit.
+- `/staff/reservations/[reservationId]` shows internal reservation readiness detail for buyer/family, puppy/litter, ledger-derived financial truth, document metadata, go-home readiness, checklist items, blockers, internal links, event history, and audit history.
 - Current dashboard write actions use authenticated staff profile actor context rather than static local actor env usage.
 - `/staff/go-home` loads and displays the Go-Home workspace.
 - Owner/admin can save a go-home detail through `/staff/go-home`.
@@ -244,6 +246,7 @@ Implemented owner/operator auth/access pieces:
 - `/staff/kennel-logs` is restricted to owner/admin; staff-role users see a restricted message and do not fetch kennel history rows.
 - `/staff/proposed-actions` is restricted to owner/admin; staff-role users see a restricted message and do not fetch proposal rows.
 - `/staff/command` uses role-aware reads; owner/admin can see audit/financial/phone-sensitive summaries while staff does not fetch restricted audit or phone lookup rows.
+- `/staff/reservations/[reservationId]` uses role-aware reads; owner/admin can see financial ledger, document, event, and audit details, while staff-role users do not fetch restricted rows.
 - Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
 - Go-home detail updates are owner/admin only.
 - Go-home checklist updates are allowed for operational staff.
@@ -300,6 +303,7 @@ Core-native owner/operator operating system foundation
   -> Application detail review workflow added
   -> application approve/decline/needs-info/internal-note review actions added for owner/admin only
   -> first-wave RLS foundation added for internal profile/role checks and highest-risk Core tables
+  -> Reservation detail readiness workflow added
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
@@ -312,20 +316,20 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 This pass compared the docs to the local `main` build, not just older documentation.
 
-- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
+- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/reservations/[reservationId]`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
 - Migrations documented vs actual migrations: 25 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
 - Tests documented vs actual tests: 21 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
 - Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
 - Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
 - Documents/messages documented accurately: `/staff/documents` and `/staff/messages` are read-only metadata workspaces and do not generate, sign, send, reply, upload, or call providers.
-- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions. Live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
+- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions, and the reservation detail page is internal readiness visibility only. Live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
 - RLS/staging/production documented accurately: first-wave internal RLS exists locally, while remaining table coverage, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
 
 ## Current Recommended Next Task
 
 1. Continue RLS/security hardening by finishing remaining table coverage/tests and reviewing service-role server access before selected real-data staging or production use.
-2. Verify unauthorized-role boundaries for the application detail review actions and other owner/admin-only write paths.
+2. Verify unauthorized-role boundaries for the application detail review actions, reservation readiness detail restricted reads, and other owner/admin-only write/read paths.
 3. Keep the Command Console non-executing and keep Proposed Actions limited to proposal/review state until a later approved proposed-action execution task exists.
 4. Run `npm run lint` and `npm run build` after implementation changes.
 

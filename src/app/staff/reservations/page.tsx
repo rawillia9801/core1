@@ -189,6 +189,15 @@ export default async function StaffReservationsPage({
                       </div>
                     </div>
 
+                    <div className="mt-4">
+                      <Link
+                        href={`/staff/reservations/${reservation.reservationId}`}
+                        className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
+                      >
+                        Open readiness
+                      </Link>
+                    </div>
+
                     <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
                       <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Reservation</dt><dd className="mt-1 text-slate-700">{reservation.id}</dd></div>
                       <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Application</dt><dd className="mt-1 text-slate-700">{reservation.applicationReference}</dd></div>
