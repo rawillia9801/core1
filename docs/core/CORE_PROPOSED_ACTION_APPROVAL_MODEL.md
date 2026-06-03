@@ -1,10 +1,16 @@
 # Core Proposed Action Approval Model
+## Status Note
+
+- Current as of this pass: active planning/reference tied to implemented local/dev proposal records.
+- Reflects current proposed-action storage/review foundation; approval only changes review state and does not execute business actions.
+- Central current truth: `CURRENT_STATUS.md` and this file for the approval safety model.
+
 
 ## Purpose
 
 This document defines the approval bridge between read-only Core assistance, future proposed actions, and controlled Core action execution. Core is intended to become the operating system and daily command layer for Cristy's owner-operated business and kennel, but not a reckless autonomous actor.
 
-It locks the autonomy safety model for proposed-action work. The current database/read-only review foundation may store and display proposal records, but approval still does not execute underlying business changes.
+It locks the autonomy safety model for proposed-action work. The current database and owner/admin review foundation can store, display, create, approve, and reject proposal records, but approval still does not execute underlying business changes.
 
 The intended path is:
 
@@ -141,7 +147,7 @@ Requirements:
 - Write `core_events` for operational timeline visibility.
 - Write `core_audit_log` for accountability.
 
-## Future Approval Queue UI Requirements
+## Approval Queue UI Requirements
 
 The future approval queue must show:
 
@@ -159,15 +165,16 @@ The future approval queue must show:
 
 The UI must not hide important side effects behind vague summaries.
 
-## First Implementation Milestone Later
+## Current Implementation Boundary
 
-When implementation is approved, the first milestone should be:
+The first implementation milestone now exists locally:
 
 1. Database schema for proposed actions.
-2. Read-only approval queue.
-3. Manual draft action creation by owner/operator only.
-4. No AI provider connected.
-5. No execution behavior yet.
+2. Owner/admin proposal queue.
+3. Manual proposal creation by owner/admin only.
+4. Approve/reject proposal review-state actions.
+5. No AI provider connected.
+6. No business execution behavior yet.
 
 This staged approach proves storage, review, visibility, and permissions before any AI-assisted or executable workflow exists.
 
@@ -185,4 +192,4 @@ This staged approach proves storage, review, visibility, and permissions before 
 
 ## Current Status
 
-The proposed-action database and read-only owner/admin review workspace exist for proposal/review records. Approval records do not execute business changes. No AI provider calls, autonomous write tools, external sending, payment movement, document/signature generation, public publishing, or customer-facing side effects have been implemented.
+The proposed-action database and owner/admin review workspace exist for proposal/review records. Owners/admins can create, approve, and reject proposal review records. Approval records do not execute business changes. No AI provider calls, autonomous write tools, external sending, payment movement, document/signature generation, public publishing, or customer-facing side effects have been implemented.

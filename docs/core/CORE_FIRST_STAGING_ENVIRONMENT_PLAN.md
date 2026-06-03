@@ -1,4 +1,10 @@
 # Core First Staging Environment Plan
+## Status Note
+
+- Current as of this pass: blocked planning document.
+- Reflects future selected-real-data staging setup only; no staging environment, production launch, or live integration is complete.
+- Central current truth: `CORE_STAGING_READINESS_CHECKLIST.md`, `CURRENT_STATUS.md`, and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

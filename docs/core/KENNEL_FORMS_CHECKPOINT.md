@@ -1,4 +1,10 @@
 # Core Checkpoint — Kennel Forms
+## Status Note
+
+- Current as of this pass: historical checkpoint/reference.
+- Reflects the completed kennel forms checkpoint and remains useful as a local verification record; ongoing current truth lives in the central steering docs.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Completed
 

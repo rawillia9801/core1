@@ -1,4 +1,10 @@
 # Core Application Approval Workflow
+## Status Note
+
+- Current as of this pass: planning/reference tied to implemented local/dev RPC and dashboard action.
+- Reflects current code for the `core_approve_application` foundation; future production/RLS/customer messaging remains blocked.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

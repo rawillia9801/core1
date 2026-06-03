@@ -1,4 +1,10 @@
 # Core Go-Home Effective Read Model
+## Status Note
+
+- Current as of this pass: active technical reference.
+- Reflects implemented local/dev go-home read/write foundation and effective read model; no documents, messages, transport, payments, or external integrations are triggered.
+- Central current truth: `CURRENT_STATUS.md` and this file for go-home read model behavior.
+
 
 ## Purpose
 

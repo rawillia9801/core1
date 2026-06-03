@@ -1,4 +1,10 @@
 # Historical Application Intake Endpoint
+## Status Note
+
+- Current as of this pass: historical/reference only.
+- Reflects cancelled Zoho-shaped local experiment history, not active code direction or a future import path.
+- Central current truth: `CURRENT_STATUS.md`; Core-native intake direction lives in `CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
+
 
 ## Purpose
 

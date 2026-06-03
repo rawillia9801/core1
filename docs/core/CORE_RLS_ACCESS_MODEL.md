@@ -1,4 +1,10 @@
 # Core V1 RLS And Access Model
+## Status Note
+
+- Current as of this pass: blocked security planning reference.
+- Reflects intended RLS/access model only; production RLS, policy tests, staging security boundary, and customer portal access are not complete.
+- Central current truth: `CURRENT_STATUS.md` and this file for planned access rules.
+
 
 ## Status
 

@@ -1,4 +1,10 @@
 # Core Phone Lookup
+## Status Note
+
+- Current as of this pass: active technical reference.
+- Reflects implemented local/dev phone lookup read models and owner/admin read-only workspace; Twilio, routing, verification automation, and public disclosure are not connected.
+- Central current truth: `CURRENT_STATUS.md` and this file for lookup safety.
+
 
 ## Purpose
 

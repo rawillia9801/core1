@@ -1,4 +1,10 @@
 # Historical Application Field Reference
+## Status Note
+
+- Current as of this pass: historical/reference only.
+- Reflects old Zoho field-shape research only; Zoho is not active, planned, imported from, synced with, or written back to.
+- Central current truth: `CURRENT_STATUS.md` and `CORE_NATIVE_APPLICATION_ENTRY_PLAN.md`.
+
 
 ## Purpose
 

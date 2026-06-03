@@ -1,4 +1,10 @@
 # Core V1 Database Smoke Tests
+## Status Note
+
+- Current as of this pass: active technical reference.
+- Reflects current rollback-safe SQL validation scripts in `supabase/tests`; tests are local/dev validation only and not production data operations.
+- Central current truth: this file for SQL test commands; `CURRENT_STATUS.md` for verified workflow status.
+
 
 ## Purpose
 

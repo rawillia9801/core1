@@ -1,4 +1,10 @@
 # Core Owner/Operator Auth And Access Boundary Plan
+## Status Note
+
+- Current as of this pass: active auth/access planning reference.
+- Reflects current owner/operator auth direction and transitional staff-route internals; production RLS and staging access boundaries are incomplete.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

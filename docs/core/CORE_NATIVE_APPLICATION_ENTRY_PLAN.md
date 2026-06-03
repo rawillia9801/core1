@@ -1,4 +1,10 @@
 # Core Native Application Entry Plan
+## Status Note
+
+- Current as of this pass: active reference for Core-native application entry.
+- Reflects implemented local/dev private owner/operator application entry; public application intake and customer-facing automation remain future/blocked.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

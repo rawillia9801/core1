@@ -1,4 +1,10 @@
 # Core Staff Auth Local Verification
+## Status Note
+
+- Current as of this pass: local/dev verification reference.
+- Reflects local Supabase Auth/profile verification only; production auth hardening, RLS, staging, and customer access remain blocked.
+- Central current truth: `CURRENT_STATUS.md` and `CORE_STAFF_AUTH_PLAN.md`.
+
 
 ## Purpose
 

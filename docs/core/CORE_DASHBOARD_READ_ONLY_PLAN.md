@@ -1,4 +1,10 @@
 # Core Read-Only Dashboard Plan
+## Status Note
+
+- Current as of this pass: historical/partially superseded planning reference.
+- The original static read-only shell milestone has been surpassed by authenticated local owner/operator workspaces, but its safety constraints still apply.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 
@@ -6,7 +12,9 @@ The first dashboard milestone is a read-only shell. It gives the Core project a 
 
 ## Current Scope
 
-This dashboard shell is intentionally static and uses placeholder data that mirrors the Core read models already verified by smoke tests.
+This original dashboard shell milestone is historical. The current app has moved beyond the static placeholder shell into authenticated local owner/operator workspaces backed by Core reads and controlled local/dev server actions. Keep this document as a safety reference for the read-first principle; do not use it as the current route inventory.
+
+The original shell was intentionally static and used placeholder data that mirrored the Core read models verified by smoke tests.
 
 It is allowed to show:
 
@@ -52,9 +60,11 @@ When the shell is wired to real read-only data, likely sources are:
 - No Supabase client, environment variable, production credential, or integration is added.
 - `npm run lint` passes.
 
-## Next Step After This Shell
+## Superseded Next Step After This Shell
 
-The next step is not write tools. The next step is deciding how to load read-only data safely:
+This next-step list was completed or superseded by later authenticated local workspaces and controlled local/dev actions. The current next tasks live in `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
+The original next step was not write tools. It was deciding how to load read-only data safely:
 
 1. Server-side read-only Supabase access pattern.
 2. Environment variable strategy.

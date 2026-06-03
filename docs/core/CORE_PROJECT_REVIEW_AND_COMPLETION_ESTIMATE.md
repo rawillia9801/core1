@@ -1,4 +1,10 @@
 # Core Project Review And Completion Estimate
+## Status Note
+
+- Current as of this pass: active steering/review document.
+- Reflects a multi-stage Core OS timeline, with internal foundation useful first and full Core OS/customer/assistant/nervous-system layers measured in months, not days.
+- Central current truth: `CURRENT_STATUS.md`, `IMPLEMENTATION_CHECKLIST.md`, and `CORE_BUILD_ORDER.md`.
+
 
 ## Purpose
 
@@ -40,6 +46,7 @@ Core-native private application entry
   -> Command Console plan added
   -> Command Console read-only shell added
   -> Proposed Action Approval Model plan added
+  -> Proposed Action Queue review-state foundation added
 ```
 
 The safe communications workflow remains preview-only:
@@ -112,6 +119,7 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked after implementation.
 - `/staff/command` exists as a read-only Core Command Center shell only. It does not connect an AI provider or replace `/staff`.
 - `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
+- `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.
 
 ## Recently Added / In Progress
 
@@ -182,25 +190,25 @@ checkpoint verified kennel/buyer/family/event workspaces
   -> Command Console read-only shell added
   -> Proposed Action Approval Model plan added
   -> continue owner/operator Core workflows under existing technical routes
+  -> keep proposed-action execution blocked until separately approved
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, public website publishing, AI write capability, or unrelated integrations until the matching safety gates are complete.
 
-## Recommended Next 7 Tasks
+## Recommended Next Tasks
 
-1. **Browser-check Messages and Kennel Logs**
-   - Confirm `/staff/messages` loads for owner/admin.
-   - Confirm `/staff/kennel-logs` loads for owner/admin.
+1. **Browser-check Documents**
+   - Confirm `/staff/documents` loads for owner/admin.
    - Confirm staff role sees only the restricted message.
-   - Confirm no sends, replies, writes, public publishing, customer messages, or external provider behavior exists.
+   - Confirm no document generation, uploads, signatures, sends, portal links, or provider calls exist.
 
-2. **Browser-check Command Console**
-   - Confirm `/staff/command` loads for owner/admin.
-   - Confirm the input is disabled/planning-only.
-   - Confirm no AI provider, autonomous action, proposed-action records, or direct database write behavior is connected.
+2. **Verify unauthorized-role boundaries**
+   - Confirm staff role cannot update go-home details.
+   - Confirm staff role cannot create dog/litter/puppy records.
+   - Confirm staff cancellation with puppy release remains blocked.
 
-3. **Review Proposed Action Approval Model**
-   - Confirm future writes use proposed action, owner/admin approval, controlled RPC/server action execution, and event/audit logging.
+3. **Keep Proposed Actions review-only**
+   - Do not add execution behavior until a separate approved task defines exact action types, validation, permissions, and event/audit behavior.
 
 4. **Continue owner/operator workflows only**
    - Keep all new pages authenticated, read-first, real-data-only, and side-effect free unless a later explicit write task is approved.
@@ -213,8 +221,9 @@ Estimated remaining time: **1 to 2 weeks** of focused work.
 
 Main remaining items:
 
-- Browser-check Messages, Kennel Logs, and Command read-only workspaces.
-- Review Proposed Action Approval Model.
+- Browser-check Documents.
+- Verify unauthorized-role boundaries for current owner/admin-only actions.
+- Keep Proposed Actions limited to review-state records.
 - Finish unauthorized-role verification for current actions.
 - Keep owner/admin audit visibility restricted.
 
@@ -296,9 +305,10 @@ The biggest schedule risks are:
 Stay on this exact order:
 
 ```text
-1. Browser-check Messages, Kennel Logs, and Command as read-only owner/admin workspaces.
-2. Review the Proposed Action Approval Model before implementation.
-3. Continue Core-native owner/operator workflows only.
+1. Browser-check Documents as an owner/admin read-only workspace.
+2. Verify unauthorized-role boundaries for current protected actions.
+3. Keep Proposed Actions limited to review-state records until execution is separately approved.
+4. Continue Core-native owner/operator workflows only.
 ```
 
 Do not connect Hostinger SMTP yet.

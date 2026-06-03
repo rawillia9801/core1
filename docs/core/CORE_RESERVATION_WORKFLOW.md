@@ -1,4 +1,10 @@
 # Core Reservation Workflow
+## Status Note
+
+- Current as of this pass: active technical reference.
+- Reflects implemented local/dev reservation/payment/cancellation/ledger foundations; live payments, refunds, documents, portal visibility, and external messages remain blocked.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

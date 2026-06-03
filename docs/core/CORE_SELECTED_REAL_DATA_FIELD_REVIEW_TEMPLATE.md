@@ -1,4 +1,10 @@
 # Core Selected Real Data Field Review Template
+## Status Note
+
+- Current as of this pass: blocked staging template.
+- Reflects future owner-approved selected-real-data field review only; no production data import or selected-real-data staging has occurred.
+- Central current truth: `CORE_STAGING_READINESS_CHECKLIST.md` and `CORE_SELECTED_REAL_DATA_STAGING_PLAN.md`.
+
 
 ## Purpose
 

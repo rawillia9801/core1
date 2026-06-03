@@ -1,4 +1,10 @@
 # Core Command Console Plan
+## Status Note
+
+- Current as of this pass: planning/reference plus current shell boundary.
+- Reflects the implemented read-only `/staff/command` shell and future Core Command Console vision; no AI provider, model call, execution, or direct write path exists.
+- Central current truth: `CURRENT_STATUS.md` and this file for console safety direction.
+
 
 ## Purpose
 

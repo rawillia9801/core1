@@ -1,4 +1,10 @@
 # Core Staging Readiness Checklist
+## Status Note
+
+- Current as of this pass: blocked staging gate.
+- Reflects readiness checks before one or two owner-approved real records enter staging; staging, production, live integrations, and bulk data movement are not complete.
+- Central current truth: this file owns staging gates; `CURRENT_STATUS.md` owns current implementation state.
+
 
 ## Purpose
 

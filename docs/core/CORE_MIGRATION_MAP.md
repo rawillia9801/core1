@@ -1,4 +1,10 @@
 # Core Migration Map
+## Status Note
+
+- Current as of this pass: reference/planning document.
+- Reflects canonical destination mapping and safe future migration principles; no production migration or Zoho import path is active.
+- Central current truth: `CURRENT_STATUS.md`; this file owns future mapping constraints.
+
 
 ## Purpose
 

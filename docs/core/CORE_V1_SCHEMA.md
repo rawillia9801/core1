@@ -1,4 +1,10 @@
 # Core V1 Canonical Schema
+## Status Note
+
+- Current as of this pass: active technical schema reference.
+- Reflects current canonical `core_` schema/read/write foundations in migrations; RLS, production data migration, live integrations, and customer portal remain blocked.
+- Central current truth: this file for schema; `CURRENT_STATUS.md` for implementation status.
+
 
 ## Purpose
 

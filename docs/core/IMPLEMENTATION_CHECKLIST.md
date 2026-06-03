@@ -1,4 +1,10 @@
 # Cherolee Core Complete Implementation Checklist
+## Status Note
+
+- Current as of this pass: primary checklist source of truth.
+- Reflects complete/incomplete Core work across local/dev, staging, production, customer-facing, assistant, and future nervous-system phases.
+- Central current truth: this file plus `CURRENT_STATUS.md`.
+
 
 ## Purpose
 
@@ -37,6 +43,7 @@ Core-native owner/operator operating system foundation
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
+  -> Proposed Action Queue review-state foundation added
   -> then continue Core-native owner/operator workflows only
 ```
 
@@ -152,7 +159,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Controlled go-home detail update rollback-safe SQL test added.
 - [x] `/staff/go-home` owner/admin go-home detail form added.
 - [x] Go-home detail update manually verified locally: form save created one effective read-model row and triggered no external systems.
-- [~] Go-home checklist item RPC/table added; SQL test and UI wiring are next.
+- [x] Go-home checklist item RPC/table added, tested, and wired into `/staff/go-home`.
 - [ ] Define broader server-side write-tool authorization/error pattern.
 - [ ] Add low-risk kennel tools only after application/reservation/payment/go-home flow is stable.
 - [ ] Prevent direct AI/database writes.
@@ -272,7 +279,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] `/staff/go-home` enabled in navigation.
 - [x] `/staff/go-home` owner/admin Set Go-Home Detail form added.
 - [x] Manual browser save verified a visible effective go-home row.
-- [~] `core_go_home_checklist_items` table and `core_upsert_go_home_checklist_item(...)` added; SQL test and UI wiring are next.
+- [x] `core_go_home_checklist_items` table and `core_upsert_go_home_checklist_item(...)` added, tested, and wired into `/staff/go-home`.
 - [ ] Add go-home communication/document handoff rules.
 
 ### 1.8 Phone Lookup Safety
@@ -323,11 +330,13 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ### 1.12 Future Core Command Console
 
 - [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
-- [x] Read-only `/staff/command` shell added with no AI provider, no writes, no proposed-action records, and no external systems.
+- [x] Read-only `/staff/command` shell added with no AI provider, no execution writes, no autonomous action records, and no external systems.
 - [x] Proposed Action Approval Model planning document added: `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md`.
 - [x] Build read-only Command Console shell only after approval.
 - [x] Browser-check `/staff/command` as owner/admin after real local `/login` sign-in.
 - [x] Browser-check `/staff/proposed-actions` as owner/admin after real local `/login` sign-in; review/approval state does not execute business changes.
+- [x] Proposed Action Queue can create, approve, and reject proposal review records only.
+- [ ] Design proposed-action execution only after a separate approval task defines exact action types, validation, role gates, and event/audit requirements.
 - [blocked] AI provider calls, model integrations, autonomous actions, and AI write tools remain blocked.
 
 ## Phase 2 — Owner/Operator Staging With Selected Core Records
@@ -464,7 +473,7 @@ Estimated target for full replacement: 4-6+ months total from current checkpoint
 - [ ] Signature provider integration is not implemented.
 - [ ] Customer portal is not implemented.
 - [ ] Public website replacement is not implemented.
-- [ ] Kennel logging write tools are not implemented.
+- [ ] Kennel observation/log-entry write tools are not implemented.
 - [ ] Production-authenticated dashboard actions are not implemented.
 
 ## Current Verified Commands
@@ -481,11 +490,9 @@ cat supabase/tests/core_update_go_home_detail_tests.sql | docker exec -i supabas
 npm run lint
 ```
 
-Next focused validation needed:
+Next focused validation needed after implementation changes:
 
 ```bash
-cat supabase/migrations/20260526350000_core_go_home_checklist_items.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
-cat supabase/tests/core_go_home_checklist_items_tests.sql | docker exec -i supabase_db_core1 psql -U postgres -d postgres -v ON_ERROR_STOP=1
 npm run lint
 ```
 

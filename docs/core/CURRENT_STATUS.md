@@ -1,4 +1,10 @@
 # Cherolee Core Current Status
+## Status Note
+
+- Current as of this pass: primary source of implemented-state truth.
+- Reflects actual local/main build state, blocked features, and recommended next task; update this before or with any steering change.
+- Central current truth: this file.
+
 
 ## Purpose
 
@@ -13,7 +19,7 @@ rawillia9801/core1
 Active local working folder:
 
 ```text
-C:/Users/rawil/core1
+C:\Users\rawil\core1
 ```
 
 Active branch:
@@ -88,7 +94,7 @@ Verified local behavior:
 - Kennel Logs is enabled in the staff sidebar.
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked against migrations after implementation.
 - `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
-- `/staff/proposed-actions` has been added as a read-only owner/admin Proposed Action Queue review workspace. Approved proposed actions do not execute business changes.
+- `/staff/proposed-actions` has been added as an owner/admin Proposed Action Queue workspace. It can create, approve, and reject proposal review records only; approved proposed actions do not execute business changes.
 - Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
 - The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.
 
@@ -287,16 +293,30 @@ Core-native owner/operator operating system foundation
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
-  -> Proposed Action Queue foundation added for proposal/review only
+  -> Proposed Action Queue foundation added for proposal/review state only
 ```
 
 Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, Zoho tooling, or polish-only work until the relevant safety gates are complete.
+
+## Build-File Alignment Checklist
+
+This pass compared the docs to the local `main` build, not just older documentation.
+
+- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
+- Migrations documented vs actual migrations: 23 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
+- Tests documented vs actual tests: 19 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
+- Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
+- Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
+- Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
+- Documents/messages documented accurately: `/staff/documents` and `/staff/messages` are read-only metadata workspaces and do not generate, sign, send, reply, upload, or call providers.
+- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist; live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
+- RLS/staging/production documented accurately: RLS policies, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
 
 ## Current Recommended Next Task
 
 1. Continue safe owner/operator workflow verification under existing `/staff` routes.
 2. Browser-check `/staff/documents` as owner/admin.
-3. Keep the Command Console and Proposed Actions review surfaces read-only until a later approved proposed-action execution task exists.
+3. Keep the Command Console non-executing and keep Proposed Actions limited to proposal/review state until a later approved proposed-action execution task exists.
 4. Run `npm run lint` after any implementation changes.
 
 ## Future Command Console Planning
@@ -305,7 +325,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 `/staff/command` now exists as a read-only shell only. It uses existing Core reads, shows a disabled planning input, summarizes real Core records, and clearly marks AI provider, writes, external systems, and action queues as off.
 
-`docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning for a future proposed-action lifecycle. The database and read-only staff review foundation now exists, but it is proposal/review only. No AI provider, API, autonomous write, business action execution, external side effect, or approval UI button behavior has been added.
+`docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning for a future proposed-action lifecycle. The database and owner/admin proposal-review foundation now exists, including proposal creation plus approve/reject review-state actions. No AI provider, API, autonomous write, business action execution, external side effect, or executable approval behavior has been added.
 
 ## Time Estimate
 

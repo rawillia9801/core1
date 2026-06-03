@@ -1,4 +1,10 @@
 # Core Build Order
+## Status Note
+
+- Current as of this pass: active steering document.
+- Reflects current staged Core OS vision: internal Core first, governed Core second, customer-facing Core later, then assistant/nervous-system/smart-kennel layers.
+- Central current truth: this file owns build sequence; `CURRENT_STATUS.md` owns implemented state.
+
 
 ## Guardrail
 
@@ -12,73 +18,54 @@ Cherolee Core should be built in small, verifiable phases. Core is the operating
 - Freeze destructive cleanup: do not delete, rename, truncate, or repurpose existing tables.
 - Document production access, privacy requirements, and migration approval points.
 
-## Phase 1: Core Schema Baseline
+## Phase 1: Internal Core Foundation
 
 - Establish canonical `core_` tables and read-friendly views.
 - Establish audit and integration event ledgers.
 - Establish schema documentation and development instructions.
 - Validate migrations on a clean local/dev database.
+- Build owner/operator-only local workflows for applications, reservations, ledger entries, go-home planning, kennel records, read-only workspaces, notification preview, command shell, and proposed-action review.
 
-Current task ends in this phase. No production records are wired by this baseline.
+Current local/main work is in this phase. It remains internal/local/dev focused; no production records, customer-facing routes, live providers, or device automations are wired.
 
-## Phase 2: Read-Only Owner/Operator Dashboard
+## Phase 2: Governed Owner/Operator Core
 
-- Build simple operational reads backed by canonical views.
-- Include empty/error/loading states and privacy-conscious server access.
-- Use test data or owner-approved Core-native records only after a validation task.
-- Do not add broad write actions while read models are still settling.
+- Harden authenticated owner/operator access, staging environment boundaries, RLS or approved server-only access rules, field visibility, and selected-real-data gates.
+- Keep service-role use server-side and deliberate until RLS/security work is complete.
+- Use one or two owner-approved Core-native records only after the staging checklist is satisfied.
+- Add controlled write paths one at a time with validation, authorization, structured errors, events, and audit records.
 
-## Phase 3: First Write Tools
+## Phase 3: Internal Production Owner/Operator Core
 
-- Implement one validated server-side tool at a time.
-- Require authorization, input validation, structured errors, and `core_audit_log` entries.
-- Ensure AI/chat cannot issue direct database writes.
-- Start with low-risk manual workflows only after approval.
+- Move stable owner/operator workflows into production use for Cristy only.
+- Continue to make interfaces request/display truth from Core; do not let dashboards, chat, portals, or provider state define truth.
+- Keep financial balances derived from reservation contract totals and immutable-style ledger entries.
+- Keep proposed actions review-only unless a separate approved execution workflow exists.
 
-## Phase 4: Core Phone Lookup
+## Phase 4: Customer-Facing Core
 
-- Confirm phone normalization and duplicate-resolution policy.
-- Use `core_phone_lookup_view` as the read model for lookup.
-- Only connect Twilio or live routing after testing and explicit approval.
-- Keep customer communications controlled and auditable.
+- Add minimal public application intake only after access rules, validation, privacy language, and safety checks exist.
+- Add customer portal, documents, signatures, payment visibility, customer messaging, and public website publishing only after internal Core is stable.
+- Keep customer-facing automation blocked until owner/operator review, field visibility, RLS/security, and rollback rules are proven.
 
-## Phase 5: Applications Into Core
+## Phase 5: Assistant Core
 
-- Build Core-native application intake and review paths.
-- Review incomplete/duplicate contacts from Core-native records or owner-approved historical reference.
-- Add application review workflows incrementally.
-- Do not automatically approve prospective buyers.
+- Add read-oriented assistant behavior only after internal records are stable.
+- AI is an interface/helper, not authority.
+- AI may prepare summaries and proposed actions but must not write directly, send messages, move money, publish listings, control devices, or decide buyer/puppy outcomes.
+- Proposed-action execution requires a separately approved controlled RPC/server-action path with event/audit records.
 
-## Phase 6: Payments And Documents
+## Phase 6: Core Nervous System
 
-- Map contracts, payment history, document metadata, and reconciliation rules.
-- Validate ledger-derived balances before exposing operational totals.
-- Add document privacy/storage controls.
-- Do not connect live processors, issue refunds, or change pricing automatically.
+- Add system health signals, dependency status, incidents, recovery playbooks, degraded-state awareness, and presence state as a major future layer.
+- Treat nervous-system signals as operational awareness, not uncontrolled authority.
+- Keep recovery/action playbooks governed, auditable, and owner/operator-controlled.
 
-## Phase 7: Core Chat
+## Phase 7: Smart Kennel, Smart Home, CoreFace, And Physical-World Layers
 
-- Add read-oriented conversational assistance and explicit validated tools.
-- Log tool requests, executions, pending approvals, and all completed writes.
-- Require confirmation for sensitive action categories.
-- Do not permit free-form AI database mutations.
-
-## Phase 8: Kennel Logging
-
-- Add controlled workflows for puppy events, weights, feeding, and medications.
-- Preserve factual observations and avoid inferred medical conclusions.
-- Keep action history auditable.
-
-## Phase 9: Home Assistant Bridge
-
-- Design a narrow, approval-aware integration boundary.
-- Let Home Assistant own device execution while Core owns intent, policy, and audit context.
-- Do not enable sensitive device control without explicit approval.
-
-## Phase 10: Camera And Smart Mirror Later
-
-- Consider camera event sources, displays, and mirror experiences only after foundational workflows are stable.
-- Treat camera information as observational input, not health or medical authority.
+- Consider kennel monitoring, camera event sources, voice, CoreFace, displays, mirror experiences, and Home Assistant only after foundational workflows and governance are stable.
+- Smart-home and kennel monitoring must be safety-bounded, auditable, and limited to approved intent/action paths.
+- Camera and sensor information is observational input, not medical or health authority.
 - Require separate privacy, security, and operational approvals before implementation.
 
 ## Not Yet

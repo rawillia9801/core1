@@ -1,4 +1,10 @@
 # Core Audit And Integration Events
+## Status Note
+
+- Current as of this pass: active technical reference.
+- Reflects current canonical event/audit/integration/proposed-action foundations and future safety rules; no uncontrolled AI writes or live integrations are enabled.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

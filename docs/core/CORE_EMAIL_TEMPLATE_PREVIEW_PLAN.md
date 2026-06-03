@@ -1,4 +1,10 @@
 # Core Email Template Preview Plan
+## Status Note
+
+- Current as of this pass: active planning/reference.
+- Reflects preview-only templates, queue records, and blocked delivery-attempt logging; no live SMTP/Resend/customer email sending is connected.
+- Central current truth: `CURRENT_STATUS.md` and `IMPLEMENTATION_CHECKLIST.md`.
+
 
 ## Purpose
 

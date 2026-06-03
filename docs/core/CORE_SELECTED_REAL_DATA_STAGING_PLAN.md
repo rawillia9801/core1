@@ -1,4 +1,10 @@
 # Core Selected Real Data Staging Plan
+## Status Note
+
+- Current as of this pass: blocked planning document.
+- Reflects future tiny owner-approved selected-real-data staging; no bulk import, Zoho import, live integration, or production move is approved.
+- Central current truth: `CORE_STAGING_READINESS_CHECKLIST.md` and `CURRENT_STATUS.md`.
+
 
 ## Purpose
 
