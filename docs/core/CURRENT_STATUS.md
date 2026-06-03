@@ -89,6 +89,7 @@ Verified local behavior:
 - `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace using existing Core phone lookup views.
 - Phone Lookup is enabled in the staff sidebar.
 - `/staff/documents` has been added as a read-only owner/admin document metadata inventory using existing Core document tables.
+- `/staff/documents` has been enhanced into a Document Readiness workspace with metadata counts, grouped document records, reservation requirement checks, and document-related go-home blockers.
 - Documents is enabled in the staff sidebar.
 - `/staff/messages` has been added as a read-only owner/admin communications metadata workspace using existing Core conversation, message, notification, and delivery-attempt tables.
 - Messages is enabled in the staff sidebar.
@@ -99,6 +100,7 @@ Verified local behavior:
 - `/staff/proposed-actions` has been added as an owner/admin Proposed Action Queue workspace. It can create, approve, and reject proposal review records only; approved proposed actions do not execute business changes.
 - Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
 - The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.
+- Document readiness remains metadata-only. It does not generate documents, connect a signing provider, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 
 ## Current Verified Communications Workflow
 
@@ -298,6 +300,7 @@ Core-native owner/operator operating system foundation
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
+  -> Document readiness metadata workflow added
   -> Messages read-only workspace added
   -> Kennel Logs read-only workspace added
   -> Application detail review workflow added
@@ -322,14 +325,14 @@ This pass compared the docs to the local `main` build, not just older documentat
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
 - Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
 - Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
-- Documents/messages documented accurately: `/staff/documents` and `/staff/messages` are read-only metadata workspaces and do not generate, sign, send, reply, upload, or call providers.
+- Documents/messages documented accurately: `/staff/documents` is an internal metadata/readiness workspace and `/staff/messages` is a read-only metadata workspace. They do not generate, sign, send, reply, upload, deliver portal links, or call providers.
 - Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions, and the reservation detail page is internal readiness visibility only. Live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
 - RLS/staging/production documented accurately: first-wave internal RLS exists locally, while remaining table coverage, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
 
 ## Current Recommended Next Task
 
 1. Continue RLS/security hardening by finishing remaining table coverage/tests and reviewing service-role server access before selected real-data staging or production use.
-2. Verify unauthorized-role boundaries for the application detail review actions, reservation readiness detail restricted reads, and other owner/admin-only write/read paths.
+2. Verify unauthorized-role boundaries for the application detail review actions, reservation readiness detail restricted reads, document readiness restricted reads, and other owner/admin-only write/read paths.
 3. Keep the Command Console non-executing and keep Proposed Actions limited to proposal/review state until a later approved proposed-action execution task exists.
 4. Run `npm run lint` and `npm run build` after implementation changes.
 

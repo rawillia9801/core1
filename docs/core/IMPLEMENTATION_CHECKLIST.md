@@ -39,6 +39,7 @@ Core-native owner/operator operating system foundation
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
+  -> Document readiness metadata workflow added
   -> Messages read-only workspace added
   -> Kennel Logs read-only workspace added
   -> Core Command Console planning doc added
@@ -307,7 +308,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Page reads existing Core document metadata and document version metadata only.
 - [x] Page does not generate documents, request signatures, upload files, expose portal links, send email, or call external providers.
 - [x] Staff role is restricted from document inventory details.
-- [ ] Browser-check `/staff/documents` as owner/admin.
+- [x] `/staff/documents` enhanced into internal Document Readiness with metadata counts, grouped document records, reservation requirement checks, and document-related go-home blockers.
+- [x] Document readiness remains metadata-only and does not add document generation, signing providers, upload/storage writes, downloads, email/SMS, customer portal delivery, or external provider calls.
+- [x] Browser-check `/staff/documents` as owner/admin.
 - [ ] Design future document generation/signature/upload/storage rules only after explicit approval.
 
 ### 1.10 Messages Read-Only Workspace
@@ -521,7 +524,7 @@ Do not run `supabase db reset --local` for this validation.
 3. [x] Browser-check `/staff/kennel-logs` as owner/admin.
 4. [x] Browser-check `/staff/command` and `/staff/proposed-actions` as owner/admin.
 5. [ ] Run `npm run lint` after UI changes.
-6. [ ] Browser-check `/staff/documents` as owner/admin.
+6. [x] Browser-check `/staff/documents` as owner/admin.
 7. [ ] Keep proposed-action execution blocked until a separate approved implementation task.
 
 ## Stop Conditions

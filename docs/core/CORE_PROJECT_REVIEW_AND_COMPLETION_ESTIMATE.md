@@ -42,6 +42,7 @@ Core-native private application entry
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
+  -> Document readiness metadata workflow added
   -> Messages read-only workspace added
   -> Kennel Logs read-only workspace added
   -> Command Console plan added
@@ -112,6 +113,7 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace.
 - Phone Lookup is enabled in the staff sidebar.
 - `/staff/documents` has been added as a read-only owner/admin document metadata inventory.
+- `/staff/documents` now shows internal document readiness metadata, reservation document requirement checks, and document-related go-home blockers.
 - Documents is enabled in the staff sidebar.
 - `/staff/messages` has been added as a read-only owner/admin communications metadata workspace.
 - Messages is enabled in the existing technical sidebar.
@@ -123,6 +125,7 @@ The following are implemented and have been manually or test verified in local/d
 - `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
 - `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.
 - The reservation detail readiness workflow is internal Core visibility only and does not send email, SMS, payment requests, document links, customer portal messages, public listing changes, or external provider calls.
+- The document readiness workflow is internal metadata/readiness only and does not generate documents, connect signing providers, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 
 ## Recently Added / In Progress
 
@@ -188,6 +191,7 @@ The current lane is Core-native owner/operator workflow completion:
 checkpoint verified kennel/buyer/family/event workspaces
   -> Phone Lookup Safety read-only owner/admin workspace added
   -> Documents read-only owner/admin workspace added
+  -> Document readiness metadata workflow added
   -> Messages read-only owner/admin workspace added
   -> Kennel Logs read-only owner/admin workspace added
   -> Reservation detail readiness workflow added
@@ -309,8 +313,8 @@ The biggest schedule risks are:
 Stay on this exact order:
 
 ```text
-1. Browser-check Documents as an owner/admin read-only workspace.
-2. Verify unauthorized-role boundaries for current protected actions.
+1. Verify unauthorized-role boundaries for current protected actions and restricted read surfaces.
+2. Keep document generation, signing, upload/storage, downloads, portal delivery, and customer communication blocked until separate approval.
 3. Keep Proposed Actions limited to review-state records until execution is separately approved.
 4. Continue Core-native owner/operator workflows only.
 ```
