@@ -104,6 +104,13 @@ type SystemNode = {
   line: string;
 };
 
+type BriefingItem = {
+  label: string;
+  value: string | number;
+  detail: string;
+  href?: string;
+};
+
 function getSupabaseRestConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -238,6 +245,59 @@ function HelperRow({ icon, text }: { icon: string; text: string }) {
       </span>
       {text}
     </div>
+  );
+}
+
+function BriefingPanel({ items }: { items: BriefingItem[] }) {
+  return (
+    <GlassPanel className="relative overflow-hidden p-6 sm:p-7">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(34,211,238,0.18),transparent_28%),radial-gradient(circle_at_88%_24%,rgba(59,130,246,0.14),transparent_24%)]" />
+      <div className="relative grid gap-6 xl:grid-cols-[0.76fr_1.24fr] xl:items-start">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.24em] text-blue-700">
+            Today&apos;s Briefing
+          </p>
+          <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            Good morning. Core has the operating picture ready.
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-slate-600">
+            Core reviewed existing records and surfaced the items most likely to need owner/operator attention.
+          </p>
+          <p className="mt-5 rounded-2xl border border-cyan-100 bg-white/75 p-4 text-xs font-bold leading-6 text-cyan-950">
+            Briefing is generated from existing Core records only. No actions are taken from this panel.
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {items.map((item) => {
+            const content = (
+              <>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-black text-slate-950">{item.label}</p>
+                  <span className="rounded-2xl bg-slate-950 px-3 py-1 text-sm font-black text-white shadow-sm">
+                    {item.value}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
+                  {item.detail}
+                </p>
+              </>
+            );
+            const className =
+              "block rounded-2xl border border-white/80 bg-white/72 p-4 shadow-sm ring-1 ring-cyan-100/60 transition hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_18px_45px_rgba(14,165,233,0.12)]";
+
+            return item.href ? (
+              <Link key={item.label} href={item.href} className={className}>
+                {content}
+              </Link>
+            ) : (
+              <div key={item.label} className={className}>
+                {content}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </GlassPanel>
   );
 }
 
@@ -548,6 +608,57 @@ export default async function StaffCommandPage() {
   const proposedHighRiskCount = proposedActions.filter((row) =>
     ["high", "blocked"].includes(normalized(row.risk_level)),
   ).length;
+  const briefingItems: BriefingItem[] = [
+    {
+      label: "Applications needing review",
+      value: pendingApplicationCount,
+      detail:
+        pendingApplicationCount > 0
+          ? "Review queue has applications ready for owner/operator attention."
+          : "No application review backlog in the current Core read.",
+      href: "/staff/applications",
+    },
+    {
+      label: "Notifications queued",
+      value: unsentNotificationCount,
+      detail:
+        unsentNotificationCount > 0
+          ? "Preview records are waiting; no email or SMS is sent from here."
+          : "No unsent notification records found in this read.",
+      href: "/staff/notifications",
+    },
+    {
+      label: "Go-home items unscheduled",
+      value: goHomeUnscheduledCount,
+      detail:
+        goHomeUnscheduledCount > 0
+          ? "Some go-home records still need schedule review."
+          : "Current go-home records have schedule coverage.",
+      href: "/staff/go-home",
+    },
+    {
+      label: "Documents pending",
+      value: canViewAudit ? draftDocumentCount : "Owner/admin",
+      detail: canViewAudit
+        ? "Document metadata may need review; no generation or signature action is connected."
+        : "Document inventory details are restricted to owner/admin users.",
+    },
+    {
+      label: "Phone lookup ambiguity",
+      value: canViewPhone ? ambiguousPhoneCount : "Owner/admin",
+      detail: canViewPhone
+        ? "Ambiguous phone records require human verification before any future phone workflow."
+        : "Phone ambiguity details are restricted to owner/admin users.",
+    },
+    {
+      label: "Proposed actions needing review",
+      value: canViewAudit ? proposedNeedsReviewCount : "Owner/admin",
+      detail: canViewAudit
+        ? "Proposal records are review-only; approval does not execute business changes."
+        : "Proposed-action review details are restricted to owner/admin users.",
+      href: canViewAudit ? "/staff/proposed-actions" : undefined,
+    },
+  ];
 
   const warning =
     applicationResult.warning ??
@@ -720,6 +831,8 @@ export default async function StaffCommandPage() {
             </div>
           </div>
         </section>
+
+        <BriefingPanel items={briefingItems} />
 
         {warning ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">
