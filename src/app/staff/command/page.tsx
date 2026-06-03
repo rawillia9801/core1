@@ -185,17 +185,6 @@ function formatDateTime(value: string | null | undefined) {
       }).format(date);
 }
 
-function formatMoney(cents: number | null) {
-  if (typeof cents !== "number") {
-    return "Restricted";
-  }
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
-}
-
 function formatKey(value: string | null | undefined) {
   if (!value) {
     return "Not recorded";
@@ -515,7 +504,6 @@ export default async function StaffCommandPage() {
   const goHomes = goHomeResult.rows;
   const notifications = notificationResult.rows;
   const events = eventResult.rows;
-  const audits = auditResult.rows;
   const documents = documentResult.rows;
   const phoneRows = phoneResult.rows;
   const proposedActions = proposedActionResult.rows;
@@ -556,12 +544,6 @@ export default async function StaffCommandPage() {
   const openBalanceCount = canViewFinancials
     ? reservations.filter((row) => (row.balance_due_cents ?? 0) > 0).length
     : "Restricted";
-  const totalBalanceDue = canViewFinancials
-    ? reservations.reduce((sum, row) => sum + (row.balance_due_cents ?? 0), 0)
-    : null;
-  const successfulAuditCount = audits.filter(
-    (row) => normalized(row.outcome) === "success",
-  ).length;
   const proposedNeedsReviewCount = countByStatus(proposedActions, ["needs_review"]);
   const proposedHighRiskCount = proposedActions.filter((row) =>
     ["high", "blocked"].includes(normalized(row.risk_level)),
