@@ -43,7 +43,7 @@ Core-native private application entry
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
   -> Document readiness metadata workflow added
-  -> Messages read-only workspace added
+  -> Communications Readiness metadata workflow added
   -> Kennel Logs read-only workspace added
   -> Command Console plan added
   -> Command Console read-only shell added
@@ -116,6 +116,7 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/documents` now shows internal document readiness metadata, reservation document requirement checks, and document-related go-home blockers.
 - Documents is enabled in the staff sidebar.
 - `/staff/messages` has been added as a read-only owner/admin communications metadata workspace.
+- `/staff/messages` has been enhanced into Communications Readiness with metadata counts, linked/unlinked grouping, attention signals, phone ambiguity flags, preview-only template state, queued notification state, and related internal links.
 - Messages is enabled in the existing technical sidebar.
 - `/staff/kennel-logs` has been added as a read-only owner/admin kennel event/audit history workspace.
 - Kennel Logs is enabled in the existing technical sidebar.
@@ -126,6 +127,7 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.
 - The reservation detail readiness workflow is internal Core visibility only and does not send email, SMS, payment requests, document links, customer portal messages, public listing changes, or external provider calls.
 - The document readiness workflow is internal metadata/readiness only and does not generate documents, connect signing providers, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
+- The communications readiness workflow is internal metadata/preview-only and does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
 
 ## Recently Added / In Progress
 
@@ -192,7 +194,7 @@ checkpoint verified kennel/buyer/family/event workspaces
   -> Phone Lookup Safety read-only owner/admin workspace added
   -> Documents read-only owner/admin workspace added
   -> Document readiness metadata workflow added
-  -> Messages read-only owner/admin workspace added
+  -> Communications Readiness owner/admin metadata workflow added
   -> Kennel Logs read-only owner/admin workspace added
   -> Reservation detail readiness workflow added
   -> Command Console read-only shell added

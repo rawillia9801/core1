@@ -40,7 +40,7 @@ Core-native owner/operator operating system foundation
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
   -> Document readiness metadata workflow added
-  -> Messages read-only workspace added
+  -> Communications Readiness metadata workflow added
   -> Kennel Logs read-only workspace added
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
@@ -220,6 +220,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Documents is enabled in the staff sidebar.
 - [x] Dedicated `/staff/messages` page added as a read-only owner/admin communications metadata workspace.
 - [x] Messages is enabled in the staff sidebar.
+- [x] `/staff/messages` enhanced into Communications Readiness with counts, linked/unlinked grouping, attention signals, phone ambiguity flags, notification/template preview state, and related internal links.
 - [x] Dedicated `/staff/kennel-logs` page added as a read-only owner/admin kennel history workspace.
 - [x] Kennel Logs is enabled in the staff sidebar.
 - [x] `/staff/messages` and `/staff/kennel-logs` selected columns cross-checked against migrations after implementation.
@@ -315,13 +316,15 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ### 1.10 Messages Read-Only Workspace
 
-- [x] `core_conversations`, `core_messages`, `core_notifications`, and `core_notification_delivery_attempts` schema confirmed.
+- [x] `core_conversations`, `core_messages`, `core_phone_calls`, `core_notifications`, `core_message_templates`, `core_notification_delivery_attempts`, and phone lookup safety view schema confirmed.
 - [x] `/staff/messages` added as a read-only owner/admin workspace.
 - [x] Messages sidebar link enabled after the page was built.
 - [x] Page reads existing Core communication, notification, and delivery-attempt metadata only.
 - [x] Page does not send email, send SMS, create replies, create notifications, write messages, or call external providers.
 - [x] Staff role is restricted from message inventory details.
 - [x] Browser-check `/staff/messages` as owner/admin after real local `/login` sign-in.
+- [x] Communications Readiness page now surfaces metadata readiness summaries, linkage grouping, attention signals, preview-only template state, queued notification state, and phone ambiguity hints.
+- [x] Communications Readiness remains preview/readiness-only and does not connect SMTP, Twilio, Facebook, portal messaging, provider requests, send buttons, reply controls, test-send controls, or AI communication actions.
 
 ### 1.11 Kennel Logs Read-Only Workspace
 

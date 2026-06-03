@@ -27,6 +27,7 @@ Core already has communication foundations:
 - The owner/admin notification preview page now shows seeded email templates alongside queued notification previews.
 - A disabled/preview email provider foundation now exists in `src/lib/email/provider.ts`.
 - A delivery-attempt audit table foundation now exists as `core_notification_delivery_attempts`.
+- `/staff/messages` now provides a read-only Communications Readiness view across communication metadata, queued notifications, preview-only template state, delivery-attempt logs, and phone ambiguity signals.
 
 Nothing currently sends email. No SMTP provider, Resend provider, send worker, provider package, provider key, live delivery attempt, or send button is connected.
 
@@ -97,6 +98,13 @@ The preview surface:
 - Show event/audit links or short IDs when useful.
 - Avoid raw JSON blobs by summarizing safe fields.
 - Provide no send button initially.
+
+The broader `/staff/messages` readiness surface:
+
+- Summarizes communication, notification, template, and attempt metadata.
+- Groups records by existing Core links such as application, reservation, buyer/family, puppy, template preview, or unknown.
+- Flags internal attention signals such as unlinked context, ambiguous phone matches, queued/blocked/failed statuses, old pending rows, and sensitive communication categories.
+- Shows preview-only template and queued notification state without adding send, reply, test-send, provider, or portal controls.
 
 Preview should prove that templates and merge data are understandable before any provider can deliver email.
 
