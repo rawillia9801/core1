@@ -290,6 +290,8 @@ Core-native owner/operator operating system foundation
   -> Documents read-only workspace added
   -> Messages read-only workspace added
   -> Kennel Logs read-only workspace added
+  -> Application detail review workflow added
+  -> application approve/decline/needs-info/internal-note review actions added for owner/admin only
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
@@ -302,22 +304,22 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 This pass compared the docs to the local `main` build, not just older documentation.
 
-- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
+- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
 - Migrations documented vs actual migrations: 23 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
 - Tests documented vs actual tests: 19 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
 - Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
 - Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
 - Documents/messages documented accurately: `/staff/documents` and `/staff/messages` are read-only metadata workspaces and do not generate, sign, send, reply, upload, or call providers.
-- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist; live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
+- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions. Live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
 - RLS/staging/production documented accurately: RLS policies, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
 
 ## Current Recommended Next Task
 
-1. Continue safe owner/operator workflow verification under existing `/staff` routes.
-2. Browser-check `/staff/documents` as owner/admin.
+1. Verify unauthorized-role boundaries for the application detail review actions and other owner/admin-only write paths.
+2. Continue RLS/security hardening before selected real-data staging or production use.
 3. Keep the Command Console non-executing and keep Proposed Actions limited to proposal/review state until a later approved proposed-action execution task exists.
-4. Run `npm run lint` after any implementation changes.
+4. Run `npm run lint` and `npm run build` after implementation changes.
 
 ## Future Command Console Planning
 

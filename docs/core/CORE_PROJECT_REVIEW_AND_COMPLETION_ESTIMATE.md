@@ -197,15 +197,15 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ## Recommended Next Tasks
 
-1. **Browser-check Documents**
-   - Confirm `/staff/documents` loads for owner/admin.
-   - Confirm staff role sees only the restricted message.
-   - Confirm no document generation, uploads, signatures, sends, portal links, or provider calls exist.
-
-2. **Verify unauthorized-role boundaries**
+1. **Verify unauthorized-role boundaries**
+   - Confirm staff role cannot run application detail approve, decline, needs-info, or internal-note review actions.
    - Confirm staff role cannot update go-home details.
    - Confirm staff role cannot create dog/litter/puppy records.
    - Confirm staff cancellation with puppy release remains blocked.
+
+2. **Continue RLS/security hardening**
+   - Add policy tests before selected real-data staging.
+   - Review service-role server-action boundaries before production use.
 
 3. **Keep Proposed Actions review-only**
    - Do not add execution behavior until a separate approved task defines exact action types, validation, permissions, and event/audit behavior.

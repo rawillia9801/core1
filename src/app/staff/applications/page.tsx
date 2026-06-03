@@ -284,6 +284,12 @@ export default async function StaffApplicationsPage({
                           <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
                             {applicationRow.source} · {applicationRow.reference}
                           </p>
+                          <Link
+                            href={`/staff/applications/${applicationRow.id}`}
+                            className="mt-3 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
+                          >
+                            Open review
+                          </Link>
                         </div>
                         <p className="text-sm font-semibold text-slate-500 lg:text-right">{applicationRow.submitted}</p>
                       </div>

@@ -364,6 +364,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Request-memoize staff auth/profile lookup to reduce duplicate layout/page reads while keeping server actions independently authorized.
 - [ ] Add admin/staff role assignment flow.
 - [ ] Verify unauthorized role behavior, especially staff cancellation with puppy release and go-home updates.
+- [ ] Verify unauthorized role behavior for application detail review actions.
 - [ ] Add a staging environment separate from local dev.
 - [ ] Add environment variable documentation for staging without committing secrets.
 - [ ] Add deployment checklist for staging.
@@ -393,6 +394,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [ ] Validate field shapes against Core intake path chosen for staging.
 - [ ] Enter or stage owner-approved Core-native records through approved Core workflows when ready.
 - [blocked] Stage selected real records only after exact records, field review, fields, staging environment plan, environment, verification checklist, readiness checklist, and rollback plan are approved.
+- [x] Add local owner/admin application detail review workflow.
+- [x] Add local owner/admin application approve, decline, needs-info, and internal-note review actions.
 - [ ] Verify received applications display correctly in staging.
 - [ ] Verify application details display correctly in staging.
 - [ ] Verify no emails/messages/payments are triggered by selected record setup.
@@ -401,8 +404,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 - [ ] Use Core to review real applications internally.
 - [ ] Use Core to approve applications internally.
-- [ ] Add decline/needs-follow-up action only after approval flow is stable.
-- [ ] Add internal notes/follow-up workflow.
+- [x] Add local decline/needs-follow-up application review actions for owner/admin only.
+- [x] Add local internal application review note workflow.
 - [ ] Add staff activity/audit review surface.
 - [ ] Verify reservation creation with real-like data in staging.
 - [ ] Add staff-reviewed financial adjustment UI only after authorization boundaries exist.

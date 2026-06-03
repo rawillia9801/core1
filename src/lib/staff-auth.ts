@@ -152,7 +152,6 @@ export function canStaffPerformDashboardAction(
   }
 
   return (
-    action === "approve_application" ||
     action === "create_reservation" ||
     action === "record_reservation_payment" ||
     action === "upsert_go_home_checklist_item"
