@@ -223,6 +223,7 @@ Implemented Core database foundations include:
 - `core_go_home_checklist_items` and `core_upsert_go_home_checklist_item(...)` for operational go-home checklist items.
 - `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` for real owner/admin kennel record creation.
 - `core_proposed_actions` plus `core_create_proposed_action(...)`, `core_approve_proposed_action(...)`, and `core_reject_proposed_action(...)` for proposal/review records only. Approval does not execute the underlying business action.
+- First-wave RLS helper functions and policies for internal profile, application, buyer/family, reservation, ledger, event/audit, and proposed-action access.
 
 ## Current Auth And Access Boundary
 
@@ -245,13 +246,17 @@ Implemented owner/operator auth/access pieces:
 - Go-home detail updates are owner/admin only.
 - Go-home checklist updates are allowed for operational staff.
 - Dog, litter, and puppy create actions are owner/admin only.
+- First-wave RLS is enabled locally on `core_profiles`, `core_families`, `core_buyers`, `core_family_members`, `core_applications`, `core_application_sections`, `core_reservations`, `core_financial_ledger`, `core_events`, `core_audit_log`, and `core_proposed_actions`.
+- RLS helper functions exist: `core_current_profile_id()`, `core_current_profile_role()`, `core_current_profile_is_owner_admin()`, `core_current_profile_is_staff_or_above()`, and `core_can_read_sensitive_owner_data()`.
+- First-wave RLS blocks anonymous/unmapped direct reads, allows internal operational reads for owner/admin/staff where intended, restricts sensitive ledger/event/audit/proposed-action direct reads to owner/admin, and does not grant direct authenticated table writes.
 
 Still incomplete:
 
-- RLS policies and policy tests.
+- Remaining RLS table coverage and deeper policy tests.
 - Staging/production security boundary.
 - Admin/staff role assignment workflow.
 - Real field visibility review before selected-real-data staging.
+- Production review of transitional service-role server-side reads and RPC access.
 
 ## Still Not Connected Live
 
@@ -292,6 +297,7 @@ Core-native owner/operator operating system foundation
   -> Kennel Logs read-only workspace added
   -> Application detail review workflow added
   -> application approve/decline/needs-info/internal-note review actions added for owner/admin only
+  -> first-wave RLS foundation added for internal profile/role checks and highest-risk Core tables
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
@@ -305,19 +311,19 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 This pass compared the docs to the local `main` build, not just older documentation.
 
 - Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
-- Migrations documented vs actual migrations: 23 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
-- Tests documented vs actual tests: 19 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
+- Migrations documented vs actual migrations: 25 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
+- Tests documented vs actual tests: 21 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
 - Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
 - Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
 - Documents/messages documented accurately: `/staff/documents` and `/staff/messages` are read-only metadata workspaces and do not generate, sign, send, reply, upload, or call providers.
 - Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions. Live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
-- RLS/staging/production documented accurately: RLS policies, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
+- RLS/staging/production documented accurately: first-wave internal RLS exists locally, while remaining table coverage, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
 
 ## Current Recommended Next Task
 
-1. Verify unauthorized-role boundaries for the application detail review actions and other owner/admin-only write paths.
-2. Continue RLS/security hardening before selected real-data staging or production use.
+1. Continue RLS/security hardening by finishing remaining table coverage/tests and reviewing service-role server access before selected real-data staging or production use.
+2. Verify unauthorized-role boundaries for the application detail review actions and other owner/admin-only write paths.
 3. Keep the Command Console non-executing and keep Proposed Actions limited to proposal/review state until a later approved proposed-action execution task exists.
 4. Run `npm run lint` and `npm run build` after implementation changes.
 

@@ -1,16 +1,18 @@
 # Core V1 RLS And Access Model
 ## Status Note
 
-- Current as of this pass: blocked security planning reference.
-- Reflects intended RLS/access model only; production RLS, policy tests, staging security boundary, and customer portal access are not complete.
+- Current as of this pass: first-wave RLS foundation implemented locally.
+- Reflects implemented internal helper functions and first-wave policies plus remaining blocked production/customer access work.
 - Central current truth: `CURRENT_STATUS.md` and this file for planned access rules.
 
 
 ## Status
 
-Core V1 establishes canonical tables and read models, but it does not enable production Row Level Security (RLS) policies yet. This is intentional: authenticated identities, family membership onboarding, backend integration paths, and public-safe fields must be agreed before policies can be safely enforced.
+Core V1 now has a first-wave internal Row Level Security (RLS) foundation for the clearest and highest-risk owner/operator tables. This is not full production/customer access security. It is a deny-by-default foundation for authenticated internal profile checks and accidental anonymous/customer exposure prevention.
 
-Until RLS is implemented and tested, do not expose these `public` schema tables or views to browser/client access in a live Supabase project. Server-side service-role access must also remain limited to explicitly approved tools and integrations.
+Server-side service-role access remains a transitional backend pattern for existing owner/operator pages and controlled RPCs. It bypasses RLS by design and must receive a future production review before selected real-data staging or live production use.
+
+No customer-facing RLS policies are active. No public/anonymous Core table access is active.
 
 ## Roles
 
@@ -65,7 +67,7 @@ Unauthenticated website visitor or external public consumer.
 
 ## Table Group Access Direction
 
-This table is the proposed policy direction, not implemented RLS.
+This table remains the broad direction. The first implemented wave is listed below it.
 
 | Table group | Owner/Admin | Staff | Buyer/Family | Future Partners | Public |
 | --- | --- | --- | --- | --- | --- |
@@ -80,6 +82,44 @@ This table is the proposed policy direction, not implemented RLS.
 | `core_events` | Full operational access | Scoped operational access | Only explicitly family-visible events later | None unless assigned | None |
 | `core_audit_log`, `core_integration_events` | Restricted administrative read | Limited troubleshooting read later | None | None | None |
 | Threads, tool runs, pending actions | Administrative/tool-service scope | Only assigned workflows later | None unless separate user-safe design | None | None |
+
+## First-Wave Implemented RLS
+
+Migration:
+
+```text
+supabase/migrations/20260526400000_core_rls_foundation.sql
+```
+
+Helper functions:
+
+| Function | Current behavior |
+| --- | --- |
+| `core_current_profile_id()` | Returns the active `core_profiles.id` mapped to `auth.uid()`, or null. |
+| `core_current_profile_role()` | Returns the active mapped internal role, or null. |
+| `core_current_profile_is_owner_admin()` | True for active `owner` or `admin`. |
+| `core_current_profile_is_staff_or_above()` | True for active `owner`, `admin`, or `staff`. |
+| `core_can_read_sensitive_owner_data()` | True for active `owner` or `admin`; used by sensitive read policies. |
+
+Tables with RLS enabled in the first wave:
+
+| Table | First-wave direct authenticated access |
+| --- | --- |
+| `core_profiles` | Owner/admin can read all profiles; staff can read only its own active profile. |
+| `core_families` | Owner/admin/staff can read operational family rows. |
+| `core_buyers` | Owner/admin/staff can read operational buyer rows. |
+| `core_family_members` | Owner/admin/staff can read operational family-member rows. |
+| `core_applications` | Owner/admin/staff can read application rows. |
+| `core_application_sections` | Owner/admin/staff can read application answer sections. |
+| `core_reservations` | Owner/admin/staff can read operational reservation rows. |
+| `core_financial_ledger` | Owner/admin can read; staff is denied direct sensitive ledger rows. |
+| `core_events` | Owner/admin can read; staff is denied the general event feed. |
+| `core_audit_log` | Owner/admin can read; staff is denied direct audit rows. |
+| `core_proposed_actions` | Owner/admin can read; staff is denied proposal rows. |
+
+Authenticated direct table writes are not granted in this first wave. Write policies exist for owner/admin internal profiles where appropriate, but table privileges grant only `select` to `authenticated`; existing writes must continue through backend service-role server actions and controlled RPCs that validate actor profile IDs and write event/audit records.
+
+Anonymous access is explicitly revoked for the first-wave tables. Buyer/family, portal, partner, and public policies remain blocked until separately designed and tested.
 
 ## Service-Role-Only Actions
 
@@ -96,9 +136,9 @@ These operations should require validated server-side code using service-role cr
 
 All approved write tools must validate authorization and payloads, and append an audit record.
 
-## Future Helper Functions
+## Deferred Helper Functions
 
-Policy implementation may need stable security-definer helper functions after identity and access rules are finalized:
+Later policy waves may need additional stable helper functions after customer/partner access rules are finalized:
 
 | Function | Intended purpose |
 | --- | --- |
@@ -110,6 +150,6 @@ Policy implementation may need stable security-definer helper functions after id
 
 Any helper function implementation must guard against recursive policy evaluation, use the authenticated user-to-profile mapping consistently, and be tested for cross-family isolation.
 
-## Minimal Implementation Recommendation
+## Remaining Security Work
 
-Do not enable partial RLS merely to appear secure. The next security task should define identity mapping, service-role/server boundaries, and read/write policy tests, then enable RLS together with complete deny-by-default policies for a small initial table surface. Until then, Core V1 remains a local/development schema baseline only.
+The next security tasks should finish remaining table coverage and policy tests, then review service-role server access before staging or production. Customer-facing access remains blocked until portal identity, family membership, field visibility, document visibility, and public-safe read models are explicitly designed and tested.

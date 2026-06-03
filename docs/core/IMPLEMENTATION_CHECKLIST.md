@@ -348,7 +348,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Minimal staff login page added.
 - [x] Protected `/staff` route added with active staff profile requirement.
 - [x] Root `/` route changed to a non-sensitive landing page.
-- [~] Staff profile lookup maps Supabase Auth user to `core_profiles.auth_user_id`; it currently uses service role server-side as a transitional bridge until RLS exists.
+- [~] Staff profile lookup maps Supabase Auth user to `core_profiles.auth_user_id`; it currently uses service role server-side as a transitional bridge until production service-role boundaries are reviewed.
 - [~] Separate local/dev service-role usage from staging/production access patterns.
 - [x] Add per-action server-side authorization checks for current dashboard actions.
 - [x] Replace static local/development actor env usage with authenticated staff profile actors for approval, reservation creation, deposit/payment recording, cancellation, and go-home detail update.
@@ -371,12 +371,15 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 ### 2.2 RLS And Security
 
-- [ ] Implement admin/staff access policies.
+- [x] Add first-wave internal RLS helper functions.
+- [x] Enable first-wave RLS on internal profile, application, buyer/family, reservation, ledger, event/audit, and proposed-action tables.
+- [x] Add first-wave admin/staff read policies for the tested table surface.
+- [ ] Finish remaining admin/staff RLS table coverage.
 - [ ] Implement buyer/family portal access policies later, not before portal design.
 - [ ] Implement public/anonymous access boundaries.
-- [ ] Implement service-role-only operation rules.
-- [ ] Add RLS policy tests.
-- [ ] Verify no sensitive tables/views are exposed to live clients before policies exist.
+- [~] Implement service-role-only operation rules.
+- [x] Add first-wave RLS policy tests.
+- [~] Verify no sensitive tables/views are exposed to live clients before policies exist.
 - [ ] Review all read models for sensitive data leakage.
 - [ ] Review all server actions for authorization and audit coverage.
 
@@ -465,7 +468,7 @@ Estimated target for full replacement: 4-6+ months total from current checkpoint
 
 ## Still Not Connected Live
 
-- [ ] Production RLS is not enabled.
+- [~] First-wave internal RLS is enabled locally; remaining table coverage, service-role review, staging policies, and customer-facing policies are incomplete.
 - [ ] Zoho is historical reference only and is not connected, planned, imported from, synced with, written back to, or treated as a dependency.
 - [ ] Twilio is not connected live.
 - [ ] Email is not sending.

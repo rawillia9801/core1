@@ -204,7 +204,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
    - Confirm staff cancellation with puppy release remains blocked.
 
 2. **Continue RLS/security hardening**
-   - Add policy tests before selected real-data staging.
+   - Finish remaining table coverage and policy tests before selected real-data staging.
    - Review service-role server-action boundaries before production use.
 
 3. **Keep Proposed Actions review-only**
