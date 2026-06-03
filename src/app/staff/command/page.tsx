@@ -111,6 +111,12 @@ type BriefingItem = {
   href?: string;
 };
 
+type RecommendedStep = {
+  title: string;
+  detail: string;
+  href: string;
+};
+
 function getSupabaseRestConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -296,6 +302,45 @@ function BriefingPanel({ items }: { items: BriefingItem[] }) {
             );
           })}
         </div>
+      </div>
+    </GlassPanel>
+  );
+}
+
+function RecommendedNextSteps({ steps }: { steps: RecommendedStep[] }) {
+  return (
+    <GlassPanel className="relative overflow-hidden p-6">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(59,130,246,0.12),transparent_42%),radial-gradient(circle_at_92%_18%,rgba(45,212,191,0.14),transparent_24%)]" />
+      <div className="relative">
+        <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">
+          Recommended Next Steps
+        </p>
+        <h2 className="mt-2 text-2xl font-black text-slate-950">
+          Deterministic actions to review next
+        </h2>
+        <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+          {steps.length > 0 ? (
+            steps.map((step) => (
+              <Link
+                key={step.title}
+                href={step.href}
+                className="block rounded-2xl border border-white/80 bg-white/75 p-4 shadow-sm ring-1 ring-cyan-100/60 transition hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_18px_45px_rgba(14,165,233,0.12)]"
+              >
+                <p className="text-sm font-black text-slate-950">{step.title}</p>
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
+                  {step.detail}
+                </p>
+              </Link>
+            ))
+          ) : (
+            <div className="rounded-2xl border border-dashed border-cyan-200 bg-white/70 p-5 text-sm font-bold leading-6 text-cyan-950 lg:col-span-2 xl:col-span-3">
+              No urgent next steps found from current Core records.
+            </div>
+          )}
+        </div>
+        <p className="mt-5 rounded-2xl border border-cyan-100 bg-white/70 p-4 text-xs font-bold leading-6 text-cyan-950">
+          Recommendations are deterministic from current Core records. No actions are taken automatically.
+        </p>
       </div>
     </GlassPanel>
   );
@@ -659,6 +704,62 @@ export default async function StaffCommandPage() {
       href: canViewAudit ? "/staff/proposed-actions" : undefined,
     },
   ];
+  const recommendedSteps: RecommendedStep[] = [
+    ...(pendingApplicationCount > 0
+      ? [
+          {
+            title: "Review pending applications",
+            detail: `${pendingApplicationCount} application record(s) need owner/operator review.`,
+            href: "/staff/applications",
+          },
+        ]
+      : []),
+    ...(goHomeUnscheduledCount > 0
+      ? [
+          {
+            title: "Schedule go-home details",
+            detail: `${goHomeUnscheduledCount} go-home record(s) need schedule review.`,
+            href: "/staff/go-home",
+          },
+        ]
+      : []),
+    ...(canViewAudit && proposedNeedsReviewCount > 0
+      ? [
+          {
+            title: "Review proposed actions",
+            detail: `${proposedNeedsReviewCount} proposal record(s) are waiting for review.`,
+            href: "/staff/proposed-actions",
+          },
+        ]
+      : []),
+    ...(canViewPhone && ambiguousPhoneCount > 0
+      ? [
+          {
+            title: "Resolve phone lookup ambiguity",
+            detail: `${ambiguousPhoneCount} phone lookup result(s) need human verification.`,
+            href: "/staff/phone-lookup",
+          },
+        ]
+      : []),
+    ...(canViewAudit && draftDocumentCount > 0
+      ? [
+          {
+            title: "Review pending document metadata",
+            detail: `${draftDocumentCount} document metadata record(s) are pending or in review states.`,
+            href: "/staff/documents",
+          },
+        ]
+      : []),
+    ...(unsentNotificationCount > 0
+      ? [
+          {
+            title: "Review notification queue",
+            detail: `${unsentNotificationCount} notification record(s) are not marked sent.`,
+            href: "/staff/notifications",
+          },
+        ]
+      : []),
+  ];
 
   const warning =
     applicationResult.warning ??
@@ -833,6 +934,8 @@ export default async function StaffCommandPage() {
         </section>
 
         <BriefingPanel items={briefingItems} />
+
+        <RecommendedNextSteps steps={recommendedSteps} />
 
         {warning ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">

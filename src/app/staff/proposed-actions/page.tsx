@@ -1,4 +1,9 @@
 import { requireStaffProfile } from "@/lib/staff-auth";
+import {
+  approveProposedAction,
+  createProposedAction,
+  rejectProposedAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -195,6 +200,102 @@ function MetricCard({
   );
 }
 
+function SelectField({
+  label,
+  name,
+  options,
+  defaultValue,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+  defaultValue: string;
+}) {
+  return (
+    <label className="block text-sm font-semibold text-slate-700">
+      {label}
+      <select
+        name={name}
+        defaultValue={defaultValue}
+        className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {formatKey(option)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function TextField({
+  label,
+  name,
+  required = false,
+  placeholder,
+}: {
+  label: string;
+  name: string;
+  required?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block text-sm font-semibold text-slate-700">
+      {label}
+      <input
+        name={name}
+        required={required}
+        placeholder={placeholder}
+        className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+      />
+    </label>
+  );
+}
+
+function StatusMessage({
+  created,
+  approved,
+  rejected,
+  error,
+}: {
+  created?: string;
+  approved?: string;
+  rejected?: string;
+  error?: string;
+}) {
+  if (created) {
+    return "Proposed action created for review. No business action was executed.";
+  }
+
+  if (approved) {
+    return "Proposed action marked approved. Approval does not execute the business action yet.";
+  }
+
+  if (rejected) {
+    return "Proposed action marked rejected. No business action was executed.";
+  }
+
+  if (error === "unauthorized") {
+    return "Your profile is not authorized to change proposed action records.";
+  }
+
+  if (error) {
+    return "Proposed action update failed. Check the fields and try again.";
+  }
+
+  return null;
+}
+
+function canReviewProposal(proposal: ProposedActionRow) {
+  const status = normalized(proposal.status);
+  return status === "draft" || status === "needs_review";
+}
+
+function canApproveProposal(proposal: ProposedActionRow) {
+  return canReviewProposal(proposal) && normalized(proposal.risk_level) !== "blocked";
+}
+
 function proposedChangeSummary(value: Record<string, unknown> | null) {
   if (!value || Object.keys(value).length === 0) {
     return "No proposed change keys recorded.";
@@ -253,7 +354,17 @@ function RestrictedMessage() {
   );
 }
 
-export default async function ProposedActionsPage() {
+export default async function ProposedActionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    created?: string;
+    approved?: string;
+    rejected?: string;
+    error?: string;
+  }>;
+}) {
+  const params = await searchParams;
   const staff = await requireStaffProfile();
   const canViewProposals = staff.role === "owner" || staff.role === "admin";
 
@@ -278,6 +389,7 @@ export default async function ProposedActionsPage() {
   const highOrBlockedCount = proposedActions.filter((row) =>
     ["high", "blocked"].includes(normalized(row.risk_level)),
   ).length;
+  const statusMessage = StatusMessage(params);
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -312,6 +424,12 @@ export default async function ProposedActionsPage() {
           </section>
         ) : null}
 
+        {statusMessage ? (
+          <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm font-semibold leading-6 text-blue-950 shadow-sm">
+            {statusMessage}
+          </section>
+        ) : null}
+
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard
             label="Total proposed"
@@ -342,6 +460,116 @@ export default async function ProposedActionsPage() {
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
+              Owner/admin proposal intake
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight">
+              Create Proposed Action
+            </h2>
+            <p className="mt-2 max-w-4xl text-sm leading-7 text-slate-600">
+              This form creates proposal records only. It does not send email,
+              send SMS, move money, generate documents, publish listings, call
+              providers, or change target records.
+            </p>
+          </div>
+
+          <form action={createProposedAction} className="grid gap-5 xl:grid-cols-2">
+            <TextField
+              label="Title"
+              name="title"
+              required
+              placeholder="Review follow-up for application"
+            />
+            <TextField
+              label="Action type"
+              name="action_type"
+              required
+              placeholder="draft_customer_follow_up"
+            />
+            <label className="block text-sm font-semibold text-slate-700 xl:col-span-2">
+              Summary
+              <textarea
+                name="summary"
+                rows={3}
+                placeholder="Short review note for the owner/operator."
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+              />
+            </label>
+            <SelectField
+              label="Domain"
+              name="domain"
+              defaultValue="business"
+              options={[
+                "business",
+                "kennel",
+                "puppies",
+                "buyers_families",
+                "payments",
+                "documents",
+                "messages",
+                "personal_family",
+                "grocery_list",
+                "smart_home",
+                "monitoring_alerts",
+                "voice_command",
+                "system",
+                "unknown",
+              ]}
+            />
+            <SelectField
+              label="Permission tier"
+              name="permission_tier"
+              defaultValue="owner_admin_approval_required"
+              options={[
+                "read_only",
+                "immediate_safe_action",
+                "confirmation_required",
+                "owner_admin_approval_required",
+                "blocked_until_configured",
+              ]}
+            />
+            <SelectField
+              label="Risk level"
+              name="risk_level"
+              defaultValue="low"
+              options={["low", "medium", "high", "blocked"]}
+            />
+            <TextField
+              label="Target table, optional"
+              name="target_table"
+              placeholder="core_applications"
+            />
+            <TextField
+              label="Target ID, optional UUID"
+              name="target_id"
+              placeholder="00000000-0000-0000-0000-000000000000"
+            />
+            <label className="block text-sm font-semibold text-slate-700 xl:col-span-2">
+              Proposed change summary or JSON
+              <textarea
+                name="proposed_change_summary"
+                rows={5}
+                placeholder='Plain text summary, or JSON such as {"draft_only": true, "note": "Prepare follow-up"}'
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+              />
+            </label>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-950 xl:col-span-2">
+              Approval does not execute the business action yet. This queue
+              stores review records only.
+            </div>
+            <div className="xl:col-span-2">
+              <button
+                type="submit"
+                className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                Create Proposed Action
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5">
             <h2 className="text-xl font-bold tracking-tight">
               Proposal Records
             </h2>
@@ -353,11 +581,15 @@ export default async function ProposedActionsPage() {
 
           {proposedActions.length > 0 ? (
             <div className="grid gap-4 xl:grid-cols-2">
-              {proposedActions.map((proposal) => (
-                <article
-                  key={proposal.id}
-                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
-                >
+              {proposedActions.map((proposal) => {
+                const reviewable = canReviewProposal(proposal);
+                const approvable = canApproveProposal(proposal);
+
+                return (
+                  <article
+                    key={proposal.id}
+                    className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                  >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-lg font-bold text-slate-950">
@@ -472,8 +704,66 @@ export default async function ProposedActionsPage() {
                       ) : null}
                     </div>
                   </div>
+
+                  {reviewable ? (
+                    <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <p className="text-sm font-bold text-amber-950">
+                        Review controls update proposal status only.
+                      </p>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-amber-900">
+                        Approval does not execute the business action yet. No
+                        email, SMS, payment, document, publishing, or device
+                        action happens from this page.
+                      </p>
+                      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                        {approvable ? (
+                          <form action={approveProposedAction}>
+                            <input
+                              type="hidden"
+                              name="proposed_action_id"
+                              value={proposal.id}
+                            />
+                            <button
+                              type="submit"
+                              className="w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            >
+                              Approve Review Record Only
+                            </button>
+                          </form>
+                        ) : (
+                          <div className="rounded-xl border border-red-200 bg-white/70 p-3 text-sm font-semibold text-red-800">
+                            Blocked-risk proposals cannot be approved here.
+                          </div>
+                        )}
+                        <form action={rejectProposedAction} className="space-y-2">
+                          <input
+                            type="hidden"
+                            name="proposed_action_id"
+                            value={proposal.id}
+                          />
+                          <input
+                            name="rejection_reason"
+                            placeholder="Optional rejection reason"
+                            className="block w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-slate-800"
+                          />
+                          <button
+                            type="submit"
+                            className="w-full rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                          >
+                            Reject Review Record Only
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-600">
+                      This proposal is in a terminal review state. No approve or
+                      reject controls are shown.
+                    </div>
+                  )}
                 </article>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
@@ -494,7 +784,7 @@ export default async function ProposedActionsPage() {
               Review state visible
             </div>
             <div className="rounded-2xl border border-cyan-100 bg-white/70 p-4 text-sm font-semibold">
-              No approval buttons yet
+              Approval/rejection status only
             </div>
             <div className="rounded-2xl border border-cyan-100 bg-white/70 p-4 text-sm font-semibold">
               No execution tools enabled
