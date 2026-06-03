@@ -4,13 +4,7 @@
 
 Cherolee Core should be built in small, verifiable phases. Core is the operating system and daily command layer for Cristy's owner-operated business and kennel. Each phase depends on a trustworthy canonical model and explicit owner approval before any production data movement or sensitive action.
 
-Current steering shortcut:
-
-```text
-docs/core/CORE_CURRENT_BUILD_DIRECTION.md
-```
-
-Use that document before starting a Codex task so completed verification work is not repeated and the next build lane stays focused.
+The uploaded Core OS overview and technical manual define the same direction: Core is a governed operating system, not a dashboard, CRM, chatbot, portal, or smart-home gadget. Interfaces request or display truth; Core validates, records, blocks, proposes, or executes according to rules.
 
 ## Mandatory Path Rule
 
@@ -44,6 +38,9 @@ Next useful build lanes, in order:
 3. Internal notes and follow-up workflow.
 4. Documents/messages safe internal workflow expansion.
 5. RLS/security hardening before staging or customer-facing access.
+6. Core Nervous System foundation: health signals, dependency mapping, incidents, degraded states, and recovery proposals.
+7. Customer-facing Core only after internal truth, RLS, and safety boundaries are reliable.
+8. AI, voice, Twilio/Facebook, smart-home, camera, CoreFace, and physical-world automation only after governed proposal/execution rules are explicitly approved.
 
 Each lane must remain internal, audited, and free of external side effects until separately approved.
 
@@ -117,7 +114,7 @@ Application detail page + controlled internal review actions.
 
 Documents may expand into metadata-only internal review workflows later. They must not generate, upload, sign, send, expose portal links, or call external providers until explicitly approved.
 
-## Phase 7: Core Chat
+## Phase 7: Core Chat And Proposed Actions
 
 - Add read-oriented conversational assistance and explicit validated tools.
 - Log tool requests, executions, pending approvals, and all completed writes.
@@ -126,22 +123,30 @@ Documents may expand into metadata-only internal review workflows later. They mu
 
 The Command Console may guide the owner/operator to existing pages and proposal review records. It must not submit AI commands, execute writes, or call model providers until a separate approved safety lane exists.
 
-## Phase 8: Kennel Logging
+## Phase 8: Core Nervous System
 
-- Add controlled workflows for puppy events, weights, feeding, and medications.
+- Add `core_system_components`, dependency mapping, health signals, incident classification, recovery playbooks, recovery actions, and presence-state derivation when the internal business foundation is stable enough to monitor.
+- A degraded component must make dependent surfaces honest: partial, blocked, stale, or unsafe.
+- Recovery may propose or perform only explicitly safe actions.
+- Unsafe recovery must create a proposed action or owner-visible incident.
+
+## Phase 9: Kennel Logging
+
+- Add controlled workflows for puppy events, weights, feeding, medications, and care observations.
 - Preserve factual observations and avoid inferred medical conclusions.
 - Keep action history auditable.
 
-## Phase 9: Home Assistant Bridge
+## Phase 10: Home Assistant Bridge
 
 - Design a narrow, approval-aware integration boundary.
 - Let Home Assistant own device execution while Core owns intent, policy, and audit context.
 - Do not enable sensitive device control without explicit approval.
 
-## Phase 10: Camera And Smart Mirror Later
+## Phase 11: Camera, CoreFace, Voice, And Smart Mirror Later
 
-- Consider camera event sources, displays, and mirror experiences only after foundational workflows are stable.
+- Consider camera event sources, displays, voice command, CoreFace, and mirror experiences only after foundational workflows are stable.
 - Treat camera information as observational input, not health or medical authority.
+- The visible presence layer must reflect real system state, not decorative animation.
 - Require separate privacy, security, and operational approvals before implementation.
 
 ## Not Yet
