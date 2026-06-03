@@ -114,6 +114,7 @@ Core-native application entry
 Verified local behavior:
 
 - `core_queue_notification(...)` exists and queues notification rows.
+- `.env.example` documents local Supabase/Core variable names, email safety flags, and future Hostinger SMTP variable names without secrets.
 - `/staff/notifications` exists and is owner/admin only.
 - Staff-role users are blocked from the notification preview page.
 - Creating a Core-native application with an applicant email queues a preview-only `application_received` notification.
@@ -126,6 +127,7 @@ Verified local behavior:
 - The disabled/preview email provider foundation exists and lint passes.
 - `core_notification_delivery_attempts` exists and is used for blocked preview attempt logging.
 - `/staff/notifications` displays delivery attempts.
+- Hostinger SMTP remains disconnected and email remains preview-only.
 
 ## Email Template Keys Verified
 

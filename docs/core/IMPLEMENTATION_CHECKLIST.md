@@ -233,6 +233,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 ### 1.6 Communications Workflow
 
 - [x] Define Core email template and preview plan: `docs/core/CORE_EMAIL_TEMPLATE_PREVIEW_PLAN.md`.
+- [x] Document local Supabase/Core and future email variable names in `.env.example` without secrets.
 - [x] Add controlled notification queue database foundation: `core_queue_notification`.
 - [x] Add rollback-safe notification queue SQL test.
 - [x] Add owner/admin notification or email preview UI before sending: `/staff/notifications`.

@@ -216,6 +216,12 @@ EMAIL_PREVIEW_ONLY=true
 
 SMTP sending should not be added until preview, approval, staging override, send logging, and test-send rules are implemented.
 
+## Environment Configuration Boundary
+
+`.env.example` documents local Supabase/Core variable names and future email configuration names without secrets. Hostinger SMTP is included in the existing hosting plan and may be used later, but the current Core state remains preview-only.
+
+`EMAIL_PROVIDER` must remain `disabled` or preview-only until send approval gates are implemented. SMTP variables may exist in `.env.local` later, but their presence must not activate sending by itself. Live sending requires separate approval, test-send controls, staging override, send logs, audit rows, and owner/admin gating.
+
 ## Provider Abstraction
 
 Future provider code should use the small internal interface instead of spreading SMTP or Resend logic across actions.
