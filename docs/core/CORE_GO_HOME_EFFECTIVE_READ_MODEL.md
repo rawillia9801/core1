@@ -57,12 +57,15 @@ The effective read model feeds the go-home fields used by:
 - `core_puppy_summary_view`
 - `core_dashboard_today_view`
 - `/staff/reservations/[reservationId]`
+- `/staff/go-home`
+
+`/staff/go-home` now uses the effective go-home read model as part of the internal Go-Home Command & Completion Readiness workspace. It combines existing reservation summary, payment balance, ledger, document metadata, application, puppy/litter, and checklist rows to show readiness counts, per-reservation blockers, and internal links.
 
 `core_phone_lookup_view` already reads reservation context through the reservation/buyer summaries. Ambiguous phone lookups still redact buyer, puppy, payment, and go-home context until a later owner/operator verification workflow is built.
 
 ## Not Built Here
 
-The reservation detail page reads the effective model for internal readiness only. It does not schedule transport, send reminders, create documents, change payment state, update public listings, or contact customers.
+The reservation detail page and go-home command page read the effective model for internal readiness only. They do not schedule transport, send reminders, create documents, change payment state, update portal visibility, release registration papers, update public listings, call providers, or contact customers.
 
 This read-model foundation does not build:
 

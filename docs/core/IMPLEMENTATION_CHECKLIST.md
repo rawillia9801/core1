@@ -34,6 +34,7 @@ Core-native owner/operator operating system foundation
   -> preview-only communication safety verified
   -> go-home detail update verified
   -> go-home checklist verified and wired
+  -> go-home command/completion readiness workflow added
   -> reservation detail readiness workflow added
   -> payment ledger/account readiness workflow added
   -> kennel add/edit/archive browser-tested
@@ -288,6 +289,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] `/staff/go-home` owner/admin Set Go-Home Detail form added.
 - [x] Manual browser save verified a visible effective go-home row.
 - [x] `core_go_home_checklist_items` table and `core_upsert_go_home_checklist_item(...)` added, tested, and wired into `/staff/go-home`.
+- [x] `/staff/go-home` enhanced into internal Go-Home Command & Completion Readiness with reservation rows, payment/document/checklist/schedule readiness counts, deterministic blockers, and related internal links.
+- [x] Go-home completion readiness remains internal-only: no email/SMS, payment processing, document generation, portal update, registration release, public listing change, provider call, dependency, migration, or route addition was added.
 - [ ] Add go-home communication/document handoff rules.
 
 ### 1.8 Phone Lookup Safety

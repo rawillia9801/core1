@@ -37,6 +37,7 @@ Core-native private application entry
   -> go-home detail update
   -> effective go-home read model display
   -> go-home checklist SQL/UI foundation
+  -> go-home command/completion readiness review
   -> dog/litter/puppy create RPC verification
   -> dog/litter/puppy create forms added
   -> dog/litter/puppy edit/archive browser-tested
@@ -94,6 +95,8 @@ The following are implemented and have been manually or test verified in local/d
 - `core_go_home_checklist_items` and `core_upsert_go_home_checklist_item(...)` were added.
 - Go-home checklist SQL test passed locally.
 - Go-home checklist controls were wired into `/staff/go-home`.
+- `/staff/go-home` now works as internal Go-Home Command & Completion Readiness with reservation-level readiness rows, payment/document/checklist/schedule counts, deterministic blockers, and related Core links.
+- Go-home completion readiness remains internal-only and does not send messages, process payments, generate documents, update the customer portal, release registration papers, change public listings, call external providers, add dependencies, or add migrations.
 - `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` were applied.
 - The self-contained v2 kennel create test passed locally with:
   - `dam_check = 1`
@@ -129,6 +132,7 @@ The following are implemented and have been manually or test verified in local/d
 - `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
 - `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.
 - The reservation detail readiness workflow is internal Core visibility only and does not send email, SMS, payment requests, document links, customer portal messages, public listing changes, or external provider calls.
+- The go-home command/completion readiness workflow is internal Core visibility only and does not send email/SMS, process payments, generate documents, update customer portal visibility, release registration papers, change public listings, or call providers.
 - The document readiness workflow is internal metadata/readiness only and does not generate documents, connect signing providers, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 - The communications readiness workflow is internal metadata/preview-only and does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
 
@@ -201,6 +205,7 @@ checkpoint verified kennel/buyer/family/event workspaces
   -> Kennel Logs read-only owner/admin workspace added
   -> Reservation detail readiness workflow added
   -> Payment Ledger & Account Readiness workflow added
+  -> Go-Home Command & Completion Readiness workflow added
   -> Command Console read-only shell added
   -> Proposed Action Approval Model plan added
   -> continue owner/operator Core workflows under existing technical routes

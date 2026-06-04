@@ -54,6 +54,7 @@ Core-native private application entry
   -> go-home detail update
   -> effective go-home read model display
   -> go-home checklist item SQL verification
+  -> go-home command/completion readiness review
   -> kennel dog/litter/puppy create RPC verification
   -> kennel dog/litter/puppy add/edit/archive browser verification
   -> buyers/families/events read-only owner/operator workspaces
@@ -73,7 +74,7 @@ Verified local behavior:
 - `/staff/payments` remains internal ledger/readiness only. It does not connect a payment processor, process refunds, create payment links, send reminders, move money, call payment providers, add customer portal behavior, send email/SMS, or change financial balance semantics.
 - `/staff/reservations/[reservationId]` shows internal reservation readiness detail for buyer/family, puppy/litter, ledger-derived financial truth, document metadata, go-home readiness, checklist items, blockers, internal links, event history, and audit history.
 - Current dashboard write actions use authenticated staff profile actor context rather than static local actor env usage.
-- `/staff/go-home` loads and displays the Go-Home workspace.
+- `/staff/go-home` now works as an internal Go-Home Command & Completion Readiness workspace with readiness counts, one row per active reservation, ledger-derived payment readiness, document metadata requirement checks, checklist completion, schedule/location detail checks, deterministic blockers, and related internal links.
 - Owner/admin can save a go-home detail through `/staff/go-home`.
 - The saved go-home detail appears back through `core_go_home_effective_view`.
 - The go-home update path was locally verified with migration, rollback-safe SQL test, lint, browser load, form save, and visible saved row.
@@ -173,6 +174,8 @@ Implemented and verified:
 - `core_upsert_go_home_checklist_item(...)` controlled checklist item RPC exists.
 - Go-home checklist rollback-safe SQL test passed locally.
 - Go-home checklist UI is wired into `/staff/go-home`.
+- Go-home completion readiness was browser-smoked as the mapped local owner and remains internal Core readiness only.
+- Go-home completion readiness does not send email/SMS, process payments, generate documents, update the customer portal, release registration papers, change public listings, call external providers, or add live integrations.
 
 Known cleanup:
 
@@ -299,6 +302,7 @@ Core-native owner/operator operating system foundation
   -> preview-only communication safety verified
   -> go-home detail update verified
   -> go-home checklist SQL/UI wired
+  -> Go-Home Command & Completion Readiness workflow added
   -> kennel dog/litter/puppy create RPCs verified
   -> kennel create forms added
   -> kennel add/edit/archive browser-tested
