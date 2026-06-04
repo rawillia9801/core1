@@ -63,6 +63,10 @@ Verified results:
 - The workflow reads existing litter, dog, puppy, puppy event, and observed weight rows only.
 - It shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - It does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices/cameras, add dependencies, or add migrations.
+- Daily Weight & Care Log was added inside `/staff/litters`.
+- `core_record_puppy_weight_log(...)` records factual puppy weight observations in grams.
+- `core_record_puppy_care_observation(...)` records factual neonatal care observations using allowed observation types.
+- The weight/care log workflow writes event/audit rows and remains internal owner/operator observation logging only. It does not diagnose puppies, message customers, publish puppies, update the portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
 
 ## Obsolete Tests Removed
 

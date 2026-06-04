@@ -58,6 +58,7 @@ Core-native private application entry
   -> kennel dog/litter/puppy create RPC verification
   -> kennel dog/litter/puppy add/edit/archive browser verification
   -> neonatal litter command workflow added to /staff/litters
+  -> daily puppy weight/neonatal care log workflow added
   -> buyers/families/events read-only owner/operator workspaces
 ```
 
@@ -89,6 +90,10 @@ Verified local behavior:
 - `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows.
 - The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - The neonatal command is read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, or add public/customer-facing behavior.
+- `core_record_puppy_weight_log(...)` records factual puppy weight observations in grams through a controlled owner/admin RPC.
+- `core_record_puppy_care_observation(...)` records factual neonatal care observations in `core_puppy_events` through a controlled owner/admin RPC.
+- The Daily Weight & Care Log UI is available inside `/staff/litters` and writes only through the controlled RPCs.
+- The weight/care log workflow writes `core_events` and `core_audit_log`, remains internal owner/operator observation logging only, and does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, or call external providers.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
@@ -311,6 +316,7 @@ Core-native owner/operator operating system foundation
   -> kennel create forms added
   -> kennel add/edit/archive browser-tested
   -> Neonatal Litter Command workflow added
+  -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added

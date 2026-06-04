@@ -39,6 +39,7 @@ Core-native owner/operator operating system foundation
   -> payment ledger/account readiness workflow added
   -> kennel add/edit/archive browser-tested
   -> Neonatal Litter Command workflow added
+  -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -349,6 +350,11 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Workflow reads existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows only.
 - [x] Workflow shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - [x] Workflow remains read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, connect SMTP/Twilio/Facebook/AI/smart-home/devices/cameras, or call external providers.
+- [x] Daily Weight & Care Log added inside `/staff/litters`.
+- [x] `core_record_puppy_weight_log(...)` added as an owner/admin controlled RPC for factual gram-based puppy weight observations.
+- [x] `core_record_puppy_care_observation(...)` added as an owner/admin controlled RPC for factual care observations using allowed observation types only.
+- [x] Weight/care log actions write `core_events` and `core_audit_log`.
+- [x] Weight/care log workflow remains internal owner/operator observation logging only: no diagnosis, customer messages, public puppy publishing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, documents, payments, or external providers were added.
 
 ### 1.13 Future Core Command Console
 

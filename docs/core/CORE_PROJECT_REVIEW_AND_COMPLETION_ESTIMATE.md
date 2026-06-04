@@ -42,6 +42,7 @@ Core-native private application entry
   -> dog/litter/puppy create forms added
   -> dog/litter/puppy edit/archive browser-tested
   -> Neonatal Litter Command workflow added
+  -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -115,6 +116,10 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing litter, dog, puppy, puppy event, and observed weight rows.
 - The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - The neonatal command remains internal/read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, add migrations, or add dependencies.
+- `/staff/litters` now includes an internal Daily Weight & Care Log workflow for newborn/active puppy weight and care observations.
+- `core_record_puppy_weight_log(...)` records factual gram-based puppy weights through an owner/admin controlled RPC.
+- `core_record_puppy_care_observation(...)` records factual neonatal care observations through an owner/admin controlled RPC and allowed observation types.
+- The weight/care log workflow writes event/audit rows and remains internal owner/operator observation logging only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, add AI, add external providers, generate documents, or process payments.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
@@ -140,6 +145,7 @@ The following are implemented and have been manually or test verified in local/d
 - The document readiness workflow is internal metadata/readiness only and does not generate documents, connect signing providers, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 - The communications readiness workflow is internal metadata/preview-only and does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
 - The neonatal litter command workflow is internal Core visibility only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect devices/cameras, or add external integrations.
+- The puppy weight/care log workflow is internal Core observation logging only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 
 ## Recently Added / In Progress
 

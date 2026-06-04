@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { recordPuppyCareObservation, recordPuppyWeight } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -150,6 +151,28 @@ function formatDate(value: string | null) {
   }
 
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(date);
+}
+
+function formatDateTime(value: string | null) {
+  if (!value) {
+    return "Not recorded";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Invalid date";
+  }
+
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function dateTimeInput(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
 function formatAgeDays(value: string | null) {
@@ -305,9 +328,35 @@ function InfoItem({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-export default async function StaffLittersPage({ searchParams }: { searchParams: Promise<{ litter?: string }> }) {
-  await requireStaffProfile();
-  const { litter } = await searchParams;
+function ResultMessage({ searchParams }: { searchParams: { litter?: string; weight_recorded?: string; observation_recorded?: string; error?: string } }) {
+  if (searchParams.weight_recorded === "1") {
+    return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">Puppy weight recorded. Core stored the observation only and did not message customers, publish puppies, diagnose, or call external providers.</section>;
+  }
+
+  if (searchParams.observation_recorded === "1") {
+    return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">Puppy care observation recorded. Core stored the observation only and did not message customers, publish puppies, diagnose, or call external providers.</section>;
+  }
+
+  if (searchParams.error === "unauthorized") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">Only owner/admin can record puppy weight and care observations.</section>;
+  }
+
+  if (searchParams.error === "invalid") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">Check the puppy, weight, date/time, observation type, and note length.</section>;
+  }
+
+  if (searchParams.error === "failed") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">The neonatal log action failed. Check local server logs for details.</section>;
+  }
+
+  return null;
+}
+
+export default async function StaffLittersPage({ searchParams }: { searchParams: Promise<{ litter?: string; weight_recorded?: string; observation_recorded?: string; error?: string }> }) {
+  const staff = await requireStaffProfile();
+  const resolvedSearchParams = await searchParams;
+  const { litter } = resolvedSearchParams;
+  const canLogCare = staff.role === "owner" || staff.role === "admin";
 
   const [litterResult, dogResult, puppyResult, weightResult, puppyEventResult] = await Promise.all([
     readRows<LitterRow>("core_litters", {
@@ -407,6 +456,7 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
         </section>
 
         {litter ? <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">Litter action result: {litter}</section> : null}
+        <ResultMessage searchParams={resolvedSearchParams} />
 
         {litterResult.warning || dogResult.warning || puppyResult.warning || weightResult.warning || puppyEventResult.warning ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">
@@ -441,6 +491,80 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
             <StatCard label="Weights today" value={todayWeights} note="Observed core_weight_logs today" />
             <StatCard label="Watch signals" value={puppyWatchRows.length} note="Deterministic owner-review flags" />
           </div>
+
+          <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-950">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-950">Daily Weight & Care Log</h3>
+                <p className="mt-1 max-w-4xl text-sm leading-6 text-emerald-900">This log stores owner observations only. It does not diagnose puppies, replace veterinary care, message customers, publish puppies, or call external providers.</p>
+              </div>
+              <Badge tone="bg-white text-emerald-800 ring-emerald-200">Owner/Admin</Badge>
+            </div>
+
+            {canLogCare ? (
+              neonatalPuppies.length > 0 ? (
+                <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_1fr]">
+                  <form action={recordPuppyWeight} className="space-y-4 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                    <div>
+                      <p className="text-base font-bold text-slate-950">Record Weight</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">Weights are stored as integer grams in `core_weight_logs`.</p>
+                    </div>
+                    <label className="block text-sm font-medium text-slate-700">Puppy<select name="puppyId" required className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"><option value="">Select puppy</option>{neonatalPuppies.map((puppy) => <option key={puppy.id} value={puppy.id}>{puppyName(puppy)} / {puppy.litter_id ? litterName(litterById.get(puppy.litter_id) ?? ({ id: puppy.litter_id } as LitterRow)) : "Unlinked litter"}</option>)}</select></label>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="block text-sm font-medium text-slate-700">Weight (grams)<input type="number" name="weightGrams" min="1" max="10000" required className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800" /></label>
+                      <label className="block text-sm font-medium text-slate-700">Observation time<input type="datetime-local" name="measuredAt" defaultValue={dateTimeInput(new Date().toISOString())} className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800" /></label>
+                    </div>
+                    <label className="block text-sm font-medium text-slate-700">Internal note<textarea name="notes" maxLength={1000} rows={3} className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800" /></label>
+                    <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Record weight</button>
+                  </form>
+
+                  <form action={recordPuppyCareObservation} className="space-y-4 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                    <div>
+                      <p className="text-base font-bold text-slate-950">Record Observation</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">Observation types are factual care markers stored in `core_puppy_events`.</p>
+                    </div>
+                    <label className="block text-sm font-medium text-slate-700">Puppy<select name="puppyId" required className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"><option value="">Select puppy</option>{neonatalPuppies.map((puppy) => <option key={puppy.id} value={puppy.id}>{puppyName(puppy)} / {puppy.litter_id ? litterName(litterById.get(puppy.litter_id) ?? ({ id: puppy.litter_id } as LitterRow)) : "Unlinked litter"}</option>)}</select></label>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="block text-sm font-medium text-slate-700">Observation type<select name="observationType" required className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800"><option value="nursing_observed">Nursing observed</option><option value="bottle_feeding">Bottle feeding</option><option value="weight_check">Weight check</option><option value="dam_note">Dam note</option><option value="general_note">General note</option><option value="watch_note">Watch note</option></select></label>
+                      <label className="block text-sm font-medium text-slate-700">Observation time<input type="datetime-local" name="observedAt" defaultValue={dateTimeInput(new Date().toISOString())} className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800" /></label>
+                    </div>
+                    <label className="block text-sm font-medium text-slate-700">Observation note<textarea name="note" maxLength={1000} rows={3} className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-800" /></label>
+                    <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Record observation</button>
+                  </form>
+                </div>
+              ) : <EmptyState text="No newborn or active puppies are available for weight or care logging yet." />
+            ) : <EmptyState text="Daily puppy weight and care logging is owner/admin only during this phase." />}
+
+            <div className="mt-5 rounded-2xl border border-emerald-100 bg-white p-5">
+              <h4 className="text-base font-bold text-slate-950">Latest Weight History</h4>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Most recent observed weights and care observations for newborn/active puppies.</p>
+              {neonatalPuppies.length > 0 ? (
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  {neonatalPuppies.map((puppy) => {
+                    const weights = weightsByPuppy.get(puppy.id) ?? [];
+                    const events = eventsByPuppy.get(puppy.id) ?? [];
+                    const latestWeights = [...weights].sort((a, b) => new Date(b.measured_at ?? 0).getTime() - new Date(a.measured_at ?? 0).getTime()).slice(0, 3);
+                    const latestEvents = [...events].sort((a, b) => new Date(b.event_at ?? 0).getTime() - new Date(a.event_at ?? 0).getTime()).slice(0, 3);
+                    return (
+                      <article key={puppy.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="font-semibold text-slate-950">{puppyName(puppy)}</p>
+                        <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
+                          <div>
+                            <p className="text-xs font-semibold uppercase text-slate-400">Recent weights</p>
+                            {latestWeights.length > 0 ? <ul className="mt-2 space-y-1 text-slate-700">{latestWeights.map((weight) => <li key={weight.id}>{weightLabel(weight)} / {formatDateTime(weight.measured_at)}</li>)}</ul> : <p className="mt-2 text-slate-500">No weight logs yet.</p>}
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold uppercase text-slate-400">Care observations</p>
+                            {latestEvents.length > 0 ? <ul className="mt-2 space-y-1 text-slate-700">{latestEvents.map((event) => <li key={event.id}>{display(event.event_type, "Observation")} / {formatDateTime(event.event_at)}</li>)}</ul> : <p className="mt-2 text-slate-500">No care observations yet.</p>}
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : <EmptyState text="No newborn puppy history is available yet." />}
+            </div>
+          </section>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_1fr]">
             <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
