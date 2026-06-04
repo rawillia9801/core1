@@ -57,6 +57,7 @@ Core-native private application entry
   -> go-home command/completion readiness review
   -> kennel dog/litter/puppy create RPC verification
   -> kennel dog/litter/puppy add/edit/archive browser verification
+  -> neonatal litter command workflow added to /staff/litters
   -> buyers/families/events read-only owner/operator workspaces
 ```
 
@@ -85,6 +86,9 @@ Verified local behavior:
 - Dog, litter, and puppy add forms create real Core records.
 - Dog, litter, and puppy edit/archive pages are built and browser-tested.
 - Kennel update/archive SQL verification passed with `event_check = 6` and `audit_check = 6`.
+- `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows.
+- The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
+- The neonatal command is read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, or add public/customer-facing behavior.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
@@ -306,6 +310,7 @@ Core-native owner/operator operating system foundation
   -> kennel dog/litter/puppy create RPCs verified
   -> kennel create forms added
   -> kennel add/edit/archive browser-tested
+  -> Neonatal Litter Command workflow added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added

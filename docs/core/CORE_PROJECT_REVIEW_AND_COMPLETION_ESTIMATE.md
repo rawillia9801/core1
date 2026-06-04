@@ -41,6 +41,7 @@ Core-native private application entry
   -> dog/litter/puppy create RPC verification
   -> dog/litter/puppy create forms added
   -> dog/litter/puppy edit/archive browser-tested
+  -> Neonatal Litter Command workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -111,6 +112,9 @@ The following are implemented and have been manually or test verified in local/d
 - Dogs, Litters, and Puppies are enabled in the existing technical sidebar.
 - Dog, litter, and puppy edit/archive pages exist and have been browser-tested.
 - Audited kennel update/archive SQL verification passed with `event_check = 6` and `audit_check = 6`.
+- `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing litter, dog, puppy, puppy event, and observed weight rows.
+- The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
+- The neonatal command remains internal/read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, add migrations, or add dependencies.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
@@ -135,6 +139,7 @@ The following are implemented and have been manually or test verified in local/d
 - The go-home command/completion readiness workflow is internal Core visibility only and does not send email/SMS, process payments, generate documents, update customer portal visibility, release registration papers, change public listings, or call providers.
 - The document readiness workflow is internal metadata/readiness only and does not generate documents, connect signing providers, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 - The communications readiness workflow is internal metadata/preview-only and does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
+- The neonatal litter command workflow is internal Core visibility only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect devices/cameras, or add external integrations.
 
 ## Recently Added / In Progress
 

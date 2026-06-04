@@ -38,6 +38,7 @@ Core-native owner/operator operating system foundation
   -> reservation detail readiness workflow added
   -> payment ledger/account readiness workflow added
   -> kennel add/edit/archive browser-tested
+  -> Neonatal Litter Command workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -342,7 +343,14 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Staff role is restricted from kennel history details.
 - [x] Browser-check `/staff/kennel-logs` as owner/admin after real local `/login` sign-in.
 
-### 1.12 Future Core Command Console
+### 1.12 Neonatal Litter Command Workflow
+
+- [x] `/staff/litters` enhanced with an internal Neonatal Litter Command workflow.
+- [x] Workflow reads existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows only.
+- [x] Workflow shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
+- [x] Workflow remains read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, connect SMTP/Twilio/Facebook/AI/smart-home/devices/cameras, or call external providers.
+
+### 1.13 Future Core Command Console
 
 - [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
 - [x] Read-only `/staff/command` shell added with no AI provider, no execution writes, no autonomous action records, and no external systems.

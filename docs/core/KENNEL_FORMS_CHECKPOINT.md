@@ -57,6 +57,13 @@ Verified results:
 - `audit_check = 6`
 - `ROLLBACK`
 
+## Neonatal Command Follow-Up
+
+- `/staff/litters` now includes an internal Neonatal Litter Command workflow.
+- The workflow reads existing litter, dog, puppy, puppy event, and observed weight rows only.
+- It shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
+- It does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices/cameras, add dependencies, or add migrations.
+
 ## Obsolete Tests Removed
 
 The two earlier broken/obsolete kennel create tests were removed so future test runs are clearer:
