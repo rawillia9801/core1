@@ -68,6 +68,10 @@ It does not call `core_create_reservation(...)`, payment RPCs, cancellation RPCs
 
 Financial truth on the detail page remains derived from `core_financial_ledger` and `core_payment_balance_view`; it is not copied onto buyers or treated as processor activity.
 
+`/staff/payments` now provides the broader internal Payment Ledger & Account Readiness workspace. It reads reservation accounts, ledger-derived balances, posted deposit/payment/credit/increase-effect totals, deterministic payment blockers, document/payment relationship notes, go-home payment readiness, and recent financial event/audit context.
+
+The payment readiness workspace remains internal ledger/readiness only. It does not connect a payment processor, process refunds, create payment links, send payment reminders, move money, add customer portal payment behavior, send email/SMS, or call external providers.
+
 ## Active Reservation Rule
 
 A puppy cannot be assigned to a second active reservation.

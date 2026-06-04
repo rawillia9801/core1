@@ -49,6 +49,7 @@ Core-native private application entry
   -> reservation creation
   -> deposit/payment ledger entry
   -> visible ledger-derived balance reduction
+  -> payment ledger/account readiness review
   -> reservation detail readiness review
   -> go-home detail update
   -> effective go-home read model display
@@ -68,6 +69,8 @@ Verified local behavior:
 - A reservation can be created from the approved application.
 - Deposit/payment entries can be recorded through the controlled dashboard action.
 - Ledger-derived balance decreases correctly after payment/deposit.
+- `/staff/payments` now works as an internal Payment Ledger & Account Readiness workspace with ledger-derived account summaries, posted payment/deposit/credit/increase-effect totals, account grouping, deterministic blockers, document/payment relationship notes, go-home payment readiness links, recent ledger rows, and recent financial event/audit context.
+- `/staff/payments` remains internal ledger/readiness only. It does not connect a payment processor, process refunds, create payment links, send reminders, move money, call payment providers, add customer portal behavior, send email/SMS, or change financial balance semantics.
 - `/staff/reservations/[reservationId]` shows internal reservation readiness detail for buyer/family, puppy/litter, ledger-derived financial truth, document metadata, go-home readiness, checklist items, blockers, internal links, event history, and audit history.
 - Current dashboard write actions use authenticated staff profile actor context rather than static local actor env usage.
 - `/staff/go-home` loads and displays the Go-Home workspace.
@@ -309,6 +312,7 @@ Core-native owner/operator operating system foundation
   -> application approve/decline/needs-info/internal-note review actions added for owner/admin only
   -> first-wave RLS foundation added for internal profile/role checks and highest-risk Core tables
   -> Reservation detail readiness workflow added
+  -> Payment Ledger & Account Readiness workflow added
   -> Core Command Console planning doc added
   -> Core Command Console read-only shell added
   -> Proposed Action Approval Model planning doc added
@@ -322,13 +326,13 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 This pass compared the docs to the local `main` build, not just older documentation.
 
 - Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/reservations/[reservationId]`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
-- Migrations documented vs actual migrations: 25 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
+- Migrations documented vs actual migrations: 26 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
 - Tests documented vs actual tests: 21 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
 - Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
 - Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
 - Documents/messages documented accurately: `/staff/documents` is an internal metadata/readiness workspace and `/staff/messages` is a read-only Communications Readiness metadata workspace. They do not generate, sign, send, reply, upload, deliver portal links, call providers, connect SMTP/Twilio/Facebook, or expose customer portal messaging.
-- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions, and the reservation detail page is internal readiness visibility only. Live payment processors, automatic buyer approval, customer messages, documents, refunds, and production use remain blocked.
+- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions, and the reservation detail plus payment account pages are internal readiness visibility only. Live payment processors, automatic buyer approval, customer messages, documents, refunds, payment links, reminders, money movement, and production use remain blocked.
 - RLS/staging/production documented accurately: first-wave internal RLS exists locally, while remaining table coverage, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
 
 ## Current Recommended Next Task

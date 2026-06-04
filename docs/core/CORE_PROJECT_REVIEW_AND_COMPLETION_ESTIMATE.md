@@ -32,6 +32,7 @@ Core-native private application entry
   -> reservation creation
   -> deposit/payment ledger entry
   -> visible ledger-derived balance reduction
+  -> payment ledger/account readiness review
   -> reservation detail readiness review
   -> go-home detail update
   -> effective go-home read model display
@@ -77,6 +78,8 @@ The following are implemented and have been manually or test verified in local/d
 - Reservation creation works through controlled RPC/server action.
 - Deposit/payment recording works through controlled RPC/server action.
 - Ledger-derived balance decreases after a payment/deposit.
+- `/staff/payments` now works as an internal Payment Ledger & Account Readiness workspace with ledger-derived account summaries, posted ledger transaction review, deterministic blockers, document/payment relationship notes, go-home payment readiness context, and financial event/audit history.
+- Payment readiness remains internal ledger/readiness only. It does not connect payment processors, process refunds, create payment links, send reminders, move money, add customer portal behavior, send email/SMS, or call external providers.
 - `/staff/reservations/[reservationId]` shows read-only internal readiness detail with financial, document, go-home, checklist, blocker, event, and audit context.
 - `/staff/notifications` displays queued notification previews.
 - Core-native application entry queues preview-only `application_received` notifications when applicant email exists.
@@ -197,6 +200,7 @@ checkpoint verified kennel/buyer/family/event workspaces
   -> Communications Readiness owner/admin metadata workflow added
   -> Kennel Logs read-only owner/admin workspace added
   -> Reservation detail readiness workflow added
+  -> Payment Ledger & Account Readiness workflow added
   -> Command Console read-only shell added
   -> Proposed Action Approval Model plan added
   -> continue owner/operator Core workflows under existing technical routes

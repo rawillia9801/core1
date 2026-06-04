@@ -35,6 +35,7 @@ Core-native owner/operator operating system foundation
   -> go-home detail update verified
   -> go-home checklist verified and wired
   -> reservation detail readiness workflow added
+  -> payment ledger/account readiness workflow added
   -> kennel add/edit/archive browser-tested
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
@@ -182,6 +183,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Read-only Financial Ledger Activity panel added for deposits, payments, credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
 - [x] Ledger panel labels refunds/chargebacks as internal ledger records rather than processor movement.
 - [x] Dedicated `/staff/payments` page added for local ledger entry and read-only ledger review.
+- [x] `/staff/payments` enhanced into an internal Payment Ledger & Account Readiness workspace with ledger-derived summaries, payment account rows, posted ledger transaction review, deterministic blockers, document/payment relationship notes, go-home payment readiness links, and financial event/audit context.
+- [x] Payment readiness remains internal ledger/readiness only: no payment processor, refund processing, payment links, reminders, money movement, customer portal behavior, email/SMS, or provider calls were added.
 - [ ] Add further payment recording validation before any staff-facing use.
 - [ ] Add dashboard UI for creating financial adjustments only after staff authorization boundaries are designed.
 - [ ] Define live payment processor reconciliation and idempotency before live refund/chargeback operations.
