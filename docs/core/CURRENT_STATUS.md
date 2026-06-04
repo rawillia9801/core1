@@ -58,6 +58,7 @@ Core-native private application entry
   -> kennel dog/litter/puppy create RPC verification
   -> kennel dog/litter/puppy add/edit/archive browser verification
   -> neonatal litter command workflow added to /staff/litters
+  -> expected litter / whelping prep workflow added to /staff/litters
   -> daily puppy weight/neonatal care log workflow added
   -> buyers/families/events read-only owner/operator workspaces
 ```
@@ -90,6 +91,10 @@ Verified local behavior:
 - `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows.
 - The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - The neonatal command is read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, or add public/customer-facing behavior.
+- `/staff/litters` now includes an internal Expected Litters & Whelping Prep section using existing dog/litter/puppy metadata only.
+- Expected Litters & Whelping Prep shows planned/expected litter counts, expected birth date countdowns where recorded, missing due-date/setup flags, owner/operator prep reminders, and recent-birth transition flags.
+- Expected Litters & Whelping Prep is internal planning only. It does not diagnose pregnancy or puppies, predict medical outcomes, publish puppies, message customers, update the portal, connect smart-home/cameras/devices, call providers, or add public/customer-facing behavior.
+- Pregnancy status is not inferred because the current schema has no pregnancy-status field; expected birth date and planned/expected status are shown only from existing litter fields and existing Add/Edit Litter forms.
 - `core_record_puppy_weight_log(...)` records factual puppy weight observations in grams through a controlled owner/admin RPC.
 - `core_record_puppy_care_observation(...)` records factual neonatal care observations in `core_puppy_events` through a controlled owner/admin RPC.
 - The Daily Weight & Care Log UI is available inside `/staff/litters` and writes only through the controlled RPCs.
@@ -316,6 +321,7 @@ Core-native owner/operator operating system foundation
   -> kennel create forms added
   -> kennel add/edit/archive browser-tested
   -> Neonatal Litter Command workflow added
+  -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added

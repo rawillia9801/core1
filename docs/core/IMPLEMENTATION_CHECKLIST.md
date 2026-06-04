@@ -39,6 +39,7 @@ Core-native owner/operator operating system foundation
   -> payment ledger/account readiness workflow added
   -> kennel add/edit/archive browser-tested
   -> Neonatal Litter Command workflow added
+  -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
@@ -350,6 +351,11 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Workflow reads existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows only.
 - [x] Workflow shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - [x] Workflow remains read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, connect SMTP/Twilio/Facebook/AI/smart-home/devices/cameras, or call external providers.
+- [x] `/staff/litters` enhanced with an internal Expected Litters & Whelping Prep workflow.
+- [x] Expected Litters & Whelping Prep uses existing dog/litter/puppy metadata only, including expected birth date and planned/expected litter status where stored.
+- [x] Expected Litters & Whelping Prep shows upcoming/planned litter summaries, due-date countdowns, missing setup/data quality flags, owner/operator prep reminders, and recently born transition flags.
+- [x] Expected Litters & Whelping Prep remains internal owner/operator planning only: no pregnancy/puppy diagnosis, no medical prediction, no public puppy publishing, no customer messages, no portal update, no smart-home/camera/device connection, no AI, and no external providers.
+- [x] Missing pregnancy-status metadata is not inferred; it remains a future schema/workflow follow-up if explicitly approved.
 - [x] Daily Weight & Care Log added inside `/staff/litters`.
 - [x] `core_record_puppy_weight_log(...)` added as an owner/admin controlled RPC for factual gram-based puppy weight observations.
 - [x] `core_record_puppy_care_observation(...)` added as an owner/admin controlled RPC for factual care observations using allowed observation types only.

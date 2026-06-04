@@ -42,6 +42,7 @@ Core-native private application entry
   -> dog/litter/puppy create forms added
   -> dog/litter/puppy edit/archive browser-tested
   -> Neonatal Litter Command workflow added
+  -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
@@ -116,6 +117,10 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing litter, dog, puppy, puppy event, and observed weight rows.
 - The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
 - The neonatal command remains internal/read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, add migrations, or add dependencies.
+- `/staff/litters` now includes an internal Expected Litters & Whelping Prep workflow using existing dog, litter, puppy, puppy event, and weight metadata only.
+- Expected Litters & Whelping Prep shows planned/expected litter summaries, expected birth date countdowns when stored, missing setup/data quality flags, owner/operator prep reminders, and recently born transition flags.
+- Expected Litters & Whelping Prep remains internal owner/operator planning only. It does not diagnose pregnancy or puppies, predict medical outcomes, publish puppies, message customers, update the portal, connect smart-home/cameras/devices, call external providers, add migrations, or add dependencies.
+- Pregnancy status is not inferred because the current schema does not store a pregnancy-status field; missing pregnancy/due-date planning metadata remains a future follow-up only if explicitly approved.
 - `/staff/litters` now includes an internal Daily Weight & Care Log workflow for newborn/active puppy weight and care observations.
 - `core_record_puppy_weight_log(...)` records factual gram-based puppy weights through an owner/admin controlled RPC.
 - `core_record_puppy_care_observation(...)` records factual neonatal care observations through an owner/admin controlled RPC and allowed observation types.

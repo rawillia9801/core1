@@ -206,6 +206,25 @@ function isUpcoming(value: string | null) {
   return !Number.isNaN(date.getTime()) && date.getTime() >= Date.now();
 }
 
+function daysUntil(value: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  return Math.round((startOfDate - startOfToday) / 86_400_000);
+}
+
+function daysUntilLabel(value: string | null) {
+  const days = daysUntil(value);
+  if (days === null) return "Not recorded";
+  if (days < 0) return `${Math.abs(days)} days past expected date`;
+  if (days === 0) return "Expected today";
+  if (days === 1) return "1 day until expected birth";
+  return `${days} days until expected birth`;
+}
+
 function isNeonatalLitter(litter: LitterRow) {
   const age = daysSince(litter.birth_at);
   const status = normalizeText(litter.status);
@@ -214,6 +233,11 @@ function isNeonatalLitter(litter: LitterRow) {
 
 function isExpectedLitter(litter: LitterRow) {
   return !litter.birth_at && Boolean(litter.expected_birth_at);
+}
+
+function isPlannedOrExpectedLitter(litter: LitterRow) {
+  const status = normalizeText(litter.status);
+  return !litter.birth_at && (Boolean(litter.expected_birth_at) || ["planned", "expected", "pending"].includes(status));
 }
 
 function isActiveStatus(status: string | null) {
@@ -299,6 +323,53 @@ function watchSignalsForPuppy(puppy: PuppyRow, litter: LitterRow | undefined, we
   }
 
   return signals;
+}
+
+function missingSetupForLitter(litter: LitterRow, puppies: PuppyRow[], weightsByPuppy: Map<string, WeightLogRow[]>) {
+  const blockers: string[] = [];
+
+  if (!litter.expected_birth_at && !litter.birth_at) blockers.push("Expected date is missing.");
+  if (!litter.dam_id) blockers.push("Dam is not linked.");
+  if (!litter.sire_id) blockers.push("Sire is not linked.");
+  if (!litter.status) blockers.push("Litter status is unclear.");
+  if (litter.notes !== null && !litter.notes.trim()) blockers.push("No notes/context recorded.");
+
+  const expectedDays = daysUntil(litter.expected_birth_at);
+  const bornDays = daysSince(litter.birth_at);
+
+  if (expectedDays !== null && expectedDays < 0 && !litter.birth_at && puppies.length === 0) {
+    blockers.push("Expected date has passed and no birth date or puppy rows are recorded.");
+  }
+
+  if (bornDays !== null && bornDays >= 0 && puppies.length === 0) {
+    blockers.push("Birth date is recorded but no puppies are linked.");
+  }
+
+  if (bornDays !== null && bornDays >= 0 && bornDays <= 14) {
+    const puppiesWithoutWeights = puppies.filter((puppy) => (weightsByPuppy.get(puppy.id) ?? []).length === 0).length;
+    if (puppies.length > 0 && puppiesWithoutWeights > 0) {
+      blockers.push(`${puppiesWithoutWeights} newborn puppy weight log${puppiesWithoutWeights === 1 ? " is" : "s are"} missing.`);
+    }
+  }
+
+  return blockers;
+}
+
+function recentlyBornFlags(puppies: PuppyRow[], weightsByPuppy: Map<string, WeightLogRow[]>) {
+  const flags: string[] = [];
+
+  if (puppies.length === 0) {
+    flags.push("No puppies linked.");
+    return flags;
+  }
+
+  const missingIdentity = puppies.filter((puppy) => !puppy.sex || !puppy.color || !puppy.status).length;
+  const missingWeights = puppies.filter((puppy) => (weightsByPuppy.get(puppy.id) ?? []).length === 0).length;
+
+  if (missingIdentity > 0) flags.push(`${missingIdentity} puppy identity/status detail${missingIdentity === 1 ? " is" : "s are"} incomplete.`);
+  if (missingWeights > 0) flags.push(`${missingWeights} puppy weight log${missingWeights === 1 ? " is" : "s are"} missing.`);
+
+  return flags;
 }
 
 function Badge({ children, tone = "bg-slate-100 text-slate-700 ring-slate-200" }: { children: ReactNode; tone?: string }) {
@@ -414,6 +485,28 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
   const totalPuppies = litters.reduce((sum, row) => sum + (row.total_puppies ?? puppiesByLitter.get(row.id)?.length ?? 0), 0);
   const todayBornLitters = litters.filter((row) => isSameLocalDay(row.birth_at));
   const expectedLitters = litters.filter(isExpectedLitter).sort((a, b) => new Date(a.expected_birth_at ?? 0).getTime() - new Date(b.expected_birth_at ?? 0).getTime());
+  const plannedExpectedLitters = litters
+    .filter(isPlannedOrExpectedLitter)
+    .sort((a, b) => new Date(a.expected_birth_at ?? "9999-12-31").getTime() - new Date(b.expected_birth_at ?? "9999-12-31").getTime());
+  const missingDueDateCount = plannedExpectedLitters.filter((row) => !row.expected_birth_at).length;
+  const upcomingWithin7 = expectedLitters.filter((row) => {
+    const days = daysUntil(row.expected_birth_at);
+    return days !== null && days >= 0 && days <= 7;
+  }).length;
+  const upcomingWithin14 = expectedLitters.filter((row) => {
+    const days = daysUntil(row.expected_birth_at);
+    return days !== null && days >= 0 && days <= 14;
+  }).length;
+  const expectedSetupRows = plannedExpectedLitters.map((row) => ({
+    litter: row,
+    blockers: missingSetupForLitter(row, linkedPuppies(row, puppiesByLitter), weightsByPuppy),
+  }));
+  const recentlyBornLitters = litters
+    .filter((row) => {
+      const age = daysSince(row.birth_at);
+      return age !== null && age >= 0 && age <= 14;
+    })
+    .sort((a, b) => new Date(b.birth_at ?? 0).getTime() - new Date(a.birth_at ?? 0).getTime());
   const neonatalLitters = litters.filter((row) => isNeonatalLitter(row) || isActiveStatus(row.status));
   const neonatalPuppies = puppyResult.rows.filter((puppy) => {
     const litterRow = puppy.litter_id ? litterById.get(puppy.litter_id) : undefined;
@@ -469,6 +562,156 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
           <StatCard label="Born" value={bornCount} note="Have birth date" />
           <StatCard label="Expected" value={expectedCount} note="Expected, not born" />
           <StatCard label="Puppies" value={totalPuppies} note="Recorded/linked count" />
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">Internal Planning</p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-950">Expected Litters & Whelping Prep</h2>
+              <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-600">This workspace tracks internal breeder planning and whelping preparation only. It does not diagnose pregnancy, predict medical outcomes, publish puppies, message customers, update the portal, or call external providers.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/litters/new" className="rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white">Add Litter</Link>
+              <Link href="/staff/puppies/new" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800">Add Puppy</Link>
+              <Link href="/staff/dogs" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800">Dogs</Link>
+              <Link href="/staff/kennel-logs" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800">Kennel Logs</Link>
+              <Link href="/staff/events" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800">Events</Link>
+            </div>
+          </div>
+
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <h3 className="text-lg font-semibold text-slate-950">Expected / Upcoming Litter Summary</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Summary is calculated only from existing `core_litters`, `core_dogs`, `core_puppies`, and weight log rows.</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <StatCard label="Expected/planned" value={plannedExpectedLitters.length} note="No birth date and expected/planned status or date" />
+              <StatCard label="Missing due date" value={missingDueDateCount} note="Planned/expected rows without expected date" />
+              <StatCard label="Within 7 days" value={upcomingWithin7} note="Expected birth date recorded" />
+              <StatCard label="Within 14 days" value={upcomingWithin14} note="Expected birth date recorded" />
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="rounded-2xl border border-white bg-white p-4 text-sm leading-6 text-slate-700">Pregnancy status field: not available in the current kennel schema, so Core does not label dams pregnant from dog rows.</div>
+              <div className="rounded-2xl border border-white bg-white p-4 text-sm leading-6 text-slate-700">Expected dates: available through `core_litters.expected_birth_at` and existing Add/Edit Litter forms.</div>
+              <div className="rounded-2xl border border-white bg-white p-4 text-sm leading-6 text-slate-700">Planning statuses: current schema supports planned, expected, born, active, closed, and archived litter statuses.</div>
+            </div>
+          </section>
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <h3 className="text-lg font-semibold text-slate-950">Upcoming Expected Litters List</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Planned or expected litter rows that have not been marked born.</p>
+              {plannedExpectedLitters.length > 0 ? (
+                <div className="mt-4 space-y-4">
+                  {plannedExpectedLitters.map((row) => {
+                    const puppies = linkedPuppies(row, puppiesByLitter);
+                    const dam = row.dam_id ? dogsById.get(row.dam_id) : undefined;
+                    const sire = row.sire_id ? dogsById.get(row.sire_id) : undefined;
+                    return (
+                      <article key={row.id} className="rounded-2xl border border-blue-100 bg-white p-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-base font-bold text-slate-950">{litterName(row)}</p>
+                            <p className="mt-1 text-sm text-slate-600">Dam: {dogName(dam)} / Sire: {dogName(sire)}</p>
+                          </div>
+                          <Badge tone={statusTone(row.status)}>{display(row.status, "Status unknown")}</Badge>
+                        </div>
+                        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+                          <InfoItem label="Expected date" value={formatDate(row.expected_birth_at)} />
+                          <InfoItem label="Countdown" value={daysUntilLabel(row.expected_birth_at)} />
+                          <InfoItem label="Linked puppies" value={puppies.length} />
+                          <InfoItem label="External ref" value={display(row.external_reference)} />
+                          <InfoItem label="Details pending" value={row.details_pending ? "Yes" : "No"} />
+                          <InfoItem label="Updated" value={formatDate(row.updated_at)} />
+                        </dl>
+                        {row.notes ? <p className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3 text-sm leading-6 text-slate-600">{row.notes}</p> : null}
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Link href={`/staff/litters/${row.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit Litter</Link>
+                          {row.dam_id ? <Link href={`/staff/dogs/${row.dam_id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit Dam</Link> : <Link href="/staff/dogs" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Dogs</Link>}
+                          {row.sire_id ? <Link href={`/staff/dogs/${row.sire_id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit Sire</Link> : null}
+                          <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Puppies</Link>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : <EmptyState text="No expected/upcoming litters are recorded. Expected litters can be tracked when planned or expected litter records have a due date/status in the current schema." />}
+            </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <h3 className="text-lg font-semibold text-slate-950">Whelping Prep Checklist Panel</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Prep reminders are owner/operator reminders only and are not medical diagnosis.</p>
+              <div className="mt-4 grid gap-3">
+                {[
+                  "Confirm dam record is current.",
+                  "Confirm sire is linked if known.",
+                  "Confirm expected date is recorded.",
+                  "Prepare clean whelping area.",
+                  "Prepare clean towels / bedding.",
+                  "Prepare scale for weights.",
+                  "Prepare puppy identifiers.",
+                  "Prepare notebook/Core logging routine.",
+                  "Monitor dam behavior.",
+                  "Contact veterinarian for concerning symptoms.",
+                ].map((task) => (
+                  <div key={task} className="rounded-2xl border border-white bg-white p-4 text-sm leading-6 text-slate-700">{task}</div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_1fr]">
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <h3 className="text-lg font-semibold text-slate-950">Missing Setup / Data Quality Panel</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Deterministic setup blockers from current kennel metadata only.</p>
+              {expectedSetupRows.length > 0 ? (
+                <div className="mt-4 space-y-4">
+                  {expectedSetupRows.map(({ litter: row, blockers }) => (
+                    <article key={row.id} className="rounded-2xl border border-amber-100 bg-white p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <p className="font-bold text-slate-950">{litterName(row)}</p>
+                        <Badge tone={blockers.length > 0 ? "bg-amber-50 text-amber-700 ring-amber-100" : "bg-emerald-50 text-emerald-700 ring-emerald-100"}>{blockers.length} flag{blockers.length === 1 ? "" : "s"}</Badge>
+                      </div>
+                      {blockers.length > 0 ? (
+                        <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-950">{blockers.map((blocker) => <li key={blocker}>{blocker}</li>)}</ul>
+                      ) : <p className="mt-3 text-sm leading-6 text-emerald-800">No setup blockers found from available fields.</p>}
+                    </article>
+                  ))}
+                </div>
+              ) : <EmptyState text="Not enough kennel metadata to evaluate this item." />}
+            </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <h3 className="text-lg font-semibold text-slate-950">Born Recently / Transition To Neonatal</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Litters with birth dates in the last 14 days, linked to neonatal and puppy records.</p>
+              {recentlyBornLitters.length > 0 ? (
+                <div className="mt-4 space-y-4">
+                  {recentlyBornLitters.map((row) => {
+                    const puppies = linkedPuppies(row, puppiesByLitter);
+                    const flags = recentlyBornFlags(puppies, weightsByPuppy);
+                    return (
+                      <article key={row.id} className="rounded-2xl border border-emerald-100 bg-white p-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="font-bold text-slate-950">{litterName(row)}</p>
+                            <p className="mt-1 text-sm text-slate-600">{formatAgeDays(row.birth_at)} / {puppies.length} linked puppies</p>
+                          </div>
+                          <Badge tone="bg-emerald-50 text-emerald-700 ring-emerald-100">Neonatal transition</Badge>
+                        </div>
+                        {flags.length > 0 ? (
+                          <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-950">{flags.map((flag) => <li key={flag}>{flag}</li>)}</ul>
+                        ) : <p className="mt-3 text-sm leading-6 text-emerald-800">No newborn data flags found from available fields.</p>}
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Link href={`/staff/litters/${row.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit Litter</Link>
+                          <Link href="/staff/puppies/new" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Add Puppy</Link>
+                          <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Puppies</Link>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : <EmptyState text="No litters have a birth date in the last 14 days." />}
+            </section>
+          </div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
