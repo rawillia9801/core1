@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function safeNextPath(value: FormDataEntryValue | null) {
   const nextPath = String(value ?? "").trim();
@@ -22,6 +21,7 @@ export async function signInWithPassword(formData: FormData) {
     redirect(`/login?error=missing_credentials&next=${encodeURIComponent(nextPath)}`);
   }
 
+  const { createSupabaseServerClient } = await import("@/lib/supabase/server");
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -36,6 +36,7 @@ export async function signInWithPassword(formData: FormData) {
 }
 
 export async function signOutStaff() {
+  const { createSupabaseServerClient } = await import("@/lib/supabase/server");
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect("/login?signed_out=1");

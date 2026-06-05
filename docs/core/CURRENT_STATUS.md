@@ -141,6 +141,7 @@ Verified local behavior:
 - Browser verification confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
 - The public/root login landing page was rebuilt as a Cherolee Core OS cinematic login experience with `/` and `/login` sharing the new owner/operator visual login style.
 - Login visual refinement corrected the first-pass styling by replacing the cartoon-style dog graphic with a subtle premium Chihuahua-profile crest/watermark and improving the glass panel/background depth.
+- Production `/` and `/login` route rendering was hardened by deferring Supabase cookie/auth client loading until the login server action actually runs.
 - Auth behavior was preserved: valid owner login still reaches `/staff`, invalid login shows styled error feedback, and staff routes were not renamed or removed.
 - The public login experience exposes no private Core data and adds no external integrations.
 - Document readiness remains metadata-only. It does not generate documents, connect a signing provider, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
