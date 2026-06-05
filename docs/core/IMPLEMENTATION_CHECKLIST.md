@@ -44,6 +44,7 @@ Core-native owner/operator operating system foundation
   -> Individual Puppy Detail / Neonatal Growth Timeline added
   -> Kennel Daily Task Board / Today's Care Checklist added
   -> Breeding Dog Profile / Dog Document Vault workflow added
+  -> Dog Document Upload / Private Storage Attachment workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -378,9 +379,12 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dog profile supports internal health history / medical event tracking through `core_dog_health_events` and `core_record_dog_health_event(...)`.
 - [x] Dog profile supports registry, acquisition, genetic testing, certificate, and pedigree metadata through controlled `core_dogs.metadata` updates.
 - [x] Dog Document Vault / Genetic Reports / Certificates workflow added through `core_dog_documents` and `core_record_dog_document_metadata(...)`.
-- [x] Dog document vault supports dog-linked report/certificate/registry metadata only; file upload/storage is explicitly deferred and no public links or raw storage paths are exposed.
+- [x] Dog Document Upload / Private Storage Attachment workflow added for dog document metadata records.
+- [x] Dog document files are stored in the private `dog-documents` Supabase storage bucket only.
+- [x] Dog document upload is owner/admin only, validates PDF/JPG/PNG/WEBP/TXT/CSV files up to 10 MB, updates metadata through `core_attach_dog_document_file_metadata(...)`, and writes event/audit rows.
+- [x] Dog document vault exposes no public links and does not show raw storage paths in the UI.
 - [x] Dam/sire litter history shows linked litters, puppies, and buyer/reservation context where existing Core data supports it.
-- [x] Dog profile workflow remains internal owner/operator recordkeeping only: no animal diagnosis, customer messages, public puppy publishing, document generation, upload/storage, payment processing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, or external providers were added.
+- [x] Dog profile workflow remains internal owner/operator recordkeeping only: no animal diagnosis, customer messages, public puppy publishing, document generation, payment processing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, or external providers were added.
 
 ### 1.13 Future Core Command Console
 

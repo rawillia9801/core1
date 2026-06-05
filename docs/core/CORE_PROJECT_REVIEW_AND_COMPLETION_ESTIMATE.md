@@ -47,6 +47,7 @@ Core-native private application entry
   -> Individual Puppy Detail / Neonatal Growth Timeline added
   -> Kennel Daily Task Board / Today's Care Checklist added
   -> Breeding Dog Profile / Dog Document Vault workflow added
+  -> Dog Document Upload / Private Storage Attachment workflow added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -137,8 +138,9 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/dogs/[dogId]` now shows an internal Breeding Dog Profile and Dog Document Vault workflow.
 - Dog profile uses existing dog/litter/puppy/reservation/buyer/family data plus new internal dog health and dog document metadata tables.
 - Dog profile supports internal health history / medical event tracking, registry/acquisition/genetic testing/certification metadata, and dam/sire litter history with puppy and buyer/reservation context where existing records link.
-- Dog Document Vault supports dog-linked report, certificate, registry, genetic test, vaccine, health, surgery/emergency vet, acquisition, microchip, and pedigree metadata. File upload/storage is explicitly deferred, no public document links are exposed, and raw storage paths are not shown.
-- The dog profile workflow remains internal owner/operator recordkeeping only. It does not diagnose animals, replace veterinary care, message customers, publish puppies, generate documents, upload files, process payments, add customer portal behavior, connect smart-home/cameras/devices, add AI, or call external providers.
+- Dog Document Vault supports dog-linked report, certificate, registry, genetic test, vaccine, health, surgery/emergency vet, acquisition, microchip, and pedigree metadata.
+- Dog Document Upload / Private Storage Attachment workflow was added for dog document metadata records. Storage is private in the `dog-documents` bucket, no public document links are exposed, and raw storage paths are not shown in the UI.
+- The dog profile workflow remains internal owner/operator recordkeeping only. It does not diagnose animals, replace veterinary care, message customers, publish puppies, generate documents, process payments, add customer portal behavior, connect smart-home/cameras/devices, add AI, or call external providers.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
@@ -167,7 +169,7 @@ The following are implemented and have been manually or test verified in local/d
 - The puppy weight/care log workflow is internal Core observation logging only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 - The individual puppy timeline workflow is internal Core observation review only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 - The daily task board workflow is internal Core task visibility only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, process payments, generate documents, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
-- The dog profile and dog document vault workflow is internal Core recordkeeping only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, generate documents, upload files, expose public document links, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
+- The dog profile and dog document vault workflow is internal Core recordkeeping only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, generate documents, expose public document links, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 
 ## Recently Added / In Progress
 
@@ -179,6 +181,7 @@ Recently added:
 - Open profile links on `/staff/dogs`.
 - Breeding Dog Profile detail page at `/staff/dogs/[dogId]`.
 - Dog health event table/RPC and dog document metadata table/RPC with event/audit rows.
+- Private dog document upload/attachment workflow using the private `dog-documents` storage bucket.
 - Visible Add Litter button on `/staff/litters`.
 - Visible Add Puppy button on `/staff/puppies`.
 - Owner/admin-only kennel edit/archive server actions in `src/app/staff/kennel-manage-actions.ts`.

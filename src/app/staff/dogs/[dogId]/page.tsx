@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import {
+  openPrivateDogDocumentFile,
   recordDogDocumentMetadata,
   recordDogHealthEvent,
   updateDogProfileMetadata,
+  uploadDogDocumentFile,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -104,6 +106,8 @@ type DogDocumentRow = {
   file_size_bytes: number | null;
   storage_bucket: string | null;
   storage_path: string | null;
+  uploaded_at: string | null;
+  uploaded_by_profile_id: string | null;
   notes: string | null;
   metadata: JsonMap | null;
 };
@@ -207,6 +211,13 @@ function calculateAge(value: string | null) {
 function formatMoney(cents: number | null | undefined) {
   if (cents === null || cents === undefined) return "Not recorded";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+}
+
+function formatFileSize(bytes: number | null | undefined) {
+  if (bytes === null || bytes === undefined) return "Not recorded";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function metadataText(metadata: JsonMap | null | undefined, key: string) {
@@ -323,7 +334,7 @@ export default async function DogProfilePage({
       limit: "100",
     }),
     readRows<DogDocumentRow>("core_dog_documents", {
-      select: "id,dog_id,document_type,title,registry,document_status,report_source,issued_at,expires_at,file_name,file_mime_type,file_size_bytes,storage_bucket,storage_path,notes,metadata",
+      select: "id,dog_id,document_type,title,registry,document_status,report_source,issued_at,expires_at,file_name,file_mime_type,file_size_bytes,storage_bucket,storage_path,uploaded_at,uploaded_by_profile_id,notes,metadata",
       dog_id: `eq.${dog.id}`,
       order: "updated_at.desc",
       limit: "100",
@@ -433,7 +444,7 @@ export default async function DogProfilePage({
                 <InfoCard label="Genetic testing" value={metadataText(dogMetadata, "genetic_testing_summary") || "Not recorded"} />
                 <InfoCard label="Color/coat genetics" value={metadataText(dogMetadata, "color_coat_genetics_notes") || "Not recorded"} />
                 <InfoCard label="COI notes" value={metadataText(dogMetadata, "coi_notes") || "Not recorded"} />
-                <InfoCard label="Storage boundary" value="File upload/storage not connected yet." />
+                <InfoCard label="Storage boundary" value="Private dog-document storage only; no public links." />
               </dl>
             </section>
 
@@ -484,10 +495,10 @@ export default async function DogProfilePage({
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold">Dog Documents / Reports / Certificates</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">Dog-linked metadata for genetic reports, registries, pedigrees, vaccines, health certificates, and acquisition records.</p>
-                </div>
-                <Badge>Metadata only</Badge>
+              <h2 className="text-lg font-semibold">Dog Documents / Reports / Certificates</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Dog-linked metadata and private owner/operator file attachments for genetic reports, registries, pedigrees, vaccines, health certificates, and acquisition records.</p>
+            </div>
+                <Badge>Private storage</Badge>
               </div>
               {documentsResult.rows.length ? (
                 <div className="mt-5 grid gap-3 lg:grid-cols-2">
@@ -498,7 +509,7 @@ export default async function DogProfilePage({
                           <p className="font-semibold">{document.title}</p>
                           <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{formatKey(document.document_type)} / {formatKey(document.document_status)}</p>
                         </div>
-                        <Badge>{document.file_name ? "file metadata" : "no file"}</Badge>
+                        <Badge>{document.storage_bucket && document.storage_path ? "private file attached" : "no file"}</Badge>
                       </div>
                       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                         <div><dt className="text-xs font-semibold uppercase text-slate-400">Registry</dt><dd>{display(document.registry)}</dd></div>
@@ -506,14 +517,39 @@ export default async function DogProfilePage({
                         <div><dt className="text-xs font-semibold uppercase text-slate-400">Issued</dt><dd>{formatDate(document.issued_at)}</dd></div>
                         <div><dt className="text-xs font-semibold uppercase text-slate-400">Expires</dt><dd>{formatDate(document.expires_at)}</dd></div>
                         <div><dt className="text-xs font-semibold uppercase text-slate-400">Attached</dt><dd>{document.file_name ? document.file_name : "No file attached"}</dd></div>
-                        <div><dt className="text-xs font-semibold uppercase text-slate-400">Storage</dt><dd>{document.storage_bucket || document.storage_path ? "Private pointer hidden" : "Not connected"}</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase text-slate-400">File type</dt><dd>{display(document.file_mime_type)}</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase text-slate-400">File size</dt><dd>{formatFileSize(document.file_size_bytes)}</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase text-slate-400">Uploaded</dt><dd>{formatDateTime(document.uploaded_at)}</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase text-slate-400">Storage</dt><dd>{document.storage_bucket && document.storage_path ? "Private bucket; path hidden" : "No private file attached"}</dd></div>
                       </dl>
                       {document.notes ? <p className="mt-3 text-sm leading-6 text-slate-600">{document.notes}</p> : null}
+                      {canEdit ? (
+                        <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-white p-3">
+                          <form action={uploadDogDocumentFile} encType="multipart/form-data" className="space-y-3">
+                            <input type="hidden" name="dogId" value={dog.id} />
+                            <input type="hidden" name="dogDocumentId" value={document.id} />
+                            <label className="block text-sm font-medium">
+                              Attach private file
+                              <input name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.csv,application/pdf,image/jpeg,image/png,image/webp,text/plain,text/csv" className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
+                            </label>
+                            <p className="text-xs leading-5 text-slate-500">Private bucket only. PDF, JPG, PNG, WEBP, TXT, or CSV. Max 10 MB. No public URL is created.</p>
+                            <button type="submit" className="rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white">Upload private file</button>
+                          </form>
+                          {document.storage_bucket && document.storage_path ? (
+                            <form action={openPrivateDogDocumentFile}>
+                              <input type="hidden" name="dogId" value={dog.id} />
+                              <input type="hidden" name="dogDocumentId" value={document.id} />
+                              <button type="submit" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Open private file</button>
+                              <p className="mt-2 text-xs leading-5 text-slate-500">Creates a short-lived internal signed URL only when clicked.</p>
+                            </form>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="mt-5"><EmptyState text="No dog document metadata exists yet. File upload/storage not connected yet." /></div>
+                <div className="mt-5"><EmptyState text="No dog document metadata exists yet. Create metadata first, then attach a private file from this section." /></div>
               )}
             </section>
 
@@ -690,7 +726,7 @@ export default async function DogProfilePage({
             {canEdit ? (
               <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-semibold">Record Dog Document Metadata</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">File upload/storage not connected yet.</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Create the internal metadata record first, then attach a private file from the document vault card.</p>
                 <form action={recordDogDocumentMetadata} className="mt-4 space-y-3">
                   <input type="hidden" name="dogId" value={dog.id} />
                   <label className="block text-sm font-medium">Type

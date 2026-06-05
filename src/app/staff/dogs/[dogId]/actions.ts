@@ -2,14 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 import { requireStaffProfile } from "@/lib/staff-auth";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DOG_DOCUMENT_BUCKET = "dog-documents";
+const DOG_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
 const PROFILE_ROLES = new Set(["", "dam", "sire", "active", "retired", "breeding_candidate", "other"]);
 const HEALTH_EVENT_TYPES = new Set(["vet_visit", "vaccine", "surgery", "birth_complication", "reproductive", "medication", "injury", "general_health_note", "other"]);
 const HEALTH_SEVERITIES = new Set(["", "low", "watch", "moderate", "high", "emergency", "unknown"]);
 const DOG_DOCUMENT_TYPES = new Set(["genetic_test", "embark_report", "pedigree", "akc_registration", "ckc_registration", "aca_registration", "dual_registration", "vaccine_record", "health_certificate", "surgery_record", "emergency_vet_record", "acquisition_record", "microchip_record", "other"]);
 const DOG_DOCUMENT_STATUSES = new Set(["metadata_only", "pending", "active", "expired", "archived", "review_needed"]);
+const DOG_DOCUMENT_MIME_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp", "text/plain", "text/csv"]);
+const DOG_DOCUMENT_EXTENSIONS = new Set(["pdf", "jpg", "jpeg", "png", "webp", "txt", "csv"]);
 
 function logDogProfileFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
@@ -32,6 +37,24 @@ function getActionConfig() {
   }
 
   return { restUrl: `${supabaseUrl}/rest/v1`, serviceRoleKey };
+}
+
+function getStorageClient() {
+  const supabaseUrl = (
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  )?.replace(/\/$/, "");
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Local/development storage action configuration is incomplete.");
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 }
 
 function serverHeaders(serviceRoleKey: string) {
@@ -130,6 +153,55 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
   }
 
   return true;
+}
+
+async function readOne<T>(table: string, params: Record<string, string>) {
+  const { restUrl, serviceRoleKey } = getActionConfig();
+  const url = new URL(`${restUrl}/${table}`);
+  Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: serviceRoleKey,
+      authorization: `Bearer ${serviceRoleKey}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    logDogProfileFailure("dog profile read failed", {
+      table,
+      httpStatus: response.status,
+      responseBody: await response.text().catch(() => ""),
+    });
+    return null;
+  }
+
+  const rows = (await response.json()) as T[];
+  return rows[0] ?? null;
+}
+
+function safeFileName(value: string) {
+  const cleaned = value
+    .trim()
+    .replace(/[/\\]/g, "-")
+    .replace(/[^a-zA-Z0-9._ -]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 160);
+
+  return cleaned || "dog-document-file";
+}
+
+function fileExtension(value: string) {
+  const index = value.lastIndexOf(".");
+  return index >= 0 ? value.slice(index + 1).toLowerCase() : "";
+}
+
+function isAllowedDogDocumentFile(file: File) {
+  const mimeType = file.type.toLowerCase();
+  const extension = fileExtension(file.name);
+
+  return DOG_DOCUMENT_MIME_TYPES.has(mimeType) && DOG_DOCUMENT_EXTENSIONS.has(extension);
 }
 
 export async function updateDogProfileMetadata(formData: FormData) {
@@ -270,4 +342,120 @@ export async function recordDogDocumentMetadata(formData: FormData) {
   revalidatePath(`/staff/dogs/${dogId.value}`);
   revalidatePath("/staff/dogs");
   redirect(`/staff/dogs/${dogId.value}?dog=${ok ? "document_recorded" : "document_error"}`);
+}
+
+export async function uploadDogDocumentFile(formData: FormData) {
+  const dogId = cleanRequiredUuid(formData.get("dogId"));
+  const documentId = cleanRequiredUuid(formData.get("dogDocumentId"));
+
+  if (!dogId.valid || !documentId.valid) {
+    redirect("/staff/dogs?dog=upload_invalid_input");
+  }
+
+  const staff = await requireOwnerOrAdmin(dogId.value, "upload");
+  const fileValue = formData.get("file");
+
+  if (!(fileValue instanceof File) || fileValue.size <= 0) {
+    redirect(`/staff/dogs/${dogId.value}?dog=upload_missing_file`);
+  }
+
+  if (fileValue.size > DOG_DOCUMENT_MAX_BYTES || !isAllowedDogDocumentFile(fileValue)) {
+    redirect(`/staff/dogs/${dogId.value}?dog=upload_invalid_file`);
+  }
+
+  const dog = await readOne<{ id: string }>("core_dogs", {
+    select: "id",
+    id: `eq.${dogId.value}`,
+    limit: "1",
+  });
+  const document = await readOne<{ id: string; dog_id: string }>("core_dog_documents", {
+    select: "id,dog_id",
+    id: `eq.${documentId.value}`,
+    dog_id: `eq.${dogId.value}`,
+    limit: "1",
+  });
+
+  if (!dog || !document) {
+    redirect(`/staff/dogs/${dogId.value}?dog=upload_not_found`);
+  }
+
+  const storage = getStorageClient();
+  const cleanedName = safeFileName(fileValue.name);
+  const storagePath = `dogs/${dogId.value}/documents/${documentId.value}/${crypto.randomUUID()}-${cleanedName}`;
+  const uploadResult = await storage.storage
+    .from(DOG_DOCUMENT_BUCKET)
+    .upload(storagePath, fileValue, {
+      contentType: fileValue.type,
+      upsert: false,
+    });
+
+  if (uploadResult.error) {
+    logDogProfileFailure("private dog document upload failed", {
+      dogId: dogId.value,
+      documentId: documentId.value,
+      error: uploadResult.error.message,
+    });
+    redirect(`/staff/dogs/${dogId.value}?dog=upload_storage_error`);
+  }
+
+  const ok = await postRpc("core_attach_dog_document_file_metadata", {
+    p_actor_profile_id: staff.id,
+    p_dog_document_id: documentId.value,
+    p_storage_bucket: DOG_DOCUMENT_BUCKET,
+    p_storage_path: storagePath,
+    p_file_name: cleanedName,
+    p_file_mime_type: fileValue.type.toLowerCase(),
+    p_file_size_bytes: fileValue.size,
+  });
+
+  if (!ok) {
+    await storage.storage.from(DOG_DOCUMENT_BUCKET).remove([storagePath]);
+    redirect(`/staff/dogs/${dogId.value}?dog=upload_metadata_error`);
+  }
+
+  revalidatePath(`/staff/dogs/${dogId.value}`);
+  revalidatePath("/staff/dogs");
+  redirect(`/staff/dogs/${dogId.value}?dog=upload_success`);
+}
+
+export async function openPrivateDogDocumentFile(formData: FormData) {
+  const dogId = cleanRequiredUuid(formData.get("dogId"));
+  const documentId = cleanRequiredUuid(formData.get("dogDocumentId"));
+
+  if (!dogId.valid || !documentId.valid) {
+    redirect("/staff/dogs?dog=download_invalid_input");
+  }
+
+  await requireOwnerOrAdmin(dogId.value, "download");
+  const document = await readOne<{
+    id: string;
+    dog_id: string;
+    storage_bucket: string | null;
+    storage_path: string | null;
+  }>("core_dog_documents", {
+    select: "id,dog_id,storage_bucket,storage_path",
+    id: `eq.${documentId.value}`,
+    dog_id: `eq.${dogId.value}`,
+    limit: "1",
+  });
+
+  if (!document || document.storage_bucket !== DOG_DOCUMENT_BUCKET || !document.storage_path) {
+    redirect(`/staff/dogs/${dogId.value}?dog=download_not_found`);
+  }
+
+  const storage = getStorageClient();
+  const signedUrlResult = await storage.storage
+    .from(DOG_DOCUMENT_BUCKET)
+    .createSignedUrl(document.storage_path, 60);
+
+  if (signedUrlResult.error || !signedUrlResult.data?.signedUrl) {
+    logDogProfileFailure("private dog document signed URL failed", {
+      dogId: dogId.value,
+      documentId: documentId.value,
+      error: signedUrlResult.error?.message,
+    });
+    redirect(`/staff/dogs/${dogId.value}?dog=download_error`);
+  }
+
+  redirect(signedUrlResult.data.signedUrl);
 }

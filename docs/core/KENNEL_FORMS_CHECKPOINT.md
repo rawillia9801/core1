@@ -84,8 +84,10 @@ Verified results:
 - Registry, acquisition, genetic testing, pedigree, and certification metadata support was added through controlled `core_dogs.metadata` updates.
 - Dog Document Vault / Genetic Reports / Certificates metadata support was added through `core_dog_documents` and `core_record_dog_document_metadata(...)`.
 - Dam/sire litter history shows linked litters, puppies, and buyer/reservation context where existing Core data links those records.
-- The dog profile and document vault are internal owner/operator recordkeeping only. They do not diagnose animals, message customers, publish puppies, generate documents, upload files, expose public document links, connect smart-home/cameras/devices, or call external providers.
-- File upload/storage is explicitly deferred and not connected.
+- Dog Document Upload / Private Storage Attachment workflow was added for dog document metadata records.
+- Dog document storage uses the private `dog-documents` Supabase storage bucket only.
+- Private dog document upload is owner/admin only, validates allowed files up to 10 MB, updates metadata through `core_attach_dog_document_file_metadata(...)`, and writes event/audit rows.
+- The dog profile and document vault are internal owner/operator recordkeeping only. They do not diagnose animals, message customers, publish puppies, generate documents, expose public document links, connect smart-home/cameras/devices, or call external providers.
 
 ## Obsolete Tests Removed
 
