@@ -142,6 +142,7 @@ Verified local behavior:
 - The public/root login landing page was rebuilt as a Cherolee Core OS cinematic login experience with `/` and `/login` sharing the new owner/operator visual login style.
 - Login visual refinement corrected the first-pass styling by replacing the cartoon-style dog graphic with a subtle premium Chihuahua-profile crest/watermark and improving the glass panel/background depth.
 - Production `/` and `/login` route rendering was hardened by deferring Supabase cookie/auth client loading until the login server action actually runs.
+- Vercel must set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` for deployed auth and protected owner/operator routes; protected routes now redirect to the login screen instead of crashing if auth config is missing.
 - Auth behavior was preserved: valid owner login still reaches `/staff`, invalid login shows styled error feedback, and staff routes were not renamed or removed.
 - The public login experience exposes no private Core data and adds no external integrations.
 - Document readiness remains metadata-only. It does not generate documents, connect a signing provider, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.

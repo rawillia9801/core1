@@ -92,7 +92,16 @@ const readStaffProfileByAuthUserId = cache(async (authUserId: string) => {
 });
 
 export const requireStaffProfile = cache(async (): Promise<StaffProfile> => {
-  const supabase = await createSupabaseServerClient();
+  let supabase;
+  try {
+    supabase = await createSupabaseServerClient();
+  } catch (error) {
+    logStaffAuthFailure("supabase auth configuration missing for staff access", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    redirect("/login?error=server_config&next=/staff");
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

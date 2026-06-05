@@ -22,7 +22,12 @@ export async function signInWithPassword(formData: FormData) {
   }
 
   const { createSupabaseServerClient } = await import("@/lib/supabase/server");
-  const supabase = await createSupabaseServerClient();
+  let supabase;
+  try {
+    supabase = await createSupabaseServerClient();
+  } catch {
+    redirect(`/login?error=server_config&next=${encodeURIComponent(nextPath)}`);
+  }
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -37,7 +42,12 @@ export async function signInWithPassword(formData: FormData) {
 
 export async function signOutStaff() {
   const { createSupabaseServerClient } = await import("@/lib/supabase/server");
-  const supabase = await createSupabaseServerClient();
+  let supabase;
+  try {
+    supabase = await createSupabaseServerClient();
+  } catch {
+    redirect("/login?error=server_config");
+  }
   await supabase.auth.signOut();
   redirect("/login?signed_out=1");
 }

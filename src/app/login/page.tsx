@@ -19,6 +19,10 @@ function messageFor(error: string | undefined, signedOut: string | undefined) {
     return "Login failed. Check the email and password.";
   }
 
+  if (error === "server_config") {
+    return "Core login is not fully configured on this deployment.";
+  }
+
   return null;
 }
 
