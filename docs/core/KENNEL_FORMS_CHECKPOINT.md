@@ -78,6 +78,14 @@ Verified results:
 - Kennel Daily Task Board / Today's Care Checklist was added to `/staff`.
 - The daily task board derives owner/operator tasks from existing Core puppy, litter, weight, care, go-home, reservation, payment, document, notification, dog, and kennel metadata.
 - The daily task board is internal task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update the portal, connect smart-home/cameras/devices, call external providers, or add AI.
+- Breeding Dog Profile was added at `/staff/dogs/[dogId]`.
+- `/staff/dogs` now links each dog to its internal profile with an Open profile link while preserving the existing add/edit/archive loop.
+- The dog profile supports internal dog health history / medical event tracking through `core_dog_health_events` and `core_record_dog_health_event(...)`.
+- Registry, acquisition, genetic testing, pedigree, and certification metadata support was added through controlled `core_dogs.metadata` updates.
+- Dog Document Vault / Genetic Reports / Certificates metadata support was added through `core_dog_documents` and `core_record_dog_document_metadata(...)`.
+- Dam/sire litter history shows linked litters, puppies, and buyer/reservation context where existing Core data links those records.
+- The dog profile and document vault are internal owner/operator recordkeeping only. They do not diagnose animals, message customers, publish puppies, generate documents, upload files, expose public document links, connect smart-home/cameras/devices, or call external providers.
+- File upload/storage is explicitly deferred and not connected.
 
 ## Obsolete Tests Removed
 

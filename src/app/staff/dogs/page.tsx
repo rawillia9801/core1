@@ -135,7 +135,10 @@ export default async function StaffDogsPage({ searchParams }: { searchParams: Pr
                     <div><dt className="text-xs font-semibold uppercase text-slate-400">Birth date</dt><dd>{formatDate(row.birth_at)}</dd></div>
                     <div><dt className="text-xs font-semibold uppercase text-slate-400">External ref</dt><dd>{display(row.external_reference)}</dd></div>
                   </dl>
-                  <div className="mt-5 flex flex-wrap gap-2"><Link href={`/staff/dogs/${row.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit</Link></div>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <Link href={`/staff/dogs/${row.id}`} className="rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white">Open profile</Link>
+                    <Link href={`/staff/dogs/${row.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit</Link>
+                  </div>
                   {row.notes ? <p className="mt-4 text-sm leading-6 text-slate-600">{row.notes}</p> : null}
                 </article>
               ))}

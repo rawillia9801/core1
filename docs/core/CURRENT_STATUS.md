@@ -62,6 +62,7 @@ Core-native private application entry
   -> daily puppy weight/neonatal care log workflow added
   -> individual puppy detail / neonatal growth timeline added
   -> kennel daily task board / today's care checklist added to /staff
+  -> breeding dog profile health/lineage/document vault workflow added
   -> buyers/families/events read-only owner/operator workspaces
 ```
 
@@ -107,6 +108,11 @@ Verified local behavior:
 - `/staff` now includes an internal Kennel Daily Task Board / Today's Care Checklist.
 - The daily task board derives task visibility from existing Core puppy, litter, weight, care, reservation, go-home, payment, document, notification, dog, and kennel metadata.
 - The daily task board is internal owner/operator task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update a portal, connect smart-home/cameras/devices, call external providers, or add AI.
+- `/staff/dogs/[dogId]` now shows an internal Breeding Dog Profile with identity, registry/acquisition/genetic/certificate metadata, health history, dog document vault metadata, deterministic attention flags, dam/sire litter history, puppy links, and linked buyer/reservation context where existing data supports it.
+- Dog profile health history uses `core_dog_health_events` and controlled owner/admin RPCs for internal veterinary/health/event recordkeeping only. It records factual notes such as vaccines, vet visits, surgeries, birth complications, reproductive events, medication notes, injuries, and general health notes; it does not diagnose animals or replace veterinary care.
+- Dog profile document vault uses `core_dog_documents` and controlled owner/admin RPCs for dog-linked report/certificate/registry metadata only, including genetic tests, Embark reports, pedigrees, AKC/CKC/ACA/dual registration, vaccine records, health certificates, surgery/emergency vet records, acquisition records, and microchip records.
+- Dog profile registry/acquisition metadata is stored on existing `core_dogs.metadata` through a controlled owner/admin RPC. File upload/storage remains explicitly disconnected and no raw storage paths or public document links are exposed.
+- The dog profile workflow is internal owner/operator recordkeeping only. It does not message customers, publish puppies, generate documents, upload files, connect smart-home/cameras/devices, call external providers, add AI, process payments, or add customer portal behavior.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
@@ -216,6 +222,9 @@ Implemented and verified:
 - Kennel create RPCs perform no customer messages, documents, payments, public website updates, or external integration actions.
 - Self-contained v2 rollback-safe kennel create test passed locally with `dam_check = 1`, `sire_check = 1`, `litter_check = 1`, `puppy_check = 1`, `event_check = 4`, and `audit_check = 4`.
 - `/staff/dogs` exists and reads real `core_dogs` records only.
+- `/staff/dogs` links each dog to `/staff/dogs/[dogId]` for internal Breeding Dog Profile review.
+- `/staff/dogs/[dogId]` exists and reads real Core dog, litter, puppy, reservation, buyer/family, dog health, dog document metadata, event, and owner/admin audit rows only.
+- `core_dog_health_events`, `core_dog_documents`, `core_record_dog_health_event(...)`, `core_record_dog_document_metadata(...)`, and `core_update_dog_profile_metadata(...)` exist for internal owner/admin dog recordkeeping with event/audit rows and no external side effects.
 - `/staff/dogs/new` exists and creates real dog records through `createDog` -> `core_create_dog(...)`.
 - `/staff/litters` exists and reads real `core_litters`, `core_dogs`, and `core_puppies` records only.
 - `/staff/litters/new` exists and creates real litter records through `createLitter` -> `core_create_litter(...)`.
@@ -337,6 +346,7 @@ Core-native owner/operator operating system foundation
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> Individual Puppy Detail / Neonatal Growth Timeline added
   -> Kennel Daily Task Board / Today's Care Checklist added
+  -> Breeding Dog Profile / Dog Document Vault workflow added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
