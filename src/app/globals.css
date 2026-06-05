@@ -1,8 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f3ea;
+  --foreground: #172033;
+  --core-cream: #f7f3ea;
+  --core-cream-strong: #fffaf0;
+  --core-panel: rgba(255, 255, 255, 0.88);
+  --core-panel-solid: #fffdf7;
+  --core-ink: #172033;
+  --core-muted: #637083;
+  --core-line: rgba(99, 112, 131, 0.18);
+  --core-gold: #b68a35;
+  --core-blue: #246c86;
+  --core-teal: #1f8a7a;
+  --core-shadow: 0 18px 48px rgba(30, 41, 59, 0.10);
+  --core-shadow-soft: 0 10px 28px rgba(30, 41, 59, 0.07);
 }
 
 @theme inline {
@@ -12,17 +24,176 @@
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top left, rgba(182, 138, 53, 0.12), transparent 34rem),
+    linear-gradient(135deg, #f7f3ea 0%, #eef4f5 46%, #f9f6ef 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.core-shell {
+  background:
+    linear-gradient(135deg, rgba(247, 243, 234, 0.98) 0%, rgba(238, 246, 246, 0.96) 55%, rgba(249, 246, 239, 0.98) 100%);
+}
+
+.core-shell aside {
+  border-color: rgba(89, 68, 38, 0.24);
+  background:
+    linear-gradient(180deg, #20313b 0%, #233d45 42%, #2a342f 100%);
+  box-shadow: 18px 0 54px rgba(23, 32, 51, 0.22);
+}
+
+.core-shell aside h1 {
+  color: #fffaf0;
+}
+
+.core-shell aside p {
+  color: rgba(255, 250, 240, 0.74);
+}
+
+.core-nav-link {
+  border: 1px solid transparent;
+  border-radius: 14px;
+}
+
+.core-nav-link:hover {
+  border-color: rgba(255, 250, 240, 0.18);
+  background: rgba(255, 250, 240, 0.11);
+}
+
+.core-status-bar {
+  border-color: rgba(36, 108, 134, 0.18);
+  background:
+    linear-gradient(90deg, rgba(255, 250, 240, 0.92) 0%, rgba(232, 244, 245, 0.94) 100%);
+  box-shadow: 0 10px 30px rgba(36, 108, 134, 0.08);
+}
+
+.core-sign-out,
+.core-mobile-nav-link {
+  box-shadow: 0 8px 18px rgba(30, 41, 59, 0.06);
+}
+
+.core-mobile-nav {
+  border-color: var(--core-line);
+  background: rgba(255, 253, 247, 0.92);
+  backdrop-filter: blur(16px);
+}
+
+.core-shell main[class*="bg-slate-100"],
+main[class*="bg-slate-100"] {
+  background:
+    radial-gradient(circle at 85% 8%, rgba(31, 138, 122, 0.10), transparent 26rem),
+    linear-gradient(135deg, rgba(247, 243, 234, 0.98) 0%, rgba(239, 247, 247, 0.96) 55%, rgba(250, 247, 241, 0.98) 100%);
+}
+
+.core-shell section[class*="bg-white"],
+.core-shell article[class*="bg-white"],
+.core-shell div[class*="bg-white"],
+main section[class*="bg-white"],
+main article[class*="bg-white"] {
+  border-color: var(--core-line);
+  background-color: var(--core-panel);
+  box-shadow: var(--core-shadow-soft);
+}
+
+.core-shell section[class*="rounded-3xl"][class*="bg-white"],
+main section[class*="rounded-3xl"][class*="bg-white"] {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96) 0%, rgba(255, 255, 255, 0.88) 100%);
+  box-shadow: var(--core-shadow);
+}
+
+.core-shell section[class*="bg-slate-50"],
+.core-shell article[class*="bg-slate-50"],
+main section[class*="bg-slate-50"],
+main article[class*="bg-slate-50"] {
+  border-color: rgba(99, 112, 131, 0.16);
+  background-color: rgba(248, 250, 247, 0.78);
+}
+
+.core-shell section[class*="bg-blue-50"],
+main section[class*="bg-blue-50"] {
+  border-color: rgba(36, 108, 134, 0.20);
+  background-color: rgba(232, 244, 245, 0.82);
+}
+
+.core-shell section[class*="bg-amber-50"],
+main section[class*="bg-amber-50"] {
+  border-color: rgba(182, 138, 53, 0.24);
+  background-color: rgba(255, 247, 230, 0.88);
+}
+
+.core-shell section[class*="bg-emerald-50"],
+main section[class*="bg-emerald-50"] {
+  border-color: rgba(31, 138, 122, 0.20);
+  background-color: rgba(234, 247, 242, 0.84);
+}
+
+.core-shell h1,
+.core-shell h2,
+.core-shell h3,
+main h1,
+main h2,
+main h3 {
+  color: var(--core-ink);
+}
+
+.core-shell p[class*="uppercase"],
+main p[class*="uppercase"],
+.core-shell dt[class*="uppercase"],
+main dt[class*="uppercase"] {
+  color: var(--core-blue);
+}
+
+.core-shell a[class*="bg-blue-700"],
+.core-shell button[class*="bg-blue-700"],
+main a[class*="bg-blue-700"],
+main button[class*="bg-blue-700"] {
+  background:
+    linear-gradient(135deg, #246c86 0%, #1f8a7a 100%);
+  box-shadow: 0 10px 22px rgba(36, 108, 134, 0.20);
+}
+
+.core-shell a[class*="border"],
+.core-shell button[class*="border"],
+main a[class*="border"],
+main button[class*="border"] {
+  border-color: rgba(99, 112, 131, 0.22);
+}
+
+.core-shell input,
+.core-shell select,
+.core-shell textarea,
+main input,
+main select,
+main textarea {
+  border-color: rgba(99, 112, 131, 0.26);
+  background-color: rgba(255, 253, 247, 0.94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+.core-shell input:focus,
+.core-shell select:focus,
+.core-shell textarea:focus,
+main input:focus,
+main select:focus,
+main textarea:focus {
+  outline: 2px solid rgba(31, 138, 122, 0.28);
+  outline-offset: 2px;
+}
+
+.core-shell [class*="shadow-sm"],
+main [class*="shadow-sm"] {
+  box-shadow: var(--core-shadow-soft);
 }
 
 @keyframes core-command-cloud-breathe {

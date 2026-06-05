@@ -237,6 +237,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Duplicate top workspace navigation removed; left sidebar is the desktop navigation.
 - [x] Staff profile lookup and `requireStaffProfile()` are request-memoized to reduce duplicate layout/page auth reads while preserving server-action checks.
 - [x] Add approved read-only data coverage for litter context within reservation detail readiness view.
+- [x] Core owner/operator UI styling enhanced through shared global/layout styling while preserving all existing pages, routes, sidebar items, workflows, server actions, queries, auth rules, database behavior, and safety boundaries.
+- [x] Browser-check confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
 - [ ] Add proper loading/empty/error states for all read panels.
 - [ ] Reduce repeated dashboard data reads if `/staff` or child route performance remains slow after `.next` cache clearing.
 - [ ] Replace temporary/local-only data assumptions before staging.

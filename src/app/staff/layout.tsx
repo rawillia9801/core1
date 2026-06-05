@@ -30,7 +30,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   const staff = await requireStaffProfile();
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950 lg:flex">
+    <div className="core-shell min-h-screen bg-slate-100 text-slate-950 lg:flex">
       <aside className="hidden border-r border-slate-800 bg-slate-950 text-white lg:sticky lg:top-0 lg:block lg:h-screen lg:w-72 lg:shrink-0 lg:overflow-y-auto lg:px-5 lg:py-6">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-200">
@@ -48,14 +48,14 @@ export default async function StaffLayout({ children }: { children: ReactNode })
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+                className="core-nav-link block rounded-2xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
               >
                 {item.label}
               </Link>
             ) : (
               <div
                 key={item.href}
-                className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-500"
+                className="core-nav-link rounded-2xl px-4 py-3 text-sm font-medium text-slate-500"
                 title="Workspace page not built yet"
               >
                 {item.label}
@@ -66,7 +66,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
       </aside>
 
       <div className="min-w-0 flex-1">
-        <section className="border-b border-blue-200 bg-blue-50 px-4 py-3 text-blue-950 sm:px-6 lg:px-8">
+        <section className="core-status-bar border-b border-blue-200 bg-blue-50 px-4 py-3 text-blue-950 sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-[1500px] flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-700">
@@ -79,7 +79,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
             <form action={signOutStaff}>
               <button
                 type="submit"
-                className="rounded-xl border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-900"
+                className="core-sign-out rounded-xl border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-900"
               >
                 Sign Out
               </button>
@@ -87,7 +87,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
           </div>
         </section>
 
-        <div className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6 lg:hidden lg:px-8">
+        <div className="core-mobile-nav border-b border-slate-200 bg-white px-4 py-3 sm:px-6 lg:hidden lg:px-8">
           <div className="mx-auto flex max-w-[1500px] gap-2 overflow-x-auto">
             {primaryNavigation
               .filter((item) => item.ready)
@@ -95,7 +95,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700"
+                  className="core-mobile-nav-link whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700"
                 >
                   {item.label}
                 </Link>

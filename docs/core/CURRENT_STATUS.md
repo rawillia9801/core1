@@ -119,6 +119,8 @@ Verified local behavior:
 - `/staff/proposed-actions` has been added as an owner/admin Proposed Action Queue workspace. It can create, approve, and reject proposal review records only; approved proposed actions do not execute business changes.
 - Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
 - The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.
+- Core owner/operator UI styling was enhanced through shared global/layout styling only. Existing pages, routes, sidebar items, workflows, server actions, queries, auth rules, database behavior, and safety boundaries were preserved.
+- Browser verification confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
 - Document readiness remains metadata-only. It does not generate documents, connect a signing provider, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 - Communications Readiness remains metadata/preview-only. It does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
 
