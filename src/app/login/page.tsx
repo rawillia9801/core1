@@ -1,4 +1,5 @@
 import CoreLoginShell from "../core-login-shell";
+import { signInWithPassword } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -38,5 +39,11 @@ export default async function LoginPage({
   const { error, next, signed_out: signedOut } = await searchParams;
   const message = messageFor(error, signedOut);
 
-  return <CoreLoginShell message={message} nextPath={next ?? "/staff"} />;
+  return (
+    <CoreLoginShell
+      message={message}
+      nextPath={next ?? "/staff"}
+      formAction={signInWithPassword}
+    />
+  );
 }
