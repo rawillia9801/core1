@@ -19,78 +19,90 @@ export default function CoreLoginShell({
         <span />
         <span />
       </div>
-      <div className="core-login-dog" aria-hidden="true">
-        <svg viewBox="0 0 420 440" role="presentation">
+      <div className="core-login-emblem" aria-hidden="true">
+        <svg viewBox="0 0 520 520" role="presentation">
           <defs>
-            <linearGradient id="dog-fur" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stopColor="#080a0c" />
-              <stop offset="58%" stopColor="#18120e" />
-              <stop offset="100%" stopColor="#4a3118" />
+            <linearGradient id="emblem-gold" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stopColor="#f7e8bd" />
+              <stop offset="42%" stopColor="#c99a4b" />
+              <stop offset="100%" stopColor="#6f4619" />
             </linearGradient>
-            <linearGradient id="dog-gold" x1="0" x2="1">
-              <stop offset="0%" stopColor="#8a5a22" />
-              <stop offset="48%" stopColor="#f4d28a" />
-              <stop offset="100%" stopColor="#9b6827" />
-            </linearGradient>
+            <radialGradient id="emblem-fill" cx="50%" cy="42%" r="64%">
+              <stop offset="0%" stopColor="#f4d28a" stopOpacity="0.18" />
+              <stop offset="62%" stopColor="#09151b" stopOpacity="0.36" />
+              <stop offset="100%" stopColor="#05090c" stopOpacity="0" />
+            </radialGradient>
           </defs>
           <path
-            d="M120 212 C65 166 37 89 51 32 C103 49 145 94 166 151 C182 145 202 141 222 142 C247 92 292 47 346 31 C358 91 333 164 277 211 C295 238 303 274 298 309 C289 374 244 412 185 407 C128 402 89 359 86 301 C84 267 95 237 120 212 Z"
-            fill="url(#dog-fur)"
-          />
-          <path
-            d="M132 197 C88 155 72 100 76 65 C113 88 139 126 155 166 Z"
-            fill="#06080a"
-          />
-          <path
-            d="M274 168 C291 126 317 88 355 65 C356 101 340 157 294 198 Z"
-            fill="#06080a"
-          />
-          <path
-            d="M158 290 C171 268 195 257 219 260 C244 263 262 279 270 301 C252 340 181 342 158 290 Z"
-            fill="#d6a65f"
+            d="M260 33 L438 112 L416 388 L260 487 L104 388 L82 112 Z"
+            fill="url(#emblem-fill)"
+            stroke="url(#emblem-gold)"
+            strokeWidth="2.5"
             opacity="0.72"
           />
           <path
-            d="M142 248 C154 232 179 232 190 249 C180 258 152 258 142 248 Z"
-            fill="#c58a45"
-            opacity="0.78"
-          />
-          <path
-            d="M251 249 C262 231 287 232 299 248 C288 258 261 258 251 249 Z"
-            fill="#c58a45"
-            opacity="0.78"
-          />
-          <circle cx="166" cy="245" r="14" fill="#090b0e" />
-          <circle cx="274" cy="245" r="14" fill="#090b0e" />
-          <circle cx="171" cy="240" r="4" fill="#f6e2b4" />
-          <circle cx="279" cy="240" r="4" fill="#f6e2b4" />
-          <path
-            d="M207 291 C217 285 230 286 239 293 C236 303 228 309 218 309 C209 309 201 302 207 291 Z"
-            fill="#050608"
-          />
-          <path
-            d="M218 310 C216 325 203 331 191 328 M219 310 C221 324 235 331 247 327"
-            stroke="#07090b"
-            strokeWidth="5"
+            d="M169 335 C205 366 263 372 309 341 C346 316 367 273 361 228 C355 178 318 143 272 137 C235 132 200 146 178 173"
+            fill="none"
+            stroke="url(#emblem-gold)"
             strokeLinecap="round"
-            fill="none"
+            strokeWidth="11"
+            opacity="0.80"
           />
           <path
-            d="M123 210 C93 203 64 216 38 249 M310 210 C342 204 371 218 396 250"
-            stroke="#15110d"
-            strokeWidth="16"
-            strokeLinecap="round"
-            opacity="0.72"
+            d="M187 176 C161 127 150 84 156 54 C189 76 214 112 228 151"
             fill="none"
-          />
-          <circle cx="220" cy="373" r="30" fill="none" stroke="url(#dog-gold)" strokeWidth="5" />
-          <path
-            d="M207 372 L218 385 L237 358"
-            fill="none"
-            stroke="url(#dog-gold)"
-            strokeWidth="5"
+            stroke="url(#emblem-gold)"
             strokeLinecap="round"
             strokeLinejoin="round"
+            strokeWidth="8"
+            opacity="0.64"
+          />
+          <path
+            d="M290 146 C314 103 347 78 383 65 C382 106 364 149 329 183"
+            fill="none"
+            stroke="url(#emblem-gold)"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="8"
+            opacity="0.64"
+          />
+          <path
+            d="M169 335 C134 315 115 282 115 244 C115 201 139 166 178 150 C201 141 230 137 260 141"
+            fill="none"
+            stroke="rgba(247, 232, 189, 0.45)"
+            strokeLinecap="round"
+            strokeWidth="3"
+            opacity="0.76"
+          />
+          <path
+            d="M218 244 C238 232 265 232 286 246"
+            fill="none"
+            stroke="rgba(247, 232, 189, 0.36)"
+            strokeLinecap="round"
+            strokeWidth="3"
+          />
+          <circle cx="298" cy="218" r="5" fill="#f7e8bd" opacity="0.68" />
+          <path
+            d="M352 267 C387 274 417 291 442 317"
+            fill="none"
+            stroke="rgba(247, 232, 189, 0.28)"
+            strokeLinecap="round"
+            strokeWidth="3"
+          />
+          <path
+            fill="none"
+            d="M338 299 C373 316 399 344 416 382"
+            stroke="rgba(247, 232, 189, 0.20)"
+            strokeLinecap="round"
+            strokeWidth="3"
+          />
+          <path
+            d="M132 396 H388"
+            fill="none"
+            stroke="url(#emblem-gold)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.38"
           />
         </svg>
       </div>

@@ -245,6 +245,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Browser-check confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
 - [x] Public/root login landing page rebuilt as the Cherolee Core OS cinematic login experience.
 - [x] `/` and `/login` now use the new owner/operator visual login style while preserving the existing auth flow.
+- [x] Login visual refinement corrected after the first pass by replacing the cartoon dog graphic with a subtle premium Chihuahua-profile crest/watermark.
 - [x] Staff routes were not renamed or removed, no private Core data is exposed on the public page, and no external integrations were added.
 - [ ] Add proper loading/empty/error states for all read panels.
 - [ ] Reduce repeated dashboard data reads if `/staff` or child route performance remains slow after `.next` cache clearing.
