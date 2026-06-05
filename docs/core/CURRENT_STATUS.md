@@ -60,6 +60,7 @@ Core-native private application entry
   -> neonatal litter command workflow added to /staff/litters
   -> expected litter / whelping prep workflow added to /staff/litters
   -> daily puppy weight/neonatal care log workflow added
+  -> individual puppy detail / neonatal growth timeline added
   -> buyers/families/events read-only owner/operator workspaces
 ```
 
@@ -99,6 +100,9 @@ Verified local behavior:
 - `core_record_puppy_care_observation(...)` records factual neonatal care observations in `core_puppy_events` through a controlled owner/admin RPC.
 - The Daily Weight & Care Log UI is available inside `/staff/litters` and writes only through the controlled RPCs.
 - The weight/care log workflow writes `core_events` and `core_audit_log`, remains internal owner/operator observation logging only, and does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, or call external providers.
+- `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
+- Puppy detail reads existing puppy, litter, dam/sire, weight, care observation, event, and owner/admin audit context where safely linkable.
+- Puppy detail is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
@@ -212,6 +216,8 @@ Implemented and verified:
 - `/staff/litters` exists and reads real `core_litters`, `core_dogs`, and `core_puppies` records only.
 - `/staff/litters/new` exists and creates real litter records through `createLitter` -> `core_create_litter(...)`.
 - `/staff/puppies` exists and reads real `core_puppies` records only.
+- `/staff/puppies` links each puppy to `/staff/puppies/[puppyId]` for internal puppy detail/timeline review.
+- `/staff/puppies/[puppyId]` exists and reads existing Core puppy/litter/weight/care rows only, with event/audit context shown only where safely linkable.
 - `/staff/puppies/new` exists and creates real puppy records through `createPuppy` -> `core_create_puppy(...)`.
 - Dogs, Litters, and Puppies are enabled in the staff sidebar.
 - Kennel create actions are owner/admin only.
@@ -325,6 +331,7 @@ Core-native owner/operator operating system foundation
   -> Neonatal Litter Command workflow added
   -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
+  -> Individual Puppy Detail / Neonatal Growth Timeline added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -348,7 +355,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 This pass compared the docs to the local `main` build, not just older documentation.
 
-- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/reservations/[reservationId]`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
+- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/reservations/[reservationId]`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
 - Migrations documented vs actual migrations: 26 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
 - Tests documented vs actual tests: 21 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.

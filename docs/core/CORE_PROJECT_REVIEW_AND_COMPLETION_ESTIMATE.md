@@ -44,6 +44,7 @@ Core-native private application entry
   -> Neonatal Litter Command workflow added
   -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
+  -> Individual Puppy Detail / Neonatal Growth Timeline added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -125,6 +126,9 @@ The following are implemented and have been manually or test verified in local/d
 - `core_record_puppy_weight_log(...)` records factual gram-based puppy weights through an owner/admin controlled RPC.
 - `core_record_puppy_care_observation(...)` records factual neonatal care observations through an owner/admin controlled RPC and allowed observation types.
 - The weight/care log workflow writes event/audit rows and remains internal owner/operator observation logging only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, add AI, add external providers, generate documents, or process payments.
+- `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
+- Puppy detail uses existing puppy/litter/weight/care data, dam/sire context, deterministic owner attention flags, and safely linkable event/audit context.
+- Puppy detail remains internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, add AI, add external providers, generate documents, or process payments.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
@@ -151,6 +155,7 @@ The following are implemented and have been manually or test verified in local/d
 - The communications readiness workflow is internal metadata/preview-only and does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
 - The neonatal litter command workflow is internal Core visibility only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect devices/cameras, or add external integrations.
 - The puppy weight/care log workflow is internal Core observation logging only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
+- The individual puppy timeline workflow is internal Core observation review only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 
 ## Recently Added / In Progress
 

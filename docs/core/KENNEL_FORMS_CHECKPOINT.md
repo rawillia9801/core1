@@ -72,6 +72,9 @@ Verified results:
 - `core_record_puppy_weight_log(...)` records factual puppy weight observations in grams.
 - `core_record_puppy_care_observation(...)` records factual neonatal care observations using allowed observation types.
 - The weight/care log workflow writes event/audit rows and remains internal owner/operator observation logging only. It does not diagnose puppies, message customers, publish puppies, update the portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
+- Individual Puppy Detail / Neonatal Growth Timeline was added at `/staff/puppies/[puppyId]`.
+- The puppy timeline uses existing puppy, litter, dam/sire, weight, care observation, event, and safely linkable audit data only.
+- The puppy timeline is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update the portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
 
 ## Obsolete Tests Removed
 

@@ -1,0 +1,721 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { requireStaffProfile } from "@/lib/staff-auth";
+
+export const dynamic = "force-dynamic";
+
+type PuppyRow = {
+  id: string;
+  external_reference: string | null;
+  litter_id: string | null;
+  name: string | null;
+  collar_color: string | null;
+  sex: string | null;
+  color: string | null;
+  coat_type: string | null;
+  birth_at: string | null;
+  status: string | null;
+  health_status: string | null;
+  public_listing_status: string | null;
+  notes: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+type LitterRow = {
+  id: string;
+  external_reference: string | null;
+  litter_name: string | null;
+  dam_id: string | null;
+  sire_id: string | null;
+  expected_birth_at: string | null;
+  birth_at: string | null;
+  total_puppies: number | null;
+  female_count: number | null;
+  male_count: number | null;
+  status: string | null;
+  details_pending: boolean | null;
+  notes: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+type DogRow = {
+  id: string;
+  external_reference: string | null;
+  registered_name: string | null;
+  call_name: string | null;
+  sex: string | null;
+  color: string | null;
+  coat_type: string | null;
+  birth_at: string | null;
+  status: string | null;
+  notes: string | null;
+  metadata: Record<string, unknown> | null;
+};
+
+type WeightLogRow = {
+  id: string;
+  puppy_id: string | null;
+  measured_at: string | null;
+  weight_grams: number | null;
+  notes: string | null;
+  recorded_by_profile_id: string | null;
+  metadata: Record<string, unknown> | null;
+};
+
+type PuppyEventRow = {
+  id: string;
+  puppy_id: string | null;
+  event_type: string | null;
+  event_at: string | null;
+  summary: string | null;
+  details: Record<string, unknown> | null;
+  recorded_by_profile_id: string | null;
+  created_at: string | null;
+};
+
+type EventRow = {
+  id: string;
+  event_type: string | null;
+  event_at: string | null;
+  summary: string | null;
+  puppy_id: string | null;
+  reservation_id: string | null;
+  related_table: string | null;
+  related_id: string | null;
+  source: string | null;
+  details: Record<string, unknown> | null;
+  created_by_profile_id: string | null;
+  created_at: string | null;
+};
+
+type AuditRow = {
+  id: string;
+  actor_type: string | null;
+  actor_profile_id: string | null;
+  actor_identifier: string | null;
+  source: string | null;
+  action: string | null;
+  entity_table: string | null;
+  entity_id: string | null;
+  request_context: Record<string, unknown> | null;
+  outcome: string | null;
+  error_message: string | null;
+  created_at: string | null;
+};
+
+const ATTENTION_TERMS = ["weak", "watch", "fading", "not nursing", "cold", "losing", "loss", "risk", "concern"];
+
+function getSupabaseRestConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null;
+  }
+
+  return { restUrl: `${supabaseUrl}/rest/v1`, serviceRoleKey };
+}
+
+function buildUrl(restUrl: string, table: string, params: Record<string, string>) {
+  const url = new URL(`${restUrl}/${table}`);
+  Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+  return url;
+}
+
+async function readRows<T>(table: string, params: Record<string, string>) {
+  const config = getSupabaseRestConfig();
+
+  if (!config) {
+    return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+  }
+
+  const response = await fetch(buildUrl(config.restUrl, table, params), {
+    headers: {
+      apikey: config.serviceRoleKey,
+      authorization: `Bearer ${config.serviceRoleKey}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    return { rows: [] as T[], warning: `${table} read failed: ${response.status} ${body}`.trim() };
+  }
+
+  return { rows: (await response.json()) as T[], warning: null };
+}
+
+function display(value: string | null | undefined, fallback = "Not recorded") {
+  return value && value.trim() ? value : fallback;
+}
+
+function shortId(value: string | null | undefined) {
+  return value ? value.slice(0, 8) : "-";
+}
+
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function formatKey(value: string | null | undefined) {
+  if (!value) return "Not recorded";
+  return value.replaceAll("_", " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Invalid date" : new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(date);
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Invalid date"
+    : new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function daysSince(value: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.floor((Date.now() - date.getTime()) / 86_400_000);
+}
+
+function formatAge(value: string | null) {
+  const days = daysSince(value);
+  if (days === null) return "Not recorded";
+  if (days < 0) return "Expected";
+  if (days === 0) return "Born today";
+  if (days === 1) return "1 day old";
+  if (days < 28) return `${days} days old`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks} week${weeks === 1 ? "" : "s"} old`;
+}
+
+function isSameLocalDay(value: string | null, comparison = new Date()) {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return date.getFullYear() === comparison.getFullYear() && date.getMonth() === comparison.getMonth() && date.getDate() === comparison.getDate();
+}
+
+function puppyName(puppy: PuppyRow) {
+  return puppy.name || puppy.collar_color || puppy.external_reference || `Puppy ${shortId(puppy.id)}`;
+}
+
+function litterName(litter: LitterRow | null | undefined) {
+  if (!litter) return "Not linked";
+  return display(litter.litter_name, `Litter ${shortId(litter.id)}`);
+}
+
+function dogName(dog: DogRow | null | undefined) {
+  if (!dog) return "Not linked";
+  return dog.call_name || dog.registered_name || dog.external_reference || `Dog ${shortId(dog.id)}`;
+}
+
+function statusTone(status: string | null) {
+  const normalized = normalizeText(status);
+  if (["available", "ready", "active", "newborn", "neonatal"].includes(normalized)) return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+  if (["reserved", "hold", "pending", "planned", "expected"].includes(normalized)) return "bg-blue-50 text-blue-700 ring-blue-100";
+  if (["sold", "completed", "placed", "kept"].includes(normalized)) return "bg-violet-50 text-violet-700 ring-violet-100";
+  if (["deceased", "watch", "at risk", "at_risk"].includes(normalized)) return "bg-rose-50 text-rose-700 ring-rose-100";
+  return "bg-slate-100 text-slate-700 ring-slate-200";
+}
+
+function outcomeTone(outcome: string | null) {
+  const normalized = normalizeText(outcome);
+  if (normalized === "success") return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+  if (["blocked", "unauthorized", "rejected"].includes(normalized)) return "bg-amber-50 text-amber-700 ring-amber-100";
+  if (["error", "failed"].includes(normalized)) return "bg-red-50 text-red-700 ring-red-100";
+  return "bg-slate-100 text-slate-700 ring-slate-200";
+}
+
+function weightLabel(weight: WeightLogRow | null | undefined) {
+  if (!weight || typeof weight.weight_grams !== "number") return "Not recorded";
+  return `${weight.weight_grams} g`;
+}
+
+function sortWeightsAscending(weights: WeightLogRow[]) {
+  return [...weights].sort((a, b) => new Date(a.measured_at ?? 0).getTime() - new Date(b.measured_at ?? 0).getTime());
+}
+
+function latestWeight(weights: WeightLogRow[]) {
+  return [...weights].sort((a, b) => new Date(b.measured_at ?? 0).getTime() - new Date(a.measured_at ?? 0).getTime())[0] ?? null;
+}
+
+function birthWeightForPuppy(puppy: PuppyRow, litter: LitterRow | null | undefined, weights: WeightLogRow[]) {
+  const birthAt = puppy.birth_at ?? litter?.birth_at ?? null;
+  const sorted = sortWeightsAscending(weights);
+  if (!birthAt) return sorted[0] ?? null;
+  return sorted.find((weight) => isSameLocalDay(weight.measured_at, new Date(birthAt))) ?? sorted[0] ?? null;
+}
+
+function hasAttentionText(...values: Array<string | null | undefined>) {
+  const text = normalizeText(values.filter(Boolean).join(" "));
+  return ATTENTION_TERMS.some((term) => text.includes(term));
+}
+
+function metadataText(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!metadata) return null;
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "string" && value.trim()) return value;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+
+  return null;
+}
+
+function registryValue(metadata: Record<string, unknown> | null | undefined) {
+  return metadataText(metadata, ["registry", "registration", "registration_number", "registry_number", "akc_registration", "akc_number"]);
+}
+
+function safeDetails(details: Record<string, unknown> | null | undefined) {
+  if (!details || Object.keys(details).length === 0) return "No detail keys recorded";
+  const safePairs = Object.entries(details)
+    .filter(([key]) => {
+      const lowered = key.toLowerCase();
+      return !lowered.includes("secret") && !lowered.includes("token") && !lowered.includes("key") && !lowered.includes("password");
+    })
+    .slice(0, 5)
+    .map(([key, value]) => `${key}: ${String(value)}`);
+
+  return safePairs.length > 0 ? safePairs.join(" / ") : "Details present, hidden from preview";
+}
+
+function watchSignalsForPuppy(puppy: PuppyRow, litter: LitterRow | null | undefined, weights: WeightLogRow[], events: PuppyEventRow[]) {
+  const signals: string[] = [];
+  const latest = latestWeight(weights);
+  const birth = birthWeightForPuppy(puppy, litter, weights);
+  const age = daysSince(puppy.birth_at ?? litter?.birth_at ?? null);
+  const status = normalizeText(puppy.status);
+
+  if (!puppy.litter_id) signals.push("Puppy is not linked to a litter.");
+  if (!puppy.birth_at && !litter?.birth_at) signals.push("Birth date is not recorded.");
+  if (!puppy.sex || !puppy.color || !puppy.status) signals.push("Identity or status details are incomplete.");
+  if (!birth) signals.push("No birth weight recorded.");
+  if (age !== null && age >= 0 && age <= 7 && !weights.some((weight) => isSameLocalDay(weight.measured_at))) signals.push("No weight recorded today.");
+  if (["unavailable", "deceased", "watch", "at risk", "at_risk"].includes(status)) signals.push(`Puppy status is ${display(puppy.status, "unknown")}.`);
+  if (hasAttentionText(puppy.health_status, puppy.notes)) signals.push("Health marker or notes contain watch terms.");
+  if (events.some((event) => hasAttentionText(event.event_type, event.summary, JSON.stringify(event.details ?? {})))) signals.push("Care history contains watch terms.");
+  if (latest?.weight_grams !== null && latest?.weight_grams !== undefined && latest.weight_grams <= 0) signals.push("Latest weight value needs owner review.");
+
+  return signals;
+}
+
+function uniqueEvents(events: EventRow[]) {
+  const byId = new Map<string, EventRow>();
+  for (const event of events) {
+    byId.set(event.id, event);
+  }
+  return [...byId.values()].sort((a, b) => new Date(b.event_at ?? 0).getTime() - new Date(a.event_at ?? 0).getTime());
+}
+
+function Badge({ children, tone = "bg-slate-100 text-slate-700 ring-slate-200" }: { children: ReactNode; tone?: string }) {
+  return <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${tone}`}>{children}</span>;
+}
+
+function EmptyState({ text }: { text: string }) {
+  return <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">{text}</div>;
+}
+
+function StatCard({ label, value, note }: { label: string; value: ReactNode; note: string }) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-3 text-3xl font-bold">{value}</p>
+      <p className="mt-2 text-sm text-slate-500">{note}</p>
+    </div>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div>
+      <dt className="text-xs font-semibold uppercase text-slate-400">{label}</dt>
+      <dd className="mt-1 text-slate-700">{value}</dd>
+    </div>
+  );
+}
+
+export default async function StaffPuppyDetailPage({ params }: { params: Promise<{ puppyId: string }> }) {
+  const staff = await requireStaffProfile();
+  const { puppyId } = await params;
+  const canViewAudit = staff.role === "owner" || staff.role === "admin";
+
+  const puppyResult = await readRows<PuppyRow>("core_puppies", {
+    select: "id,external_reference,litter_id,name,collar_color,sex,color,coat_type,birth_at,status,health_status,public_listing_status,notes,metadata,created_at,updated_at",
+    id: `eq.${puppyId}`,
+    limit: "1",
+  });
+  const puppy = puppyResult.rows[0] ?? null;
+
+  if (!puppy) {
+    return (
+      <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl space-y-6">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Puppies</p>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight">Puppy not found</h1>
+            <p className="mt-3 text-sm leading-6 text-slate-600">No current Core puppy row matched {shortId(puppyId)}.</p>
+            <Link href="/staff/puppies" className="mt-5 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Puppies</Link>
+          </section>
+          {puppyResult.warning ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{puppyResult.warning}</section> : null}
+        </div>
+      </main>
+    );
+  }
+
+  const [litterResult, weightResult, puppyEventResult, directEventResult, relatedEventResult, auditResult] = await Promise.all([
+    puppy.litter_id
+      ? readRows<LitterRow>("core_litters", {
+          select: "id,external_reference,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes,metadata,created_at,updated_at",
+          id: `eq.${puppy.litter_id}`,
+          limit: "1",
+        })
+      : Promise.resolve({ rows: [] as LitterRow[], warning: null }),
+    readRows<WeightLogRow>("core_weight_logs", {
+      select: "id,puppy_id,measured_at,weight_grams,notes,recorded_by_profile_id,metadata",
+      puppy_id: `eq.${puppy.id}`,
+      order: "measured_at.desc",
+      limit: "200",
+    }),
+    readRows<PuppyEventRow>("core_puppy_events", {
+      select: "id,puppy_id,event_type,event_at,summary,details,recorded_by_profile_id,created_at",
+      puppy_id: `eq.${puppy.id}`,
+      order: "event_at.desc",
+      limit: "100",
+    }),
+    readRows<EventRow>("core_events", {
+      select: "id,event_type,event_at,summary,puppy_id,reservation_id,related_table,related_id,source,details,created_by_profile_id,created_at",
+      puppy_id: `eq.${puppy.id}`,
+      order: "event_at.desc",
+      limit: "100",
+    }),
+    readRows<EventRow>("core_events", {
+      select: "id,event_type,event_at,summary,puppy_id,reservation_id,related_table,related_id,source,details,created_by_profile_id,created_at",
+      related_table: "eq.core_puppies",
+      related_id: `eq.${puppy.id}`,
+      order: "event_at.desc",
+      limit: "100",
+    }),
+    canViewAudit
+      ? readRows<AuditRow>("core_audit_log", {
+          select: "id,actor_type,actor_profile_id,actor_identifier,source,action,entity_table,entity_id,request_context,outcome,error_message,created_at",
+          entity_table: "eq.core_puppies",
+          entity_id: `eq.${puppy.id}`,
+          order: "created_at.desc",
+          limit: "100",
+        })
+      : Promise.resolve({ rows: [] as AuditRow[], warning: null }),
+  ]);
+
+  const litter = litterResult.rows[0] ?? null;
+  const dogIds = [litter?.dam_id, litter?.sire_id].filter((id): id is string => Boolean(id));
+  const dogResult = dogIds.length > 0
+    ? await readRows<DogRow>("core_dogs", {
+        select: "id,external_reference,registered_name,call_name,sex,color,coat_type,birth_at,status,notes,metadata",
+        id: `in.(${dogIds.join(",")})`,
+        limit: "2",
+      })
+    : { rows: [] as DogRow[], warning: null };
+
+  const dogsById = new Map(dogResult.rows.map((dog) => [dog.id, dog]));
+  const dam = litter?.dam_id ? dogsById.get(litter.dam_id) : null;
+  const sire = litter?.sire_id ? dogsById.get(litter.sire_id) : null;
+  const weights = weightResult.rows;
+  const careEvents = puppyEventResult.rows;
+  const operationalEvents = uniqueEvents([...directEventResult.rows, ...relatedEventResult.rows]);
+  const latest = latestWeight(weights);
+  const birth = birthWeightForPuppy(puppy, litter, weights);
+  const watchSignals = watchSignalsForPuppy(puppy, litter, weights, careEvents);
+  const ageSource = puppy.birth_at ?? litter?.birth_at ?? null;
+  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, directEventResult.warning, relatedEventResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
+
+  return (
+    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Puppies</p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Individual Puppy Detail / Neonatal Growth Timeline</h1>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
+                Internal owner/operator review for one puppy using existing Core puppy, litter, weight, care, event, and audit rows only.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Puppies</Link>
+              <Link href={`/staff/puppies/${puppy.id}/edit`} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Edit Puppy</Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Observation boundary</p>
+          <p className="mt-2 text-sm leading-6">
+            This timeline is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, call external providers, create documents, or process payments.
+          </p>
+        </section>
+
+        {warnings.length > 0 ? (
+          <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{warnings[0]}</section>
+        ) : null}
+
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Puppy" value={puppyName(puppy)} note={`Core ID ${shortId(puppy.id)}`} />
+          <StatCard label="Age" value={formatAge(ageSource)} note={`Birth date ${formatDate(ageSource)}`} />
+          <StatCard label="Latest weight" value={weightLabel(latest)} note={latest ? formatDateTime(latest.measured_at) : "No weight logs"} />
+          <StatCard label="Watch flags" value={watchSignals.length} note="Deterministic owner attention flags" />
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Puppy Identity</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Current values stored on `core_puppies`; registry appears only if present in metadata.</p>
+            </div>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-2xl font-bold text-slate-950">{puppyName(puppy)}</p>
+                <p className="mt-1 text-sm text-slate-500">External reference {display(puppy.external_reference, "Not recorded")}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge tone={statusTone(puppy.status)}>{display(puppy.status, "Unknown")}</Badge>
+                <Badge>{display(puppy.public_listing_status, "Private")}</Badge>
+              </div>
+            </div>
+            <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-3">
+              <InfoItem label="Sex" value={display(puppy.sex)} />
+              <InfoItem label="Color" value={display(puppy.color)} />
+              <InfoItem label="Coat" value={display(puppy.coat_type)} />
+              <InfoItem label="Collar" value={display(puppy.collar_color)} />
+              <InfoItem label="Health marker" value={display(puppy.health_status)} />
+              <InfoItem label="Registry" value={display(registryValue(puppy.metadata), "Not recorded")} />
+              <InfoItem label="Created" value={formatDateTime(puppy.created_at)} />
+              <InfoItem label="Updated" value={formatDateTime(puppy.updated_at)} />
+              <InfoItem label="Litter ID" value={shortId(puppy.litter_id)} />
+            </dl>
+            {puppy.notes ? <p className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">{puppy.notes}</p> : null}
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Litter And Parents</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Context from linked litter, dam, and sire records when available.</p>
+            </div>
+            {litter ? (
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-slate-950">{litterName(litter)}</p>
+                      <p className="mt-1 text-sm text-slate-500">ID {shortId(litter.id)}</p>
+                    </div>
+                    <Badge tone={statusTone(litter.status)}>{display(litter.status, "Unknown")}</Badge>
+                  </div>
+                  <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                    <InfoItem label="Expected birth" value={formatDate(litter.expected_birth_at)} />
+                    <InfoItem label="Birth date" value={formatDate(litter.birth_at)} />
+                    <InfoItem label="Puppy count" value={litter.total_puppies ?? "Not recorded"} />
+                    <InfoItem label="Female / Male" value={`${litter.female_count ?? "?"} / ${litter.male_count ?? "?"}`} />
+                  </dl>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {[{ label: "Dam", dog: dam }, { label: "Sire", dog: sire }].map(({ label, dog }) => (
+                    <article key={label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-xs font-semibold uppercase text-slate-400">{label}</p>
+                      <p className="mt-2 font-bold text-slate-950">{dogName(dog)}</p>
+                      <dl className="mt-3 grid gap-2 text-sm">
+                        <InfoItem label="Status" value={display(dog?.status)} />
+                        <InfoItem label="Color / coat" value={`${display(dog?.color)} / ${display(dog?.coat_type)}`} />
+                        <InfoItem label="Registry" value={display(registryValue(dog?.metadata), "Not recorded")} />
+                      </dl>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <EmptyState text="This puppy is not linked to a litter row yet." />
+            )}
+          </section>
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Weight Summary</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Observed weights from `core_weight_logs`, stored as integer grams.</p>
+            </div>
+            <dl className="grid gap-4 text-sm sm:grid-cols-2">
+              <InfoItem label="Birth weight" value={weightLabel(birth)} />
+              <InfoItem label="Latest weight" value={weightLabel(latest)} />
+              <InfoItem label="Weight rows" value={weights.length} />
+              <InfoItem label="Last weight date" value={latest ? formatDateTime(latest.measured_at) : "Not recorded"} />
+            </dl>
+            <p className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              Weight entries are factual observations only. This page does not interpret trends as medical conclusions.
+            </p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Weight History / Timeline</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Newest local observations remain stored in Core; no new rows are created here.</p>
+            </div>
+            {weights.length > 0 ? (
+              <div className="space-y-3">
+                {weights.map((weight) => (
+                  <article key={weight.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-bold text-slate-950">{weightLabel(weight)}</p>
+                        <p className="mt-1 text-sm text-slate-500">{formatDateTime(weight.measured_at)}</p>
+                      </div>
+                      <Badge>Weight</Badge>
+                    </div>
+                    {weight.notes ? <p className="mt-3 text-sm leading-6 text-slate-700">{weight.notes}</p> : null}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState text="No weight history has been recorded for this puppy yet." />
+            )}
+          </section>
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Care / Observation History</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Factual puppy care rows from `core_puppy_events`.</p>
+            </div>
+            {careEvents.length > 0 ? (
+              <div className="space-y-3">
+                {careEvents.map((event) => (
+                  <article key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-slate-950">{display(event.summary, formatKey(event.event_type))}</p>
+                        <p className="mt-1 text-sm text-slate-500">{formatDateTime(event.event_at)} / actor {shortId(event.recorded_by_profile_id)}</p>
+                      </div>
+                      <Badge>{formatKey(event.event_type)}</Badge>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{safeDetails(event.details)}</p>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState text="No care or observation history has been recorded for this puppy yet." />
+            )}
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Watch / Attention Flags</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Deterministic owner review flags from existing Core status, identity, notes, events, and weight presence.</p>
+            </div>
+            {watchSignals.length > 0 ? (
+              <div className="space-y-3">
+                {watchSignals.map((signal) => (
+                  <div key={signal} className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm leading-6 text-amber-950">{signal}</div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState text="No deterministic watch flags were found from current Core rows." />
+            )}
+          </section>
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Event Context</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Safely linked `core_events` rows by puppy id or related puppy entity.</p>
+            </div>
+            {operationalEvents.length > 0 ? (
+              <div className="space-y-3">
+                {operationalEvents.map((event) => (
+                  <article key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-slate-950">{display(event.summary, formatKey(event.event_type))}</p>
+                        <p className="mt-1 text-sm text-slate-500">{formatDateTime(event.event_at)} / {display(event.source, "source unknown")}</p>
+                      </div>
+                      <Badge>{formatKey(event.event_type)}</Badge>
+                    </div>
+                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                      <InfoItem label="Related" value={`${display(event.related_table)} / ${shortId(event.related_id)}`} />
+                      <InfoItem label="Reservation" value={shortId(event.reservation_id)} />
+                    </dl>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{safeDetails(event.details)}</p>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState text="No linked operational event rows were found for this puppy." />
+            )}
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">Audit Context</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Owner/admin review of safely linked `core_audit_log` rows for this puppy.</p>
+            </div>
+            {!canViewAudit ? (
+              <EmptyState text="Audit context is restricted to owner/admin profiles." />
+            ) : auditResult.rows.length > 0 ? (
+              <div className="space-y-3">
+                {auditResult.rows.map((audit) => (
+                  <article key={audit.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-slate-950">{formatKey(audit.action)}</p>
+                        <p className="mt-1 text-sm text-slate-500">{formatDateTime(audit.created_at)} / {display(audit.source, "source unknown")}</p>
+                      </div>
+                      <Badge tone={outcomeTone(audit.outcome)}>{display(audit.outcome, "Unknown")}</Badge>
+                    </div>
+                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                      <InfoItem label="Actor" value={`${shortId(audit.actor_profile_id)} / ${display(audit.actor_type)}`} />
+                      <InfoItem label="Entity" value={`${display(audit.entity_table)} / ${shortId(audit.entity_id)}`} />
+                      <InfoItem label="Context" value={safeDetails(audit.request_context)} />
+                      <InfoItem label="Error" value={display(audit.error_message, "None")} />
+                    </dl>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState text="No linked audit rows were found for this puppy." />
+            )}
+          </section>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold">Related Links</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Internal navigation only. These links do not change records or contact outside systems.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Puppy List</Link>
+            <Link href={`/staff/puppies/${puppy.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit Puppy</Link>
+            {litter ? <Link href={`/staff/litters/${litter.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit Litter</Link> : null}
+            {dam ? <Link href={`/staff/dogs/${dam.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Dam</Link> : null}
+            {sire ? <Link href={`/staff/dogs/${sire.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Sire</Link> : null}
+            <Link href="/staff/dogs" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Dogs</Link>
+            <Link href="/staff/litters" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Litters</Link>
+            <Link href="/staff/kennel-logs" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Kennel Logs</Link>
+            <Link href="/staff/events" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Events</Link>
+            <Link href="/staff/command" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Command</Link>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

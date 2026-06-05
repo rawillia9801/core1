@@ -41,6 +41,7 @@ Core-native owner/operator operating system foundation
   -> Neonatal Litter Command workflow added
   -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
+  -> Individual Puppy Detail / Neonatal Growth Timeline added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -363,6 +364,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] `core_record_puppy_care_observation(...)` added as an owner/admin controlled RPC for factual care observations using allowed observation types only.
 - [x] Weight/care log actions write `core_events` and `core_audit_log`.
 - [x] Weight/care log workflow remains internal owner/operator observation logging only: no diagnosis, customer messages, public puppy publishing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, documents, payments, or external providers were added.
+- [x] Individual Puppy Detail / Neonatal Growth Timeline added at `/staff/puppies/[puppyId]`.
+- [x] Puppy detail links were added from `/staff/puppies`.
+- [x] Puppy detail uses existing puppy, litter, dam/sire, weight, care observation, event, and safely linkable audit context only.
+- [x] Puppy detail remains internal owner/operator observation review only: no diagnosis, customer messages, public puppy publishing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, documents, payments, or external providers were added.
 
 ### 1.13 Future Core Command Console
 
