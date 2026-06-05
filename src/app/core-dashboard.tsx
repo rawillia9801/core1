@@ -67,6 +67,55 @@ function RestrictedPanel({ text }: { text: string }) {
   );
 }
 
+function TaskList({
+  tasks,
+  emptyText,
+}: {
+  tasks: {
+    id: string;
+    title: string;
+    detail: string;
+    meta: string;
+    tone: string;
+    links: {
+      href: string;
+      label: string;
+    }[];
+  }[];
+  emptyText: string;
+}) {
+  if (tasks.length === 0) {
+    return <EmptyList text={emptyText} />;
+  }
+
+  return (
+    <div className="space-y-3">
+      {tasks.map((task) => (
+        <article key={task.id} className={`rounded-2xl border p-4 ${task.tone}`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="font-semibold">{task.title}</p>
+              <p className="mt-1 text-sm leading-6">{task.detail}</p>
+              <p className="mt-2 text-xs font-semibold uppercase tracking-wide opacity-75">{task.meta}</p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              {task.links.map((link) => (
+                <Link
+                  key={`${task.id}-${link.href}-${link.label}`}
+                  href={link.href}
+                  className="rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 function WorkflowNotice({ searchParams }: { searchParams: SearchParams }) {
   const notices = [
     searchParams.application === "created"
@@ -199,6 +248,73 @@ export default async function CoreDashboard({
               <p className="mt-2 text-sm leading-6 text-slate-500">{link.helper}</p>
             </Link>
           ))}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">
+                Today&apos;s Care Checklist
+              </p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
+                Kennel Daily Task Board
+              </h2>
+              <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
+                This board is an internal owner/operator checklist only. It does not diagnose puppies, send messages, process payments, generate documents, publish listings, update the portal, or call external providers.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-950">
+              {dashboard.taskBoard.totalTasks} task{dashboard.taskBoard.totalTasks === 1 ? "" : "s"} from current Core metadata
+            </div>
+          </div>
+
+          {dashboard.taskBoard.totalTasks === 0 ? (
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm font-semibold text-emerald-900">
+              No urgent tasks found from current Core metadata.
+            </div>
+          ) : null}
+
+          <div className="mt-6 grid gap-5 xl:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-4">
+                <h3 className="font-semibold text-slate-950">Newborn / Puppy Care Today</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Recent litter puppies with missing today weight, latest weight, or deterministic watch flags.</p>
+              </div>
+              <TaskList tasks={dashboard.taskBoard.newbornPuppyCare} emptyText="No newborn puppy care tasks found from current weight and care metadata." />
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-4">
+                <h3 className="font-semibold text-slate-950">Expected Litters / Whelping Prep</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Upcoming expected litters and setup flags from existing litter records.</p>
+              </div>
+              <TaskList tasks={dashboard.taskBoard.expectedLitters} emptyText="No expected litter prep tasks found from current litter metadata." />
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-4">
+                <h3 className="font-semibold text-slate-950">Go-Home Readiness Today / Upcoming</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Upcoming go-home records plus payment, document, and checklist blockers where available.</p>
+              </div>
+              <TaskList tasks={dashboard.taskBoard.goHomeReadiness} emptyText="No go-home readiness tasks found from current reservation metadata." />
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-4">
+                <h3 className="font-semibold text-slate-950">Payment / Document / Communication Attention</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Read-only attention items. No sending, payment processing, or document generation is connected.</p>
+              </div>
+              <TaskList tasks={dashboard.taskBoard.accountAttention} emptyText="No payment, document, or communication attention items found from current metadata." />
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 xl:col-span-2">
+              <div className="mb-4">
+                <h3 className="font-semibold text-slate-950">Kennel Record Maintenance</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Dogs, litters, and puppies with safely derivable missing basic metadata. No automatic changes are made.</p>
+              </div>
+              <TaskList tasks={dashboard.taskBoard.kennelMaintenance} emptyText="No kennel record maintenance tasks found from current dog, litter, and puppy metadata." />
+            </div>
+          </div>
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">

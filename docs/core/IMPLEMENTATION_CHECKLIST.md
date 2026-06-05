@@ -42,6 +42,7 @@ Core-native owner/operator operating system foundation
   -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> Individual Puppy Detail / Neonatal Growth Timeline added
+  -> Kennel Daily Task Board / Today's Care Checklist added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -368,6 +369,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Puppy detail links were added from `/staff/puppies`.
 - [x] Puppy detail uses existing puppy, litter, dam/sire, weight, care observation, event, and safely linkable audit context only.
 - [x] Puppy detail remains internal owner/operator observation review only: no diagnosis, customer messages, public puppy publishing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, documents, payments, or external providers were added.
+- [x] Kennel Daily Task Board / Today's Care Checklist added to `/staff`.
+- [x] Daily task board derives tasks from existing Core puppy, litter, weight, care observation, reservation, go-home, payment, document, notification, dog, and kennel metadata.
+- [x] Daily task board remains internal owner/operator task visibility only: no diagnosis, customer messages, public puppy publishing, payment processing, document generation, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, or external providers were added.
 
 ### 1.13 Future Core Command Console
 

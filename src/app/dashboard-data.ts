@@ -50,6 +50,29 @@ type DashboardGoHome = {
   status: string;
 };
 
+type DashboardTaskLink = {
+  href: string;
+  label: string;
+};
+
+type DashboardTask = {
+  id: string;
+  title: string;
+  detail: string;
+  meta: string;
+  tone: string;
+  links: DashboardTaskLink[];
+};
+
+type DashboardTaskBoard = {
+  totalTasks: number;
+  newbornPuppyCare: DashboardTask[];
+  expectedLitters: DashboardTask[];
+  goHomeReadiness: DashboardTask[];
+  accountAttention: DashboardTask[];
+  kennelMaintenance: DashboardTask[];
+};
+
 type DashboardReservation = {
   id: string;
   reservationId: string;
@@ -151,13 +174,63 @@ type BuyerRow = {
 
 type PuppyRow = {
   id: string;
+  litter_id?: string | null;
   name: string | null;
   collar_color: string | null;
   sex: string | null;
+  color?: string | null;
+  coat_type?: string | null;
+  birth_at?: string | null;
+  status?: string | null;
+  health_status?: string | null;
+  public_listing_status?: string | null;
+  notes?: string | null;
 };
 
 type AvailablePuppyRow = PuppyRow & {
   status: string | null;
+};
+
+type DogRow = {
+  id: string;
+  registered_name: string | null;
+  call_name: string | null;
+  sex: string | null;
+  color: string | null;
+  coat_type: string | null;
+  birth_at: string | null;
+  status: string | null;
+};
+
+type LitterRow = {
+  id: string;
+  litter_name: string | null;
+  dam_id: string | null;
+  sire_id: string | null;
+  expected_birth_at: string | null;
+  birth_at: string | null;
+  total_puppies: number | null;
+  female_count: number | null;
+  male_count: number | null;
+  status: string | null;
+  details_pending: boolean | null;
+  notes: string | null;
+};
+
+type WeightLogRow = {
+  id: string;
+  puppy_id: string | null;
+  measured_at: string | null;
+  weight_grams: number | null;
+};
+
+type PuppyEventRow = {
+  id: string;
+  puppy_id: string | null;
+  event_type: string | null;
+  event_at: string | null;
+  summary: string | null;
+  details: Record<string, unknown> | null;
 };
 
 type ReservationRow = {
@@ -182,6 +255,11 @@ type ReservationSummaryRow = {
   contract_total_cents: number | null;
   deposit_required_cents: number | null;
   balance_due_cents: number | null;
+  go_home_planned_at?: string | null;
+  go_home_status?: string | null;
+  go_home_detail_status?: string | null;
+  go_home_checklist_status?: string | null;
+  go_home_balance_cleared_status?: string | null;
 };
 
 type PaymentBalanceRow = {
@@ -213,6 +291,34 @@ type GoHomeRow = {
   effective_status: string | null;
   source_of_schedule: string | null;
   has_individual_override: boolean | null;
+};
+
+type ChecklistItemRow = {
+  id: string;
+  reservation_id: string | null;
+  item_key: string | null;
+  label: string | null;
+  status: string | null;
+};
+
+type DocumentRow = {
+  id: string;
+  reservation_id: string | null;
+  buyer_id: string | null;
+  family_id: string | null;
+  puppy_id: string | null;
+  document_type: string | null;
+  title: string | null;
+  status: string | null;
+};
+
+type NotificationRow = {
+  id: string;
+  notification_type: string | null;
+  channel: string | null;
+  status: string | null;
+  payload: Record<string, unknown> | null;
+  created_at: string | null;
 };
 
 type PhoneLookupRow = {
@@ -270,6 +376,7 @@ export type DashboardData = {
   events: DashboardEvent[];
   workflowActivity: DashboardWorkflowActivity[];
   ledgerActivity: DashboardLedgerActivity[];
+  taskBoard: DashboardTaskBoard;
   readScopes: DashboardReadScopes;
   dataSourceLabel: string;
   dataWarning: string | null;
@@ -294,6 +401,16 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "2-digit",
 });
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+});
+
+const NEONATAL_WINDOW_DAYS = 21;
+const EXPECTED_LITTER_WINDOW_DAYS = 21;
+const GO_HOME_WINDOW_DAYS = 14;
+const ATTENTION_TERMS = ["weak", "watch", "fading", "not nursing", "cold", "losing", "loss", "risk", "concern"];
 
 export const foundationChecks = [
   "Migrations apply locally",
@@ -369,6 +486,20 @@ function formatScheduledDateTime(value: string | null | undefined) {
   return formatDateTime(value);
 }
 
+function formatDate(value: string | null | undefined) {
+  if (!value) {
+    return "Not available";
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "Not available";
+  }
+
+  return dateFormatter.format(parsed);
+}
+
 function sortTime(value: string | null | undefined) {
   if (!value) {
     return 0;
@@ -381,6 +512,44 @@ function sortTime(value: string | null | undefined) {
 
 function shortId(value: string | null | undefined) {
   return value ? value.slice(0, 8) : "Not linked";
+}
+
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function daysSince(value: string | null | undefined) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return Math.floor((Date.now() - parsed.getTime()) / 86_400_000);
+}
+
+function daysUntil(value: string | null | undefined) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const startOfDate = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()).getTime();
+  return Math.round((startOfDate - startOfToday) / 86_400_000);
+}
+
+function isSameLocalDay(value: string | null | undefined, comparison = new Date()) {
+  if (!value) return false;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getFullYear() === comparison.getFullYear() && parsed.getMonth() === comparison.getMonth() && parsed.getDate() === comparison.getDate();
+}
+
+function isWithinFutureDays(value: string | null | undefined, days: number) {
+  const until = daysUntil(value);
+  return until !== null && until >= 0 && until <= days;
+}
+
+function hasAttentionText(...values: Array<string | null | undefined>) {
+  const text = normalizeText(values.filter(Boolean).join(" "));
+  return ATTENTION_TERMS.some((term) => text.includes(term));
 }
 
 function buyerName(buyer: BuyerRow | undefined) {
@@ -427,6 +596,53 @@ function formatResponseValue(value: unknown): string {
   }
 
   return JSON.stringify(value);
+}
+
+function dogName(dog: DogRow | undefined) {
+  if (!dog) {
+    return "Unnamed dog";
+  }
+
+  return dog.call_name || dog.registered_name || `Dog ${shortId(dog.id)}`;
+}
+
+function litterName(litter: LitterRow | undefined) {
+  if (!litter) {
+    return "Unlinked litter";
+  }
+
+  return litter.litter_name || `Litter ${shortId(litter.id)}`;
+}
+
+function weightLabel(weight: WeightLogRow | null | undefined) {
+  if (!weight || typeof weight.weight_grams !== "number") {
+    return "No weight recorded";
+  }
+
+  return `${weight.weight_grams} g`;
+}
+
+function latestWeight(weights: WeightLogRow[]) {
+  return [...weights].sort((a, b) => sortTime(b.measured_at) - sortTime(a.measured_at))[0] ?? null;
+}
+
+function isNewbornLitter(litter: LitterRow) {
+  const age = daysSince(litter.birth_at);
+  const status = normalizeText(litter.status);
+  return (age !== null && age >= 0 && age <= NEONATAL_WINDOW_DAYS) || ["born", "active", "newborn", "neonatal"].includes(status);
+}
+
+function isExpectedLitterTask(litter: LitterRow) {
+  const status = normalizeText(litter.status);
+  return !litter.birth_at && (isWithinFutureDays(litter.expected_birth_at, EXPECTED_LITTER_WINDOW_DAYS) || ["planned", "expected", "pending"].includes(status));
+}
+
+function taskTone(kind: "amber" | "blue" | "emerald" | "rose" | "slate") {
+  if (kind === "amber") return "border-amber-200 bg-amber-50 text-amber-950";
+  if (kind === "blue") return "border-blue-200 bg-blue-50 text-blue-950";
+  if (kind === "emerald") return "border-emerald-200 bg-emerald-50 text-emerald-950";
+  if (kind === "rose") return "border-rose-200 bg-rose-50 text-rose-950";
+  return "border-slate-200 bg-slate-50 text-slate-700";
 }
 
 function safeTextValue(value: unknown) {
@@ -513,6 +729,14 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     events: [],
     workflowActivity: [],
     ledgerActivity: [],
+    taskBoard: {
+      totalTasks: 0,
+      newbornPuppyCare: [],
+      expectedLitters: [],
+      goHomeReadiness: [],
+      accountAttention: [],
+      kennelMaintenance: [],
+    },
     readScopes: {
       canViewSensitiveFinancials: false,
       canViewAuditActivity: false,
@@ -665,6 +889,14 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
       workflowEvents,
       auditLogs,
       ledgerRows,
+      dogsForTasks,
+      littersForTasks,
+      puppiesForTasks,
+      weightsForTasks,
+      puppyEventsForTasks,
+      checklistItemsForTasks,
+      documentsForTasks,
+      notificationsForTasks,
     ] = await Promise.all([
       readCount(restUrl, serviceRoleKey, "core_applications"),
       readCount(restUrl, serviceRoleKey, "core_applications", {
@@ -689,9 +921,9 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
       readCount(restUrl, serviceRoleKey, "core_reservations"),
       readRows<ReservationSummaryRow>(restUrl, serviceRoleKey, "core_reservation_summary_view", {
         select:
-          "reservation_id,reservation_status,reserved_at,buyer_id,buyer_name,buyer_email,puppy_id,puppy_name,puppy_status,application_id,contract_total_cents,deposit_required_cents,balance_due_cents",
+          "reservation_id,reservation_status,reserved_at,buyer_id,buyer_name,buyer_email,puppy_id,puppy_name,puppy_status,application_id,contract_total_cents,deposit_required_cents,balance_due_cents,go_home_planned_at,go_home_status,go_home_detail_status,go_home_checklist_status,go_home_balance_cleared_status",
         order: "reserved_at.desc.nullslast",
-        limit: "5",
+        limit: "100",
       }),
       readRows<PaymentBalanceRow>(restUrl, serviceRoleKey, "core_payment_balance_view", {
         select: "reservation_id,balance_due_cents",
@@ -745,6 +977,50 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
               "in.(deposit,payment,credit,refund,chargeback,fee,admin_fee,transport_fee,finance_charge,adjustment)",
             order: "occurred_at.desc",
             limit: "15",
+          })
+        : Promise.resolve([]),
+      readRows<DogRow>(restUrl, serviceRoleKey, "core_dogs", {
+        select: "id,registered_name,call_name,sex,color,coat_type,birth_at,status",
+        order: "updated_at.desc",
+        limit: "250",
+      }),
+      readRows<LitterRow>(restUrl, serviceRoleKey, "core_litters", {
+        select: "id,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes",
+        order: "updated_at.desc",
+        limit: "250",
+      }),
+      readRows<PuppyRow>(restUrl, serviceRoleKey, "core_puppies", {
+        select: "id,litter_id,name,collar_color,sex,color,coat_type,birth_at,status,health_status,public_listing_status,notes",
+        order: "updated_at.desc",
+        limit: "500",
+      }),
+      readRows<WeightLogRow>(restUrl, serviceRoleKey, "core_weight_logs", {
+        select: "id,puppy_id,measured_at,weight_grams",
+        order: "measured_at.desc",
+        limit: "1000",
+      }),
+      readRows<PuppyEventRow>(restUrl, serviceRoleKey, "core_puppy_events", {
+        select: "id,puppy_id,event_type,event_at,summary,details",
+        order: "event_at.desc",
+        limit: "500",
+      }),
+      readRows<ChecklistItemRow>(restUrl, serviceRoleKey, "core_go_home_checklist_items", {
+        select: "id,reservation_id,item_key,label,status",
+        order: "updated_at.desc",
+        limit: "500",
+      }),
+      readScopes.canViewSensitiveFinancials
+        ? readRows<DocumentRow>(restUrl, serviceRoleKey, "core_documents", {
+            select: "id,reservation_id,buyer_id,family_id,puppy_id,document_type,title,status",
+            order: "updated_at.desc",
+            limit: "500",
+          })
+        : Promise.resolve([]),
+      readScopes.canViewAuditActivity
+        ? readRows<NotificationRow>(restUrl, serviceRoleKey, "core_notifications", {
+            select: "id,notification_type,channel,status,payload,created_at",
+            order: "created_at.desc",
+            limit: "100",
           })
         : Promise.resolve([]),
     ]);
@@ -821,6 +1097,38 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
 
     const buyersById = new Map(buyers.map((buyer) => [buyer.id, buyer]));
     const puppiesById = new Map(puppies.map((puppy) => [puppy.id, puppy]));
+    const taskLittersById = new Map(littersForTasks.map((litter) => [litter.id, litter]));
+    const taskWeightsByPuppy = new Map<string, WeightLogRow[]>();
+    const taskEventsByPuppy = new Map<string, PuppyEventRow[]>();
+    const taskChecklistByReservation = new Map<string, ChecklistItemRow[]>();
+    const taskDocumentsByReservation = new Map<string, DocumentRow[]>();
+
+    for (const weight of weightsForTasks) {
+      if (!weight.puppy_id) continue;
+      taskWeightsByPuppy.set(weight.puppy_id, [...(taskWeightsByPuppy.get(weight.puppy_id) ?? []), weight]);
+    }
+
+    for (const event of puppyEventsForTasks) {
+      if (!event.puppy_id) continue;
+      taskEventsByPuppy.set(event.puppy_id, [...(taskEventsByPuppy.get(event.puppy_id) ?? []), event]);
+    }
+
+    for (const checklistItem of checklistItemsForTasks) {
+      if (!checklistItem.reservation_id) continue;
+      taskChecklistByReservation.set(checklistItem.reservation_id, [
+        ...(taskChecklistByReservation.get(checklistItem.reservation_id) ?? []),
+        checklistItem,
+      ]);
+    }
+
+    for (const document of documentsForTasks) {
+      if (!document.reservation_id) continue;
+      taskDocumentsByReservation.set(document.reservation_id, [
+        ...(taskDocumentsByReservation.get(document.reservation_id) ?? []),
+        document,
+      ]);
+    }
+
     const applicationsById = new Map(applications.map((application) => [application.id, application]));
     const reservationApplicationsById = new Map(
       reservationApplications.map((application) => [application.id, application]),
@@ -841,6 +1149,196 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
       (sum, balance) => sum + Math.max(balance.balance_due_cents ?? 0, 0),
       0,
     );
+    const activeReservations = reservations.filter((reservation) => !["cancelled", "void", "released"].includes(normalizeText(reservation.reservation_status)));
+    const newbornPuppyCare: DashboardTask[] = puppiesForTasks
+      .filter((puppy) => {
+        const litter = puppy.litter_id ? taskLittersById.get(puppy.litter_id) : undefined;
+        const age = daysSince(puppy.birth_at ?? litter?.birth_at);
+        return (litter && isNewbornLitter(litter)) || (age !== null && age >= 0 && age <= NEONATAL_WINDOW_DAYS);
+      })
+      .flatMap((puppy) => {
+        const litter = puppy.litter_id ? taskLittersById.get(puppy.litter_id) : undefined;
+        const weights = taskWeightsByPuppy.get(puppy.id) ?? [];
+        const eventsForPuppy = taskEventsByPuppy.get(puppy.id) ?? [];
+        const latest = latestWeight(weights);
+        const signals = [
+          weights.length === 0 ? "No weight history recorded." : null,
+          !weights.some((weight) => isSameLocalDay(weight.measured_at)) ? "Missing weight today." : null,
+          hasAttentionText(puppy.health_status, puppy.notes) ? "Health marker or notes include watch terms." : null,
+          eventsForPuppy.some((event) => hasAttentionText(event.event_type, event.summary, JSON.stringify(event.details ?? {})))
+            ? "Care history includes watch terms."
+            : null,
+          ["watch", "at risk", "at_risk", "deceased", "unavailable"].includes(normalizeText(puppy.status))
+            ? `Status is ${puppy.status ?? "unknown"}.`
+            : null,
+        ].filter(Boolean) as string[];
+
+        if (signals.length === 0) return [];
+
+        return [{
+          id: `puppy-care-${puppy.id}`,
+          title: puppyName(puppy),
+          detail: signals.join(" "),
+          meta: `${litterName(litter)} / latest weight ${weightLabel(latest)}`,
+          tone: taskTone(signals.some((signal) => signal.toLowerCase().includes("watch") || signal.includes("Status")) ? "amber" : "blue"),
+          links: [
+            { href: `/staff/puppies/${puppy.id}`, label: "Open timeline" },
+            { href: "/staff/litters", label: "Litter command" },
+          ],
+        }];
+      })
+      .slice(0, 8);
+    const expectedLitters: DashboardTask[] = littersForTasks
+      .filter(isExpectedLitterTask)
+      .map((litter) => {
+        const until = daysUntil(litter.expected_birth_at);
+        const flags = [
+          !litter.expected_birth_at ? "Expected birth date is missing." : null,
+          !litter.dam_id ? "Dam is not linked." : null,
+          !litter.sire_id ? "Sire is not linked." : null,
+          !litter.status ? "Status is missing." : null,
+          litter.details_pending ? "Details are marked pending." : null,
+        ].filter(Boolean) as string[];
+
+        return {
+          id: `expected-litter-${litter.id}`,
+          title: litterName(litter),
+          detail: flags.length > 0 ? flags.join(" ") : "Expected litter is inside the upcoming prep window.",
+          meta: until === null ? `Expected date ${formatDate(litter.expected_birth_at)}` : until === 0 ? "Expected today" : `${until} day${until === 1 ? "" : "s"} until expected birth`,
+          tone: taskTone(flags.length > 0 ? "amber" : "blue"),
+          links: [
+            { href: "/staff/litters", label: "Litters page" },
+            { href: `/staff/litters/${litter.id}/edit`, label: "Edit litter" },
+          ],
+        };
+      })
+      .slice(0, 8);
+    const goHomeReadiness: DashboardTask[] = activeReservations
+      .filter((reservation) => {
+        const isUpcoming = isWithinFutureDays(reservation.go_home_planned_at, GO_HOME_WINDOW_DAYS);
+        const hasBlocker =
+          (reservation.balance_due_cents ?? 0) > 0 ||
+          !reservation.go_home_planned_at ||
+          !["ready", "complete", "completed"].includes(normalizeText(reservation.go_home_detail_status)) ||
+          !["ready", "complete", "completed"].includes(normalizeText(reservation.go_home_checklist_status)) ||
+          !["cleared", "ready", "complete", "completed"].includes(normalizeText(reservation.go_home_balance_cleared_status));
+        return isUpcoming || hasBlocker;
+      })
+      .map((reservation) => {
+        const checklistItems = taskChecklistByReservation.get(reservation.reservation_id) ?? [];
+        const incompleteChecklist = checklistItems.filter((item) => !["complete", "completed", "done"].includes(normalizeText(item.status))).length;
+        const blockers = [
+          (reservation.balance_due_cents ?? 0) > 0 ? `Balance due ${formatOptionalCurrencyFromCents(reservation.balance_due_cents)}.` : null,
+          !reservation.go_home_planned_at ? "Go-home time is not scheduled." : null,
+          incompleteChecklist > 0 ? `${incompleteChecklist} checklist item${incompleteChecklist === 1 ? "" : "s"} not complete.` : null,
+          normalizeText(reservation.go_home_detail_status) && !["ready", "complete", "completed"].includes(normalizeText(reservation.go_home_detail_status))
+            ? `Detail status is ${reservation.go_home_detail_status}.`
+            : null,
+        ].filter(Boolean) as string[];
+
+        return {
+          id: `go-home-${reservation.reservation_id}`,
+          title: reservation.puppy_name || `Reservation ${shortId(reservation.reservation_id)}`,
+          detail: blockers.length > 0 ? blockers.join(" ") : "Upcoming go-home record needs routine owner review.",
+          meta: `${reservation.buyer_name || "Unassigned buyer"} / ${formatScheduledDateTime(reservation.go_home_planned_at)}`,
+          tone: taskTone(blockers.length > 0 ? "amber" : "blue"),
+          links: [
+            { href: "/staff/go-home", label: "Go-home board" },
+            { href: `/staff/reservations/${reservation.reservation_id}`, label: "Reservation readiness" },
+          ],
+        };
+      })
+      .slice(0, 8);
+    const accountAttention: DashboardTask[] = [
+      ...activeReservations
+        .filter((reservation) => readScopes.canViewSensitiveFinancials && (reservation.balance_due_cents ?? 0) > 0)
+        .map((reservation) => ({
+          id: `balance-${reservation.reservation_id}`,
+          title: reservation.buyer_name || `Reservation ${shortId(reservation.reservation_id)}`,
+          detail: `Ledger-derived balance due is ${formatOptionalCurrencyFromCents(reservation.balance_due_cents)}.`,
+          meta: reservation.puppy_name || "Unassigned puppy",
+          tone: taskTone("amber"),
+          links: [
+            { href: "/staff/payments", label: "Payments" },
+            { href: `/staff/reservations/${reservation.reservation_id}`, label: "Reservation" },
+          ],
+        })),
+      ...activeReservations
+        .filter((reservation) => readScopes.canViewSensitiveFinancials && (taskDocumentsByReservation.get(reservation.reservation_id) ?? []).length === 0)
+        .map((reservation) => ({
+          id: `documents-${reservation.reservation_id}`,
+          title: reservation.puppy_name || `Reservation ${shortId(reservation.reservation_id)}`,
+          detail: "No document metadata is linked to this reservation yet.",
+          meta: reservation.buyer_name || "Unassigned buyer",
+          tone: taskTone("blue"),
+          links: [
+            { href: "/staff/documents", label: "Documents" },
+            { href: `/staff/reservations/${reservation.reservation_id}`, label: "Reservation" },
+          ],
+        })),
+      ...notificationsForTasks
+        .filter((notification) => ["queued", "blocked", "failed", "preview", "previewed"].includes(normalizeText(notification.status)))
+        .map((notification) => ({
+          id: `notification-${notification.id}`,
+          title: safeTextValue(notification.payload?.subject_preview) || safeTextValue(notification.payload?.subject) || notification.notification_type || `Notification ${shortId(notification.id)}`,
+          detail: `Preview/queue status is ${notification.status ?? "unknown"}. No sending is connected.`,
+          meta: safeTextValue(notification.payload?.recipient_email) || notification.channel || "No recipient recorded",
+          tone: taskTone(normalizeText(notification.status) === "failed" ? "rose" : "blue"),
+          links: [
+            { href: "/staff/messages", label: "Messages" },
+            { href: "/staff/notifications", label: "Notifications" },
+          ],
+        })),
+    ].slice(0, 10);
+    const kennelMaintenance: DashboardTask[] = [
+      ...puppiesForTasks
+        .filter((puppy) => !puppy.litter_id || !puppy.sex || !puppy.color || !puppy.coat_type || !puppy.birth_at || !puppy.status)
+        .map((puppy) => ({
+          id: `puppy-maintenance-${puppy.id}`,
+          title: puppyName(puppy),
+          detail: "Basic puppy metadata is incomplete.",
+          meta: [!puppy.litter_id ? "missing litter" : null, !puppy.sex ? "missing sex" : null, !puppy.color ? "missing color" : null, !puppy.birth_at ? "missing birth date" : null].filter(Boolean).join(" / "),
+          tone: taskTone("slate"),
+          links: [
+            { href: `/staff/puppies/${puppy.id}`, label: "Open timeline" },
+            { href: `/staff/puppies/${puppy.id}/edit`, label: "Edit puppy" },
+          ],
+        })),
+      ...littersForTasks
+        .filter((litter) => !litter.dam_id || !litter.sire_id || (!litter.expected_birth_at && !litter.birth_at) || !litter.status)
+        .map((litter) => ({
+          id: `litter-maintenance-${litter.id}`,
+          title: litterName(litter),
+          detail: "Basic litter setup metadata is incomplete.",
+          meta: [!litter.dam_id ? "missing dam" : null, !litter.sire_id ? "missing sire" : null, !litter.expected_birth_at && !litter.birth_at ? "missing date" : null].filter(Boolean).join(" / "),
+          tone: taskTone("slate"),
+          links: [
+            { href: "/staff/litters", label: "Litters" },
+            { href: `/staff/litters/${litter.id}/edit`, label: "Edit litter" },
+          ],
+        })),
+      ...dogsForTasks
+        .filter((dog) => (!dog.call_name && !dog.registered_name) || !dog.sex || !dog.status)
+        .map((dog) => ({
+          id: `dog-maintenance-${dog.id}`,
+          title: dogName(dog),
+          detail: "Basic dog metadata is incomplete.",
+          meta: [!dog.call_name && !dog.registered_name ? "missing name" : null, !dog.sex ? "missing sex" : null, !dog.status ? "missing status" : null].filter(Boolean).join(" / "),
+          tone: taskTone("slate"),
+          links: [
+            { href: "/staff/dogs", label: "Dogs" },
+            { href: `/staff/dogs/${dog.id}/edit`, label: "Edit dog" },
+          ],
+        })),
+    ].slice(0, 10);
+    const taskBoard = {
+      totalTasks: newbornPuppyCare.length + expectedLitters.length + goHomeReadiness.length + accountAttention.length + kennelMaintenance.length,
+      newbornPuppyCare,
+      expectedLitters,
+      goHomeReadiness,
+      accountAttention,
+      kennelMaintenance,
+    };
     const workflowActivity = [
       ...workflowEvents.map((event) => {
         const details = event.details ?? {};
@@ -1061,6 +1559,7 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
           occurredAt: formatDateTime(ledger.occurred_at),
         };
       }),
+      taskBoard,
       readScopes,
       dataSourceLabel: "Local Supabase read-only",
       dataWarning: null,

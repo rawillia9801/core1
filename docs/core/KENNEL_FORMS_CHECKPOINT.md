@@ -75,6 +75,9 @@ Verified results:
 - Individual Puppy Detail / Neonatal Growth Timeline was added at `/staff/puppies/[puppyId]`.
 - The puppy timeline uses existing puppy, litter, dam/sire, weight, care observation, event, and safely linkable audit data only.
 - The puppy timeline is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update the portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
+- Kennel Daily Task Board / Today's Care Checklist was added to `/staff`.
+- The daily task board derives owner/operator tasks from existing Core puppy, litter, weight, care, go-home, reservation, payment, document, notification, dog, and kennel metadata.
+- The daily task board is internal task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update the portal, connect smart-home/cameras/devices, call external providers, or add AI.
 
 ## Obsolete Tests Removed
 

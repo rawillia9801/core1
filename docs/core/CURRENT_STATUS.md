@@ -61,6 +61,7 @@ Core-native private application entry
   -> expected litter / whelping prep workflow added to /staff/litters
   -> daily puppy weight/neonatal care log workflow added
   -> individual puppy detail / neonatal growth timeline added
+  -> kennel daily task board / today's care checklist added to /staff
   -> buyers/families/events read-only owner/operator workspaces
 ```
 
@@ -103,6 +104,9 @@ Verified local behavior:
 - `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
 - Puppy detail reads existing puppy, litter, dam/sire, weight, care observation, event, and owner/admin audit context where safely linkable.
 - Puppy detail is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
+- `/staff` now includes an internal Kennel Daily Task Board / Today's Care Checklist.
+- The daily task board derives task visibility from existing Core puppy, litter, weight, care, reservation, go-home, payment, document, notification, dog, and kennel metadata.
+- The daily task board is internal owner/operator task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update a portal, connect smart-home/cameras/devices, call external providers, or add AI.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
@@ -332,6 +336,7 @@ Core-native owner/operator operating system foundation
   -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> Individual Puppy Detail / Neonatal Growth Timeline added
+  -> Kennel Daily Task Board / Today's Care Checklist added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -361,6 +366,7 @@ This pass compared the docs to the local `main` build, not just older documentat
 - Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
 - Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
 - Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
+- Daily task board documented accurately: `/staff` includes an internal owner/operator checklist derived from existing Core metadata and performs no writes or external side effects.
 - Documents/messages documented accurately: `/staff/documents` is an internal metadata/readiness workspace and `/staff/messages` is a read-only Communications Readiness metadata workspace. They do not generate, sign, send, reply, upload, deliver portal links, call providers, connect SMTP/Twilio/Facebook, or expose customer portal messaging.
 - Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions, and the reservation detail plus payment account pages are internal readiness visibility only. Live payment processors, automatic buyer approval, customer messages, documents, refunds, payment links, reminders, money movement, and production use remain blocked.
 - RLS/staging/production documented accurately: first-wave internal RLS exists locally, while remaining table coverage, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.

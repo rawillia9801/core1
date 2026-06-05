@@ -45,6 +45,7 @@ Core-native private application entry
   -> Expected Litters / Whelping Prep workflow added
   -> Daily Puppy Weight / Neonatal Care Log workflow added
   -> Individual Puppy Detail / Neonatal Growth Timeline added
+  -> Kennel Daily Task Board / Today's Care Checklist added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -129,6 +130,9 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
 - Puppy detail uses existing puppy/litter/weight/care data, dam/sire context, deterministic owner attention flags, and safely linkable event/audit context.
 - Puppy detail remains internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, add AI, add external providers, generate documents, or process payments.
+- `/staff` now includes an internal Kennel Daily Task Board / Today's Care Checklist.
+- The task board derives today's owner/operator attention items from existing Core puppy, litter, weight, care, go-home, reservation, payment, document, notification, dog, and kennel metadata.
+- The task board is internal task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update a portal, connect smart-home/cameras/devices, add AI, or call external providers.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
@@ -156,6 +160,7 @@ The following are implemented and have been manually or test verified in local/d
 - The neonatal litter command workflow is internal Core visibility only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect devices/cameras, or add external integrations.
 - The puppy weight/care log workflow is internal Core observation logging only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 - The individual puppy timeline workflow is internal Core observation review only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
+- The daily task board workflow is internal Core task visibility only and does not diagnose, replace veterinary care, publish public listings, update a customer portal, message customers, process payments, generate documents, call providers, connect smart-home/cameras/devices, add AI, or add external integrations.
 
 ## Recently Added / In Progress
 
