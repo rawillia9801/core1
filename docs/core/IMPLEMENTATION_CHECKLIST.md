@@ -243,6 +243,9 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Add approved read-only data coverage for litter context within reservation detail readiness view.
 - [x] Core owner/operator UI styling enhanced through shared global/layout styling while preserving all existing pages, routes, sidebar items, workflows, server actions, queries, auth rules, database behavior, and safety boundaries.
 - [x] Browser-check confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
+- [x] Public/root login landing page rebuilt as the Cherolee Core OS cinematic login experience.
+- [x] `/` and `/login` now use the new owner/operator visual login style while preserving the existing auth flow.
+- [x] Staff routes were not renamed or removed, no private Core data is exposed on the public page, and no external integrations were added.
 - [ ] Add proper loading/empty/error states for all read panels.
 - [ ] Reduce repeated dashboard data reads if `/staff` or child route performance remains slow after `.next` cache clearing.
 - [ ] Replace temporary/local-only data assumptions before staging.
@@ -407,6 +410,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Minimal staff login page added.
 - [x] Protected `/staff` route added with active staff profile requirement.
 - [x] Root `/` route changed to a non-sensitive landing page.
+- [x] Root `/` and `/login` now share the Cherolee Core OS cinematic owner/operator login screen.
+- [x] Invalid login shows styled error feedback and valid owner login still reaches `/staff`.
 - [~] Staff profile lookup maps Supabase Auth user to `core_profiles.auth_user_id`; it currently uses service role server-side as a transitional bridge until production service-role boundaries are reviewed.
 - [~] Separate local/dev service-role usage from staging/production access patterns.
 - [x] Add per-action server-side authorization checks for current dashboard actions.

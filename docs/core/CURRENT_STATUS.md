@@ -70,6 +70,7 @@ Core-native private application entry
 Verified local behavior:
 
 - `/login` works for the local mapped owner profile.
+- Public `/` and `/login` now use the Cherolee Core OS cinematic owner/operator login experience.
 - `/staff` loads for the active owner profile.
 - `/staff/applications/new` creates a Core-native application without Zoho.
 - The application appears in `/staff`.
@@ -138,6 +139,9 @@ Verified local behavior:
 - The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.
 - Core owner/operator UI styling was enhanced through shared global/layout styling only. Existing pages, routes, sidebar items, workflows, server actions, queries, auth rules, database behavior, and safety boundaries were preserved.
 - Browser verification confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
+- The public/root login landing page was rebuilt as a Cherolee Core OS cinematic login experience with `/` and `/login` sharing the new owner/operator visual login style.
+- Auth behavior was preserved: valid owner login still reaches `/staff`, invalid login shows styled error feedback, and staff routes were not renamed or removed.
+- The public login experience exposes no private Core data and adds no external integrations.
 - Document readiness remains metadata-only. It does not generate documents, connect a signing provider, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
 - Communications Readiness remains metadata/preview-only. It does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
 
@@ -284,7 +288,7 @@ Implemented owner/operator auth/access pieces:
 - Supabase Auth packages installed.
 - `/login` provides owner/operator email/password sign-in through the existing technical staff-auth route.
 - `/staff` requires an authenticated Supabase user mapped to an active `core_profiles` profile.
-- `/` is a non-sensitive landing page.
+- `/` is a non-sensitive Cherolee Core OS login landing page and exposes no private Core data.
 - Dashboard reads require authenticated active staff context before broad service-role reads run.
 - Owner/admin users keep full current dashboard read surface.
 - Future helper/staff-role users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
