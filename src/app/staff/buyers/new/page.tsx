@@ -26,9 +26,24 @@ function familyLabel(family: FamilyRow) {
   return family.name || `Family ${family.id.slice(0, 8)}`;
 }
 
-export default async function NewBuyerPage() {
+function buyerMessage(code: string | undefined) {
+  if (code === "migration_missing") return "The production database is missing the buyer/family relationship migration. Run migration 20260526460000_core_puppy_buyer_relationship_tools.sql in Supabase, then retry.";
+  if (code === "duplicate") return "A buyer with that email or phone already exists.";
+  if (code === "configuration") return "Core database configuration is missing for this deployment.";
+  if (code === "invalid") return "Check the buyer fields and try again.";
+  if (code === "failed") return "Buyer save failed. The database rejected the request.";
+  return null;
+}
+
+export default async function NewBuyerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ buyer?: string }>;
+}) {
   const staff = await requireStaffProfile();
   const canEdit = staff.role === "owner" || staff.role === "admin";
+  const { buyer: buyerCode } = await searchParams;
+  const message = buyerMessage(buyerCode);
   const familyResult = await readRows<FamilyRow>("core_families", { select: "id,name,status", order: "created_at.desc", limit: "500" });
 
   return (
@@ -43,6 +58,10 @@ export default async function NewBuyerPage() {
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
           This workspace is for internal owner/operator record correction and buyer assignment only. It does not send messages, process payments, generate documents, publish puppies, update the customer portal, or call external providers.
         </section>
+
+        {message ? (
+          <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{message}</section>
+        ) : null}
 
         {!canEdit ? (
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Only owner/admin can create buyer records.</section>

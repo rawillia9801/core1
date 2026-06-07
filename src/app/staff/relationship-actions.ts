@@ -59,7 +59,15 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
     });
 
     if (!response.ok) {
-      return { ok: false, id: null, code: response.status === 409 ? "duplicate" : "failed" };
+      const bodyText = await response.text().catch(() => "");
+      const isMissingRpc =
+        response.status === 404 &&
+        (bodyText.includes("PGRST202") || bodyText.includes(`/${functionName}`) || bodyText.includes(functionName));
+      return {
+        ok: false,
+        id: null,
+        code: isMissingRpc ? "migration_missing" : response.status === 409 ? "duplicate" : "failed",
+      };
     }
 
     const text = await response.text();
@@ -167,7 +175,11 @@ export async function updateBuyer(formData: FormData) {
 
   revalidateRelationshipPaths();
   revalidatePath(`/staff/buyers/${buyerId.value}`);
-  redirect(`/staff/buyers/${buyerId.value}?buyer=${result.code}`);
+  redirect(
+    result.ok
+      ? `/staff/buyers/${buyerId.value}?buyer=${result.code}`
+      : `/staff/buyers/${buyerId.value}/edit?buyer=${result.code}`,
+  );
 }
 
 export async function createFamily(formData: FormData) {
@@ -223,7 +235,11 @@ export async function updateFamily(formData: FormData) {
 
   revalidateRelationshipPaths();
   revalidatePath(`/staff/families/${familyId.value}`);
-  redirect(`/staff/families/${familyId.value}?family=${result.code}`);
+  redirect(
+    result.ok
+      ? `/staff/families/${familyId.value}?family=${result.code}`
+      : `/staff/families/${familyId.value}/edit?family=${result.code}`,
+  );
 }
 
 export async function linkBuyerFamilyMember(formData: FormData) {
