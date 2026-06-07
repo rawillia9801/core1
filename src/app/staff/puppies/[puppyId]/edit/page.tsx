@@ -34,7 +34,7 @@ function getSupabaseRestConfig() {
 
 async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
-  if (!config) return [] as T[];
+  if (!config) return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for Core edit reads." };
 
   const url = new URL(`${config.restUrl}/${table}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
@@ -45,11 +45,12 @@ async function readRows<T>(table: string, params: Record<string, string>) {
   });
 
   if (!response.ok) {
-    console.error(`[core kennel] ${table} edit read failed`, await response.text().catch(() => ""));
-    return [] as T[];
+    const body = await response.text().catch(() => "");
+    console.error(`[core kennel] ${table} edit read failed`, body);
+    return { rows: [] as T[], warning: `${table} edit read failed: ${response.status} ${body}`.trim() };
   }
 
-  return (await response.json()) as T[];
+  return { rows: (await response.json()) as T[], warning: null };
 }
 
 function dateInput(value: string | null) {
@@ -79,8 +80,9 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
       limit: "500",
     }),
   ]);
-  const puppy = puppies[0];
+  const puppy = puppies.rows[0];
   const canEdit = staff.role === "owner" || staff.role === "admin";
+  const warnings = [puppies.warning, litters.warning].filter(Boolean);
 
   if (!puppy) {
     return (
@@ -107,7 +109,12 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
         ) : (
           <form action={updatePuppy} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <input type="hidden" name="puppyId" value={puppy.id} />
-            <label className="block text-sm font-medium">Litter<select name="litterId" defaultValue={puppy.litter_id ?? ""} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2"><option value="">Not linked</option>{litters.map((litter) => <option key={litter.id} value={litter.id}>{litterLabel(litter)}</option>)}</select></label>
+            {warnings.length ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                {warnings.map((warning) => <p key={warning}>{warning}</p>)}
+              </div>
+            ) : null}
+            <label className="block text-sm font-medium">Litter<select name="litterId" defaultValue={puppy.litter_id ?? ""} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2"><option value="">Not linked</option>{litters.rows.map((litter) => <option key={litter.id} value={litter.id}>{litterLabel(litter)}</option>)}</select></label>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-medium">Name<input name="name" defaultValue={puppy.name ?? ""} maxLength={120} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">Collar color<input name="collarColor" defaultValue={puppy.collar_color ?? ""} maxLength={80} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>

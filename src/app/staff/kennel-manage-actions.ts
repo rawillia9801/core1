@@ -20,10 +20,6 @@ function logKennelManageFailure(reason: string, details?: Record<string, unknown
 }
 
 function getActionConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Kennel edit/delete actions are disabled until staging/production authorization is approved.");
-  }
-
   const supabaseUrl = (
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/$/, "");
