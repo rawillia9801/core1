@@ -367,7 +367,8 @@ export default async function DogProfilePage({
   ]);
 
   const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
-  const warnings = [dogResult, littersResult, puppiesResult, reservationsResult, buyersResult, familiesResult, healthResult, documentsResult, mediaResult, eventsResult, auditResult]
+  const mediaWarning = mediaResult.warning ? "Private photo storage is not available from the current Core schema yet." : null;
+  const warnings = [dogResult, littersResult, puppiesResult, reservationsResult, buyersResult, familiesResult, healthResult, documentsResult, { warning: mediaWarning }, eventsResult, auditResult]
     .map((result) => result.warning)
     .filter(Boolean);
   const litters = littersResult.rows;

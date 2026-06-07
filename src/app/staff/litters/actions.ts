@@ -14,17 +14,13 @@ function logNeonatalFailure(reason: string, details?: Record<string, unknown>) {
 }
 
 function getActionConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Puppy weight/care log actions are disabled until staging/production authorization is approved.");
-  }
-
   const supabaseUrl = (
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Local/development puppy weight/care log action configuration is incomplete.");
+    return null;
   }
 
   return { restUrl: `${supabaseUrl}/rest/v1`, serviceRoleKey };
@@ -93,25 +89,39 @@ function cleanWeightGrams(value: FormDataEntryValue | null) {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
-  const { restUrl, serviceRoleKey } = getActionConfig();
-  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
-    method: "POST",
-    headers: serverHeaders(serviceRoleKey),
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  const config = getActionConfig();
 
-  if (!response.ok) {
-    const responseBody = await response.text().catch(() => "");
-    logNeonatalFailure("neonatal log RPC failed", {
-      functionName,
-      httpStatus: response.status,
-      responseBody,
-    });
-    return false;
+  if (!config) {
+    logNeonatalFailure("neonatal log action configuration missing", { functionName });
+    return "configuration";
   }
 
-  return true;
+  try {
+    const response = await fetch(`${config.restUrl}/rpc/${functionName}`, {
+      method: "POST",
+      headers: serverHeaders(config.serviceRoleKey),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const responseBody = await response.text().catch(() => "");
+      logNeonatalFailure("neonatal log RPC failed", {
+        functionName,
+        httpStatus: response.status,
+        responseBody,
+      });
+      return "failed";
+    }
+  } catch (error) {
+    logNeonatalFailure("neonatal log RPC crashed", {
+      functionName,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "failed";
+  }
+
+  return "success";
 }
 
 export async function recordPuppyWeight(formData: FormData) {
@@ -135,7 +145,7 @@ export async function recordPuppyWeight(formData: FormData) {
 
   revalidatePath("/staff/litters");
   revalidatePath("/staff/puppies");
-  redirect(ok ? "/staff/litters?weight_recorded=1" : "/staff/litters?error=failed");
+  redirect(ok === "success" ? "/staff/litters?weight_recorded=1" : `/staff/litters?error=${ok}`);
 }
 
 export async function recordPuppyCareObservation(formData: FormData) {
@@ -159,5 +169,5 @@ export async function recordPuppyCareObservation(formData: FormData) {
 
   revalidatePath("/staff/litters");
   revalidatePath("/staff/puppies");
-  redirect(ok ? "/staff/litters?observation_recorded=1" : "/staff/litters?error=failed");
+  redirect(ok === "success" ? "/staff/litters?observation_recorded=1" : `/staff/litters?error=${ok}`);
 }

@@ -18,24 +18,24 @@ function logKennelMediaFailure(reason: string, details?: Record<string, unknown>
 }
 
 function getActionConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Kennel media write actions are disabled until staging/production authorization is approved.");
-  }
-
   const supabaseUrl = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Local/development kennel media action configuration is incomplete.");
+    return null;
   }
 
   return { restUrl: `${supabaseUrl}/rest/v1`, serviceRoleKey, supabaseUrl };
 }
 
 function getStorageClient() {
-  const { supabaseUrl, serviceRoleKey } = getActionConfig();
+  const config = getActionConfig();
 
-  return createClient(supabaseUrl, serviceRoleKey, {
+  if (!config) {
+    return null;
+  }
+
+  return createClient(config.supabaseUrl, config.serviceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -72,13 +72,28 @@ function serverHeaders(serviceRoleKey: string) {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
-  const { restUrl, serviceRoleKey } = getActionConfig();
-  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
-    method: "POST",
-    headers: serverHeaders(serviceRoleKey),
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  const config = getActionConfig();
+
+  if (!config) {
+    logKennelMediaFailure("kennel media action configuration missing", { functionName });
+    return "configuration";
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${config.restUrl}/rpc/${functionName}`, {
+      method: "POST",
+      headers: serverHeaders(config.serviceRoleKey),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch (error) {
+    logKennelMediaFailure("kennel media RPC crashed", {
+      functionName,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "failed";
+  }
 
   if (!response.ok) {
     logKennelMediaFailure("kennel media RPC failed", {
@@ -86,21 +101,27 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
       httpStatus: response.status,
       responseBody: await response.text().catch(() => ""),
     });
-    return false;
+    return "failed";
   }
 
-  return true;
+  return "success";
 }
 
 async function readOne<T>(table: string, params: Record<string, string>) {
-  const { restUrl, serviceRoleKey } = getActionConfig();
-  const url = new URL(`${restUrl}/${table}`);
+  const config = getActionConfig();
+
+  if (!config) {
+    logKennelMediaFailure("kennel media read configuration missing", { table });
+    return null;
+  }
+
+  const url = new URL(`${config.restUrl}/${table}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
 
   const response = await fetch(url, {
     headers: {
-      apikey: serviceRoleKey,
-      authorization: `Bearer ${serviceRoleKey}`,
+      apikey: config.serviceRoleKey,
+      authorization: `Bearer ${config.serviceRoleKey}`,
     },
     cache: "no-store",
   });
@@ -174,6 +195,9 @@ export async function uploadKennelMediaFile(formData: FormData) {
   }
 
   const storage = getStorageClient();
+  if (!storage) {
+    redirect(`/staff/${pathPrefix}/${entityId.value}?media=upload_configuration`);
+  }
   const cleanedName = safeFileName(fileValue.name);
   const storagePath = `${pathPrefix}/${entityId.value}/photos/${crypto.randomUUID()}-${cleanedName}`;
   const uploadResult = await storage.storage
@@ -181,6 +205,14 @@ export async function uploadKennelMediaFile(formData: FormData) {
     .upload(storagePath, fileValue, {
       contentType: fileValue.type,
       upsert: false,
+    })
+    .catch((error: unknown) => {
+      logKennelMediaFailure("private kennel media upload crashed", {
+        entityType,
+        entityId: entityId.value,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return { data: null, error: { message: "storage upload crashed" } };
     });
 
   if (uploadResult.error) {
@@ -207,8 +239,8 @@ export async function uploadKennelMediaFile(formData: FormData) {
     p_is_primary: isPrimary,
   });
 
-  if (!ok) {
-    await storage.storage.from(KENNEL_MEDIA_BUCKET).remove([storagePath]);
+  if (ok !== "success") {
+    await storage.storage.from(KENNEL_MEDIA_BUCKET).remove([storagePath]).catch(() => null);
     redirect(`/staff/${pathPrefix}/${entityId.value}?media=upload_metadata_error`);
   }
 

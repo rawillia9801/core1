@@ -92,6 +92,8 @@ Verified results:
 - Private dog/puppy photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, records metadata through `core_record_kennel_media_metadata(...)`, uses signed internal previews, hides raw storage paths, and writes event/audit rows.
 - The dog/puppy media foundation does not publish puppies, expose public media URLs, message customers, update a portal, connect smart-home/cameras/devices, add AI, process payments, generate documents, or call external providers.
 - The dog profile and document vault are internal owner/operator recordkeeping only. They do not diagnose animals, message customers, publish puppies, generate documents, expose public document links, connect smart-home/cameras/devices, or call external providers.
+- Production puppy weight/care and kennel media action handling was hardened so missing configuration, RPC failures, and storage failures redirect to safe error states instead of crashing page renders.
+- Temporary production repair placeholder files are absent; kennel actions remain in the canonical action files.
 
 ## Obsolete Tests Removed
 

@@ -19,6 +19,13 @@ type ApplicationRow = {
 type ReservationRow = {
   reservation_id: string;
   reservation_status: string | null;
+  buyer_id: string | null;
+  buyer_name: string | null;
+  family_id: string | null;
+  family_name: string | null;
+  puppy_id: string | null;
+  puppy_name: string | null;
+  puppy_collar_color: string | null;
   puppy_status: string | null;
   balance_due_cents: number | null;
   go_home_planned_at: string | null;
@@ -28,10 +35,15 @@ type ReservationRow = {
 type DogRow = {
   id: string;
   status: string | null;
+  call_name: string | null;
+  registered_name: string | null;
+  sex: string | null;
+  metadata: Record<string, unknown> | null;
 };
 
 type LitterRow = {
   id: string;
+  litter_name: string | null;
   status: string | null;
   birth_at: string | null;
   expected_birth_at: string | null;
@@ -39,7 +51,11 @@ type LitterRow = {
 
 type PuppyRow = {
   id: string;
+  litter_id: string | null;
+  name: string | null;
+  collar_color: string | null;
   status: string | null;
+  health_status: string | null;
   public_listing_status: string | null;
 };
 
@@ -79,6 +95,55 @@ type AuditRow = {
 type DocumentRow = {
   id: string;
   status: string | null;
+  title?: string | null;
+  document_type?: string | null;
+};
+
+type WeightLogRow = {
+  id: string;
+  puppy_id: string | null;
+  measured_at: string | null;
+  weight_grams: number | null;
+};
+
+type DogHealthRow = {
+  id: string;
+  dog_id: string | null;
+  event_type: string | null;
+  title: string | null;
+  event_date: string | null;
+  severity: string | null;
+};
+
+type KennelMediaRow = {
+  id: string;
+  entity_type: string | null;
+  dog_id: string | null;
+  puppy_id: string | null;
+  is_primary: boolean | null;
+  uploaded_at: string | null;
+};
+
+type DogDocumentRow = {
+  id: string;
+  dog_id: string | null;
+  document_status: string | null;
+  title: string | null;
+};
+
+type BuyerRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  email: string | null;
+  approval_status: string | null;
+};
+
+type FamilyRow = {
+  id: string;
+  name: string | null;
+  status: string | null;
 };
 
 type PhoneLookupSummaryRow = {
@@ -115,6 +180,13 @@ type RecommendedStep = {
   title: string;
   detail: string;
   href: string;
+};
+
+type ConsoleCard = {
+  title: string;
+  detail: string;
+  href?: string;
+  badge?: string;
 };
 
 function getSupabaseRestConfig() {
@@ -207,7 +279,60 @@ function formatKey(value: string | null | undefined) {
     .replaceAll("_", " ")
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatMoney(cents: number | null | undefined) {
+  if (typeof cents !== "number") {
+    return "Not recorded";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100);
+}
+
+function formatWeight(grams: number | null | undefined) {
+  if (typeof grams !== "number") {
+    return "No weight recorded";
+  }
+
+  return `${grams}g`;
+}
+
+function daysUntil(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const target = new Date(value);
+  if (Number.isNaN(target.getTime())) {
+    return null;
+  }
+
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const end = new Date(target.getFullYear(), target.getMonth(), target.getDate()).getTime();
+  return Math.ceil((end - start) / 86_400_000);
+}
+
+function isToday(value: string | null | undefined) {
+  if (!value) {
+    return false;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
 }
 
 function StatusChip({ label, value }: { label: string; value: string }) {
@@ -401,6 +526,53 @@ function SummaryLine({ label, value, note }: { label: string; value: string | nu
   );
 }
 
+function ConsoleSection({
+  title,
+  eyebrow,
+  detail,
+  cards,
+  emptyText,
+}: {
+  title: string;
+  eyebrow: string;
+  detail: string;
+  cards: ConsoleCard[];
+  emptyText: string;
+}) {
+  return (
+    <GlassPanel className="p-6">
+      <div className="mb-5">
+        <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">{eyebrow}</p>
+        <h2 className="mt-2 text-2xl font-black text-slate-950">{title}</h2>
+        <p className="mt-2 text-sm leading-7 text-slate-600">{detail}</p>
+      </div>
+      {cards.length ? (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {cards.map((card) => {
+            const body = (
+              <>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <p className="text-sm font-black text-slate-950">{card.title}</p>
+                  {card.badge ? <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">{card.badge}</span> : null}
+                </div>
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{card.detail}</p>
+              </>
+            );
+            const className = "block rounded-2xl border border-white/80 bg-white/75 p-4 shadow-sm ring-1 ring-cyan-100/60 transition hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_18px_45px_rgba(14,165,233,0.12)]";
+            return card.href ? (
+              <Link key={`${card.title}-${card.detail}`} href={card.href} className={className}>{body}</Link>
+            ) : (
+              <div key={`${card.title}-${card.detail}`} className={className}>{body}</div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-cyan-200 bg-white/70 p-5 text-sm font-bold leading-6 text-cyan-950">{emptyText}</div>
+      )}
+    </GlassPanel>
+  );
+}
+
 function CommandNode({ node }: { node: SystemNode }) {
   return (
     <div className={`absolute ${node.position}`}>
@@ -534,6 +706,12 @@ export default async function StaffCommandPage() {
     documentResult,
     phoneResult,
     proposedActionResult,
+    weightResult,
+    dogHealthResult,
+    kennelMediaResult,
+    dogDocumentResult,
+    buyerResult,
+    familyResult,
   ] = await Promise.all([
     readRows<ApplicationRow>("core_applications", {
       select: "id,status,submitted_at,created_at",
@@ -542,20 +720,20 @@ export default async function StaffCommandPage() {
     }),
     readRows<ReservationRow>("core_reservation_summary_view", {
       select:
-        "reservation_id,reservation_status,puppy_status,balance_due_cents,go_home_planned_at,go_home_status",
+        "reservation_id,reservation_status,buyer_id,buyer_name,family_id,family_name,puppy_id,puppy_name,puppy_collar_color,puppy_status,balance_due_cents,go_home_planned_at,go_home_status",
       order: "created_at.desc",
       limit: "500",
     }),
     readRows<DogRow>("core_dogs", {
-      select: "id,status",
+      select: "id,status,call_name,registered_name,sex,metadata",
       limit: "500",
     }),
     readRows<LitterRow>("core_litters", {
-      select: "id,status,birth_at,expected_birth_at",
+      select: "id,litter_name,status,birth_at,expected_birth_at",
       limit: "500",
     }),
     readRows<PuppyRow>("core_puppies", {
-      select: "id,status,public_listing_status",
+      select: "id,litter_id,name,collar_color,status,health_status,public_listing_status",
       limit: "500",
     }),
     readRows<GoHomeRow>("core_go_home_effective_view", {
@@ -599,6 +777,40 @@ export default async function StaffCommandPage() {
           limit: "100",
         })
       : Promise.resolve({ rows: [] as ProposedActionRow[], warning: null }),
+    readRows<WeightLogRow>("core_weight_logs", {
+      select: "id,puppy_id,measured_at,weight_grams",
+      order: "measured_at.desc",
+      limit: "500",
+    }),
+    canViewAudit
+      ? readRows<DogHealthRow>("core_dog_health_events", {
+          select: "id,dog_id,event_type,title,event_date,severity",
+          order: "event_date.desc",
+          limit: "100",
+        })
+      : Promise.resolve({ rows: [] as DogHealthRow[], warning: null }),
+    readRows<KennelMediaRow>("core_kennel_media", {
+      select: "id,entity_type,dog_id,puppy_id,is_primary,uploaded_at",
+      order: "uploaded_at.desc",
+      limit: "500",
+    }),
+    canViewAudit
+      ? readRows<DogDocumentRow>("core_dog_documents", {
+          select: "id,dog_id,document_status,title",
+          order: "updated_at.desc",
+          limit: "500",
+        })
+      : Promise.resolve({ rows: [] as DogDocumentRow[], warning: null }),
+    readRows<BuyerRow>("core_buyers", {
+      select: "id,first_name,last_name,preferred_name,email,approval_status",
+      order: "updated_at.desc",
+      limit: "200",
+    }),
+    readRows<FamilyRow>("core_families", {
+      select: "id,name,status",
+      order: "updated_at.desc",
+      limit: "200",
+    }),
   ]);
 
   const applications = applicationResult.rows;
@@ -612,6 +824,12 @@ export default async function StaffCommandPage() {
   const documents = documentResult.rows;
   const phoneRows = phoneResult.rows;
   const proposedActions = proposedActionResult.rows;
+  const weights = weightResult.rows;
+  const dogHealthEvents = dogHealthResult.rows;
+  const kennelMedia = kennelMediaResult.rows;
+  const dogDocuments = dogDocumentResult.rows;
+  const buyers = buyerResult.rows;
+  const families = familyResult.rows;
 
   const activeReservationCount = reservations.filter(
     (row) => !["cancelled", "void", "released", "completed"].includes(normalized(row.reservation_status)),
@@ -653,6 +871,256 @@ export default async function StaffCommandPage() {
   const proposedHighRiskCount = proposedActions.filter((row) =>
     ["high", "blocked"].includes(normalized(row.risk_level)),
   ).length;
+  const weightsTodayByPuppy = new Set(
+    weights
+      .filter((row) => row.puppy_id && isToday(row.measured_at))
+      .map((row) => row.puppy_id as string),
+  );
+  const latestWeightByPuppy = new Map<string, WeightLogRow>();
+  weights.forEach((row) => {
+    if (row.puppy_id && !latestWeightByPuppy.has(row.puppy_id)) {
+      latestWeightByPuppy.set(row.puppy_id, row);
+    }
+  });
+  const puppyMediaIds = new Set(
+    kennelMedia
+      .filter((row) => row.puppy_id)
+      .map((row) => row.puppy_id as string),
+  );
+  const dogMediaIds = new Set(
+    kennelMedia.filter((row) => row.dog_id).map((row) => row.dog_id as string),
+  );
+  const dogDocumentIds = new Set(
+    dogDocuments
+      .filter((row) => row.dog_id)
+      .map((row) => row.dog_id as string),
+  );
+  const newbornPuppies = puppies.filter((row) =>
+    ["newborn", "watch", "at_risk", "available", "hold", "reserved"].includes(
+      normalized(row.status),
+    ),
+  );
+  const puppiesMissingWeightToday = newbornPuppies.filter(
+    (row) => !weightsTodayByPuppy.has(row.id),
+  ).length;
+  const watchPuppies = puppies.filter((row) =>
+    ["watch", "at_risk", "attention", "needs_attention"].some((status) =>
+      `${normalized(row.status)} ${normalized(row.health_status)}`.includes(status),
+    ),
+  );
+  const expectedSoonLitters = litters.filter((row) => {
+    const days = daysUntil(row.expected_birth_at);
+    return days !== null && days >= 0 && days <= 14;
+  });
+  const goHomeUpcomingCount = goHomes.filter((row) => {
+    const days = daysUntil(row.effective_scheduled_at);
+    return days !== null && days >= 0 && days <= 14;
+  }).length;
+  const goHomeBlockerCount = goHomes.filter((row) =>
+    ["blocked", "pending", "incomplete", "not_cleared"].some((status) =>
+      `${normalized(row.checklist_status)} ${normalized(row.balance_cleared_status)} ${normalized(row.effective_status)}`.includes(
+        status,
+      ),
+    ),
+  ).length;
+  const dogsMissingMetadata = dogs.filter(
+    (row) => !row.call_name || !row.sex || !row.status,
+  ).length;
+  const buyersPending = buyers.filter((row) =>
+    ["pending", "needs_review", "received"].includes(normalized(row.approval_status)),
+  ).length;
+  const activeFamilies = countByStatus(families, ["active"]);
+
+  const priorityCards: ConsoleCard[] = [
+    {
+      title: "Newborn weights today",
+      detail: `${puppiesMissingWeightToday} newborn/recent puppy record(s) do not show a weight logged today. Latest weights remain observation-only.`,
+      href: "/staff/litters",
+      badge: String(puppiesMissingWeightToday),
+    },
+    {
+      title: "Watch / attention puppies",
+      detail: `${watchPuppies.length} puppy record(s) have deterministic status text suggesting watch or attention review. No diagnosis is made.`,
+      href: "/staff/puppies",
+      badge: String(watchPuppies.length),
+    },
+    {
+      title: "Expected litters",
+      detail: `${expectedSoonLitters.length} expected litter record(s) are dated within the next 14 days.`,
+      href: "/staff/litters",
+      badge: String(expectedSoonLitters.length),
+    },
+    {
+      title: "Go-home blockers",
+      detail: `${goHomeBlockerCount} go-home readiness record(s) show blocked, pending, incomplete, or not-cleared status text.`,
+      href: "/staff/go-home",
+      badge: String(goHomeBlockerCount),
+    },
+    {
+      title: "Open balances",
+      detail: canViewFinancials
+        ? `${openBalanceCount} active reservation record(s) show balance due in the read model.`
+        : "Financial detail is restricted for this role.",
+      href: "/staff/payments",
+      badge: String(openBalanceCount),
+    },
+    {
+      title: "Communication previews",
+      detail: `${unsentNotificationCount} notification record(s) are not marked sent. This console does not send messages.`,
+      href: "/staff/notifications",
+      badge: String(unsentNotificationCount),
+    },
+    {
+      title: "Dog metadata review",
+      detail: `${dogsMissingMetadata} dog record(s) are missing call name, sex, or status values from the current Core read.`,
+      href: "/staff/dogs",
+      badge: String(dogsMissingMetadata),
+    },
+  ];
+
+  const puppyCards: ConsoleCard[] = newbornPuppies.slice(0, 6).map((puppy) => {
+    const latestWeight = latestWeightByPuppy.get(puppy.id);
+    return {
+      title: display(puppy.name, puppy.collar_color ? `${puppy.collar_color} collar` : shortId(puppy.id)),
+      detail: [
+        `Status: ${formatKey(puppy.status)} / ${formatKey(puppy.health_status)}`,
+        `Latest weight: ${formatWeight(latestWeight?.weight_grams)} (${formatDateTime(latestWeight?.measured_at)})`,
+        weightsTodayByPuppy.has(puppy.id) ? "Weight logged today" : "No weight logged today",
+        puppyMediaIds.has(puppy.id) ? "Internal photo metadata present" : "No internal photo metadata found",
+      ].join(" | "),
+      href: `/staff/puppies/${puppy.id}`,
+      badge: puppy.public_listing_status === "private" ? "Private" : formatKey(puppy.public_listing_status),
+    };
+  });
+
+  const dogCards: ConsoleCard[] = dogs.slice(0, 6).map((dog) => ({
+    title: display(dog.call_name, display(dog.registered_name, shortId(dog.id))),
+    detail: [
+      `Status: ${formatKey(dog.status)} / ${formatKey(dog.sex)}`,
+      dogMediaIds.has(dog.id) ? "Internal photo metadata present" : "No internal photo metadata found",
+      dogDocumentIds.has(dog.id) ? "Document metadata present" : "No document metadata found",
+      dogHealthEvents.some((event) => event.dog_id === dog.id) ? "Health/care history present" : "No health/care history found",
+    ].join(" | "),
+    href: `/staff/dogs/${dog.id}`,
+    badge: formatKey(dog.status),
+  }));
+
+  const relationshipCards: ConsoleCard[] = reservations.slice(0, 6).map((reservation) => ({
+    title: display(
+      reservation.buyer_name,
+      display(reservation.family_name, `Reservation ${shortId(reservation.reservation_id)}`),
+    ),
+    detail: [
+      `Puppy: ${display(reservation.puppy_name, reservation.puppy_collar_color ?? undefined)}`,
+      `Reservation: ${formatKey(reservation.reservation_status)}`,
+      canViewFinancials ? `Balance: ${formatMoney(reservation.balance_due_cents)}` : "Balance: restricted",
+      `Go-home: ${formatDateTime(reservation.go_home_planned_at)}`,
+    ].join(" | "),
+    href: reservation.buyer_id ? `/staff/buyers/${reservation.buyer_id}` : "/staff/reservations",
+    badge: formatKey(reservation.reservation_status),
+  }));
+
+  const pipelineCards: ConsoleCard[] = [
+    {
+      title: "Applications",
+      detail: `${applications.length} total application record(s), ${pendingApplicationCount} needing review from deterministic status values.`,
+      href: "/staff/applications",
+      badge: String(pendingApplicationCount),
+    },
+    {
+      title: "Reservations",
+      detail: `${activeReservationCount} active reservation record(s), ${reservedPuppyCount} puppy record(s) marked reserved.`,
+      href: "/staff/reservations",
+      badge: String(activeReservationCount),
+    },
+    {
+      title: "Buyers / families",
+      detail: `${buyers.length} buyer record(s), ${families.length} family record(s), ${buyersPending} buyer approval record(s) pending review, ${activeFamilies} active families.`,
+      href: "/staff/buyers",
+      badge: String(buyersPending),
+    },
+  ];
+
+  const readinessCards: ConsoleCard[] = [
+    {
+      title: "Go-home readiness",
+      detail: `${goHomeUpcomingCount} go-home record(s) scheduled within 14 days, ${goHomeUnscheduledCount} unscheduled, ${goHomeBlockerCount} possible blocker(s).`,
+      href: "/staff/go-home",
+      badge: String(goHomeBlockerCount),
+    },
+    {
+      title: "Payment attention",
+      detail: canViewFinancials
+        ? `${openBalanceCount} reservation record(s) show balance due. This console does not process payments.`
+        : "Payment details are restricted for this role.",
+      href: "/staff/payments",
+      badge: String(openBalanceCount),
+    },
+    {
+      title: "Document attention",
+      detail: canViewAudit
+        ? `${draftDocumentCount} document metadata record(s) are pending, ready, generated, or in review states. No documents are generated here.`
+        : "Document detail is restricted to owner/admin users.",
+      href: "/staff/documents",
+      badge: canViewAudit ? String(draftDocumentCount) : "Locked",
+    },
+  ];
+
+  const communicationCards: ConsoleCard[] = [
+    {
+      title: "Notification queue",
+      detail: `${queuedNotificationCount} queued/pending notification record(s), ${unsentNotificationCount} not marked sent. Preview only; no SMTP, SMS, or provider call is connected.`,
+      href: "/staff/notifications",
+      badge: String(unsentNotificationCount),
+    },
+    {
+      title: "Messages readiness",
+      detail: "Communications readiness stays internal and preview-only from this surface.",
+      href: "/staff/messages",
+      badge: "Preview",
+    },
+    {
+      title: "Phone lookup safety",
+      detail: canViewPhone
+        ? `${ambiguousPhoneCount} phone lookup result(s) require human verification before future phone workflows.`
+        : "Phone lookup detail is restricted to owner/admin users.",
+      href: "/staff/phone-lookup",
+      badge: canViewPhone ? String(ambiguousPhoneCount) : "Locked",
+    },
+  ];
+
+  const eventAuditCards: ConsoleCard[] = [
+    ...events.slice(0, 3).map((event) => ({
+      title: display(event.summary, formatKey(event.event_type)),
+      detail: `${formatDateTime(event.event_at)} | ${display(event.related_table)} / ${shortId(event.related_id)} | ${display(event.source, "source unknown")}`,
+      href: "/staff/events",
+      badge: formatKey(event.event_type),
+    })),
+    ...(canViewAudit
+      ? auditResult.rows.slice(0, 3).map((audit) => ({
+          title: formatKey(audit.action),
+          detail: `${formatDateTime(audit.created_at)} | Outcome: ${formatKey(audit.outcome)}`,
+          href: "/staff/events",
+          badge: "Audit",
+        }))
+      : []),
+  ];
+
+  const proposedCards: ConsoleCard[] = canViewAudit
+    ? proposedActions.slice(0, 6).map((action) => ({
+        title: `Proposed action ${shortId(action.id)}`,
+        detail: `Status: ${formatKey(action.status)} | Risk: ${formatKey(action.risk_level)}. Review-only; approval does not execute changes yet.`,
+        href: "/staff/proposed-actions",
+        badge: formatKey(action.risk_level),
+      }))
+    : [
+        {
+          title: "Proposed actions restricted",
+          detail: "Owner/admin access is required to review proposed-action records.",
+          badge: "Locked",
+        },
+      ];
+
   const briefingItems: BriefingItem[] = [
     {
       label: "Applications needing review",
@@ -773,7 +1241,13 @@ export default async function StaffCommandPage() {
     auditResult.warning ??
     documentResult.warning ??
     phoneResult.warning ??
-    proposedActionResult.warning;
+    proposedActionResult.warning ??
+    weightResult.warning ??
+    dogHealthResult.warning ??
+    kennelMediaResult.warning ??
+    dogDocumentResult.warning ??
+    buyerResult.warning ??
+    familyResult.warning;
 
   const nodes: SystemNode[] = [
     {
@@ -937,6 +1411,18 @@ export default async function StaffCommandPage() {
 
         <RecommendedNextSteps steps={recommendedSteps} />
 
+        <ConsoleSection
+          eyebrow="Today"
+          title="Today's Priority Queue"
+          detail="Owner/operator attention items derived from current Core metadata only."
+          cards={priorityCards}
+          emptyText="No urgent priority items found from current Core metadata."
+        />
+
+        <section className="rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-sm font-black leading-7 text-amber-950 shadow-sm">
+          This Command Center is an internal owner/operator control surface only. It does not send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, call AI providers, or contact external services.
+        </section>
+
         {warning ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">
             {warning}
@@ -944,6 +1430,74 @@ export default async function StaffCommandPage() {
         ) : null}
 
         <CommandCloud nodes={nodes} />
+
+        <section className="grid gap-6 xl:grid-cols-2">
+          <ConsoleSection
+            eyebrow="Neonatal"
+            title="Neonatal / Puppy Command Summary"
+            detail="Puppy cards show identity, status, latest observed weight, today's weight coverage, and private media metadata when present."
+            cards={puppyCards}
+            emptyText="No newborn/recent puppy records were found in the current Core read."
+          />
+          <ConsoleSection
+            eyebrow="Breeding Stock"
+            title="Dogs / Breeding Stock Summary"
+            detail="Dog cards summarize internal profile readiness, photo metadata, document metadata, and care/event history."
+            cards={dogCards}
+            emptyText="No dog records were found in the current Core read."
+          />
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-2">
+          <ConsoleSection
+            eyebrow="Relationships"
+            title="Buyer / Family Relationship Summary"
+            detail="Reservation-linked buyer, family, puppy, balance, and go-home context for human review."
+            cards={relationshipCards}
+            emptyText="No reservation-linked buyer/family records were found in the current Core read."
+          />
+          <ConsoleSection
+            eyebrow="Pipeline"
+            title="Application / Reservation Pipeline"
+            detail="High-level Core pipeline counts for applications, reservations, buyers, and family records."
+            cards={pipelineCards}
+            emptyText="No application or reservation pipeline records were found in the current Core read."
+          />
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-2">
+          <ConsoleSection
+            eyebrow="Readiness"
+            title="Payment / Document / Go-Home Readiness"
+            detail="Read-only readiness indicators. This surface does not process payments or generate documents."
+            cards={readinessCards}
+            emptyText="No payment, document, or go-home readiness items were found."
+          />
+          <ConsoleSection
+            eyebrow="Communications"
+            title="Communications Preview"
+            detail="Preview-only communication and phone safety context. No SMTP, Twilio, Facebook, or provider call is connected."
+            cards={communicationCards}
+            emptyText="No communication preview records were found."
+          />
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-2">
+          <ConsoleSection
+            eyebrow="Timeline"
+            title="Event / Audit Feed"
+            detail="Recent operational events and owner/admin audit rows when safely visible."
+            cards={eventAuditCards}
+            emptyText="No event or audit rows were found for the current role."
+          />
+          <ConsoleSection
+            eyebrow="Future AI Boundary"
+            title="Proposed Actions / Future AI Boundary"
+            detail="Proposed actions are review records only. They do not execute business changes, contact providers, or update customer-facing systems."
+            cards={proposedCards}
+            emptyText="No proposed action records were found."
+          />
+        </section>
 
         <section className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
           <GlassPanel className="p-6">

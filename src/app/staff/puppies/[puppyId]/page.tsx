@@ -449,12 +449,13 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const weights = weightResult.rows;
   const careEvents = puppyEventResult.rows;
   const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
+  const mediaWarning = mediaResult.warning ? "Private photo storage is not available from the current Core schema yet." : null;
   const operationalEvents = uniqueEvents([...directEventResult.rows, ...relatedEventResult.rows]);
   const latest = latestWeight(weights);
   const birth = birthWeightForPuppy(puppy, litter, weights);
   const watchSignals = watchSignalsForPuppy(puppy, litter, weights, careEvents);
   const ageSource = puppy.birth_at ?? litter?.birth_at ?? null;
-  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, mediaResult.warning, directEventResult.warning, relatedEventResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
+  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">

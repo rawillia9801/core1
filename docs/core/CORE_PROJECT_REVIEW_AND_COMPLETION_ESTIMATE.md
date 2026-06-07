@@ -58,6 +58,7 @@ Core-native private application entry
   -> Kennel Logs read-only workspace added
   -> Command Console plan added
   -> Command Console read-only shell added
+  -> Command Center expanded with read-only owner/operator operating summaries
   -> Proposed Action Approval Model plan added
   -> Proposed Action Queue review-state foundation added
 ```
@@ -143,6 +144,7 @@ The following are implemented and have been manually or test verified in local/d
 - Dog Document Vault supports dog-linked report, certificate, registry, genetic test, vaccine, health, surgery/emergency vet, acquisition, microchip, and pedigree metadata.
 - Dog Document Upload / Private Storage Attachment workflow was added for dog document metadata records. Storage is private in the `dog-documents` bucket, no public document links are exposed, and raw storage paths are not shown in the UI.
 - Dog/Puppy Media Upload Foundation was added for internal private photo metadata. Storage is private in the `kennel-media` bucket, previews use signed internal URLs, raw storage paths are not shown in the UI, and metadata is recorded through `core_record_kennel_media_metadata(...)` with event/audit rows.
+- Puppy weight/care and kennel media actions now fail safely in production if configuration, RPC calls, or storage calls fail; they redirect to safe error states instead of crashing page renders.
 - The dog profile workflow remains internal owner/operator recordkeeping only. It does not diagnose animals, replace veterinary care, message customers, publish puppies, generate documents, process payments, add customer portal behavior, connect smart-home/cameras/devices, add AI, or call external providers.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only workspace with no external side effects.
@@ -164,7 +166,8 @@ The following are implemented and have been manually or test verified in local/d
 - Kennel Logs is enabled in the existing technical sidebar.
 - `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document only; no AI console has been built.
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked after implementation.
-- `/staff/command` exists as a read-only Core Command Center shell only. It does not connect an AI provider or replace `/staff`.
+- `/staff/command` exists as a read-only Core OS Command Center with system status, priority queue, neonatal/puppy, dog/breeding-stock, buyer/family, pipeline, readiness, communications preview, event/audit, and proposed-action boundary sections.
+- The Command Center uses existing Core metadata only. It does not connect an AI provider, send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, contact external services, or replace `/staff`.
 - `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
 - `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.
 - The reservation detail readiness workflow is internal Core visibility only and does not send email, SMS, payment requests, document links, customer portal messages, public listing changes, or external provider calls.

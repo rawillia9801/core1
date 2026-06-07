@@ -119,6 +119,8 @@ Verified local behavior:
 - Dog document private upload is owner/admin only, validates allowed PDF/JPG/PNG/WEBP/TXT/CSV files up to 10 MB, writes `core_events` and `core_audit_log`, and does not expose raw storage paths or public URLs in the UI.
 - Dog/Puppy Media Upload Foundation was added for internal private photo metadata. Files use the private `kennel-media` Supabase storage bucket, metadata is recorded through `core_record_kennel_media_metadata(...)`, previews use short-lived signed URLs, and raw storage paths are not shown in the UI.
 - Dog/puppy private photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, writes `core_events` and `core_audit_log`, and does not publish puppies, expose public media URLs, message customers, update a portal, call external providers, connect AI, connect smart-home/cameras/devices, process payments, or generate documents.
+- Puppy weight/care and dog/puppy private media actions were hardened for production so missing configuration, RPC failures, or storage failures redirect to safe error states instead of crashing route renders.
+- Temporary production repair placeholder files are not present in the repository; the active code lives in the canonical kennel action files.
 - Dog profile registry/acquisition metadata is stored on existing `core_dogs.metadata` through a controlled owner/admin RPC.
 - The dog profile workflow is internal owner/operator recordkeeping only. It does not message customers, publish puppies, generate documents, connect smart-home/cameras/devices, call external providers, add AI, process payments, or add customer portal behavior.
 - Obsolete broken kennel tests were removed.
@@ -142,6 +144,8 @@ Verified local behavior:
 - Kennel Logs is enabled in the staff sidebar.
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked against migrations after implementation.
 - `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
+- `/staff/command` was expanded into a read-only Core OS Command Center with system status, priority queue, puppy/neonatal summary, dog/breeding-stock summary, buyer/family relationship context, pipeline, payment/document/go-home readiness, communications preview, event/audit feed, and proposed-action boundary sections.
+- The Command Center uses existing Core metadata only and remains internal owner/operator visibility. It does not send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, call AI providers, or contact external services.
 - `/staff/proposed-actions` has been added as an owner/admin Proposed Action Queue workspace. It can create, approve, and reject proposal review records only; approved proposed actions do not execute business changes.
 - Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
 - The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.

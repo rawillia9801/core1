@@ -396,6 +396,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dog and puppy photos use the private `kennel-media` Supabase storage bucket only.
 - [x] Dog/puppy photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, records metadata through `core_record_kennel_media_metadata(...)`, writes `core_events` and `core_audit_log`, and uses signed internal previews without showing raw storage paths.
 - [x] Dog/puppy private media remains internal only: no public puppy publishing, customer portal media, customer messaging, AI, smart-home/camera/device integration, payment processing, document generation, or external providers were added.
+- [x] Production puppy weight/care and kennel media action crashes were cleaned up so missing configuration, RPC failures, and storage failures route to safe error states instead of breaking page rendering.
+- [x] Temporary production repair placeholder files are absent; canonical action files are the only active implementation.
 - [x] Dam/sire litter history shows linked litters, puppies, and buyer/reservation context where existing Core data supports it.
 - [x] Dog profile workflow remains internal owner/operator recordkeeping only: no animal diagnosis, customer messages, public puppy publishing, document generation, payment processing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, or external providers were added.
 
@@ -411,6 +413,8 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 
 - [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
 - [x] Read-only `/staff/command` shell added with no AI provider, no execution writes, no autonomous action records, and no external systems.
+- [x] `/staff/command` expanded into a read-only Core OS Command Center with system status, priority queue, neonatal/puppy, dog/breeding-stock, buyer/family, pipeline, readiness, communications preview, event/audit, and proposed-action boundary sections.
+- [x] Expanded Command Center uses existing Core metadata only and does not send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, call AI providers, or contact external services.
 - [x] Proposed Action Approval Model planning document added: `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md`.
 - [x] Build read-only Command Console shell only after approval.
 - [x] Browser-check `/staff/command` as owner/admin after real local `/login` sign-in.
