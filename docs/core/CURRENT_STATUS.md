@@ -64,6 +64,8 @@ Core-native private application entry
   -> kennel daily task board / today's care checklist added to /staff
   -> breeding dog profile health/lineage/document vault workflow added
   -> dog document upload / private storage attachment workflow added
+  -> buyer/family 360 command workspaces added
+  -> dog/puppy private media upload foundation added
   -> buyers/families/events read-only owner/operator workspaces
 ```
 
@@ -115,11 +117,17 @@ Verified local behavior:
 - Dog profile document vault uses `core_dog_documents` and controlled owner/admin RPCs for dog-linked report/certificate/registry metadata, including genetic tests, Embark reports, pedigrees, AKC/CKC/ACA/dual registration, vaccine records, health certificates, surgery/emergency vet records, acquisition records, and microchip records.
 - Dog Document Upload / Private Storage Attachment workflow was added for dog document records. Files are stored only in the private `dog-documents` Supabase storage bucket, and dog document metadata is updated through `core_attach_dog_document_file_metadata(...)`.
 - Dog document private upload is owner/admin only, validates allowed PDF/JPG/PNG/WEBP/TXT/CSV files up to 10 MB, writes `core_events` and `core_audit_log`, and does not expose raw storage paths or public URLs in the UI.
+- Dog/Puppy Media Upload Foundation was added for internal private photo metadata. Files use the private `kennel-media` Supabase storage bucket, metadata is recorded through `core_record_kennel_media_metadata(...)`, previews use short-lived signed URLs, and raw storage paths are not shown in the UI.
+- Dog/puppy private photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, writes `core_events` and `core_audit_log`, and does not publish puppies, expose public media URLs, message customers, update a portal, call external providers, connect AI, connect smart-home/cameras/devices, process payments, or generate documents.
 - Dog profile registry/acquisition metadata is stored on existing `core_dogs.metadata` through a controlled owner/admin RPC.
 - The dog profile workflow is internal owner/operator recordkeeping only. It does not message customers, publish puppies, generate documents, connect smart-home/cameras/devices, call external providers, add AI, process payments, or add customer portal behavior.
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
+- `/staff/buyers/[buyerId]` now shows an internal Buyer 360 Command Workspace using existing buyer, family, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit context.
+- `/staff/families/[familyId]` now shows an internal Family 360 Command Workspace using existing family, member, buyer, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit context.
+- Buyer/Family 360 links were added from `/staff/buyers` and `/staff/families`.
+- Buyer/Family 360 remains internal owner/operator visibility only. It does not message customers, invite portal users, publish puppies, process payments, generate documents, upload media, call external providers, connect AI, connect smart-home/cameras/devices, or change records.
 - `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
 - Events is enabled in the staff sidebar.
 - `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace using existing Core phone lookup views.
@@ -257,9 +265,12 @@ Implemented and verified:
 
 - `/staff/buyers` works.
 - `/staff/families` works.
+- `/staff/buyers/[buyerId]` works as an internal Buyer 360 Command Workspace.
+- `/staff/families/[familyId]` works as an internal Family 360 Command Workspace.
 - `/staff/events` works.
 - Events is enabled in the staff sidebar.
 - Buyers and Families are read-only, real-data-only staff workspaces.
+- Buyer and Family 360 workspaces use existing Core metadata only and remain internal owner/operator visibility only.
 - Events/Audit is read-only.
 - These pages perform no external side effects: no Zoho, Twilio, email, payment, document, portal, public website, or customer-contact action.
 - Owner/admin audit visibility remains restricted.
@@ -359,6 +370,8 @@ Core-native owner/operator operating system foundation
   -> Kennel Daily Task Board / Today's Care Checklist added
   -> Breeding Dog Profile / Dog Document Vault workflow added
   -> Dog Document Upload / Private Storage Attachment workflow added
+  -> Buyer / Family 360 Command Workspace added
+  -> Dog/Puppy Media Upload Foundation added
   -> buyers/families/events read-only owner/operator workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added

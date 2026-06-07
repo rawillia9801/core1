@@ -45,6 +45,8 @@ Core-native owner/operator operating system foundation
   -> Kennel Daily Task Board / Today's Care Checklist added
   -> Breeding Dog Profile / Dog Document Vault workflow added
   -> Dog Document Upload / Private Storage Attachment workflow added
+  -> Buyer / Family 360 Command Workspace added
+  -> Dog/Puppy Media Upload Foundation added
   -> buyers/families/events read-only workspaces verified
   -> Phone Lookup Safety read-only workspace added
   -> Documents read-only workspace added
@@ -390,10 +392,22 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dog document files are stored in the private `dog-documents` Supabase storage bucket only.
 - [x] Dog document upload is owner/admin only, validates PDF/JPG/PNG/WEBP/TXT/CSV files up to 10 MB, updates metadata through `core_attach_dog_document_file_metadata(...)`, and writes event/audit rows.
 - [x] Dog document vault exposes no public links and does not show raw storage paths in the UI.
+- [x] Dog/Puppy Media Upload Foundation added for internal private photo metadata.
+- [x] Dog and puppy photos use the private `kennel-media` Supabase storage bucket only.
+- [x] Dog/puppy photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, records metadata through `core_record_kennel_media_metadata(...)`, writes `core_events` and `core_audit_log`, and uses signed internal previews without showing raw storage paths.
+- [x] Dog/puppy private media remains internal only: no public puppy publishing, customer portal media, customer messaging, AI, smart-home/camera/device integration, payment processing, document generation, or external providers were added.
 - [x] Dam/sire litter history shows linked litters, puppies, and buyer/reservation context where existing Core data supports it.
 - [x] Dog profile workflow remains internal owner/operator recordkeeping only: no animal diagnosis, customer messages, public puppy publishing, document generation, payment processing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, or external providers were added.
 
-### 1.13 Future Core Command Console
+### 1.13 Buyer / Family 360 Command Workspace
+
+- [x] Individual Buyer 360 Command Workspace added at `/staff/buyers/[buyerId]`.
+- [x] Individual Family 360 Command Workspace added at `/staff/families/[familyId]`.
+- [x] Buyer/family list pages now link to Open buyer, Open family, and Open 360 detail routes.
+- [x] Buyer/Family 360 uses existing Core buyer, family, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit metadata only.
+- [x] Buyer/Family 360 remains internal owner/operator visibility only: no customer messaging, portal invitations, public puppy publishing, payment processing, document generation, media upload from those pages, AI, smart-home/camera/device integration, or external providers were added.
+
+### 1.14 Future Core Command Console
 
 - [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
 - [x] Read-only `/staff/command` shell added with no AI provider, no execution writes, no autonomous action records, and no external systems.

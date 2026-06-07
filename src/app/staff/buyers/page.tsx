@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 
 export const dynamic = "force-dynamic";
@@ -228,6 +229,11 @@ export default async function StaffBuyersPage() {
                     </div>
 
                     {buyer.notes ? <p className="mt-4 text-sm leading-6 text-slate-600">{buyer.notes}</p> : null}
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <Link href={`/staff/buyers/${buyer.id}`} className="rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white">Open buyer</Link>
+                      {primaryMember?.family_id ? <Link href={`/staff/families/${primaryMember.family_id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Open family</Link> : null}
+                      <Link href={`/staff/buyers/${buyer.id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Open 360</Link>
+                    </div>
                   </article>
                 );
               })}

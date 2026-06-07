@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { uploadKennelMediaFile } from "@/app/staff/kennel-media-actions";
+import { type KennelMediaRow, withKennelMediaSignedUrls } from "@/lib/kennel-media";
 import { requireStaffProfile } from "@/lib/staff-auth";
 
 export const dynamic = "force-dynamic";
@@ -241,6 +243,13 @@ function weightLabel(weight: WeightLogRow | null | undefined) {
   return `${weight.weight_grams} g`;
 }
 
+function formatFileSize(bytes: number | null | undefined) {
+  if (bytes === null || bytes === undefined) return "Not recorded";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function sortWeightsAscending(weights: WeightLogRow[]) {
   return [...weights].sort((a, b) => new Date(a.measured_at ?? 0).getTime() - new Date(b.measured_at ?? 0).getTime());
 }
@@ -373,7 +382,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
     );
   }
 
-  const [litterResult, weightResult, puppyEventResult, directEventResult, relatedEventResult, auditResult] = await Promise.all([
+  const [litterResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, auditResult] = await Promise.all([
     puppy.litter_id
       ? readRows<LitterRow>("core_litters", {
           select: "id,external_reference,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes,metadata,created_at,updated_at",
@@ -392,6 +401,13 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
       puppy_id: `eq.${puppy.id}`,
       order: "event_at.desc",
       limit: "100",
+    }),
+    readRows<KennelMediaRow>("core_kennel_media", {
+      select: "id,entity_type,dog_id,puppy_id,title,file_name,file_mime_type,file_size_bytes,storage_bucket,storage_path,is_primary,visibility,notes,uploaded_at,uploaded_by_profile_id",
+      entity_type: "eq.puppy",
+      puppy_id: `eq.${puppy.id}`,
+      order: "is_primary.desc,uploaded_at.desc",
+      limit: "50",
     }),
     readRows<EventRow>("core_events", {
       select: "id,event_type,event_at,summary,puppy_id,reservation_id,related_table,related_id,source,details,created_by_profile_id,created_at",
@@ -432,12 +448,13 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const sire = litter?.sire_id ? dogsById.get(litter.sire_id) : null;
   const weights = weightResult.rows;
   const careEvents = puppyEventResult.rows;
+  const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
   const operationalEvents = uniqueEvents([...directEventResult.rows, ...relatedEventResult.rows]);
   const latest = latestWeight(weights);
   const birth = birthWeightForPuppy(puppy, litter, weights);
   const watchSignals = watchSignalsForPuppy(puppy, litter, weights, careEvents);
   const ageSource = puppy.birth_at ?? litter?.birth_at ?? null;
-  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, directEventResult.warning, relatedEventResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
+  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, mediaResult.warning, directEventResult.warning, relatedEventResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -474,6 +491,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
           <StatCard label="Age" value={formatAge(ageSource)} note={`Birth date ${formatDate(ageSource)}`} />
           <StatCard label="Latest weight" value={weightLabel(latest)} note={latest ? formatDateTime(latest.measured_at) : "No weight logs"} />
           <StatCard label="Watch flags" value={watchSignals.length} note="Deterministic owner attention flags" />
+          <StatCard label="Photos" value={mediaPreviews.length} note="Private kennel-media only" />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
@@ -546,6 +564,52 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
               <EmptyState text="This puppy is not linked to a litter row yet." />
             )}
           </section>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Private Puppy Photos</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Internal owner/operator puppy media only. Photos render through short-lived signed URLs and are not public listings.</p>
+            </div>
+            <Badge>{mediaPreviews.length} photo{mediaPreviews.length === 1 ? "" : "s"}</Badge>
+          </div>
+          {mediaPreviews.length > 0 ? (
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {mediaPreviews.map((media) => (
+                <article key={media.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                  {media.signedUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={media.signedUrl} alt={media.title || "Private puppy photo"} className="aspect-[4/3] w-full object-cover" />
+                  ) : (
+                    <div className="flex aspect-[4/3] items-center justify-center bg-slate-200 px-4 text-center text-sm text-slate-600">Private preview unavailable</div>
+                  )}
+                  <div className="space-y-2 p-4 text-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold text-slate-950">{media.title || media.file_name}</p>
+                      {media.is_primary ? <Badge>Primary</Badge> : null}
+                    </div>
+                    <p className="text-slate-500">{formatDateTime(media.uploaded_at)} / {formatFileSize(media.file_size_bytes)}</p>
+                    {media.notes ? <p className="leading-6 text-slate-600">{media.notes}</p> : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5"><EmptyState text="No private puppy photos are attached yet." /></div>
+          )}
+          {canViewAudit ? (
+            <form action={uploadKennelMediaFile} encType="multipart/form-data" className="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <input type="hidden" name="entityType" value="puppy" />
+              <input type="hidden" name="entityId" value={puppy.id} />
+              <label className="block text-sm font-medium">Photo title<input name="title" maxLength={160} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="block text-sm font-medium">Private photo<input name="file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" /></label>
+              <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" name="isPrimary" className="h-4 w-4 rounded border-slate-300" /> Mark as primary internal photo</label>
+              <label className="block text-sm font-medium">Notes<textarea name="notes" rows={3} maxLength={600} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <p className="text-xs leading-5 text-slate-500">JPG, PNG, or WEBP only. Max 10 MB. Private storage only; no public puppy publishing, customer portal media, customer message, or external provider call.</p>
+              <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Upload private photo</button>
+            </form>
+          ) : null}
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">

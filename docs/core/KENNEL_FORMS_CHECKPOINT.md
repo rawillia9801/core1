@@ -87,6 +87,10 @@ Verified results:
 - Dog Document Upload / Private Storage Attachment workflow was added for dog document metadata records.
 - Dog document storage uses the private `dog-documents` Supabase storage bucket only.
 - Private dog document upload is owner/admin only, validates allowed files up to 10 MB, updates metadata through `core_attach_dog_document_file_metadata(...)`, and writes event/audit rows.
+- Dog/Puppy Media Upload Foundation was added for internal private photo metadata.
+- Dog and puppy photo storage uses the private `kennel-media` Supabase storage bucket only.
+- Private dog/puppy photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, records metadata through `core_record_kennel_media_metadata(...)`, uses signed internal previews, hides raw storage paths, and writes event/audit rows.
+- The dog/puppy media foundation does not publish puppies, expose public media URLs, message customers, update a portal, connect smart-home/cameras/devices, add AI, process payments, generate documents, or call external providers.
 - The dog profile and document vault are internal owner/operator recordkeeping only. They do not diagnose animals, message customers, publish puppies, generate documents, expose public document links, connect smart-home/cameras/devices, or call external providers.
 
 ## Obsolete Tests Removed
