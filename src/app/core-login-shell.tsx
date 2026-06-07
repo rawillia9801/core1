@@ -1,3 +1,5 @@
+import CoreLoginEffects from "./core-login-effects";
+
 type LoginFormAction = (formData: FormData) => void | Promise<void>;
 
 type CoreLoginShellProps = {
@@ -15,11 +17,10 @@ export default function CoreLoginShell({
 
   return (
     <main className="core-login-screen">
-      <div className="core-login-canvas" aria-hidden="true">
-        {Array.from({ length: 28 }).map((_, index) => (
-          <span key={index} />
-        ))}
-      </div>
+      <CoreLoginEffects />
+      <div className="cursor" id="cursor" aria-hidden="true" />
+      <div className="cursor-dot" id="cursor-dot" aria-hidden="true" />
+      <canvas id="bg-canvas" aria-hidden="true" />
       <div className="core-login-scanlines" aria-hidden="true" />
       <div className="core-login-vignette" aria-hidden="true" />
 
@@ -33,7 +34,7 @@ export default function CoreLoginShell({
           <div className="core-login-topbar-right" aria-hidden="true">
             <p><span className="core-login-dot core-login-dot-teal" />SYSTEM ONLINE</p>
             <p><span className="core-login-dot core-login-dot-gold" />SECURITY ARMED</p>
-            <p>PRIVATE</p>
+            <p id="live-time">00:00:00</p>
           </div>
         </header>
 
@@ -56,9 +57,7 @@ export default function CoreLoginShell({
             </article>
           ))}
           <div className="core-login-radar">
-            <span />
-            <span />
-            <span />
+            <canvas id="radar-canvas" width="200" height="100" />
           </div>
         </aside>
 
@@ -147,7 +146,8 @@ export default function CoreLoginShell({
           </div>
 
           <button type="submit" className="core-login-button">
-            INITIATE ACCESS
+            <span className="btn-spinner" id="btn-spinner" aria-hidden="true" />
+            <span id="btn-text">INITIATE ACCESS</span>
           </button>
 
           <div className="core-login-auth-options" aria-hidden="true">
@@ -158,7 +158,7 @@ export default function CoreLoginShell({
 
           <div className="core-login-strip" aria-hidden="true">
             <span />
-            <p>SYSTEM NOMINAL - ALL KENNEL UNITS SECURE - AI CORE OPERATIONAL</p>
+            <p id="sys-msg">SYSTEM NOMINAL - ALL KENNEL UNITS SECURE - AI CORE OPERATIONAL</p>
           </div>
         </form>
 
@@ -183,12 +183,12 @@ export default function CoreLoginShell({
             ))}
           </div>
           <p className="core-login-panel-title">System Event Log</p>
-          <div className="core-login-feed">
-            <p><span>00:01</span> KENNEL-04 temp nominal 71.6F</p>
-            <p><span>00:02</span> HOME-AUTO living room lights on</p>
-            <p><span>00:03</span> AI CORE query batch processed</p>
-            <p><span>00:04</span> BELLA activity sensor triggered</p>
-            <p><span>00:05</span> SECURITY motion: driveway sensor cleared</p>
+          <div className="core-login-feed live-feed">
+            <div className="feed-inner" id="feed-inner" />
+          </div>
+          <div className="core-login-spark-section">
+            <p className="core-login-panel-title">Temp. Trend (24h)</p>
+            <div className="sparkline-wrap" id="sparkline" />
           </div>
         </aside>
 
@@ -196,6 +196,7 @@ export default function CoreLoginShell({
           <p>VERSION <span>4.2.1-STABLE</span></p>
           <p>REGION <span>SW VIRGINIA</span></p>
           <p>ENCRYPTION <span>AES-256</span></p>
+          <p>LATENCY <span id="latency">4ms</span></p>
           <p>PRIVATE SYSTEM - OWNER ACCESS ONLY</p>
         </footer>
       </section>
