@@ -22,10 +22,6 @@ function logKennelFailure(reason: string, details?: Record<string, unknown>) {
 }
 
 function getActionConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Kennel create actions are disabled until staging/production authorization is approved.");
-  }
-
   const supabaseUrl = (
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/$/, "");
@@ -36,7 +32,7 @@ function getActionConfig() {
       hasSupabaseUrl: Boolean(supabaseUrl),
       hasServiceRoleKey: Boolean(serviceRoleKey),
     });
-    throw new Error("Local/development kennel action configuration is incomplete.");
+    return null;
   }
 
   return {
@@ -133,10 +129,15 @@ function redirectWith(path: string, key: string, outcome: string) {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
-  const { restUrl, serviceRoleKey } = getActionConfig();
-  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
+  const config = getActionConfig();
+
+  if (!config) {
+    return false;
+  }
+
+  const response = await fetch(`${config.restUrl}/rpc/${functionName}`, {
     method: "POST",
-    headers: serverHeaders(serviceRoleKey),
+    headers: serverHeaders(config.serviceRoleKey),
     body: JSON.stringify(body),
     cache: "no-store",
   });

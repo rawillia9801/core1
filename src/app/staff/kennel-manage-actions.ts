@@ -120,6 +120,27 @@ function cleanOptionalInteger(value: FormDataEntryValue | null) {
   return { valid: true, value: numberValue };
 }
 
+function cleanOptionalMoneyCents(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim().replace(/[$,]/g, "");
+
+  if (!text) {
+    return { valid: true, value: null };
+  }
+
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) {
+    return { valid: false, value: null };
+  }
+
+  const [dollars, cents = ""] = text.split(".");
+  const centsValue = Number.parseInt(dollars, 10) * 100 + Number.parseInt(cents.padEnd(2, "0"), 10);
+
+  if (!Number.isSafeInteger(centsValue) || centsValue < 0 || centsValue > 100_000_000) {
+    return { valid: false, value: null };
+  }
+
+  return { valid: true, value: centsValue };
+}
+
 async function postRpc(functionName: string, body: Record<string, unknown>) {
   const { restUrl, serviceRoleKey } = getActionConfig();
   const response = await fetch(`${restUrl}/rpc/${functionName}`, {
@@ -292,10 +313,12 @@ export async function updatePuppy(formData: FormData) {
   const status = String(formData.get("status") ?? "unavailable").trim().toLowerCase();
   const healthStatus = cleanText(formData.get("healthStatus"), 160);
   const publicListingStatus = String(formData.get("publicListingStatus") ?? "private").trim().toLowerCase();
+  const priceCents = cleanOptionalMoneyCents(formData.get("priceDollars"));
+  const depositAmountCents = cleanOptionalMoneyCents(formData.get("depositAmountDollars"));
   const externalReference = cleanText(formData.get("externalReference"), 160);
   const notes = cleanText(formData.get("notes"), 1000);
 
-  if (!puppyId.valid || !litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !externalReference.valid || !notes.valid) {
+  if (!puppyId.valid || !litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !priceCents.valid || !depositAmountCents.valid || !externalReference.valid || !notes.valid) {
     redirect("/staff/puppies?puppy=invalid_input");
   }
 
@@ -320,6 +343,8 @@ export async function updatePuppy(formData: FormData) {
     p_status: status,
     p_health_status: healthStatus.value || null,
     p_public_listing_status: publicListingStatus,
+    p_price_cents: priceCents.value,
+    p_deposit_amount_cents: depositAmountCents.value,
     p_external_reference: externalReference.value || null,
     p_notes: notes.value || null,
   });

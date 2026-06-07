@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { uploadKennelMediaFile } from "@/app/staff/kennel-media-actions";
+import { deleteKennelMediaFile, uploadKennelMediaFile } from "@/app/staff/kennel-media-actions";
 import {
   createPuppyReservationAssignment,
   recordPuppyCareObservationFromDetail,
@@ -83,6 +83,11 @@ type PuppyEventRow = {
   details: Record<string, unknown> | null;
   recorded_by_profile_id: string | null;
   created_at: string | null;
+};
+
+type LitterPuppySummaryRow = {
+  id: string;
+  sex: string | null;
 };
 
 type EventRow = {
@@ -346,6 +351,27 @@ function registryValue(metadata: Record<string, unknown> | null | undefined) {
   return metadataText(metadata, ["registry", "registration", "registration_number", "registry_number", "akc_registration", "akc_number"]);
 }
 
+function centsFromMetadata(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!metadata) return null;
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
+    if (typeof value === "string" && /^\d+$/.test(value)) return Number.parseInt(value, 10);
+  }
+
+  return null;
+}
+
+function formatMoney(cents: number | null) {
+  if (cents === null) return "Not recorded";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+}
+
+function countBySex(puppies: LitterPuppySummaryRow[], sex: "female" | "male") {
+  return puppies.filter((puppy) => normalizeText(puppy.sex) === sex).length;
+}
+
 function safeDetails(details: Record<string, unknown> | null | undefined) {
   if (!details || Object.keys(details).length === 0) return "No detail keys recorded";
   const safePairs = Object.entries(details)
@@ -442,7 +468,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
     );
   }
 
-  const [litterResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, reservationResult, buyerResult, familyResult, applicationResult, auditResult] = await Promise.all([
+  const [litterResult, litterPuppyResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, reservationResult, buyerResult, familyResult, applicationResult, auditResult] = await Promise.all([
     puppy.litter_id
       ? readRows<LitterRow>("core_litters", {
           select: "id,external_reference,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes,metadata,created_at,updated_at",
@@ -450,6 +476,13 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
           limit: "1",
         })
       : Promise.resolve({ rows: [] as LitterRow[], warning: null }),
+    puppy.litter_id
+      ? readRows<LitterPuppySummaryRow>("core_puppies", {
+          select: "id,sex",
+          litter_id: `eq.${puppy.litter_id}`,
+          limit: "200",
+        })
+      : Promise.resolve({ rows: [{ id: puppy.id, sex: puppy.sex }] as LitterPuppySummaryRow[], warning: null }),
     readRows<WeightLogRow>("core_weight_logs", {
       select: "id,puppy_id,measured_at,weight_grams,notes,recorded_by_profile_id,metadata",
       puppy_id: `eq.${puppy.id}`,
@@ -529,6 +562,10 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const sire = litter?.sire_id ? dogsById.get(litter.sire_id) : null;
   const weights = weightResult.rows;
   const careEvents = puppyEventResult.rows;
+  const litterPuppies = litterPuppyResult.rows.length > 0 ? litterPuppyResult.rows : [{ id: puppy.id, sex: puppy.sex }];
+  const derivedFemaleCount = countBySex(litterPuppies, "female");
+  const derivedMaleCount = countBySex(litterPuppies, "male");
+  const femaleMaleCountLabel = litter ? `${litter.female_count ?? derivedFemaleCount} / ${litter.male_count ?? derivedMaleCount}` : "Not linked";
   const reservations = reservationResult.rows;
   const activeReservation = reservations.find((reservation) => !["cancelled", "void", "released"].includes((reservation.reservation_status ?? "").toLowerCase())) ?? null;
   const buyers = buyerResult.rows;
@@ -541,7 +578,9 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const birth = birthWeightForPuppy(puppy, litter, weights);
   const watchSignals = watchSignalsForPuppy(puppy, litter, weights, careEvents);
   const ageSource = puppy.birth_at ?? litter?.birth_at ?? null;
-  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
+  const priceCents = centsFromMetadata(puppy.metadata, ["price_cents", "asking_price_cents", "sale_price_cents"]);
+  const depositAmountCents = centsFromMetadata(puppy.metadata, ["deposit_amount_cents", "deposit_cents", "deposit_required_cents"]);
+  const warnings = [puppyResult.warning, litterResult.warning, litterPuppyResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -604,6 +643,8 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
               <InfoItem label="Collar" value={display(puppy.collar_color)} />
               <InfoItem label="Health marker" value={display(puppy.health_status)} />
               <InfoItem label="Registry" value={display(registryValue(puppy.metadata), "Not recorded")} />
+              <InfoItem label="Price amount" value={formatMoney(priceCents)} />
+              <InfoItem label="Deposit amount" value={formatMoney(depositAmountCents)} />
               <InfoItem label="Created" value={formatDateTime(puppy.created_at)} />
               <InfoItem label="Updated" value={formatDateTime(puppy.updated_at)} />
               <InfoItem label="Litter ID" value={shortId(puppy.litter_id)} />
@@ -630,7 +671,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
                     <InfoItem label="Expected birth" value={formatDate(litter.expected_birth_at)} />
                     <InfoItem label="Birth date" value={formatDate(litter.birth_at)} />
                     <InfoItem label="Puppy count" value={litter.total_puppies ?? "Not recorded"} />
-                    <InfoItem label="Female / Male" value={`${litter.female_count ?? "?"} / ${litter.male_count ?? "?"}`} />
+                    <InfoItem label="Female / Male" value={femaleMaleCountLabel} />
                   </dl>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -721,6 +762,14 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
                     </div>
                     <p className="text-slate-500">{formatDateTime(media.uploaded_at)} / {formatFileSize(media.file_size_bytes)}</p>
                     {media.notes ? <p className="leading-6 text-slate-600">{media.notes}</p> : null}
+                    {canViewAudit ? (
+                      <form action={deleteKennelMediaFile} className="pt-2">
+                        <input type="hidden" name="entityType" value="puppy" />
+                        <input type="hidden" name="entityId" value={puppy.id} />
+                        <input type="hidden" name="mediaId" value={media.id} />
+                        <button type="submit" className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700">Delete photo</button>
+                      </form>
+                    ) : null}
                   </div>
                 </article>
               ))}

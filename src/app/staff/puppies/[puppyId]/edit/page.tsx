@@ -17,6 +17,7 @@ type PuppyRow = {
   status: string | null;
   health_status: string | null;
   public_listing_status: string | null;
+  metadata: Record<string, unknown> | null;
   notes: string | null;
 };
 
@@ -59,6 +60,22 @@ function dateInput(value: string | null) {
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
+function centsFromMetadata(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!metadata) return null;
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
+    if (typeof value === "string" && /^\d+$/.test(value)) return Number.parseInt(value, 10);
+  }
+
+  return null;
+}
+
+function moneyInputValue(cents: number | null) {
+  return cents === null ? "" : (cents / 100).toFixed(2);
+}
+
 function litterLabel(litter: LitterRow) {
   const name = litter.litter_name || `Litter ${litter.id.slice(0, 8)}`;
   const status = litter.status ? ` · ${litter.status}` : "";
@@ -70,7 +87,7 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
   const { puppyId } = await params;
   const [puppies, litters] = await Promise.all([
     readRows<PuppyRow>("core_puppies", {
-      select: "id,external_reference,litter_id,name,collar_color,sex,color,coat_type,birth_at,status,health_status,public_listing_status,notes",
+      select: "id,external_reference,litter_id,name,collar_color,sex,color,coat_type,birth_at,status,health_status,public_listing_status,metadata,notes",
       id: `eq.${puppyId}`,
       limit: "1",
     }),
@@ -83,6 +100,8 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
   const puppy = puppies.rows[0];
   const canEdit = staff.role === "owner" || staff.role === "admin";
   const warnings = [puppies.warning, litters.warning].filter(Boolean);
+  const priceCents = centsFromMetadata(puppy?.metadata, ["price_cents", "asking_price_cents", "sale_price_cents"]);
+  const depositAmountCents = centsFromMetadata(puppy?.metadata, ["deposit_amount_cents", "deposit_cents", "deposit_required_cents"]);
 
   if (!puppy) {
     return (
@@ -129,8 +148,11 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
               <label className="text-sm font-medium">Birth date<input type="date" name="birthAt" defaultValue={dateInput(puppy.birth_at)} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">Public listing status<select name="publicListingStatus" defaultValue={puppy.public_listing_status ?? "private"} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2"><option value="private">Private</option><option value="coming_soon">Coming soon</option><option value="public">Public marker</option><option value="hidden">Hidden</option></select></label>
               <label className="text-sm font-medium">Health marker<input name="healthStatus" defaultValue={puppy.health_status ?? ""} maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Price amount<input name="priceDollars" defaultValue={moneyInputValue(priceCents)} inputMode="decimal" placeholder="2000.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Deposit amount<input name="depositAmountDollars" defaultValue={moneyInputValue(depositAmountCents)} inputMode="decimal" placeholder="500.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">External reference<input name="externalReference" defaultValue={puppy.external_reference ?? ""} maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
             </div>
+            <p className="text-xs leading-5 text-slate-500">Price and deposit are internal puppy metadata only. They do not process payments, update a buyer balance, publish a listing, or contact customers.</p>
             <label className="block text-sm font-medium">Notes<textarea name="notes" defaultValue={puppy.notes ?? ""} maxLength={1000} rows={4} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
             <div className="flex flex-wrap gap-3">
               <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Save Changes</button>

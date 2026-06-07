@@ -400,6 +400,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dog and puppy photos use the private `kennel-media` Supabase storage bucket only.
 - [x] Dog/puppy photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, records metadata through `core_record_kennel_media_metadata(...)`, writes `core_events` and `core_audit_log`, and uses signed internal previews without showing raw storage paths.
 - [x] Dog/puppy private media remains internal only: no public puppy publishing, customer portal media, customer messaging, AI, smart-home/camera/device integration, payment processing, document generation, or external providers were added.
+- [x] Puppy private photo deletion added through controlled owner/admin `core_delete_kennel_media(...)` with event/audit rows and no public publishing, portal media, customer messaging, AI, devices, payments, documents, or external providers.
+- [x] Puppy edit/detail now supports internal puppy-level price and deposit metadata on `core_puppies.metadata`; these values do not process payments, create ledger rows, update buyer balances, publish listings, or contact customers.
+- [x] Puppy detail now derives litter female/male counts from linked puppy sex rows when stored litter count fields are blank.
+- [x] Kennel create actions can run in production with the existing authenticated owner/admin and controlled RPC boundaries instead of a production-only kill switch.
 - [x] Production puppy weight/care and kennel media action crashes were cleaned up so missing configuration, RPC failures, and storage failures route to safe error states instead of breaking page rendering.
 - [x] Temporary production repair placeholder files are absent; canonical action files are the only active implementation.
 - [x] Dam/sire litter history shows linked litters, puppies, and buyer/reservation context where existing Core data supports it.

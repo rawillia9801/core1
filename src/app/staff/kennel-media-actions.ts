@@ -107,6 +107,34 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
   return "success";
 }
 
+async function deleteStorageObject(storagePath: string) {
+  const storage = getStorageClient();
+
+  if (!storage) {
+    return "configuration";
+  }
+
+  const result = await storage.storage
+    .from(KENNEL_MEDIA_BUCKET)
+    .remove([storagePath])
+    .catch((error: unknown) => {
+      logKennelMediaFailure("private kennel media storage delete crashed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return { data: null, error: { message: "storage delete crashed" } };
+    });
+
+  if (result.error) {
+    logKennelMediaFailure("private kennel media storage delete failed", {
+      storagePath,
+      error: result.error.message,
+    });
+    return "failed";
+  }
+
+  return "success";
+}
+
 async function readOne<T>(table: string, params: Record<string, string>) {
   const config = getActionConfig();
 
@@ -247,4 +275,53 @@ export async function uploadKennelMediaFile(formData: FormData) {
   revalidatePath(`/staff/${pathPrefix}/${entityId.value}`);
   revalidatePath(`/staff/${pathPrefix}`);
   redirect(`/staff/${pathPrefix}/${entityId.value}?media=upload_success`);
+}
+
+export async function deleteKennelMediaFile(formData: FormData) {
+  const entityType = String(formData.get("entityType") ?? "").trim().toLowerCase();
+  const entityId = cleanRequiredUuid(formData.get("entityId"));
+  const mediaId = cleanRequiredUuid(formData.get("mediaId"));
+
+  if ((entityType !== "dog" && entityType !== "puppy") || !entityId.valid || !mediaId.valid) {
+    redirect("/staff?media=delete_invalid_input");
+  }
+
+  const pathPrefix = entityType === "dog" ? "dogs" : "puppies";
+  const staff = await requireOwnerOrAdmin(entityType, entityId.value, "delete");
+  const media = await readOne<{
+    id: string;
+    entity_type: string;
+    dog_id: string | null;
+    puppy_id: string | null;
+    storage_bucket: string;
+    storage_path: string;
+  }>("core_kennel_media", {
+    select: "id,entity_type,dog_id,puppy_id,storage_bucket,storage_path",
+    id: `eq.${mediaId.value}`,
+    limit: "1",
+  });
+
+  if (!media || media.entity_type !== entityType) {
+    redirect(`/staff/${pathPrefix}/${entityId.value}?media=delete_not_found`);
+  }
+
+  const relatedId = entityType === "dog" ? media.dog_id : media.puppy_id;
+  if (relatedId !== entityId.value || media.storage_bucket !== KENNEL_MEDIA_BUCKET || !media.storage_path) {
+    redirect(`/staff/${pathPrefix}/${entityId.value}?media=delete_invalid_input`);
+  }
+
+  const ok = await postRpc("core_delete_kennel_media", {
+    p_media_id: mediaId.value,
+    p_actor_profile_id: staff.id,
+  });
+
+  if (ok !== "success") {
+    redirect(`/staff/${pathPrefix}/${entityId.value}?media=delete_metadata_error`);
+  }
+
+  const storageResult = await deleteStorageObject(media.storage_path);
+
+  revalidatePath(`/staff/${pathPrefix}/${entityId.value}`);
+  revalidatePath(`/staff/${pathPrefix}`);
+  redirect(`/staff/${pathPrefix}/${entityId.value}?media=${storageResult === "success" ? "delete_success" : "delete_storage_warning"}`);
 }
