@@ -104,6 +104,10 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
           <p className="mt-3 text-sm leading-6 text-slate-600">Updates a real Core puppy record only. Delete hides/unavailable-marks the puppy instead of hard-deleting linked history.</p>
         </section>
 
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950 shadow-sm">
+          This workspace is for internal owner/operator record correction and buyer assignment only. It does not send messages, process payments, generate documents, publish puppies, update the customer portal, or call external providers.
+        </section>
+
         {!canEdit ? (
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">Only owner/admin can edit puppy records.</section>
         ) : (

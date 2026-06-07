@@ -834,6 +834,11 @@ export default async function StaffCommandPage() {
   const activeReservationCount = reservations.filter(
     (row) => !["cancelled", "void", "released", "completed"].includes(normalized(row.reservation_status)),
   ).length;
+  const activeReservedPuppyIds = new Set(
+    reservations
+      .filter((row) => row.puppy_id && !["cancelled", "void", "released", "completed"].includes(normalized(row.reservation_status)))
+      .map((row) => row.puppy_id as string),
+  );
   const pendingApplicationCount = countByStatus(applications, [
     "received",
     "needs_review",
@@ -903,6 +908,7 @@ export default async function StaffCommandPage() {
   const puppiesMissingWeightToday = newbornPuppies.filter(
     (row) => !weightsTodayByPuppy.has(row.id),
   ).length;
+  const puppiesWithoutAssignment = puppies.filter((row) => !activeReservedPuppyIds.has(row.id));
   const watchPuppies = puppies.filter((row) =>
     ["watch", "at_risk", "attention", "needs_attention"].some((status) =>
       `${normalized(row.status)} ${normalized(row.health_status)}`.includes(status),
@@ -937,6 +943,12 @@ export default async function StaffCommandPage() {
       detail: `${puppiesMissingWeightToday} newborn/recent puppy record(s) do not show a weight logged today. Latest weights remain observation-only.`,
       href: "/staff/litters",
       badge: String(puppiesMissingWeightToday),
+    },
+    {
+      title: "Puppies without buyer assignment",
+      detail: `${puppiesWithoutAssignment.length} puppy record(s) do not have an active Core reservation assignment. Assignment must happen through the reservation workflow.`,
+      href: "/staff/puppies",
+      badge: String(puppiesWithoutAssignment.length),
     },
     {
       title: "Watch / attention puppies",
@@ -989,7 +1001,7 @@ export default async function StaffCommandPage() {
         puppyMediaIds.has(puppy.id) ? "Internal photo metadata present" : "No internal photo metadata found",
       ].join(" | "),
       href: `/staff/puppies/${puppy.id}`,
-      badge: puppy.public_listing_status === "private" ? "Private" : formatKey(puppy.public_listing_status),
+      badge: activeReservedPuppyIds.has(puppy.id) ? "Assigned" : "Assign",
     };
   });
 
@@ -1018,6 +1030,17 @@ export default async function StaffCommandPage() {
     ].join(" | "),
     href: reservation.buyer_id ? `/staff/buyers/${reservation.buyer_id}` : "/staff/reservations",
     badge: formatKey(reservation.reservation_status),
+  }));
+
+  const assignmentCards: ConsoleCard[] = puppiesWithoutAssignment.slice(0, 6).map((puppy) => ({
+    title: display(puppy.name, puppy.collar_color ? `${puppy.collar_color} collar` : shortId(puppy.id)),
+    detail: [
+      `Status: ${formatKey(puppy.status)}`,
+      weightsTodayByPuppy.has(puppy.id) ? "Weight logged today" : "Missing today's weight",
+      "Open puppy detail to assign buyer through a reservation.",
+    ].join(" | "),
+    href: `/staff/puppies/${puppy.id}`,
+    badge: "Assign",
   }));
 
   const pipelineCards: ConsoleCard[] = [
@@ -1464,6 +1487,14 @@ export default async function StaffCommandPage() {
             emptyText="No application or reservation pipeline records were found in the current Core read."
           />
         </section>
+
+        <ConsoleSection
+          eyebrow="Assignment"
+          title="Puppy Buyer Assignment Links"
+          detail="Puppies without active reservation assignments link to the puppy detail workflow where buyer assignment is created through Core reservations."
+          cards={assignmentCards}
+          emptyText="No unassigned puppy records were found in the current Core read."
+        />
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ConsoleSection

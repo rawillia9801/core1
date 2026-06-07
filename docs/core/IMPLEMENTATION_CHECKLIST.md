@@ -380,6 +380,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Puppy detail links were added from `/staff/puppies`.
 - [x] Puppy detail uses existing puppy, litter, dam/sire, weight, care observation, event, and safely linkable audit context only.
 - [x] Puppy detail remains internal owner/operator observation review only: no diagnosis, customer messages, public puppy publishing, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, documents, payments, or external providers were added.
+- [x] Puppy edit was completed as an owner/admin internal correction workflow.
+- [x] Puppy detail now supports owner/admin puppy weight add and weight correction through controlled RPCs with event/audit rows.
+- [x] Puppy detail now supports adding factual care observations; existing care observations remain read-only.
+- [x] Puppy detail now supports buyer/family assignment through the Core reservation model, blocks duplicate active puppy reservations, and does not process payments, generate documents, publish puppies, update a portal, send messages, or call external providers.
 - [x] Kennel Daily Task Board / Today's Care Checklist added to `/staff`.
 - [x] Daily task board derives tasks from existing Core puppy, litter, weight, care observation, reservation, go-home, payment, document, notification, dog, and kennel metadata.
 - [x] Daily task board remains internal owner/operator task visibility only: no diagnosis, customer messages, public puppy publishing, payment processing, document generation, customer portal behavior, smart-home/camera/device connection, AI, SMTP/Twilio/Facebook, or external providers were added.
@@ -407,6 +411,10 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Individual Family 360 Command Workspace added at `/staff/families/[familyId]`.
 - [x] Buyer/family list pages now link to Open buyer, Open family, and Open 360 detail routes.
 - [x] Buyer/Family 360 uses existing Core buyer, family, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit metadata only.
+- [x] Manual buyer create/edit workflows added at `/staff/buyers/new` and `/staff/buyers/[buyerId]/edit`.
+- [x] Family create/edit workflows added at `/staff/families/new` and `/staff/families/[familyId]/edit`.
+- [x] Buyer/family relationship linking uses a controlled Core membership RPC with event/audit rows.
+- [x] Buyer/Family 360 operational links were added for edit, assignment, reservation, payment readiness, document readiness, and go-home readiness.
 - [x] Buyer/Family 360 remains internal owner/operator visibility only: no customer messaging, portal invitations, public puppy publishing, payment processing, document generation, media upload from those pages, AI, smart-home/camera/device integration, or external providers were added.
 
 ### 1.14 Future Core Command Console
@@ -414,6 +422,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Command Console planning document added: `docs/core/CORE_COMMAND_CONSOLE_PLAN.md`.
 - [x] Read-only `/staff/command` shell added with no AI provider, no execution writes, no autonomous action records, and no external systems.
 - [x] `/staff/command` expanded into a read-only Core OS Command Center with system status, priority queue, neonatal/puppy, dog/breeding-stock, buyer/family, pipeline, readiness, communications preview, event/audit, and proposed-action boundary sections.
+- [x] Command Center now links to owner/operator puppy edit/detail, missing-weight, buyer/family 360, and puppy buyer-assignment workflows without executing external actions.
 - [x] Expanded Command Center uses existing Core metadata only and does not send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, call AI providers, or contact external services.
 - [x] Proposed Action Approval Model planning document added: `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md`.
 - [x] Build read-only Command Console shell only after approval.

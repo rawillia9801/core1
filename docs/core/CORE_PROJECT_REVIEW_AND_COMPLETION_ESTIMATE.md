@@ -134,6 +134,8 @@ The following are implemented and have been manually or test verified in local/d
 - The weight/care log workflow writes event/audit rows and remains internal owner/operator observation logging only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, add AI, add external providers, generate documents, or process payments.
 - `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
 - Puppy detail uses existing puppy/litter/weight/care data, dam/sire context, deterministic owner attention flags, and safely linkable event/audit context.
+- Puppy edit is available as an owner/admin internal correction workflow, and puppy detail now supports factual weight add/correction plus care-observation add workflows through controlled Core RPCs with event/audit rows.
+- Puppy detail now supports buyer/family assignment through the existing Core reservation model. It blocks duplicate active puppy reservations and does not process payments, generate documents, publish puppies, update a portal, send messages, or call external providers.
 - Puppy detail remains internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, add AI, add external providers, generate documents, or process payments.
 - `/staff` now includes an internal Kennel Daily Task Board / Today's Care Checklist.
 - The task board derives today's owner/operator attention items from existing Core puppy, litter, weight, care, go-home, reservation, payment, document, notification, dog, and kennel metadata.
@@ -151,6 +153,8 @@ The following are implemented and have been manually or test verified in local/d
 - `/staff/families` works as a read-only, real-data-only workspace with no external side effects.
 - `/staff/buyers/[buyerId]` works as an internal Buyer 360 Command Workspace using existing Core buyer/family/application/reservation/ledger/go-home/document/communication/event/audit metadata only.
 - `/staff/families/[familyId]` works as an internal Family 360 Command Workspace using existing Core family/member/buyer/application/reservation/ledger/go-home/document/communication/event/audit metadata only.
+- Manual buyer create/edit and family create/edit workflows now exist for owner/admin internal record correction. Buyer/family linking uses a controlled Core membership RPC, writes event/audit rows, and does not invite portal users or message customers.
+- Buyer/Family 360 operational links were added for internal edit, assignment, reservation, payment readiness, document readiness, and go-home readiness workflows.
 - Buyer/Family 360 remains internal owner/operator visibility only. It does not message customers, invite portal users, publish puppies, process payments, generate documents, upload media from those pages, connect AI, connect smart-home/cameras/devices, or call external providers.
 - `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
 - Events is enabled in the existing technical sidebar.
@@ -167,6 +171,7 @@ The following are implemented and have been manually or test verified in local/d
 - `docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document only; no AI console has been built.
 - `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked after implementation.
 - `/staff/command` exists as a read-only Core OS Command Center with system status, priority queue, neonatal/puppy, dog/breeding-stock, buyer/family, pipeline, readiness, communications preview, event/audit, and proposed-action boundary sections.
+- The Command Center now links to owner/operator puppy edit/detail, missing-weight, buyer/family 360, and puppy buyer-assignment workflows without executing external actions.
 - The Command Center uses existing Core metadata only. It does not connect an AI provider, send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, contact external services, or replace `/staff`.
 - `docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as the safety model for owner/operator-approved proposed actions.
 - `/staff/proposed-actions` exists as an owner/admin proposal queue. It can create, approve, and reject proposal review records only; approval does not execute business changes.

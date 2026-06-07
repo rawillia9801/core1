@@ -178,6 +178,9 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
             </div>
             <div className="flex flex-wrap gap-2">
               <Link href="/staff/buyers" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Buyers</Link>
+              <Link href={`/staff/buyers/${buyer.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Edit Buyer</Link>
+              <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Assign Buyer to Puppy</Link>
+              <Link href="/staff/reservations" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Create Reservation Context</Link>
               {familyIds[0] ? <Link href={`/staff/families/${familyIds[0]}`} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Open family</Link> : null}
             </div>
           </div>
@@ -185,7 +188,7 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Internal boundary</p>
-          <p className="mt-2 text-sm leading-6">This 360 workspace is internal owner/operator visibility only. It does not message customers, invite portal users, publish puppies, process payments, generate documents, upload media, call external providers, or change records.</p>
+          <p className="mt-2 text-sm leading-6">This 360 workspace is internal owner/operator visibility only. Edit and assignment links stay inside Core. It does not message customers, invite portal users, publish puppies, process payments, generate documents, upload media, call external providers, or change records directly from this page.</p>
         </section>
 
         {warnings.length ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">{warnings.map((warning) => <p key={warning}>{warning}</p>)}</section> : null}
@@ -196,6 +199,19 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
           <InfoCard label="Applications" value={applicationsResult.rows.length} note="Buyer-linked records" />
           <InfoCard label="Reservations" value={reservationsResult.rows.length} note={`${activeReservationCount} active/open`} />
           <InfoCard label="Balance due" value={formatMoney(balanceDue)} note="Ledger-derived across linked reservations" />
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold">Operational Links</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-500">Internal navigation for controlled correction and reservation assignment workflows.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href={`/staff/buyers/${buyer.id}/edit`} className="rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white">Edit Buyer</Link>
+            <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Assign Buyer to Puppy</Link>
+            <Link href="/staff/reservations" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">View Active Reservations</Link>
+            <Link href="/staff/payments" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Payment Readiness</Link>
+            <Link href="/staff/documents" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Document Readiness</Link>
+            <Link href="/staff/go-home" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Go-Home Readiness</Link>
+          </div>
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">

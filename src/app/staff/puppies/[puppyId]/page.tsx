@@ -1,6 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { uploadKennelMediaFile } from "@/app/staff/kennel-media-actions";
+import {
+  createPuppyReservationAssignment,
+  recordPuppyCareObservationFromDetail,
+  recordPuppyWeightFromDetail,
+  updatePuppyWeightLog,
+} from "./actions";
 import { type KennelMediaRow, withKennelMediaSignedUrls } from "@/lib/kennel-media";
 import { requireStaffProfile } from "@/lib/staff-auth";
 
@@ -109,6 +115,44 @@ type AuditRow = {
   created_at: string | null;
 };
 
+type ReservationRow = {
+  reservation_id: string;
+  reservation_status: string | null;
+  buyer_id: string | null;
+  buyer_name: string | null;
+  family_id: string | null;
+  family_name: string | null;
+  puppy_id: string | null;
+  contract_total_cents: number | null;
+  balance_due_cents: number | null;
+  go_home_planned_at: string | null;
+  go_home_status: string | null;
+};
+
+type BuyerRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  email: string | null;
+  phone: string | null;
+  approval_status: string | null;
+};
+
+type FamilyRow = {
+  id: string;
+  name: string | null;
+  status: string | null;
+};
+
+type ApplicationRow = {
+  id: string;
+  status: string | null;
+  buyer_id: string | null;
+  family_id: string | null;
+  submitted_at: string | null;
+};
+
 const ATTENTION_TERMS = ["weak", "watch", "fading", "not nursing", "cold", "losing", "loss", "risk", "concern"];
 
 function getSupabaseRestConfig() {
@@ -180,6 +224,22 @@ function formatDateTime(value: string | null | undefined) {
   return Number.isNaN(date.getTime())
     ? "Invalid date"
     : new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function dateTimeInput(value: string | null | undefined) {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 16);
+}
+
+function buyerName(buyer: BuyerRow | null | undefined) {
+  if (!buyer) return "Buyer not found";
+  return buyer.preferred_name || [buyer.first_name, buyer.last_name].filter(Boolean).join(" ") || buyer.email || `Buyer ${shortId(buyer.id)}`;
+}
+
+function familyLabel(family: FamilyRow | null | undefined) {
+  if (!family) return "Family not found";
+  return family.name || `Family ${shortId(family.id)}`;
 }
 
 function daysSince(value: string | null) {
@@ -382,7 +442,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
     );
   }
 
-  const [litterResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, auditResult] = await Promise.all([
+  const [litterResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, reservationResult, buyerResult, familyResult, applicationResult, auditResult] = await Promise.all([
     puppy.litter_id
       ? readRows<LitterRow>("core_litters", {
           select: "id,external_reference,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes,metadata,created_at,updated_at",
@@ -422,6 +482,27 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
       order: "event_at.desc",
       limit: "100",
     }),
+    readRows<ReservationRow>("core_reservation_summary_view", {
+      select: "reservation_id,reservation_status,buyer_id,buyer_name,family_id,family_name,puppy_id,contract_total_cents,balance_due_cents,go_home_planned_at,go_home_status",
+      puppy_id: `eq.${puppy.id}`,
+      order: "reserved_at.desc.nullslast",
+      limit: "20",
+    }),
+    readRows<BuyerRow>("core_buyers", {
+      select: "id,first_name,last_name,preferred_name,email,phone,approval_status",
+      order: "updated_at.desc",
+      limit: "500",
+    }),
+    readRows<FamilyRow>("core_families", {
+      select: "id,name,status",
+      order: "updated_at.desc",
+      limit: "500",
+    }),
+    readRows<ApplicationRow>("core_applications", {
+      select: "id,status,buyer_id,family_id,submitted_at",
+      order: "created_at.desc",
+      limit: "500",
+    }),
     canViewAudit
       ? readRows<AuditRow>("core_audit_log", {
           select: "id,actor_type,actor_profile_id,actor_identifier,source,action,entity_table,entity_id,request_context,outcome,error_message,created_at",
@@ -448,6 +529,11 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const sire = litter?.sire_id ? dogsById.get(litter.sire_id) : null;
   const weights = weightResult.rows;
   const careEvents = puppyEventResult.rows;
+  const reservations = reservationResult.rows;
+  const activeReservation = reservations.find((reservation) => !["cancelled", "void", "released"].includes((reservation.reservation_status ?? "").toLowerCase())) ?? null;
+  const buyers = buyerResult.rows;
+  const families = familyResult.rows;
+  const applications = applicationResult.rows;
   const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
   const mediaWarning = mediaResult.warning ? "Private photo storage is not available from the current Core schema yet." : null;
   const operationalEvents = uniqueEvents([...directEventResult.rows, ...relatedEventResult.rows]);
@@ -455,7 +541,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const birth = birthWeightForPuppy(puppy, litter, weights);
   const watchSignals = watchSignalsForPuppy(puppy, litter, weights, careEvents);
   const ageSource = puppy.birth_at ?? litter?.birth_at ?? null;
-  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
+  const warnings = [puppyResult.warning, litterResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -570,6 +656,49 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
+              <h2 className="text-lg font-semibold">Buyer / Reservation Assignment</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Buyer-to-puppy assignment follows the Core reservation model. This section does not process payments, send messages, generate documents, publish puppies, or invite portal users.</p>
+            </div>
+            <Badge>{activeReservation ? "Assigned" : "No buyer assigned"}</Badge>
+          </div>
+
+          {activeReservation ? (
+            <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-5 text-sm text-emerald-950">
+              <p className="font-bold">Current active reservation</p>
+              <dl className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <InfoItem label="Buyer" value={activeReservation.buyer_id ? <Link href={`/staff/buyers/${activeReservation.buyer_id}`} className="font-semibold text-blue-700">{display(activeReservation.buyer_name)}</Link> : "Not linked"} />
+                <InfoItem label="Family" value={activeReservation.family_id ? <Link href={`/staff/families/${activeReservation.family_id}`} className="font-semibold text-blue-700">{display(activeReservation.family_name)}</Link> : "Not linked"} />
+                <InfoItem label="Reservation" value={<Link href={`/staff/reservations/${activeReservation.reservation_id}`} className="font-semibold text-blue-700">{shortId(activeReservation.reservation_id)}</Link>} />
+                <InfoItem label="Status" value={formatKey(activeReservation.reservation_status)} />
+                <InfoItem label="Contract" value={typeof activeReservation.contract_total_cents === "number" ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(activeReservation.contract_total_cents / 100) : "Not recorded"} />
+                <InfoItem label="Balance" value={typeof activeReservation.balance_due_cents === "number" ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(activeReservation.balance_due_cents / 100) : "Not recorded"} />
+                <InfoItem label="Go-home" value={`${formatKey(activeReservation.go_home_status)} / ${formatDateTime(activeReservation.go_home_planned_at)}`} />
+              </dl>
+              <p className="mt-4 rounded-xl border border-emerald-200 bg-white/80 p-3 text-xs font-semibold leading-5 text-emerald-900">Manual assignment is blocked while an active reservation exists. Use an approved cancellation/reassignment workflow before creating a different active reservation.</p>
+            </div>
+          ) : canViewAudit ? (
+            <form action={createPuppyReservationAssignment} className="mt-5 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <input type="hidden" name="puppyId" value={puppy.id} />
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium">Existing buyer<select name="buyerId" required className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2"><option value="">Select buyer</option>{buyers.map((buyer) => <option key={buyer.id} value={buyer.id}>{buyerName(buyer)} / {buyer.email ?? buyer.phone ?? "no contact"}</option>)}</select></label>
+                <label className="text-sm font-medium">Existing family<select name="familyId" required className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2"><option value="">Select family</option>{families.map((family) => <option key={family.id} value={family.id}>{familyLabel(family)} / {family.status ?? "status unknown"}</option>)}</select></label>
+                <label className="text-sm font-medium">Optional application<select name="applicationId" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2"><option value="">No application link</option>{applications.map((application) => <option key={application.id} value={application.id}>{shortId(application.id)} / {formatKey(application.status)} / {formatDate(application.submitted_at)}</option>)}</select></label>
+                <label className="text-sm font-medium">Reservation status<select name="reservationStatus" defaultValue="reserved" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2"><option value="reserved">Reserved</option><option value="pending">Pending marker</option></select></label>
+                <label className="text-sm font-medium">Contract total dollars<input name="contractTotalDollars" required inputMode="decimal" placeholder="2000.00" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                <label className="text-sm font-medium">Deposit required dollars<input name="depositRequiredDollars" inputMode="decimal" placeholder="500.00" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                <label className="text-sm font-medium md:col-span-2">Sale type / internal label<input name="saleType" maxLength={100} placeholder="manual reservation" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+              </div>
+              <label className="block text-sm font-medium">Reservation notes<textarea name="notes" rows={3} maxLength={1000} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+              <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Create Reservation Assignment</button>
+            </form>
+          ) : (
+            <div className="mt-5"><EmptyState text="Only owner/admin can assign a buyer to a puppy." /></div>
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
               <h2 className="text-lg font-semibold">Private Puppy Photos</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">Internal owner/operator puppy media only. Photos render through short-lived signed URLs and are not public listings.</p>
             </div>
@@ -628,6 +757,18 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
             <p className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               Weight entries are factual observations only. This page does not interpret trends as medical conclusions.
             </p>
+            {canViewAudit ? (
+              <form action={recordPuppyWeightFromDetail} className="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <input type="hidden" name="puppyId" value={puppy.id} />
+                <h3 className="text-sm font-bold text-slate-950">Add new weight</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="text-sm font-medium">Weight grams<input name="weightGrams" required inputMode="numeric" className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                  <label className="text-sm font-medium">Measured at<input name="measuredAt" type="datetime-local" className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                </div>
+                <label className="block text-sm font-medium">Notes<textarea name="notes" rows={3} maxLength={1000} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Record Weight</button>
+              </form>
+            ) : null}
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -647,6 +788,16 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
                       <Badge>Weight</Badge>
                     </div>
                     {weight.notes ? <p className="mt-3 text-sm leading-6 text-slate-700">{weight.notes}</p> : null}
+                    {canViewAudit ? (
+                      <form action={updatePuppyWeightLog} className="mt-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-2">
+                        <input type="hidden" name="puppyId" value={puppy.id} />
+                        <input type="hidden" name="weightLogId" value={weight.id} />
+                        <label className="text-xs font-semibold uppercase text-slate-500">Weight grams<input name="weightGrams" defaultValue={weight.weight_grams ?? ""} inputMode="numeric" className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm normal-case" /></label>
+                        <label className="text-xs font-semibold uppercase text-slate-500">Measured at<input name="measuredAt" type="datetime-local" defaultValue={dateTimeInput(weight.measured_at)} className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm normal-case" /></label>
+                        <label className="text-xs font-semibold uppercase text-slate-500 sm:col-span-2">Correction notes<textarea name="notes" defaultValue={weight.notes ?? ""} rows={2} maxLength={1000} className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm normal-case" /></label>
+                        <button type="submit" className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white sm:col-span-2">Save Weight Correction</button>
+                      </form>
+                    ) : null}
                   </article>
                 ))}
               </div>
@@ -680,6 +831,18 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
             ) : (
               <EmptyState text="No care or observation history has been recorded for this puppy yet." />
             )}
+            {canViewAudit ? (
+              <form action={recordPuppyCareObservationFromDetail} className="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <input type="hidden" name="puppyId" value={puppy.id} />
+                <h3 className="text-sm font-bold text-slate-950">Add care observation</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="text-sm font-medium">Observation type<select name="observationType" defaultValue="general_note" className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2"><option value="nursing_observed">Nursing observed</option><option value="bottle_feeding">Bottle feeding</option><option value="weight_check">Weight check</option><option value="dam_note">Dam note</option><option value="general_note">General note</option><option value="watch_note">Watch note</option></select></label>
+                  <label className="text-sm font-medium">Observed at<input name="observedAt" type="datetime-local" className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                </div>
+                <label className="block text-sm font-medium">Observation note<textarea name="note" rows={3} maxLength={1000} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" /></label>
+                <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Record Observation</button>
+              </form>
+            ) : null}
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

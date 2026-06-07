@@ -74,6 +74,10 @@ Verified results:
 - The weight/care log workflow writes event/audit rows and remains internal owner/operator observation logging only. It does not diagnose puppies, message customers, publish puppies, update the portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
 - Individual Puppy Detail / Neonatal Growth Timeline was added at `/staff/puppies/[puppyId]`.
 - The puppy timeline uses existing puppy, litter, dam/sire, weight, care observation, event, and safely linkable audit data only.
+- Puppy detail now supports owner/admin puppy weight add and weight correction workflows through controlled Core RPCs with event/audit rows.
+- Puppy detail now supports adding factual care observations through the existing controlled care-observation RPC; existing observations remain read-only.
+- Puppy edit was completed as an owner/admin internal correction workflow for puppy identity, status, and listing-marker fields.
+- Puppy detail now includes Buyer / Reservation Assignment. Assignment follows the Core reservation model through `core_create_reservation(...)`, blocks duplicate active reservations for a puppy, and does not create payments, documents, messages, portal invitations, or public listings.
 - The puppy timeline is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update the portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
 - Kennel Daily Task Board / Today's Care Checklist was added to `/staff`.
 - The daily task board derives owner/operator tasks from existing Core puppy, litter, weight, care, go-home, reservation, payment, document, notification, dog, and kennel metadata.

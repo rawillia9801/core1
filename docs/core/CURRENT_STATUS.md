@@ -109,6 +109,10 @@ Verified local behavior:
 - `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
 - Puppy detail reads existing puppy, litter, dam/sire, weight, care observation, event, and owner/admin audit context where safely linkable.
 - Puppy detail is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
+- Puppy edit was completed as an owner/admin internal correction workflow at `/staff/puppies/[puppyId]/edit`; it updates identity/status/listing-marker fields through controlled `core_update_puppy(...)`, writes event/audit rows, returns to the puppy detail page, and does not publish puppies or contact customers.
+- Puppy detail now supports owner/admin puppy weight add and weight correction workflows. New weights use `core_record_puppy_weight_log(...)`; corrections use `core_update_puppy_weight_log(...)`; both are factual observation records only and write event/audit rows.
+- Puppy detail now supports adding care observations through `core_record_puppy_care_observation(...)`. Existing care observations remain read-only because no separate safe edit path was added.
+- Puppy detail now includes Buyer / Reservation Assignment. Manual buyer assignment follows the Core reservation model by creating a reservation through `core_create_reservation(...)`; it blocks assignment when an active reservation already exists and does not process payments, generate documents, invite portal users, send messages, or publish puppies.
 - `/staff` now includes an internal Kennel Daily Task Board / Today's Care Checklist.
 - The daily task board derives task visibility from existing Core puppy, litter, weight, care, reservation, go-home, payment, document, notification, dog, and kennel metadata.
 - The daily task board is internal owner/operator task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update a portal, connect smart-home/cameras/devices, call external providers, or add AI.
@@ -126,9 +130,12 @@ Verified local behavior:
 - Obsolete broken kennel tests were removed.
 - `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
 - `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
+- Manual buyer creation and buyer edit workflows were added at `/staff/buyers/new` and `/staff/buyers/[buyerId]/edit` for owner/admin internal record correction only. They use controlled buyer RPCs, reject duplicate email/phone matches, write event/audit rows, and do not message customers or invite portal users.
+- Family create/edit workflows were added at `/staff/families/new` and `/staff/families/[familyId]/edit` for owner/admin internal household correction only. Buyer-family linking uses a controlled membership RPC, writes event/audit rows, and does not update a customer portal.
 - `/staff/buyers/[buyerId]` now shows an internal Buyer 360 Command Workspace using existing buyer, family, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit context.
 - `/staff/families/[familyId]` now shows an internal Family 360 Command Workspace using existing family, member, buyer, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit context.
 - Buyer/Family 360 links were added from `/staff/buyers` and `/staff/families`.
+- Buyer/Family 360 now includes operational links for internal edit, assignment, reservation, payment readiness, document readiness, and go-home readiness workflows. These links do not add email, SMS, portal invite, payment processor, public listing, or document-generation actions.
 - Buyer/Family 360 remains internal owner/operator visibility only. It does not message customers, invite portal users, publish puppies, process payments, generate documents, upload media, call external providers, connect AI, connect smart-home/cameras/devices, or change records.
 - `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
 - Events is enabled in the staff sidebar.
@@ -146,6 +153,7 @@ Verified local behavior:
 - `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
 - `/staff/command` was expanded into a read-only Core OS Command Center with system status, priority queue, puppy/neonatal summary, dog/breeding-stock summary, buyer/family relationship context, pipeline, payment/document/go-home readiness, communications preview, event/audit feed, and proposed-action boundary sections.
 - The Command Center uses existing Core metadata only and remains internal owner/operator visibility. It does not send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, call AI providers, or contact external services.
+- The Command Center now links to operational puppy/buyer/family workflows, including puppies without buyer/reservation assignment, puppies missing today's weight, puppy edit/detail routes, buyer/family 360 routes, and reservation assignment follow-up links.
 - `/staff/proposed-actions` has been added as an owner/admin Proposed Action Queue workspace. It can create, approve, and reject proposal review records only; approved proposed actions do not execute business changes.
 - Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
 - The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.

@@ -111,6 +111,18 @@ The current Reservations and Applications pages can call server-side actions tha
 
 The reservation detail readiness page does not add a write path.
 
+## Puppy Assignment Path
+
+The individual puppy detail workflow can now create an internal buyer/family assignment by calling the existing `core_create_reservation(...)` function from `/staff/puppies/[puppyId]`.
+
+This assignment path follows the same active-reservation rule as the main reservation workflow:
+
+- A puppy with an active reservation cannot be assigned again.
+- Assignment creates the reservation context with existing buyer, family, puppy, and optional application records.
+- Assignment writes the same event/audit trail as the reservation RPC.
+
+The puppy assignment path does not record payments, create documents, invite portal users, publish puppies, send customer messages, call email/SMS providers, or connect external systems.
+
 ## Future Payment Path
 
 After a reservation is created, payment/deposit handling should call a separate financial workflow that writes to `core_financial_ledger` using explicit `balance_effect` rules. Reservation creation must not silently create payment records.

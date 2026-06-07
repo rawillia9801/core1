@@ -325,8 +325,11 @@ export async function updatePuppy(formData: FormData) {
   });
 
   revalidatePath("/staff/puppies");
+  revalidatePath(`/staff/puppies/${puppyId.value}`);
+  revalidatePath(`/staff/puppies/${puppyId.value}/edit`);
   revalidatePath("/staff/litters");
-  redirect(`/staff/puppies?puppy=${ok ? "updated" : "error"}`);
+  revalidatePath("/staff/command");
+  redirect(`/staff/puppies/${puppyId.value}?puppy=${ok ? "updated" : "error"}`);
 }
 
 export async function archivePuppy(formData: FormData) {
@@ -344,5 +347,6 @@ export async function archivePuppy(formData: FormData) {
 
   revalidatePath("/staff/puppies");
   revalidatePath("/staff/litters");
+  revalidatePath("/staff/command");
   redirect(`/staff/puppies?puppy=${ok ? "deleted" : "error"}`);
 }

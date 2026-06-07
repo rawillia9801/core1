@@ -169,11 +169,16 @@ export default async function StaffBuyersPage() {
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Buyers</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Buyers Workspace</h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-            Real Core buyer/contact records with family membership, application, reservation, puppy, and balance context. This page is read-only and does not create customer messages, documents, payments, portal invites, or external actions.
-          </p>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Buyers</p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Buyers Workspace</h1>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
+                Real Core buyer/contact records with family membership, application, reservation, puppy, and balance context. Manual edits are internal only and do not send messages, documents, payments, portal invites, or external actions.
+              </p>
+            </div>
+            <Link href="/staff/buyers/new" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Create Buyer</Link>
+          </div>
         </section>
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
@@ -231,6 +236,7 @@ export default async function StaffBuyersPage() {
                     {buyer.notes ? <p className="mt-4 text-sm leading-6 text-slate-600">{buyer.notes}</p> : null}
                     <div className="mt-5 flex flex-wrap gap-2">
                       <Link href={`/staff/buyers/${buyer.id}`} className="rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white">Open buyer</Link>
+                      <Link href={`/staff/buyers/${buyer.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit buyer</Link>
                       {primaryMember?.family_id ? <Link href={`/staff/families/${primaryMember.family_id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Open family</Link> : null}
                       <Link href={`/staff/buyers/${buyer.id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Open 360</Link>
                     </div>
