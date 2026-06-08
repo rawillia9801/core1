@@ -124,6 +124,27 @@ function cleanOptionalInteger(value: FormDataEntryValue | null) {
   return { valid: true, value: numberValue };
 }
 
+function cleanOptionalMoneyCents(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim().replace(/[$,]/g, "");
+
+  if (!text) {
+    return { valid: true, value: null };
+  }
+
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) {
+    return { valid: false, value: null };
+  }
+
+  const [dollars, cents = ""] = text.split(".");
+  const centsValue = Number.parseInt(dollars, 10) * 100 + Number.parseInt(cents.padEnd(2, "0"), 10);
+
+  if (!Number.isSafeInteger(centsValue) || centsValue < 0 || centsValue > 100_000_000) {
+    return { valid: false, value: null };
+  }
+
+  return { valid: true, value: centsValue };
+}
+
 function redirectWith(path: string, key: string, outcome: string) {
   redirect(`${path}?${key}=${outcome}`);
 }
@@ -292,6 +313,11 @@ export async function createPuppy(formData: FormData) {
   const status = String(formData.get("status") ?? "unavailable").trim().toLowerCase();
   const healthStatus = cleanText(formData.get("healthStatus"), 160);
   const publicListingStatus = String(formData.get("publicListingStatus") ?? "private").trim().toLowerCase();
+  const registry = cleanText(formData.get("registry"), 80);
+  const registryNumber = cleanText(formData.get("registryNumber"), 120);
+  const priceCents = cleanOptionalMoneyCents(formData.get("priceDollars"));
+  const depositAmountCents = cleanOptionalMoneyCents(formData.get("depositAmountDollars"));
+  const internalCostCents = cleanOptionalMoneyCents(formData.get("internalCostDollars"));
   const externalReference = cleanText(formData.get("externalReference"), 160);
   const notes = cleanText(formData.get("notes"), 1000);
   let staff: StaffProfile | null = null;
@@ -308,7 +334,7 @@ export async function createPuppy(formData: FormData) {
     throw new Error("Unauthorized puppy create attempt");
   }
 
-  if (!litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !externalReference.valid || !notes.valid) {
+  if (!litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !registry.valid || !registryNumber.valid || !priceCents.valid || !depositAmountCents.valid || !internalCostCents.valid || !externalReference.valid || !notes.valid) {
     redirectWith("/staff/puppies", "puppy", "invalid_input");
   }
 
@@ -332,6 +358,11 @@ export async function createPuppy(formData: FormData) {
     p_status: status,
     p_health_status: healthStatus.value || null,
     p_public_listing_status: publicListingStatus,
+    p_registry: registry.value || null,
+    p_registry_number: registryNumber.value || null,
+    p_price_cents: priceCents.value,
+    p_deposit_amount_cents: depositAmountCents.value,
+    p_internal_cost_cents: internalCostCents.value,
     p_external_reference: externalReference.value || null,
     p_notes: notes.value || null,
   });

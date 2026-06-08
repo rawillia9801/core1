@@ -195,6 +195,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dedicated `/staff/payments` page added for local ledger entry and read-only ledger review.
 - [x] `/staff/payments` enhanced into an internal Payment Ledger & Account Readiness workspace with ledger-derived summaries, payment account rows, posted ledger transaction review, deterministic blockers, document/payment relationship notes, go-home payment readiness links, and financial event/audit context.
 - [x] Payment readiness remains internal ledger/readiness only: no payment processor, refund processing, payment links, reminders, money movement, customer portal behavior, email/SMS, or provider calls were added.
+- [x] Manual internal payment/deposit ledger entry is enabled for authenticated authorized owner/operator use in production through the existing controlled `core_record_reservation_payment(...)` RPC; it records ledger history only and does not connect a payment processor, move money, create payment links, send receipts/reminders, or call external providers.
 - [ ] Add further payment recording validation before any staff-facing use.
 - [ ] Add dashboard UI for creating financial adjustments only after staff authorization boundaries are designed.
 - [ ] Define live payment processor reconciliation and idempotency before live refund/chargeback operations.
@@ -402,6 +403,7 @@ Do not jump to live SMTP, customer emails, public forms, portal, documents, paym
 - [x] Dog/puppy private media remains internal only: no public puppy publishing, customer portal media, customer messaging, AI, smart-home/camera/device integration, payment processing, document generation, or external providers were added.
 - [x] Puppy private photo deletion added through controlled owner/admin `core_delete_kennel_media(...)` with event/audit rows and no public publishing, portal media, customer messaging, AI, devices, payments, documents, or external providers.
 - [x] Puppy edit/detail now supports internal puppy-level price and deposit metadata on `core_puppies.metadata`; these values do not process payments, create ledger rows, update buyer balances, publish listings, or contact customers.
+- [x] Puppy add/edit/detail/list now support private puppy registry, registry number, price, deposit, and internal cost metadata on `core_puppies.metadata`; these values remain internal recordkeeping only and do not process payments, create ledger rows, update buyer balances, publish listings, update a portal, message customers, or call external providers.
 - [x] Puppy detail now derives litter female/male counts from linked puppy sex rows when stored litter count fields are blank.
 - [x] Kennel create actions can run in production with the existing authenticated owner/admin and controlled RPC boundaries instead of a production-only kill switch.
 - [x] Production puppy weight/care and kennel media action crashes were cleaned up so missing configuration, RPC failures, and storage failures route to safe error states instead of breaking page rendering.

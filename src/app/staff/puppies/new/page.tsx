@@ -84,8 +84,14 @@ export default async function NewPuppyPage() {
               <label className="text-sm font-medium">Birth date<input type="date" name="birthAt" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">Public listing status<select name="publicListingStatus" defaultValue="private" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2"><option value="private">Private</option><option value="coming_soon">Coming soon</option><option value="public">Public marker</option><option value="hidden">Hidden</option></select></label>
               <label className="text-sm font-medium">Health marker<input name="healthStatus" maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Registry<input name="registry" maxLength={80} placeholder="AKC, CKC, ACA, etc." className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Registry number<input name="registryNumber" maxLength={120} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Price amount<input name="priceDollars" inputMode="decimal" placeholder="2000.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Deposit amount<input name="depositAmountDollars" inputMode="decimal" placeholder="500.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Internal cost amount<input name="internalCostDollars" inputMode="decimal" placeholder="0.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">External reference<input name="externalReference" maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
             </div>
+            <p className="text-xs leading-5 text-slate-500">Registry, price, deposit, and internal cost are private Core metadata only. They do not process payments, publish listings, update a portal, or contact customers.</p>
             <label className="block text-sm font-medium">Notes<textarea name="notes" maxLength={1000} rows={4} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
             <div className="flex flex-wrap gap-3">
               <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Save Puppy</button>

@@ -72,6 +72,18 @@ function centsFromMetadata(metadata: Record<string, unknown> | null | undefined,
   return null;
 }
 
+function textFromMetadata(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!metadata) return "";
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "string" && value.trim()) return value;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+
+  return "";
+}
+
 function moneyInputValue(cents: number | null) {
   return cents === null ? "" : (cents / 100).toFixed(2);
 }
@@ -100,8 +112,11 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
   const puppy = puppies.rows[0];
   const canEdit = staff.role === "owner" || staff.role === "admin";
   const warnings = [puppies.warning, litters.warning].filter(Boolean);
+  const registry = textFromMetadata(puppy?.metadata, ["registry", "registration"]);
+  const registryNumber = textFromMetadata(puppy?.metadata, ["registration_number", "registry_number", "akc_registration", "akc_number"]);
   const priceCents = centsFromMetadata(puppy?.metadata, ["price_cents", "asking_price_cents", "sale_price_cents"]);
   const depositAmountCents = centsFromMetadata(puppy?.metadata, ["deposit_amount_cents", "deposit_cents", "deposit_required_cents"]);
+  const internalCostCents = centsFromMetadata(puppy?.metadata, ["internal_cost_cents", "cost_cents", "expense_basis_cents"]);
 
   if (!puppy) {
     return (
@@ -148,11 +163,14 @@ export default async function EditPuppyPage({ params }: { params: Promise<{ pupp
               <label className="text-sm font-medium">Birth date<input type="date" name="birthAt" defaultValue={dateInput(puppy.birth_at)} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">Public listing status<select name="publicListingStatus" defaultValue={puppy.public_listing_status ?? "private"} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2"><option value="private">Private</option><option value="coming_soon">Coming soon</option><option value="public">Public marker</option><option value="hidden">Hidden</option></select></label>
               <label className="text-sm font-medium">Health marker<input name="healthStatus" defaultValue={puppy.health_status ?? ""} maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Registry<input name="registry" defaultValue={registry} maxLength={80} placeholder="AKC, CKC, ACA, etc." className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Registry number<input name="registryNumber" defaultValue={registryNumber} maxLength={120} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">Price amount<input name="priceDollars" defaultValue={moneyInputValue(priceCents)} inputMode="decimal" placeholder="2000.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">Deposit amount<input name="depositAmountDollars" defaultValue={moneyInputValue(depositAmountCents)} inputMode="decimal" placeholder="500.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
+              <label className="text-sm font-medium">Internal cost amount<input name="internalCostDollars" defaultValue={moneyInputValue(internalCostCents)} inputMode="decimal" placeholder="0.00" className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
               <label className="text-sm font-medium">External reference<input name="externalReference" defaultValue={puppy.external_reference ?? ""} maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
             </div>
-            <p className="text-xs leading-5 text-slate-500">Price and deposit are internal puppy metadata only. They do not process payments, update a buyer balance, publish a listing, or contact customers.</p>
+            <p className="text-xs leading-5 text-slate-500">Registry, price, deposit, and internal cost are internal puppy metadata only. They do not process payments, update a buyer balance, publish a listing, or contact customers.</p>
             <label className="block text-sm font-medium">Notes<textarea name="notes" defaultValue={puppy.notes ?? ""} maxLength={1000} rows={4} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" /></label>
             <div className="flex flex-wrap gap-3">
               <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Save Changes</button>

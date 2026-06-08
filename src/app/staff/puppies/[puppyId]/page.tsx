@@ -348,7 +348,11 @@ function metadataText(metadata: Record<string, unknown> | null | undefined, keys
 }
 
 function registryValue(metadata: Record<string, unknown> | null | undefined) {
-  return metadataText(metadata, ["registry", "registration", "registration_number", "registry_number", "akc_registration", "akc_number"]);
+  return metadataText(metadata, ["registry", "registration"]);
+}
+
+function registrationNumberValue(metadata: Record<string, unknown> | null | undefined) {
+  return metadataText(metadata, ["registration_number", "registry_number", "akc_registration", "akc_number"]);
 }
 
 function centsFromMetadata(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
@@ -580,6 +584,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const ageSource = puppy.birth_at ?? litter?.birth_at ?? null;
   const priceCents = centsFromMetadata(puppy.metadata, ["price_cents", "asking_price_cents", "sale_price_cents"]);
   const depositAmountCents = centsFromMetadata(puppy.metadata, ["deposit_amount_cents", "deposit_cents", "deposit_required_cents"]);
+  const internalCostCents = centsFromMetadata(puppy.metadata, ["internal_cost_cents", "cost_cents", "expense_basis_cents"]);
   const warnings = [puppyResult.warning, litterResult.warning, litterPuppyResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
@@ -643,8 +648,10 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
               <InfoItem label="Collar" value={display(puppy.collar_color)} />
               <InfoItem label="Health marker" value={display(puppy.health_status)} />
               <InfoItem label="Registry" value={display(registryValue(puppy.metadata), "Not recorded")} />
+              <InfoItem label="Registry number" value={display(registrationNumberValue(puppy.metadata), "Not recorded")} />
               <InfoItem label="Price amount" value={formatMoney(priceCents)} />
               <InfoItem label="Deposit amount" value={formatMoney(depositAmountCents)} />
+              <InfoItem label="Internal cost amount" value={formatMoney(internalCostCents)} />
               <InfoItem label="Created" value={formatDateTime(puppy.created_at)} />
               <InfoItem label="Updated" value={formatDateTime(puppy.updated_at)} />
               <InfoItem label="Litter ID" value={shortId(puppy.litter_id)} />

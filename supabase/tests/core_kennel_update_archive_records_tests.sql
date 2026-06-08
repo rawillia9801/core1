@@ -70,6 +70,11 @@ select public.core_create_puppy(
   'available',
   'observed healthy for test',
   'private',
+  null,
+  null,
+  null,
+  null,
+  null,
   'UPDATE-TEST-PUPPY-001',
   'TEST ONLY puppy note.'
 ) as puppy_id \gset
@@ -118,6 +123,11 @@ select public.core_update_puppy(
   'hold',
   'updated healthy marker',
   'coming_soon',
+  'AKC',
+  'UPDATED-REG-001',
+  180000,
+  50000,
+  25000,
   'UPDATED-PUPPY-001',
   'Updated TEST ONLY puppy note.'
 ) as updated_puppy_id;

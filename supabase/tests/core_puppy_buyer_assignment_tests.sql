@@ -26,6 +26,11 @@ select public.core_update_puppy(
   'available',
   'watch',
   'private',
+  'AKC',
+  'ASSIGN-REG-001',
+  200000,
+  50000,
+  25000,
   'assignment-test-pup',
   'Owner/admin puppy update test.'
 );
@@ -45,6 +50,11 @@ begin
     'available',
     null,
     'private',
+    null,
+    null,
+    null,
+    null,
+    null,
     'assignment-test-pup',
     null
   );
@@ -68,6 +78,11 @@ begin
     'available',
     null,
     'private',
+    null,
+    null,
+    null,
+    null,
+    null,
     'missing-pup',
     null
   );

@@ -71,6 +71,11 @@ select public.core_create_puppy(
   'available',
   'observed healthy for test',
   'private',
+  null,
+  null,
+  null,
+  null,
+  null,
   'TEST-PUPPY-V2-001',
   'TEST ONLY puppy note.'
 ) as puppy_id \gset

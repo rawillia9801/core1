@@ -16,6 +16,7 @@ type PuppyRow = {
   status: string | null;
   health_status: string | null;
   public_listing_status: string | null;
+  metadata: Record<string, unknown> | null;
   notes: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -91,6 +92,30 @@ function formatMoney(cents: number | null) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
+function metadataText(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!metadata) return null;
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "string" && value.trim()) return value;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+
+  return null;
+}
+
+function metadataCents(metadata: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!metadata) return null;
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
+    if (typeof value === "string" && /^\d+$/.test(value)) return Number.parseInt(value, 10);
+  }
+
+  return null;
+}
+
 function statusTone(status: string | null) {
   const normalized = status?.toLowerCase() ?? "";
   if (["available", "ready", "active"].includes(normalized)) return "bg-emerald-50 text-emerald-700 ring-emerald-100";
@@ -113,7 +138,7 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
 
   const [puppyResult, reservationResult] = await Promise.all([
     readRows<PuppyRow>("core_puppies", {
-      select: "id,external_reference,litter_id,name,collar_color,sex,color,coat_type,birth_at,status,health_status,public_listing_status,notes,created_at,updated_at",
+      select: "id,external_reference,litter_id,name,collar_color,sex,color,coat_type,birth_at,status,health_status,public_listing_status,metadata,notes,created_at,updated_at",
       order: "created_at.desc",
       limit: "100",
     }),
@@ -161,10 +186,13 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
             <div className="grid gap-4 xl:grid-cols-2">
               {puppies.map((row) => {
                 const reservation = reservationsByPuppy.get(row.id);
+                const registry = metadataText(row.metadata, ["registry", "registration"]);
+                const priceCents = metadataCents(row.metadata, ["price_cents", "asking_price_cents", "sale_price_cents"]);
+                const depositAmountCents = metadataCents(row.metadata, ["deposit_amount_cents", "deposit_cents", "deposit_required_cents"]);
                 return (
                   <article key={row.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-lg font-bold text-slate-950">{puppyName(row)}</p><p className="mt-1 text-sm text-slate-500">ID {row.id.slice(0, 8)}</p></div><div className="flex flex-wrap gap-2"><Badge tone={statusTone(row.status)}>{display(row.status, "Unknown")}</Badge><Badge>{display(row.public_listing_status, "Private")}</Badge></div></div>
-                    <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2"><div><dt className="text-xs font-semibold uppercase text-slate-400">Sex</dt><dd className="mt-1 text-slate-700">{display(row.sex)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Color</dt><dd className="mt-1 text-slate-700">{display(row.color)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Coat</dt><dd className="mt-1 text-slate-700">{display(row.coat_type)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Birth date</dt><dd className="mt-1 text-slate-700">{formatDate(row.birth_at)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Health marker</dt><dd className="mt-1 text-slate-700">{display(row.health_status)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Litter</dt><dd className="mt-1 text-slate-700">{row.litter_id ? row.litter_id.slice(0, 8) : "Not linked"}</dd></div></dl>
+                    <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2"><div><dt className="text-xs font-semibold uppercase text-slate-400">Sex</dt><dd className="mt-1 text-slate-700">{display(row.sex)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Color</dt><dd className="mt-1 text-slate-700">{display(row.color)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Coat</dt><dd className="mt-1 text-slate-700">{display(row.coat_type)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Birth date</dt><dd className="mt-1 text-slate-700">{formatDate(row.birth_at)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Registry</dt><dd className="mt-1 text-slate-700">{display(registry)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Price / Deposit</dt><dd className="mt-1 text-slate-700">{formatMoney(priceCents)} / {formatMoney(depositAmountCents)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Health marker</dt><dd className="mt-1 text-slate-700">{display(row.health_status)}</dd></div><div><dt className="text-xs font-semibold uppercase text-slate-400">Litter</dt><dd className="mt-1 text-slate-700">{row.litter_id ? row.litter_id.slice(0, 8) : "Not linked"}</dd></div></dl>
                     {reservation ? <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950"><p className="font-semibold">Active reservation</p><p className="mt-1">{display(reservation.buyer_name, "Buyer not named")} · {display(reservation.reservation_status, "Status unknown")}</p><p className="mt-1 text-blue-800">Balance marker: {formatMoney(reservation.balance_due_cents)}</p></div> : <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No active reservation attached.</div>}
                     <div className="mt-5 flex flex-wrap gap-2"><Link href={`/staff/puppies/${row.id}`} className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-800">Open puppy</Link><Link href={`/staff/puppies/${row.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Edit</Link></div>
                     {row.notes ? <p className="mt-4 text-sm leading-6 text-slate-600">{row.notes}</p> : null}

@@ -70,6 +70,11 @@ select public.core_create_puppy(
   'available',
   'normal',
   'private',
+  null,
+  null,
+  null,
+  null,
+  null,
   'MEDIA-PUPPY',
   'TEST ONLY media puppy.'
 ) as puppy_id \gset

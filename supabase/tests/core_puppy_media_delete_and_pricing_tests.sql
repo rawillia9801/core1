@@ -70,6 +70,11 @@ select public.core_create_puppy(
   'available',
   'normal',
   'private',
+  'AKC',
+  'PRICING-REG-001',
+  200000,
+  50000,
+  25000,
   'PRICING-PUPPY',
   'TEST ONLY pricing puppy.'
 ) as puppy_id \gset
@@ -87,8 +92,11 @@ select public.core_update_puppy(
   'available',
   'normal',
   'private',
+  'CKC',
+  'PRICING-REG-002',
   200000,
   50000,
+  30000,
   'PRICING-PUPPY',
   'TEST ONLY pricing update.'
 ) as updated_puppy_id \gset
@@ -116,8 +124,11 @@ select public.core_delete_kennel_media(
 select 'puppy_pricing_metadata_check' as check_name, count(*) as matching_rows
 from public.core_puppies
 where id = :'puppy_id'
+  and metadata ->> 'registry' = 'CKC'
+  and metadata ->> 'registration_number' = 'PRICING-REG-002'
   and metadata ->> 'price_cents' = '200000'
   and metadata ->> 'deposit_amount_cents' = '50000'
+  and metadata ->> 'internal_cost_cents' = '30000'
   and metadata ->> 'payment_processed' = 'false'
   and metadata ->> 'public_publishing_enabled' = 'false'
   and metadata ->> 'customer_message_sent' = 'false'
@@ -154,8 +165,11 @@ begin
     'available',
     'normal',
     'private',
+    null,
+    null,
     -1,
     50000,
+    null,
     'PRICING-PUPPY',
     'TEST ONLY invalid price.'
   );

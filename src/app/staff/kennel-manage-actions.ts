@@ -313,12 +313,15 @@ export async function updatePuppy(formData: FormData) {
   const status = String(formData.get("status") ?? "unavailable").trim().toLowerCase();
   const healthStatus = cleanText(formData.get("healthStatus"), 160);
   const publicListingStatus = String(formData.get("publicListingStatus") ?? "private").trim().toLowerCase();
+  const registry = cleanText(formData.get("registry"), 80);
+  const registryNumber = cleanText(formData.get("registryNumber"), 120);
   const priceCents = cleanOptionalMoneyCents(formData.get("priceDollars"));
   const depositAmountCents = cleanOptionalMoneyCents(formData.get("depositAmountDollars"));
+  const internalCostCents = cleanOptionalMoneyCents(formData.get("internalCostDollars"));
   const externalReference = cleanText(formData.get("externalReference"), 160);
   const notes = cleanText(formData.get("notes"), 1000);
 
-  if (!puppyId.valid || !litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !priceCents.valid || !depositAmountCents.valid || !externalReference.valid || !notes.valid) {
+  if (!puppyId.valid || !litterId.valid || !name.valid || !collarColor.valid || !color.valid || !coatType.valid || !birthAt.valid || !healthStatus.valid || !registry.valid || !registryNumber.valid || !priceCents.valid || !depositAmountCents.valid || !internalCostCents.valid || !externalReference.valid || !notes.valid) {
     redirect("/staff/puppies?puppy=invalid_input");
   }
 
@@ -343,8 +346,11 @@ export async function updatePuppy(formData: FormData) {
     p_status: status,
     p_health_status: healthStatus.value || null,
     p_public_listing_status: publicListingStatus,
+    p_registry: registry.value || null,
+    p_registry_number: registryNumber.value || null,
     p_price_cents: priceCents.value,
     p_deposit_amount_cents: depositAmountCents.value,
+    p_internal_cost_cents: internalCostCents.value,
     p_external_reference: externalReference.value || null,
     p_notes: notes.value || null,
   });
