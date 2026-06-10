@@ -18,6 +18,7 @@ const primaryNavigation = [
   { href: "/staff/reservations", label: "Reservations", ready: true },
   { href: "/staff/payments", label: "Payments", ready: true },
   { href: "/staff/go-home", label: "Go-Home", ready: true },
+  { href: "/staff/go-home/handoff", label: "Go-Home Handoff", ready: true },
   { href: "/staff/documents", label: "Documents", ready: true },
   { href: "/staff/messages", label: "Messages", ready: true },
   { href: "/staff/notifications", label: "Notifications", ready: true },
