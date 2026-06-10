@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { updateGoHomeDetail } from "../../../application-actions";
+import { updateGoHomeDetail } from "../../../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../../../go-home/actions";
 
