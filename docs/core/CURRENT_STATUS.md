@@ -1,454 +1,276 @@
 # Cherolee Core Current Status
+
 ## Status Note
 
-- Current as of this pass: primary source of implemented-state truth.
-- Reflects actual local/main build state, blocked features, and recommended next task; update this before or with any steering change.
-- Central current truth: this file.
-
-
-## Purpose
-
-This document is the current steering checkpoint for Core. It records what is actually implemented, what has been verified, what is unverified, and what must remain blocked so the project does not drift.
-
-Active repository:
-
-```text
-rawillia9801/core1
-```
-
-Active local working folder:
-
-```text
-C:\Users\rawil\core1
-```
-
-Active branch:
-
-```text
-main
-```
-
-The duplicate OneDrive checkout is not the working repository for Core tasks.
+- Current as of this documentation pass after the deployed public/embedded application form work.
+- This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
+- Active repository: `rawillia9801/core1`
+- Active branch: `main`
+- Active local working folder: `C:\Users\rawil\core1`
+- The duplicate OneDrive checkout is not the working repository.
 
 ## Current Direction
 
-Core is the active operating system, daily command layer, and future decision assistant for Southwest Virginia Chihuahua. This is currently a one-person owner-operated business: Cristy is the owner/operator and final authority. Future helpers may be added later only if needed, but the product direction should not pretend there is a staff team.
+Cherolee Core OS is the active operating system and daily command layer for Southwest Virginia Chihuahua. It remains an owner/operator-first system. The technical `/staff` route naming can remain for now, but product language should use Owner Console, Operator Dashboard, Core Command Center, Core OS, Core Assistant, owner/operator, and command center framing.
 
-The existing `/staff` routes may remain as technical route names for now so the application does not break. Product language should increasingly use Owner Console, Operator Dashboard, Core Command Center, Core OS, Core Assistant, owner/operator, and command center framing where appropriate.
+Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
-Zoho One has been cancelled. Zoho is historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active part of Core.
+## Most Recent Implemented Work
 
-## Current Verified Local Workflow
+### Public / Embeddable Puppy Application
 
-Core has a verified local/development workflow:
+Implemented and pushed:
+
+- `/apply`
+- `/apply/received`
+- `/embed/application`
+- `/embed/application/received`
+- `src/app/apply/actions.ts`
+- `src/lib/core/smtp-mailer.ts`
+
+The embedded application form is designed for use inside the public Southwest Virginia Chihuahua website and makes no customer-facing reference to Core. It follows the uploaded PDF application structure:
+
+- Applicant Info
+- Puppy Preferences
+- Lifestyle & Home
+- Payment & Agreement
+- Terms and Conditions
+- Applicant Declarations
+- Date-Time / Signature
+
+The embedded form styling was changed to better match the public website: cream/warm gradient, serif heading, rounded white card, black/gold accents, and Southwest Virginia Chihuahua branding only.
+
+The application submit action now captures the expanded PDF-style fields and stores structured responses into Core application sections:
+
+- `applicant_info`
+- `puppy_preferences`
+- `lifestyle_home`
+- `payment_agreement`
+
+The submit path creates:
+
+- `core_buyers`
+- `core_families`
+- `core_family_members`
+- `core_applications`
+- `core_application_sections`
+- `core_events`
+
+The form requires:
+
+- applicant name
+- email
+- state
+- Terms acknowledgement
+- Applicant Declarations acknowledgement
+- typed signature matching the applicant name
+
+### SMTP Application Alerts
+
+Implemented as conditional server-side SMTP behavior through `src/lib/core/smtp-mailer.ts` and the application submit action.
+
+SMTP is attempted only when these server-side environment variables are configured:
 
 ```text
-Core-native private application entry
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_USER
+SMTP_PASS
+SMTP_FROM
+APPLICATION_EMAIL_TO
+```
+
+When configured, the application submit action attempts to send:
+
+- an owner/operator alert email containing the application details
+- a customer confirmation email acknowledging receipt
+
+This is not a payment processor, portal invitation, automatic approval, document generation, SMS, Twilio, Facebook, or AI action.
+
+### Payment Plan Command Center
+
+Implemented and pushed:
+
+- `/staff/payment-plans`
+
+This workspace provides internal owner/admin review of:
+
+- payment plan candidates
+- half-down target estimates
+- estimated six-month payment amounts
+- open balances
+- stale payment review
+- deposit / half-down blockers
+- registration hold review
+- paid / clear lane
+- watch / standard balance lane
+- recent ledger rows
+- buyer/family/puppy/reservation links
+
+It is internal ledger/readiness only. It does not move money, create payment links, process refunds, send reminders, update customer portal visibility, or call a payment provider.
+
+### Go-Home And Puppy Handoff Workspaces
+
+Implemented and pushed:
+
+- `/staff/go-home/handoff`
+- `/staff/reservations/[reservationId]/handoff`
+- `/staff/puppies/[puppyId]/handoff`
+
+These pages provide internal handoff readiness around reservation, puppy, payment, document, checklist, schedule, and location context. They use existing Core data and controlled actions only. They do not send messages, process payments, generate documents, release registration papers, publish puppies, update the customer portal, or call outside providers.
+
+## Current Operational Workflow
+
+Current implemented workflow now includes:
+
+```text
+private owner/operator application entry
   -> application review
-  -> application approval
-  -> reservation creation
-  -> deposit/payment ledger entry
-  -> visible ledger-derived balance reduction
-  -> payment ledger/account readiness review
-  -> reservation detail readiness review
+  -> approval / reservation creation
+  -> deposit/payment ledger recording
+  -> ledger-derived balance review
+  -> payment plan command review
+  -> reservation readiness review
   -> go-home detail update
-  -> effective go-home read model display
-  -> go-home checklist item SQL verification
-  -> go-home command/completion readiness review
-  -> kennel dog/litter/puppy create RPC verification
-  -> kennel dog/litter/puppy add/edit/archive browser verification
-  -> neonatal litter command workflow added to /staff/litters
-  -> expected litter / whelping prep workflow added to /staff/litters
-  -> daily puppy weight/neonatal care log workflow added
-  -> individual puppy detail / neonatal growth timeline added
-  -> kennel daily task board / today's care checklist added to /staff
-  -> breeding dog profile health/lineage/document vault workflow added
-  -> dog document upload / private storage attachment workflow added
-  -> buyer/family 360 command workspaces added
-  -> dog/puppy private media upload foundation added
-  -> buyers/families/events read-only owner/operator workspaces
+  -> go-home checklist review
+  -> go-home handoff command
+  -> reservation handoff detail
+  -> puppy handoff detail
+  -> website/embedded public application intake
+  -> conditional SMTP application receipt alerts
 ```
 
-Verified local behavior:
+## Current Public-Facing State
 
-- `/login` works for the local mapped owner profile.
-- Public `/` and `/login` now use the Cherolee Core OS cinematic owner/operator login experience.
-- `/staff` loads for the active owner profile.
-- `/staff/applications/new` creates a Core-native application without Zoho.
-- The application appears in `/staff`.
-- The application can be approved.
-- A reservation can be created from the approved application.
-- Deposit/payment entries can be recorded through the controlled dashboard action.
-- Ledger-derived balance decreases correctly after payment/deposit.
-- `/staff/payments` now works as an internal Payment Ledger & Account Readiness workspace with ledger-derived account summaries, posted payment/deposit/credit/increase-effect totals, account grouping, deterministic blockers, document/payment relationship notes, go-home payment readiness links, recent ledger rows, and recent financial event/audit context.
-- Manual internal payment/deposit ledger entry is enabled for authenticated authorized owner/operator use in production through the existing controlled `core_record_reservation_payment(...)` RPC. It records ledger history only and does not connect a payment processor, move money, create payment links, send receipts/reminders, or call external providers.
-- `/staff/payments` remains internal ledger/readiness only. It does not connect a payment processor, process refunds, create payment links, send reminders, move money, call payment providers, add customer portal behavior, send email/SMS, or change financial balance semantics.
-- `/staff/reservations/[reservationId]` shows internal reservation readiness detail for buyer/family, puppy/litter, ledger-derived financial truth, document metadata, go-home readiness, checklist items, blockers, internal links, event history, and audit history.
-- Current dashboard write actions use authenticated staff profile actor context rather than static local actor env usage.
-- `/staff/go-home` now works as an internal Go-Home Command & Completion Readiness workspace with readiness counts, one row per active reservation, ledger-derived payment readiness, document metadata requirement checks, checklist completion, schedule/location detail checks, deterministic blockers, and related internal links.
-- Owner/admin can save a go-home detail through `/staff/go-home`.
-- The saved go-home detail appears back through `core_go_home_effective_view`.
-- The go-home update path was locally verified with migration, rollback-safe SQL test, lint, browser load, form save, and visible saved row.
-- `core_go_home_checklist_items` migration and rollback-safe test were applied/verified locally.
-- `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` were applied and verified locally through the self-contained v2 SQL test.
-- The kennel create test confirmed dam, sire, litter, puppy, event, and audit records with rollback.
-- `/staff/dogs`, `/staff/litters`, and `/staff/puppies` are built and browser-tested.
-- Dog, litter, and puppy add forms create real Core records.
-- Dog, litter, and puppy edit/archive pages are built and browser-tested.
-- Kennel update/archive SQL verification passed with `event_check = 6` and `audit_check = 6`.
-- `/staff/litters` now includes an internal Neonatal Litter Command workflow using existing `core_litters`, `core_dogs`, `core_puppies`, `core_weight_logs`, and `core_puppy_events` rows.
-- The neonatal command shows today's born litter panel, upcoming expected litters, newborn puppy cards, weight/growth readiness, 24-72 hour owner reminder tasks, and deterministic watch/risk signals.
-- The neonatal command is read-only and does not diagnose puppies, replace veterinary care, publish puppies, message customers, update the portal, call external providers, connect devices, or add public/customer-facing behavior.
-- `/staff/litters` now includes an internal Expected Litters & Whelping Prep section using existing dog/litter/puppy metadata only.
-- Expected Litters & Whelping Prep shows planned/expected litter counts, expected birth date countdowns where recorded, missing due-date/setup flags, owner/operator prep reminders, and recent-birth transition flags.
-- Expected Litters & Whelping Prep is internal planning only. It does not diagnose pregnancy or puppies, predict medical outcomes, publish puppies, message customers, update the portal, connect smart-home/cameras/devices, call providers, or add public/customer-facing behavior.
-- Pregnancy status is not inferred because the current schema has no pregnancy-status field; expected birth date and planned/expected status are shown only from existing litter fields and existing Add/Edit Litter forms.
-- `core_record_puppy_weight_log(...)` records factual puppy weight observations in grams through a controlled owner/admin RPC.
-- `core_record_puppy_care_observation(...)` records factual neonatal care observations in `core_puppy_events` through a controlled owner/admin RPC.
-- The Daily Weight & Care Log UI is available inside `/staff/litters` and writes only through the controlled RPCs.
-- The weight/care log workflow writes `core_events` and `core_audit_log`, remains internal owner/operator observation logging only, and does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, or call external providers.
-- `/staff/puppies/[puppyId]` now shows an internal Individual Puppy Detail / Neonatal Growth Timeline.
-- Puppy detail reads existing puppy, litter, dam/sire, weight, care observation, event, and owner/admin audit context where safely linkable.
-- Puppy detail is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, call external providers, add AI, generate documents, or process payments.
-- Puppy edit was completed as an owner/admin internal correction workflow at `/staff/puppies/[puppyId]/edit`; it updates identity/status/listing-marker fields through controlled `core_update_puppy(...)`, writes event/audit rows, returns to the puppy detail page, and does not publish puppies or contact customers.
-- Puppy add/edit/detail/list now support private puppy registry, registry number, price, deposit, and internal cost metadata on `core_puppies.metadata`. These fields are internal recordkeeping only; they do not process payments, create ledger rows, update buyer balances, publish puppies, message customers, update a portal, or call external providers.
-- Puppy detail now supports owner/admin puppy weight add and weight correction workflows. New weights use `core_record_puppy_weight_log(...)`; corrections use `core_update_puppy_weight_log(...)`; both are factual observation records only and write event/audit rows.
-- Puppy detail now supports adding care observations through `core_record_puppy_care_observation(...)`. Existing care observations remain read-only because no separate safe edit path was added.
-- Puppy detail now includes Buyer / Reservation Assignment. Manual buyer assignment follows the Core reservation model by creating a reservation through `core_create_reservation(...)`; it blocks assignment when an active reservation already exists and does not process payments, generate documents, invite portal users, send messages, or publish puppies.
-- `/staff` now includes an internal Kennel Daily Task Board / Today's Care Checklist.
-- The daily task board derives task visibility from existing Core puppy, litter, weight, care, reservation, go-home, payment, document, notification, dog, and kennel metadata.
-- The daily task board is internal owner/operator task visibility only. It does not diagnose puppies, message customers, publish puppies, process payments, generate documents, update a portal, connect smart-home/cameras/devices, call external providers, or add AI.
-- `/staff/dogs/[dogId]` now shows an internal Breeding Dog Profile with identity, registry/acquisition/genetic/certificate metadata, health history, dog document vault metadata, deterministic attention flags, dam/sire litter history, puppy links, and linked buyer/reservation context where existing data supports it.
-- Dog profile health history uses `core_dog_health_events` and controlled owner/admin RPCs for internal veterinary/health/event recordkeeping only. It records factual notes such as vaccines, vet visits, surgeries, birth complications, reproductive events, medication notes, injuries, and general health notes; it does not diagnose animals or replace veterinary care.
-- Dog profile document vault uses `core_dog_documents` and controlled owner/admin RPCs for dog-linked report/certificate/registry metadata, including genetic tests, Embark reports, pedigrees, AKC/CKC/ACA/dual registration, vaccine records, health certificates, surgery/emergency vet records, acquisition records, and microchip records.
-- Dog Document Upload / Private Storage Attachment workflow was added for dog document records. Files are stored only in the private `dog-documents` Supabase storage bucket, and dog document metadata is updated through `core_attach_dog_document_file_metadata(...)`.
-- Dog document private upload is owner/admin only, validates allowed PDF/JPG/PNG/WEBP/TXT/CSV files up to 10 MB, writes `core_events` and `core_audit_log`, and does not expose raw storage paths or public URLs in the UI.
-- Dog/Puppy Media Upload Foundation was added for internal private photo metadata. Files use the private `kennel-media` Supabase storage bucket, metadata is recorded through `core_record_kennel_media_metadata(...)`, previews use short-lived signed URLs, and raw storage paths are not shown in the UI.
-- Dog/puppy private photo upload is owner/admin only, validates JPG/PNG/WEBP files up to 10 MB, writes `core_events` and `core_audit_log`, and does not publish puppies, expose public media URLs, message customers, update a portal, call external providers, connect AI, connect smart-home/cameras/devices, process payments, or generate documents.
-- Puppy private photo deletion was added for owner/admin through `core_delete_kennel_media(...)`; it removes internal private media metadata with event/audit rows and does not publish puppies, message customers, update a portal, call external providers, connect AI, connect devices, process payments, or generate documents.
-- Puppy edit/detail now supports internal puppy-level price and deposit metadata on `core_puppies.metadata`. These values are recordkeeping only and do not process payments, create ledger rows, update buyer balances, publish listings, or contact customers.
-- Puppy detail now derives litter female/male counts from linked puppies when stored litter count fields are blank, so known puppy sex rows are not shown as unknown counts.
-- Kennel create actions no longer have the production-only kill switch; they still require authenticated owner/admin context and controlled RPCs with event/audit behavior.
-- Puppy weight/care and dog/puppy private media actions were hardened for production so missing configuration, RPC failures, or storage failures redirect to safe error states instead of crashing route renders.
-- Temporary production repair placeholder files are not present in the repository; the active code lives in the canonical kennel action files.
-- Dog profile registry/acquisition metadata is stored on existing `core_dogs.metadata` through a controlled owner/admin RPC.
-- The dog profile workflow is internal owner/operator recordkeeping only. It does not message customers, publish puppies, generate documents, connect smart-home/cameras/devices, call external providers, add AI, process payments, or add customer portal behavior.
-- Obsolete broken kennel tests were removed.
-- `/staff/buyers` works as a read-only, real-data-only buyer workspace with no external side effects.
-- `/staff/families` works as a read-only, real-data-only family workspace with no external side effects.
-- Manual buyer creation and buyer edit workflows were added at `/staff/buyers/new` and `/staff/buyers/[buyerId]/edit` for owner/admin internal record correction only. They use controlled buyer RPCs, reject duplicate email/phone matches, write event/audit rows, and do not message customers or invite portal users.
-- Family create/edit workflows were added at `/staff/families/new` and `/staff/families/[familyId]/edit` for owner/admin internal household correction only. Buyer-family linking uses a controlled membership RPC, writes event/audit rows, and does not update a customer portal.
-- `/staff/buyers/[buyerId]` now shows an internal Buyer 360 Command Workspace using existing buyer, family, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit context.
-- `/staff/families/[familyId]` now shows an internal Family 360 Command Workspace using existing family, member, buyer, application, reservation, ledger, go-home, document, communication, event, and owner/admin audit context.
-- Buyer/Family 360 links were added from `/staff/buyers` and `/staff/families`.
-- Buyer/Family 360 now includes operational links for internal edit, assignment, reservation, payment readiness, document readiness, and go-home readiness workflows. These links do not add email, SMS, portal invite, payment processor, public listing, or document-generation actions.
-- Buyer/Family 360 remains internal owner/operator visibility only. It does not message customers, invite portal users, publish puppies, process payments, generate documents, upload media, call external providers, connect AI, connect smart-home/cameras/devices, or change records.
-- `/staff/events` works as a read-only Events/Audit workspace with no external side effects.
-- Events is enabled in the staff sidebar.
-- `/staff/phone-lookup` has been added as a read-only owner/admin Phone Lookup Safety workspace using existing Core phone lookup views.
-- Phone Lookup is enabled in the staff sidebar.
-- `/staff/documents` has been added as a read-only owner/admin document metadata inventory using existing Core document tables.
-- `/staff/documents` has been enhanced into a Document Readiness workspace with metadata counts, grouped document records, reservation requirement checks, and document-related go-home blockers.
-- Documents is enabled in the staff sidebar.
-- `/staff/messages` has been enhanced into a read-only owner/admin Communications Readiness workspace using existing Core conversation, message, phone-call, notification, template, delivery-attempt, and phone lookup safety metadata.
-- Messages is enabled in the staff sidebar.
-- Communications Readiness shows metadata counts, linked/unlinked grouping, attention signals, preview-only template state, queued notification state, and internal links to related Core workspaces.
-- `/staff/kennel-logs` has been added as a read-only owner/admin kennel event/audit history workspace.
-- Kennel Logs is enabled in the staff sidebar.
-- `/staff/messages` and `/staff/kennel-logs` schema references were cross-checked against migrations after implementation.
-- `/staff/command` has been added as a read-only Command Console shell. It does not replace `/staff`.
-- `/staff/command` was expanded into a read-only Core OS Command Center with system status, priority queue, puppy/neonatal summary, dog/breeding-stock summary, buyer/family relationship context, pipeline, payment/document/go-home readiness, communications preview, event/audit feed, and proposed-action boundary sections.
-- The Command Center uses existing Core metadata only and remains internal owner/operator visibility. It does not send messages, process payments, generate documents, publish puppies, expose private files, update the customer portal, call AI providers, or contact external services.
-- The Command Center now links to operational puppy/buyer/family workflows, including puppies without buyer/reservation assignment, puppies missing today's weight, puppy edit/detail routes, buyer/family 360 routes, and reservation assignment follow-up links.
-- `/staff/proposed-actions` has been added as an owner/admin Proposed Action Queue workspace. It can create, approve, and reject proposal review records only; approved proposed actions do not execute business changes.
-- Local browser verification as a mapped owner confirmed `/staff/messages`, `/staff/kennel-logs`, `/staff/command`, and `/staff/proposed-actions` load after real `/login` sign-in.
-- The verified pages remain read-only/review-only where intended and do not connect email, SMS, payments, documents, signatures, public website publishing, customer portal access, AI providers, or external provider calls.
-- Core owner/operator UI styling was enhanced through shared global/layout styling only. Existing pages, routes, sidebar items, workflows, server actions, queries, auth rules, database behavior, and safety boundaries were preserved.
-- Browser verification confirmed all existing sidebar routes still load real content after the styling pass, including litters, payment ledger readiness, go-home readiness, document readiness, communications readiness, command, and proposed actions.
-- The public/root login landing page was rebuilt as a Cherolee Core OS cinematic login experience with `/` and `/login` sharing the new owner/operator visual login style.
-- Login visual refinement corrected the first-pass styling by replacing the cartoon-style dog graphic with a subtle premium Chihuahua-profile crest/watermark and improving the glass panel/background depth.
-- Production `/` and `/login` route rendering was hardened by deferring Supabase cookie/auth client loading until the login server action actually runs.
-- Production root rendering was further isolated so public `/` no longer imports the login server action; `/login` remains the only public route that wires the owner/operator sign-in action.
-- Vercel must set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` for deployed auth and protected owner/operator routes; protected routes now redirect to the login screen instead of crashing if auth config is missing.
-- Auth behavior was preserved: valid owner login still reaches `/staff`, invalid login shows styled error feedback, and staff routes were not renamed or removed.
-- The public login experience exposes no private Core data and adds no external integrations.
-- Document readiness remains metadata-only. It does not generate documents, connect a signing provider, upload files, write storage, create downloads, send email/SMS, deliver portal links, or call external providers.
-- Communications Readiness remains metadata/preview-only. It does not send email, SMS, Facebook messages, phone calls, portal messages, replies, provider requests, or AI-generated communication actions.
+Public-facing behavior now exists in a limited and specific way:
 
-## Current Verified Communications Workflow
+- `/apply` is a public application form.
+- `/embed/application` is an iframe-friendly public application form for the Southwest Virginia Chihuahua website.
+- The customer-facing embedded form uses public website language only and avoids Core references.
+- The form does not approve applicants, reserve puppies, process payments, create customer portal access, generate documents, or publish listings.
+- SMTP confirmation is conditional on server-side SMTP env configuration.
 
-Core has a verified preview-only communication foundation:
+## Current Internal Owner/Operator State
 
-```text
-Core-native application entry
-  -> queue application_received notification
-  -> preview in /staff/notifications
-  -> seeded draft templates visible
-  -> disabled/preview provider boundary exists
-  -> blocked preview attempt logging exists
-```
+Internal owner/operator routes include, among others:
 
-Verified local behavior:
+- `/staff`
+- `/staff/command`
+- `/staff/proposed-actions`
+- `/staff/applications`
+- `/staff/applications/new`
+- `/staff/applications/[applicationId]` when present in repo state
+- `/staff/buyers`
+- `/staff/buyers/[buyerId]`
+- `/staff/families`
+- `/staff/families/[familyId]`
+- `/staff/dogs`
+- `/staff/dogs/[dogId]`
+- `/staff/litters`
+- `/staff/puppies`
+- `/staff/puppies/[puppyId]`
+- `/staff/puppies/[puppyId]/handoff`
+- `/staff/reservations`
+- `/staff/reservations/[reservationId]`
+- `/staff/reservations/[reservationId]/handoff`
+- `/staff/payments`
+- `/staff/payment-plans`
+- `/staff/go-home`
+- `/staff/go-home/handoff`
+- `/staff/documents`
+- `/staff/messages`
+- `/staff/notifications`
+- `/staff/phone-lookup`
+- `/staff/kennel-logs`
+- `/staff/events`
 
-- `core_queue_notification(...)` exists and queues notification rows.
-- `.env.example` documents local Supabase/Core variable names, email safety flags, and future Hostinger SMTP variable names without secrets.
-- `/staff/notifications` exists and is owner/admin only.
-- Staff-role users are blocked from the notification preview page.
-- Creating a Core-native application with an applicant email queues a preview-only `application_received` notification.
-- `/staff/notifications` displays queued notification previews.
-- Queued notifications keep `sent_at = null`.
-- Seeded draft email templates display in `/staff/notifications`.
-- Warm Southwest Virginia Chihuahua email templates were applied locally.
-- Warm template rollback-safe SQL test passed locally for all 9 templates.
-- All 9 templates are `draft`, `preview_only = true`, `send_enabled = false`, and `provider_connected = false`.
-- The disabled/preview email provider foundation exists and lint passes.
-- `core_notification_delivery_attempts` exists and is used for blocked preview attempt logging.
-- `/staff/notifications` displays delivery attempts.
-- Hostinger SMTP remains disconnected and email remains preview-only.
-
-## Email Template Keys Verified
-
-The current seeded email template keys are:
-
-- `application_received`
-- `application_approved`
-- `reservation_created`
-- `payment_received`
-- `payment_reminder`
-- `reservation_cancelled`
-- `go_home_reminder`
-- `document_ready`
-- `staff_alert`
-
-These are reusable draft template records only. Template existence never authorizes sending.
-
-## Current Go-Home Workflow Status
-
-Implemented and verified:
-
-- `core_go_home_groups` for optional shared pickup/delivery appointments.
-- `core_go_home_details` for reservation-level current go-home detail.
-- One current go-home detail per reservation is enforced.
-- `core_go_home_effective_view` resolves group defaults, individual overrides, and ungrouped detail records.
-- `/staff/go-home` is enabled in the staff sidebar.
-- `/staff/go-home` shows go-home counts, scheduled status, readiness lane, upcoming records, checklist form, and checklist records.
-- `core_update_go_home_detail(...)` creates or updates an ungrouped reservation go-home detail.
-- The go-home update RPC writes `core_events` and `core_audit_log`.
-- The go-home update RPC performs no email, SMS, document, payment, transport, or external integration action.
-- `/staff/go-home` has an owner/admin-only Set Go-Home Detail form.
-- Staff-role users can view the page but cannot update go-home details.
-- `core_go_home_checklist_items` table foundation exists.
-- `core_upsert_go_home_checklist_item(...)` controlled checklist item RPC exists.
-- Go-home checklist rollback-safe SQL test passed locally.
-- Go-home checklist UI is wired into `/staff/go-home`.
-- Go-home completion readiness was browser-smoked as the mapped local owner and remains internal Core readiness only.
-- Go-home completion readiness does not send email/SMS, process payments, generate documents, update the customer portal, release registration papers, change public listings, call external providers, or add live integrations.
-
-Known cleanup:
-
-- The known go-home unused variable warning was removed.
-
-## Current Kennel Records Workflow Status
-
-Implemented and verified:
-
-- `core_create_dog(...)` creates real Core dog records.
-- `core_create_litter(...)` creates real Core litter records and can link sire/dam.
-- `core_create_puppy(...)` creates real Core puppy records and can link to a litter.
-- Kennel create RPCs write `core_events` and `core_audit_log`.
-- Kennel create RPCs perform no customer messages, documents, payments, public website updates, or external integration actions.
-- Self-contained v2 rollback-safe kennel create test passed locally with `dam_check = 1`, `sire_check = 1`, `litter_check = 1`, `puppy_check = 1`, `event_check = 4`, and `audit_check = 4`.
-- `/staff/dogs` exists and reads real `core_dogs` records only.
-- `/staff/dogs` links each dog to `/staff/dogs/[dogId]` for internal Breeding Dog Profile review.
-- `/staff/dogs/[dogId]` exists and reads real Core dog, litter, puppy, reservation, buyer/family, dog health, dog document metadata, event, and owner/admin audit rows only.
-- `core_dog_health_events`, `core_dog_documents`, `core_record_dog_health_event(...)`, `core_record_dog_document_metadata(...)`, `core_update_dog_profile_metadata(...)`, and `core_attach_dog_document_file_metadata(...)` exist for internal owner/admin dog recordkeeping with event/audit rows and no external side effects.
-- `/staff/dogs/new` exists and creates real dog records through `createDog` -> `core_create_dog(...)`.
-- `/staff/litters` exists and reads real `core_litters`, `core_dogs`, and `core_puppies` records only.
-- `/staff/litters/new` exists and creates real litter records through `createLitter` -> `core_create_litter(...)`.
-- `/staff/puppies` exists and reads real `core_puppies` records only.
-- `/staff/puppies` links each puppy to `/staff/puppies/[puppyId]` for internal puppy detail/timeline review.
-- `/staff/puppies/[puppyId]` exists and reads existing Core puppy/litter/weight/care rows only, with event/audit context shown only where safely linkable.
-- `/staff/puppies/new` exists and creates real puppy records through `createPuppy` -> `core_create_puppy(...)`.
-- Dogs, Litters, and Puppies are enabled in the staff sidebar.
-- Kennel create actions are owner/admin only.
-- Kennel add/edit/archive loop has been browser-tested.
-- Kennel update/archive verification passed with `event_check = 6` and `audit_check = 6`.
-- Obsolete broken kennel tests were removed.
-
-No kennel staff page creates customer messages, documents, payments, public website updates, or external integration actions.
-
-## Current Buyer, Family, And Event Workspace Status
-
-Implemented and verified:
-
-- `/staff/buyers` works.
-- `/staff/families` works.
-- `/staff/buyers/[buyerId]` works as an internal Buyer 360 Command Workspace.
-- `/staff/families/[familyId]` works as an internal Family 360 Command Workspace.
-- `/staff/events` works.
-- Events is enabled in the staff sidebar.
-- Buyers and Families are read-only, real-data-only staff workspaces.
-- Buyer and Family 360 workspaces use existing Core metadata only and remain internal owner/operator visibility only.
-- Events/Audit is read-only.
-- These pages perform no external side effects: no Zoho, Twilio, email, payment, document, portal, public website, or customer-contact action.
-- Owner/admin audit visibility remains restricted.
+Internal pages remain owner/operator visibility and controlled workflow surfaces unless explicitly documented otherwise.
 
 ## Current Database Foundations
 
 Implemented Core database foundations include:
 
-- Core V1 canonical model for buyers, families, applications, application sections, dogs, litters, puppies, reservations, financial ledger, receipts, documents, communications, events, audit logs, integration events, and future tool-safety foundations.
-- `core_create_application_manual(...)` for Core-native private application creation.
-- `core_approve_application(...)` for controlled approval.
-- `core_create_reservation(...)` for controlled reservation creation.
-- `core_record_reservation_payment(...)` for posted deposit/payment entries only.
-- `core_record_financial_adjustment(...)` for ledger-only local/dev credits, refunds, chargebacks, fees, finance charges, and neutral adjustments.
-- `core_cancel_reservation(...)` for guarded cancellation with explicit puppy release behavior.
-- `core_queue_notification(...)` for queue-only notifications.
-- Email template seed records.
-- Disabled/preview email provider module.
-- `core_notification_delivery_attempts` for blocked/preview delivery logging.
-- `core_update_go_home_detail(...)` for controlled go-home detail updates.
-- `core_go_home_checklist_items` and `core_upsert_go_home_checklist_item(...)` for operational go-home checklist items.
-- `core_create_dog(...)`, `core_create_litter(...)`, and `core_create_puppy(...)` for real owner/admin kennel record creation.
-- `core_proposed_actions` plus `core_create_proposed_action(...)`, `core_approve_proposed_action(...)`, and `core_reject_proposed_action(...)` for proposal/review records only. Approval does not execute the underlying business action.
-- First-wave RLS helper functions and policies for internal profile, application, buyer/family, reservation, ledger, event/audit, and proposed-action access.
+- buyers
+- families
+- family members
+- applications
+- application sections
+- dogs
+- litters
+- puppies
+- reservations
+- financial ledger
+- payment balance view
+- receipts
+- documents
+- document versions
+- conversations/messages/phone-call foundations
+- notifications/templates/delivery attempt foundations
+- go-home groups/details/effective view/checklist items
+- events
+- audit log
+- proposed actions
+- private kennel media foundations
+- dog document foundations
 
-## Current Auth And Access Boundary
+## Auth And Access Boundary
 
 Implemented owner/operator auth/access pieces:
 
-- Supabase Auth packages installed.
-- `/login` provides owner/operator email/password sign-in through the existing technical staff-auth route.
-- `/staff` requires an authenticated Supabase user mapped to an active `core_profiles` profile.
-- `/` is a non-sensitive Cherolee Core OS login landing page and exposes no private Core data.
-- Dashboard reads require authenticated active staff context before broad service-role reads run.
-- Owner/admin users keep full current dashboard read surface.
-- Future helper/staff-role users keep operational dashboard access but do not fetch or see financial ledger activity, full audit/activity rows, phone lookup safety, or the general event feed.
-- `/staff/phone-lookup` is restricted to owner/admin; staff-role users see a restricted message and do not fetch phone lookup rows.
-- `/staff/documents` is restricted to owner/admin; staff-role users see a restricted message and do not fetch document rows.
-- `/staff/messages` is restricted to owner/admin; staff-role users see a restricted message and do not fetch communication rows.
-- `/staff/kennel-logs` is restricted to owner/admin; staff-role users see a restricted message and do not fetch kennel history rows.
-- `/staff/proposed-actions` is restricted to owner/admin; staff-role users see a restricted message and do not fetch proposal rows.
-- `/staff/command` uses role-aware reads; owner/admin can see audit/financial/phone-sensitive summaries while staff does not fetch restricted audit or phone lookup rows.
-- `/staff/reservations/[reservationId]` uses role-aware reads; owner/admin can see financial ledger, document, event, and audit details, while staff-role users do not fetch restricted rows.
-- Owner/admin/staff dashboard read scopes were manually verified locally with the role helper.
-- Go-home detail updates are owner/admin only.
-- Go-home checklist updates are allowed for operational staff.
-- Dog, litter, and puppy create actions are owner/admin only.
-- First-wave RLS is enabled locally on `core_profiles`, `core_families`, `core_buyers`, `core_family_members`, `core_applications`, `core_application_sections`, `core_reservations`, `core_financial_ledger`, `core_events`, `core_audit_log`, and `core_proposed_actions`.
-- RLS helper functions exist: `core_current_profile_id()`, `core_current_profile_role()`, `core_current_profile_is_owner_admin()`, `core_current_profile_is_staff_or_above()`, and `core_can_read_sensitive_owner_data()`.
-- First-wave RLS blocks anonymous/unmapped direct reads, allows internal operational reads for owner/admin/staff where intended, restricts sensitive ledger/event/audit/proposed-action direct reads to owner/admin, and does not grant direct authenticated table writes.
+- Supabase Auth is used for owner/operator login.
+- `/staff` requires an authenticated user mapped to an active Core profile.
+- `/` and `/login` expose no private Core data.
+- Protected internal routes redirect to login rather than exposing private data.
+- Owner/admin roles have the current broad internal workflow surface.
+- More restrictive helper/staff-role visibility remains a continuing hardening track.
 
-Still incomplete:
+## Current Communication Boundary
 
-- Remaining RLS table coverage and deeper policy tests.
-- Staging/production security boundary.
-- Admin/staff role assignment workflow.
-- Real field visibility review before selected-real-data staging.
-- Production review of transitional service-role server-side reads and RPC access.
+Communication is now split into two categories:
 
-## Still Not Connected Live
+1. Internal preview/readiness communication foundation:
+   - notification queue
+   - templates
+   - preview rules
+   - delivery-attempt metadata
+   - communications readiness workspace
 
-The following remain intentionally disconnected:
+2. Public application receipt SMTP:
+   - conditional SMTP application owner alert
+   - conditional SMTP customer receipt confirmation
+   - no automatic approval or follow-up decisions
 
-- Hostinger SMTP.
-- Resend.
-- Any real email sending.
-- Email send buttons.
-- Automatic customer email delivery.
-- Twilio.
-- Zoho in any active form, including live webhook, writeback, sync, import, dry-run import, compatibility workflow, or planned dependency.
-- Payment processor.
-- Document generation/signature provider.
-- Customer portal.
-- Public `/apply`.
-- Production data import.
-- Public website publishing from Core.
-- Home Assistant, cameras, smart mirror, and automations.
+No SMS, Twilio, Facebook Messenger, portal messaging, AI-generated replies, payment reminders, denial letters, approval emails, or go-home notices are live unless explicitly added later under approved rules.
 
-## Correct Non-Drift Lane
+## Current Blocked / Not Yet
 
-Current active lane:
+Still blocked or not implemented unless separately approved:
 
-```text
-Core-native owner/operator operating system foundation
-  -> application/reservation/payment workflow verified
-  -> preview-only communication safety verified
-  -> go-home detail update verified
-  -> go-home checklist SQL/UI wired
-  -> Go-Home Command & Completion Readiness workflow added
-  -> kennel dog/litter/puppy create RPCs verified
-  -> kennel create forms added
-  -> kennel add/edit/archive browser-tested
-  -> Neonatal Litter Command workflow added
-  -> Expected Litters / Whelping Prep workflow added
-  -> Daily Puppy Weight / Neonatal Care Log workflow added
-  -> Individual Puppy Detail / Neonatal Growth Timeline added
-  -> Kennel Daily Task Board / Today's Care Checklist added
-  -> Breeding Dog Profile / Dog Document Vault workflow added
-  -> Dog Document Upload / Private Storage Attachment workflow added
-  -> Buyer / Family 360 Command Workspace added
-  -> Dog/Puppy Media Upload Foundation added
-  -> buyers/families/events read-only owner/operator workspaces verified
-  -> Phone Lookup Safety read-only workspace added
-  -> Documents read-only workspace added
-  -> Document readiness metadata workflow added
-  -> Communications Readiness metadata workflow added
-  -> Kennel Logs read-only workspace added
-  -> Application detail review workflow added
-  -> application approve/decline/needs-info/internal-note review actions added for owner/admin only
-  -> first-wave RLS foundation added for internal profile/role checks and highest-risk Core tables
-  -> Reservation detail readiness workflow added
-  -> Payment Ledger & Account Readiness workflow added
-  -> Core Command Console planning doc added
-  -> Core Command Console read-only shell added
-  -> Proposed Action Approval Model planning doc added
-  -> Proposed Action Queue foundation added for proposal/review state only
-```
+- full customer portal
+- portal account invitation
+- payment processor connection
+- payment links
+- live refunds / chargebacks / fees through a provider
+- document generation
+- signature provider connection
+- automatic registration release
+- public puppy publishing from Core
+- Twilio/SMS/calls
+- Facebook Messenger integration
+- AI write actions
+- AI buyer decisions
+- smart kennel device integration
+- Home Assistant control
+- cameras / smart mirror / CoreFace
+- automatic approvals, denials, reservations, payments, or customer decisions
 
-Do not jump to live SMTP, customer emails, public forms, portal, documents, payment processor, AI write capability, public website publishing, Zoho tooling, or polish-only work until the relevant safety gates are complete.
+## Current Next Best Work
 
-## Build-File Alignment Checklist
+Next useful work should stay tight and non-drifting:
 
-This pass compared the docs to the local `main` build, not just older documentation.
-
-- Staff routes documented vs actual routes: actual technical routes include `/staff`, `/staff/command`, `/staff/proposed-actions`, `/staff/applications`, `/staff/applications/new`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/families`, `/staff/dogs`, `/staff/dogs/new`, `/staff/dogs/[dogId]/edit`, `/staff/litters`, `/staff/litters/new`, `/staff/litters/[litterId]/edit`, `/staff/puppies`, `/staff/puppies/new`, `/staff/puppies/[puppyId]`, `/staff/puppies/[puppyId]/edit`, `/staff/reservations`, `/staff/reservations/[reservationId]`, `/staff/payments`, `/staff/go-home`, `/staff/documents`, `/staff/messages`, `/staff/notifications`, `/staff/phone-lookup`, `/staff/kennel-logs`, and `/staff/events`.
-- Migrations documented vs actual migrations: 26 files exist in `supabase/migrations`; current docs should treat them as local/dev foundations unless specifically marked future/blocked.
-- Tests documented vs actual tests: 21 files exist in `supabase/tests`; rollback-safe SQL tests are local/dev validation and not production data operations.
-- Live integrations documented as disconnected: Zoho, Twilio, email/SMTP/Resend, payments, documents/signatures, public portal, public website publishing, Home Assistant, cameras, smart mirror, CoreFace, and voice remain disconnected.
-- Proposed actions documented accurately: proposal creation/approval/rejection review-state writes exist; approval does not execute business actions.
-- Command Console documented accurately: `/staff/command` has no AI provider, no model API calls, no write tools, and no external execution.
-- Daily task board documented accurately: `/staff` includes an internal owner/operator checklist derived from existing Core metadata and performs no writes or external side effects.
-- Documents/messages documented accurately: `/staff/documents` is an internal metadata/readiness workspace and `/staff/messages` is a read-only Communications Readiness metadata workspace. They do not generate, sign, send, reply, upload, deliver portal links, call providers, connect SMTP/Twilio/Facebook, or expose customer portal messaging.
-- Applications/reservations/payments documented accurately: local/dev controlled RPC/server-action foundations exist, including owner/admin-only application review status actions, and the reservation detail plus payment account pages are internal readiness visibility only. Live payment processors, automatic buyer approval, customer messages, documents, refunds, payment links, reminders, money movement, and production use remain blocked.
-- RLS/staging/production documented accurately: first-wave internal RLS exists locally, while remaining table coverage, staging environment, production deployment/security boundary, selected-real-data staging, and customer-facing access are incomplete/blocked.
-
-## Current Recommended Next Task
-
-1. Continue RLS/security hardening by finishing remaining table coverage/tests and reviewing service-role server access before selected real-data staging or production use.
-2. Verify unauthorized-role boundaries for the application detail review actions, reservation readiness detail restricted reads, document readiness restricted reads, communications readiness restricted reads, and other owner/admin-only write/read paths.
-3. Keep the Command Console non-executing and keep Proposed Actions limited to proposal/review state until a later approved proposed-action execution task exists.
-4. Run `npm run lint` and `npm run build` after implementation changes.
-
-## Future Command Console Planning
-
-`docs/core/CORE_COMMAND_CONSOLE_PLAN.md` exists as a planning document for a future intelligent Core Command Console. It does not mark the console as a live AI operator. No AI provider, model API call, autonomous action, business action execution, or AI write behavior has been added.
-
-`/staff/command` now exists as a read-only shell only. It uses existing Core reads, shows a disabled planning input, summarizes real Core records, and clearly marks AI provider, writes, external systems, and action queues as off.
-
-`docs/core/CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` exists as planning for a future proposed-action lifecycle. The database and owner/admin proposal-review foundation now exists, including proposal creation plus approve/reject review-state actions. No AI provider, API, autonomous write, business action execution, external side effect, or executable approval behavior has been added.
-
-## Time Estimate
-
-This estimate separates a minimal customer-facing step from a full customer-facing Core replacement.
-
-```text
-Local internal foundation:                  in progress
-Owner/operator staging:                   3-6 weeks total from a stable local checkpoint
-Internal production staff use:             2-3 months total from current checkpoint
-Minimal customer-facing application path:  about 2 months if tightly scoped
-Full customer-facing Core replacement:     4-6+ months total
-```
-
-The 2-month estimate applies only to a tightly scoped customer-facing path such as public application intake plus limited email/preview safety, not the full portal/documents/payments/signatures replacement.
+1. Validate deployed application form submissions end-to-end.
+2. Add owner/admin internal review visibility for public application fields if the existing application detail view does not show the new sections cleanly.
+3. Add send logging for SMTP application receipt attempts so every attempted owner/customer email is recorded in Core metadata.
+4. Add duplicate application handling and dead-letter/retry behavior for public application submission failures.
+5. Continue RLS/security hardening before broader customer-facing access.
