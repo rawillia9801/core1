@@ -1,4 +1,5 @@
 import { submitCustomerApplication } from "@/app/apply/actions";
+import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ function RadioGroup({ label, name, options, required = false }: { label: string;
   );
 }
 
-function Section({ eyebrow, title, children }: { eyebrow?: string; title: string; children: React.ReactNode }) {
+function Section({ eyebrow, title, children }: { eyebrow?: string; title: string; children: ReactNode }) {
   return (
     <section className="space-y-5 border-t border-[#eadfd1] pt-7 first:border-t-0 first:pt-0">
       {eyebrow ? <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#b65f16]">{eyebrow}</p> : null}
