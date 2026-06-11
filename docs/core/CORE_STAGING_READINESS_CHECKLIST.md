@@ -1,193 +1,223 @@
 # Core Staging Readiness Checklist
+
 ## Status Note
 
-- Current as of this pass: blocked staging gate.
-- Reflects readiness checks before one or two owner-approved real records enter staging; staging, production, live integrations, and bulk data movement are not complete.
-- Central current truth: this file owns staging gates; `CURRENT_STATUS.md` owns current implementation state.
-
+- Current as of this documentation pass after the public/embedded website application form and conditional SMTP application receipt alerts were added.
+- This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
+- `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
 ## Purpose
 
-This checklist is the final gate before staging any selected real data in a Core staging environment.
+This checklist is the final gate before putting selected real records, public application submissions, or SMTP behavior through a staging-style verification pass.
 
-It is not a production launch checklist. It applies only to a tiny, owner-approved selected-real-data staging test, currently limited to one or two real application records.
+It is not a full production launch checklist. It applies to small, owner-approved, controlled verification slices only.
 
-Do not stage selected real data until every required item below is satisfied or explicitly marked not applicable by the owner.
+Zoho One remains cancelled and historical reference only. Zoho must not be used as an import source, export source, dry-run source, compatibility path, sync source, writeback target, or dependency for staging.
 
-Zoho One has been cancelled. Zoho must not be used as an import source, export source, dry-run source, compatibility path, sync source, writeback target, or dependency for staging.
+## Current Customer-Facing Scope Now Present
+
+The following public routes now exist and must be included in staging/production checks:
+
+- `/apply`
+- `/apply/received`
+- `/embed/application`
+- `/embed/application/received`
+
+The embedded form is intended for the Southwest Virginia Chihuahua public website. It must not expose internal Core branding, staff wording, admin wording, private IDs, private data, or owner/operator-only workflow information.
+
+The application submit action can create Core application records and can attempt SMTP receipt emails when SMTP env vars are configured.
 
 ## Environment Readiness
 
-- [ ] First staging environment plan is reviewed: `docs/core/CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md`.
-- [ ] Separate staging environment is identified.
-- [ ] Staging URL is known.
-- [ ] Staging database is separate from local/development.
-- [ ] Staging environment variables are configured outside the repository.
-- [ ] Secrets are not committed to Git, docs, chat, screenshots, or client code.
-- [ ] Service role key remains server-only.
-- [ ] Anon key is used only where appropriate.
+- [ ] Production/staging environment variables are reviewed outside the repository.
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` is set correctly.
+- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` is set correctly.
+- [ ] `SUPABASE_URL` is set correctly.
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` is set server-side only.
 - [ ] `.env.local` is not committed.
-- [ ] Local/dev duplicate folders are not used as the staging source of truth.
+- [ ] No secrets appear in Git, docs, chat, screenshots, browser code, or client bundles.
+- [ ] Vercel project points to the correct GitHub repo and branch.
+- [ ] Public routes deploy from `rawillia9801/core1` on `main`.
+- [ ] Local/dev duplicate folders are not used as source of truth.
+
+## Public Application Form Readiness
+
+- [ ] `/embed/application` renders without Core/admin/staff/internal wording.
+- [ ] `/embed/application` visually matches Southwest Virginia Chihuahua public site style closely enough for iframe use.
+- [ ] Embedded iframe height is sufficient for the full form and terms.
+- [ ] The form includes Applicant Info fields from the PDF.
+- [ ] The form includes Puppy Preferences fields from the PDF.
+- [ ] The form includes Lifestyle & Home fields from the PDF.
+- [ ] The form includes Payment & Agreement fields from the PDF.
+- [ ] The form includes Terms and Conditions text.
+- [ ] The form includes Applicant Declarations.
+- [ ] The form includes typed signature.
+- [ ] Required fields are verified.
+- [ ] Required Terms checkbox is verified.
+- [ ] Required Declarations checkbox is verified.
+- [ ] Submission redirects to an embedded-friendly received page.
+- [ ] Failed/invalid submission behavior is reviewed.
+
+## Public Application Data Write Readiness
+
+- [ ] Submission creates a buyer record.
+- [ ] Submission creates a family record.
+- [ ] Submission links the buyer to the family.
+- [ ] Submission creates an application record.
+- [ ] Submission stores application sections:
+  - `applicant_info`
+  - `puppy_preferences`
+  - `lifestyle_home`
+  - `payment_agreement`
+- [ ] Submission creates a Core event.
+- [ ] No reservation is created automatically.
+- [ ] No puppy is assigned automatically.
+- [ ] No approval/denial/waitlist decision happens automatically.
+- [ ] No payment is recorded automatically.
+- [ ] No document package is generated automatically.
+- [ ] No portal account is created automatically.
+
+## SMTP Application Receipt Readiness
+
+SMTP application receipt behavior is now conditional and must be treated as live side-effect behavior when configured.
+
+Required SMTP env vars:
+
+```text
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_USER
+SMTP_PASS
+SMTP_FROM
+APPLICATION_EMAIL_TO
+```
+
+Checks:
+
+- [ ] SMTP env vars are configured only in Vercel/server environment, not Git.
+- [ ] `SMTP_FROM` is a valid business sender.
+- [ ] `APPLICATION_EMAIL_TO` is the owner/operator alert recipient.
+- [ ] Owner alert email is received.
+- [ ] Customer confirmation email is received.
+- [ ] Customer confirmation copy contains no Core/admin/internal wording.
+- [ ] Owner alert includes enough application detail to identify the applicant.
+- [ ] SMTP failure does not create duplicate application records on retry without owner review.
+- [ ] SMTP failure state is visible enough to investigate.
+- [ ] Future send logging is added before expanding SMTP beyond application receipt.
 
 ## Staff Access Readiness
 
 - [ ] `/staff` route is protected.
-- [ ] `/login` works in staging.
+- [ ] `/login` works in deployed environment.
 - [ ] Owner/admin login is verified.
-- [ ] Staff login is verified.
+- [ ] Staff/helper login is verified if used.
 - [ ] Inactive mapped users are blocked.
 - [ ] Unmapped Auth users are blocked.
 - [ ] Role-based read scopes are verified.
-- [ ] Staff cannot see owner/admin-only sensitive panels.
-- [ ] Dashboard reads require authenticated staff context.
-- [ ] Service-role read paths remain server-side only.
+- [ ] Staff/helper users cannot see owner/admin-only sensitive panels.
+- [ ] Dashboard reads require authenticated profile context.
+- [ ] Service-role read/write paths remain server-side only.
 
 ## Action Authorization Readiness
 
-- [ ] Dashboard actions use authenticated staff actor IDs.
-- [ ] Audit actor attribution is verified.
+- [ ] Server actions use authenticated staff actor IDs where applicable.
+- [ ] Public application submission is restricted to the public application write surface only.
+- [ ] Public application submission cannot write reservations, payments, documents, or portal users.
+- [ ] Audit/event attribution is understood for public anonymous submissions.
 - [ ] Owner/admin permissions are verified.
-- [ ] Staff permissions are verified.
-- [ ] Staff is blocked from cancellation with puppy release.
-- [ ] Staff dashboard actions do not depend on `CORE_APPROVAL_ACTOR_PROFILE_ID`.
-- [ ] Existing actions remain local/development or staging-only until production authorization is approved.
+- [ ] Staff/helper restrictions are verified.
+- [ ] Existing internal actions do not depend on deprecated static actor env variables.
 
 ## Data Scope Approval
 
-- [ ] Exact real records are selected and approved by the owner.
-- [ ] First staging slice is limited to one or two application records only.
+- [ ] Exact real records are selected and approved by the owner before staging selected internal data.
+- [ ] Public application test submissions use either test applicants or explicitly approved real submissions.
 - [ ] No bulk import is included.
 - [ ] No payment processor records are included.
-- [ ] No financial ledger history is included.
-- [ ] No document/signature records are included.
-- [ ] No message/Twilio records are included.
+- [ ] No document/signature records are included unless explicitly approved.
+- [ ] No Twilio/Facebook/SMS records are included.
 - [ ] No customer portal records are included.
 - [ ] No Zoho modules, exports, or payloads are included.
 
 ## Field Sensitivity Review
 
-- [ ] Field review template is completed: `docs/core/CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md`.
-- [ ] Application fields are reviewed before selected-record staging.
-- [ ] Staff-visible fields are approved.
+- [ ] Field review template is completed for public application data.
+- [ ] Staff-visible application fields are approved.
 - [ ] Owner/admin-only fields are identified.
-- [ ] Unnecessary private fields are excluded where possible.
+- [ ] Free-text answers are reviewed for unexpected sensitive content.
 - [ ] Phone visibility is reviewed.
 - [ ] Email visibility is reviewed.
-- [ ] Free-text answers are reviewed for unexpected sensitive content.
-- [ ] Staff-visible application sections are confirmed safe for the selected records.
+- [ ] Signature/date-time storage is reviewed.
+- [ ] Terms/declarations acknowledgement storage is reviewed.
 
-## Import Method Readiness
+## Side-Effect Lockout / Approval
 
-- [ ] Selected real JSON payload is stored outside the repository in a private local-only folder.
-- [ ] Payload file existence is confirmed locally before the dry run.
-- [ ] Local dry run is completed first.
-- [ ] Dry run output is reviewed for application status, section count, generated IDs, errors, and `DRY RUN ONLY - ROLLED BACK`.
-- [ ] Core-native staging method is chosen.
-- [ ] Existing Core-native intake or owner/operator entry path is confirmed.
-- [ ] No seed-through-migration is used.
-- [ ] No real payload is committed to Git.
-- [ ] No live Zoho webhook is connected.
-- [ ] No recurring Zoho sync is connected.
-- [ ] No production writeback is enabled.
-- [ ] Expected audit/event rows for the Core-native staging path are understood.
+Confirm all remain off unless explicitly approved:
 
-## Side-Effect Lockout
-
-Confirm all remain off:
-
-- [ ] Email sending.
-- [ ] Twilio/SMS/calls.
 - [ ] Payment processor.
+- [ ] Refund/chargeback provider actions.
 - [ ] Document generation.
 - [ ] Signature provider.
 - [ ] Customer portal.
-- [ ] Public website replacement.
+- [ ] Public website replacement beyond embedding the application form.
+- [ ] Twilio/SMS/calls.
+- [ ] Facebook Messenger.
 - [ ] Automation or AI writes.
 - [ ] Home Assistant.
 - [ ] Cameras.
 - [ ] Smart mirror or display automations.
-- [ ] External notifications.
 - [ ] Automatic approvals.
 - [ ] Automatic reservations.
 - [ ] Automatic payments, refunds, fees, chargebacks, or credits.
 
-## Verification After Import
+SMTP application receipt emails are the only current live external side-effect path, and only when SMTP env vars are configured.
 
-- [ ] Selected application appears in `/staff`.
-- [ ] Application sections display correctly.
-- [ ] Owner/admin can see expected full dashboard data.
-- [ ] Staff role sees only approved operational data.
-- [ ] Staff cannot see financial ledger activity.
-- [ ] Staff cannot see full audit/activity rows.
-- [ ] Staff cannot see phone lookup safety/ambiguity details.
-- [ ] Staff cannot see the general event feed.
-- [ ] Event/audit rows are expected only.
-- [ ] No email was sent.
-- [ ] No SMS/Twilio action occurred.
+## Verification After Public Application Submission
+
+- [ ] Application appears in `/staff/applications`.
+- [ ] Application detail view shows submitted sections clearly.
+- [ ] Buyer/family records are created and link correctly.
+- [ ] Event row exists for application receipt.
+- [ ] Owner/admin can review the submitted answers.
+- [ ] Staff/helper roles see only approved operational data.
 - [ ] No payment processor action occurred.
 - [ ] No document/signature action occurred.
-- [ ] No customer portal visibility occurred.
-- [ ] No public website behavior changed.
-- [ ] No production Zoho record was modified.
+- [ ] No portal visibility occurred.
+- [ ] No public puppy listing behavior changed.
+- [ ] No automatic approval/denial/waitlist decision occurred.
 
 ## Rollback Plan
 
-- [ ] Staging records can be deleted or reset.
-- [ ] Staging database reset path is understood.
-- [ ] No production records are modified.
-- [ ] No customer is contacted.
+- [ ] Test application records can be deleted or archived safely.
+- [ ] Duplicate test buyer/family records are identifiable.
+- [ ] SMTP test recipient(s) are known.
+- [ ] No production records are modified outside the intended test submission.
 - [ ] No payment is triggered.
 - [ ] No document/signature is triggered.
-- [ ] No message/SMS/email is triggered.
-- [ ] Rollback approach is approved by the owner before selected-record staging.
+- [ ] No portal account is created.
+- [ ] Rollback approach is approved before wider public use.
 
 ## Go / No-Go Decision
 
-Required approvals before selected-record staging:
-
-- [ ] Owner approves exact records.
-- [ ] Owner approves exact fields.
-- [ ] Owner approves staging environment.
-- [ ] Owner approves Core-native staging method.
-- [ ] Owner approves verification checklist.
-- [ ] Owner approves rollback plan.
-
 Go only if:
 
-- [ ] Staff auth and role read scopes are verified.
-- [ ] Sensitive panels remain owner/admin only.
-- [ ] Staff-visible application fields are reviewed.
-- [ ] Live side effects are confirmed off.
-- [ ] Import method does not require committing real data.
+- [ ] Public application writes only the intended Core records.
+- [ ] Embedded application contains no Core/internal/admin wording.
+- [ ] Terms/declarations/signature are captured.
+- [ ] SMTP behavior is approved and configured intentionally.
+- [ ] Owner alert and customer confirmation are verified.
+- [ ] Internal review path can see the application cleanly.
 - [ ] Rollback path is clear.
 
 No-go if:
 
-- [ ] Any selected record is not explicitly approved.
-- [ ] Any selected field has unclear visibility.
-- [ ] Staging database separation is unclear.
-- [ ] Any live integration is connected unexpectedly.
-- [ ] Any required secret appears in Git, docs, chat, screenshots, or client code.
-
-## Hard Stop Conditions
-
-Stop immediately if:
-
-- `/staff` is reachable without login.
-- Inactive or unmapped users can access `/staff`.
-- Staff can see restricted financial, audit/activity, phone lookup, or general event-feed data.
-- Selected records are not owner-approved.
-- Staging database is not separate from local/development and production.
-- Secrets appear in the repository or browser code.
-- Any live integration tries to send, charge, generate, notify, sync, or write back.
-- Any customer is contacted.
-- Any production record is modified.
-- Any real payload must be committed to proceed.
+- [ ] Any secret appears in Git, docs, chat, screenshots, browser output, or client code.
+- [ ] Public form can create reservations, payments, documents, portal accounts, or approval decisions.
+- [ ] SMTP sends unapproved copy or exposes internal language.
+- [ ] Submitted answers do not appear in the internal review path.
+- [ ] Customer-facing route exposes internal Core data.
 
 ## Current Status
 
-This checklist exists as a documentation gate.
-
-No selected real data has been staged yet.
-
-Selected-real-data staging remains blocked until this checklist is satisfied and owner-approved.
+The public/embedded application form is implemented and deployed from GitHub/Vercel. Staging-style verification of real submissions, SMTP receipt behavior, duplicate handling, send logging, and internal application detail review visibility remains required before treating the workflow as fully production-hardened.
