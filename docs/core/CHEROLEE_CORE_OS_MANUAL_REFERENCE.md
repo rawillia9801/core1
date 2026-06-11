@@ -2,27 +2,26 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual provided in June 2026.
+Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the public/embedded application and conditional SMTP receipt work.
 
-This is not a replacement for implementation docs. It is the business/partner reference that explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
+This is not a replacement for implementation docs. It explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
 
 ## Document Overview
 
 - Business: Southwest Virginia Chihuahua / Cherolee
 - System name: Cherolee Core OS
-- Document purpose: plain-English business and technical manual for partner review
 - System type: governed operational and environmental intelligence platform
-- Web hosting: Hostinger, paid for 3 years, no additional monthly cost for current hosting
-- Email / SMTP: Hostinger SMTP included, no additional email provider cost for normal current business use
 - Core database: Supabase / PostgreSQL
-- Core frontend: Vercel, free tier at current scale
-- Phone / voice: Twilio, usage-based
+- Core frontend: Next.js App Router on Vercel
+- Public website: Southwest Virginia Chihuahua website with embeddable application iframe
+- Email / SMTP: SMTP application receipt path now exists conditionally when server-side SMTP env vars are configured
+- Phone / voice: Twilio remains future/usage-based and not connected in Core
 
 ## What Core OS Is
 
-Cherolee Core OS is the central operating system for Southwest Virginia Chihuahua and related Cherolee operations. It is the brain of the business, not just a website, dashboard, or puppy portal.
+Cherolee Core OS is the central operating system for Southwest Virginia Chihuahua and related Cherolee operations. It is the brain of the business, not just a website, dashboard, puppy portal, or chatbot.
 
-Core exists because the business cannot safely depend on memory, Facebook messages, scattered notes, spreadsheets, phone calls, and separate apps that do not share truth. Core replaces that fragmentation with one governed system that knows:
+Core exists because the business cannot safely depend on memory, scattered messages, spreadsheets, phone calls, screenshots, and disconnected apps. Core replaces that fragmentation with one governed system that knows:
 
 - what is true
 - what is allowed
@@ -31,7 +30,7 @@ Core exists because the business cannot safely depend on memory, Facebook messag
 - what must be recorded permanently
 - what must remain owner-approved
 
-Core is the authority behind every screen. Customer interactions, payments, documents, kennel sensors, and business decisions must pass through Core rules instead of living as disconnected notes or guesses.
+Core is the authority behind every internal screen. Public forms and customer surfaces may submit or request information, but Core rules decide how records are stored, reviewed, blocked, or advanced.
 
 ## What Core Is Not
 
@@ -43,34 +42,32 @@ Core is not:
 - a chatbot that makes decisions on its own
 - a replacement for the owner
 - finished when screens exist
-- a one-week build
+- allowed to silently make buyer, money, document, or puppy decisions
 
 Screens only matter if they read and write the correct source of truth.
 
 ## Full Capability Map
 
-Core is designed to support these capability areas:
-
-| Capability | What It Does |
-| --- | --- |
-| Owner Command Center | Daily priorities, blockers, alerts, metrics, and next actions in one cockpit. |
-| Application Management | Receive, review, approve, deny, waitlist, and convert applicants with full audit trail. |
-| Buyer & Family CRM | Track households, history, preferences, puppies, payments, and conversations. |
-| Waitlist Management | Capture timing, preferences, fee status, priority, renewal, and expiration. |
-| Dog Records | Sire/dam profiles, registry, DNA status, health notes, retirement, and pedigree. |
-| Litter & Puppy Tracking | Full lifecycle from planned litter to placed puppy, with weights and milestones. |
-| Payments & Financing | Ledger-based financial truth, payment plans, deposits, refunds, and reminders. |
-| Document Management | Deposit agreements, bills of sale, health guarantees, financing addenda, transport agreements. |
-| Automated Email / SMTP | Application confirmations, approval notices, payment reminders, go-home notices, weekly updates, and owner alerts. |
-| Communications Hub | Facebook, email, website chat, SMS, portal messages, and phone calls unified into one customer history. |
-| Phone & Voice / Twilio | Caller lookup, voice menu, call summaries, and sensitive-topic escalation. |
-| Customer Portal | Buyer-specific puppy updates, documents, payments, messages, and resources. |
-| Kennel Monitoring | Temperature, humidity, motion, presence, camera status, and distress alerts. |
-| Smart Home Control | Lights, plugs, displays, speakers, and alerts through Home Assistant. |
-| AI Assistant | Read, summarize, draft, propose, and match under strict guardrails. |
-| Core Nervous System | Monitor Core itself, detect failures, degrade honestly, and propose recovery. |
-| CoreFace / Presence | Visual expression of real system state on dashboard, TV, tablet, or display. |
-| Reporting | Revenue, receivables, placements, response time, kennel health, and build status. |
+| Capability | What It Does | Current State |
+| --- | --- | --- |
+| Owner Command Center | Daily priorities, blockers, alerts, metrics, and next actions in one cockpit. | Internal read-only command center exists. |
+| Application Management | Receive, review, approve, deny, waitlist, and convert applicants with audit trail. | Private entry exists; public/embedded application intake now exists; review validation still needed. |
+| Buyer & Family CRM | Track households, history, preferences, puppies, payments, and conversations. | Buyer/Family 360 workspaces exist internally. |
+| Waitlist Management | Capture timing, preferences, fee status, priority, renewal, and expiration. | Still future/specific workflow not complete. |
+| Dog Records | Sire/dam profiles, registry, DNA status, health notes, retirement, and pedigree. | Internal dog profile and document vault exist. |
+| Litter & Puppy Tracking | Lifecycle from planned litter to placed puppy, with weights and milestones. | Internal kennel, litter, puppy, neonatal and media workflows exist. |
+| Payments & Financing | Ledger truth, payment plans, deposits, refunds, reminders. | Internal ledger/payment plan readiness exists; no processor. |
+| Document Management | Deposit agreements, bills of sale, health guarantees, financing addenda, transport agreements. | Metadata/readiness only; no generation/signature provider. |
+| Automated Email / SMTP | Application confirmations, approval notices, reminders, owner alerts. | Conditional SMTP only for application receipt owner/customer alerts. Broader email remains blocked. |
+| Communications Hub | Facebook, email, website chat, SMS, portal messages, calls. | Metadata/readiness/preview only. |
+| Phone & Voice / Twilio | Caller lookup, voice menu, summaries, escalation. | Phone lookup safety exists; Twilio not connected. |
+| Customer Portal | Puppy updates, documents, payments, messages, resources. | Not implemented. |
+| Kennel Monitoring | Temperature, humidity, motion, camera status, distress alerts. | Not connected; planning only. |
+| Smart Home Control | Lights, plugs, displays, speakers, alerts through Home Assistant. | Not connected; planning only. |
+| AI Assistant | Read, summarize, draft, propose, and match under guardrails. | Proposed-action foundation exists; AI providers blocked. |
+| Core Nervous System | Health signals, dependencies, incidents, recovery. | Future. |
+| CoreFace / Presence | Visual expression of system state. | Future. |
+| Reporting | Revenue, receivables, placements, response time, kennel health, build status. | Partial internal summaries exist. |
 
 ## Architecture Rule
 
@@ -78,7 +75,7 @@ Core is layered authority. No interface defines truth.
 
 Layer order:
 
-1. Interface layer: owner console, buyer portal, Facebook, Twilio, smart display.
+1. Interface layer: owner console, public application form, buyer portal, Facebook, Twilio, smart display.
 2. API / ingress layer: receives and normalizes inputs safely.
 3. Command layer: turns intent into proposed or executable commands.
 4. Policy / guardrail layer: checks permissions, risk, state, and preconditions.
@@ -91,19 +88,17 @@ Layer order:
 Golden rule:
 
 ```text
-No interface gets to make the final decision. The dashboard, portal, Facebook, Twilio, smart-home devices, and assistant surfaces all pass through Core authority. Every meaningful action creates an immutable event record.
+No interface gets to make the final decision. The dashboard, public forms, portal, Facebook, Twilio, smart-home devices, and assistant surfaces all pass through Core authority. Every meaningful action creates a durable event or audit record where the schema supports it.
 ```
 
 ## Source Of Truth Domains
 
-Core maintains separate truth domains:
-
 | Truth Domain | What It Stores | Rule |
 | --- | --- | --- |
 | Current State | Buyers, applications, puppies, litters, dogs, reservations. | Only updated after validation. |
-| Financial Truth | Ledger transactions, payment plans, invoices, refunds, credits. | Balances derive from transactions, never typed manually. |
-| Historical Truth | `core_events`. | Immutable record of meaningful action. |
-| Communication Truth | Message threads, call sessions, transcripts. | Every contact ties to a person, application, puppy, or unresolved lead. |
+| Financial Truth | Ledger transactions, payment plans, deposits, refunds, credits. | Balances derive from transactions, never typed manually. |
+| Historical Truth | `core_events`. | Record of meaningful actions and submissions. |
+| Communication Truth | Message threads, call sessions, notification attempts. | Contact history ties to people, applications, puppies, or unresolved leads. |
 | Document Truth | Document packages, signatures, file metadata. | Not complete until signed/accepted evidence is recorded. |
 | Genetic Truth | Dogs, DNA results, genetic traits, pairing reports. | AI cannot invent results; source file required. |
 | Environmental Truth | Sensor readings, camera events, kennel alerts. | Raw readings preserved and interpreted into structured conditions. |
@@ -122,13 +117,27 @@ The application workflow is the front door of the business. Core must support:
 - withdrawn
 - expired
 
-The review flow must show application answers, duplicate matches, prior conversations, desired puppy, references, payment plan interest, and blockers. Owner actions include approve, deny, waitlist, request more information, or hold for review.
+Current implementation now includes both private owner/admin application entry and public/embedded website application intake. The public/embedded form is designed for swvachihuahua.com and intentionally uses Southwest Virginia Chihuahua customer-facing language only.
+
+The public application form currently captures:
+
+- Applicant Info
+- Puppy Preferences
+- Lifestyle & Home
+- Payment & Agreement
+- Terms and Conditions acknowledgement
+- Applicant Declarations acknowledgement
+- Date-Time / typed signature
+
+The review flow must show application answers, duplicate matches, prior conversations, desired puppy, references, payment plan interest, and blockers. If the internal application detail route does not yet display the expanded public application sections clearly, that is the next application-management hardening task.
 
 Denials are sensitive. Core may draft denial language, but it must never automatically deny based on AI judgment. Denial reason, reviewer, timestamp, and appeal notes must be preserved.
 
 ## Payments, Financing, And Documents
 
 Financial truth is ledger-based. Every payment, deposit, fee, credit, refund, financing charge, transport fee, and adjustment is a ledger transaction. Balances are calculated from transactions, not typed into puppy or buyer records.
+
+Current implementation includes internal payment ledger readiness and a Payment Plan Command Center. These are internal review tools only and do not move money, create payment links, process refunds, or contact providers.
 
 Document state must be evidence-based. A document is complete only when Core has the correct party, puppy/reservation/payment terms, signed or accepted state, and audit event.
 
@@ -141,11 +150,20 @@ Required document types include:
 - Transport Agreement
 - Application Copy
 
+Document generation and signature provider integration remain blocked until explicitly approved.
+
 ## Automated Email And Communications
 
-Hostinger SMTP is already included with the paid Hostinger hosting plan. At the current stage, this means no separate paid email provider is needed for normal business volume.
+Hostinger SMTP is included with the paid Hostinger hosting plan, so no separate paid email provider is needed for normal current business volume.
 
-Core is intended to send or draft emails for:
+Current implementation status:
+
+- SMTP helper exists at `src/lib/core/smtp-mailer.ts`.
+- Public application submission can attempt an owner alert and customer receipt confirmation when SMTP env vars are configured.
+- Customer-facing application receipt email must contain no Core/admin/internal wording.
+- Broader automated email remains blocked until send logging, test-send-to-owner, copy approval, and owner/operator approval rules are complete.
+
+Core is intended eventually to send or draft emails for:
 
 - application submitted
 - application approved
@@ -270,7 +288,6 @@ Core becomes useful before it is complete. Timeline is phased:
 Current scale assumptions:
 
 - Approximately 30 customers.
-- 0 active portal users.
 - Hostinger hosting already paid for 3 years.
 - Hostinger SMTP included.
 - Vercel can remain free tier at current scale.
@@ -279,28 +296,24 @@ Current scale assumptions:
 - AI is $0 until connected and used.
 - Local NVR can keep camera storage at $0 monthly unless optional cloud backup is chosen.
 
-The manual's grounded current-scale cost view:
+The grounded current-scale cost view:
 
 - Hostinger web hosting: $0 additional monthly.
 - Hostinger SMTP: $0 additional monthly.
 - Supabase free tier at current scale: $0.
 - Vercel free tier at current scale: $0.
-- Twilio phone number: approximately $1.15/month.
-- Twilio inbound voice: usage-based; example 100 minutes/month is under $1 in usage.
-- Twilio outbound voice: usage-based; example 50 minutes/month is under $1 in usage.
-- Twilio SMS if used: usage-based and opt-in only.
+- Twilio phone number and usage: usage-based.
 - AI provider: $0 until connected, then usage-based.
 - Camera cloud storage: optional, local NVR can be $0.
 - Home Assistant Cloud: optional.
 
 ## Recommended Build Order For Early Value
 
-1. Finish Phase 1: stable internal dashboard with trusted records.
-2. Complete Phase 2: full application/approval/buyer workflow.
-3. Configure Hostinger SMTP only after preview/approval/send logging rules are ready.
-4. Complete Phase 3: ledger payments and document tracking.
-5. Purchase/install kennel hardware in parallel with Phase 3-4 if desired.
-6. Complete Phase 4: communication hub preview and drafts.
-7. Complete Phase 5: portal integration.
-8. Complete Phase 6: smart kennel monitoring.
-9. Build Phase 7/8: nervous system, assistant, CoreFace.
+1. Validate public/embedded application submission end-to-end.
+2. Ensure internal application review displays new public application sections clearly.
+3. Add SMTP send-attempt logging for public application receipt owner/customer emails.
+4. Add duplicate application handling and failed-intake/dead-letter behavior.
+5. Continue RLS/security hardening before broader customer-facing access.
+6. Complete Phase 3 ledger/document/go-home hardening.
+7. Expand communications beyond application receipt only after logging, approval, and test-send rules are complete.
+8. Portal, AI, Twilio/Facebook, smart kennel, CoreFace, and voice remain later phases.
