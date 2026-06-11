@@ -379,7 +379,7 @@ export default async function StaffNotificationsPage() {
 
   if (staff.role !== "owner" && staff.role !== "admin") {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-10 text-slate-950 sm:px-6 lg:px-8">
+      <main className="operator-workspace min-h-screen px-4 py-10 text-slate-950 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-3xl rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
             Restricted to owner/admin
@@ -401,7 +401,7 @@ export default async function StaffNotificationsPage() {
   const { previews, templates, attempts, warning } = await getNotificationPreviews();
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -638,3 +638,4 @@ export default async function StaffNotificationsPage() {
     </main>
   );
 }
+

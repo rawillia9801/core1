@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { updateGoHomeDetail } from "../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "./actions";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -556,22 +557,45 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
   const upcomingSevenDayCount = readinessRows.filter((row) => isUpcomingWithinDays(goHomeDate(row), 7)).length;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Go-Home</p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Go-Home Command & Completion Readiness</h1>
-              <p className="mt-3 max-w-4xl text-base leading-7 text-slate-600">Internal command view for reservation go-home readiness, ledger-derived payment status, document metadata, checklist completion, schedule details, and deterministic blockers.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/staff/reservations" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Reservations</Link>
-              <Link href="/staff/payments" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Payments</Link>
-              <Link href="/staff/documents" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Documents</Link>
-            </div>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Core Go-Home"
+          title="Go-Home Command & Completion Readiness"
+          summary="Internal command view for reservation go-home readiness, ledger-derived payment status, document metadata, checklist completion, schedule details, and deterministic blockers."
+          status={`${readyCount} ready / ${blockedCount} blocked`}
+          blockers={`${missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount} readiness issue(s)`}
+          nextAction="Resolve schedule, payment, document, and checklist blockers before handoff."
+          links={[
+            { href: "/staff/go-home/handoff", label: "Handoff" },
+            { href: "/staff/reservations", label: "Reservations" },
+            { href: "/staff/payments", label: "Payments" },
+            { href: "/staff/documents", label: "Documents" },
+          ]}
+        />
+
+        <SummaryStrip
+          items={[
+            { label: "Records", value: goHomeResult.rows.length, note: `${activeReservations.length} active checked` },
+            { label: "Ready", value: readyCount, note: "no deterministic blocker" },
+            { label: "Needs setup", value: setupCount, note: "missing date/details" },
+            { label: "Payment", value: canViewSensitive ? missingPaymentCount : "Restricted", note: "balance due markers" },
+            { label: "Documents", value: canViewSensitive ? missingDocumentCount : "Restricted", note: "missing/incomplete" },
+            { label: "Checklist", value: incompleteChecklistCount, note: "incomplete items" },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { href: "#overview", label: "Overview" },
+            { href: "#schedule", label: "Schedule" },
+            { href: "#checklist", label: "Checklist" },
+            { href: "#payments", label: "Payments" },
+            { href: "#documents", label: "Documents" },
+            { href: "#blockers", label: "Blockers", count: blockedCount },
+            { href: "#related", label: "Related Records" },
+          ]}
+        />
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Safety boundary</p>
@@ -588,7 +612,7 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           </section>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section id="overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Go-home records" value={goHomeResult.rows.length} note={`${activeReservations.length} active reservation(s) checked`} />
           <StatCard label="Ready" value={readyCount} note="No deterministic blocker from current metadata" />
           <StatCard label="Blocked" value={blockedCount} note="Has blocker after schedule/checklist exists" />
@@ -599,7 +623,7 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           <StatCard label="Upcoming 7 days" value={upcomingSevenDayCount} note={`${missingDetailCount} missing date/location detail`} />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <section id="schedule" className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-slate-950">Completion Readiness List</h2>
@@ -634,7 +658,7 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
                       <InfoItem label="Location" value={display(goHomeLocation(row))} />
                       <InfoItem label="Go-home status" value={formatKey(goHomeStatus(row))} />
                       <InfoItem label="Schedule source" value={formatKey(row.goHome?.source_of_schedule ?? row.summary.go_home_source_of_schedule)} />
-                      <InfoItem label="Payment readiness" value={canViewSensitive ? formatCurrency(row.balance?.balance_due_cents ?? row.summary.balance_due_cents) : "Restricted"} />
+                      <span id="payments" className="sr-only">Payments</span><InfoItem label="Payment readiness" value={canViewSensitive ? formatCurrency(row.balance?.balance_due_cents ?? row.summary.balance_due_cents) : "Restricted"} />
                       <InfoItem label="Document readiness" value={canViewSensitive ? `${row.requirements.filter((requirement) => requirement.status === "ready" || requirement.status === "not_required").length} of ${row.requirements.length} clear` : "Restricted"} />
                       <InfoItem label="Puppy / litter" value={`${display(row.puppy?.color || row.puppy?.coat_type || row.summary.puppy_collar_color)} / ${display(row.litter?.litter_name, shortId(row.puppy?.litter_id))}`} />
                       <InfoItem label="Application" value={`${row.application?.external_reference || shortId(row.summary.application_id)} / ${formatKey(row.application?.status)}`} />
@@ -644,11 +668,11 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
 
                     <div className="mt-5 grid gap-4 lg:grid-cols-3">
                       <div className="rounded-2xl border border-white bg-white p-4">
-                        <p className="text-sm font-bold text-slate-950">Blockers</p>
+                        <p id="blockers" className="text-sm font-bold text-slate-950">Blockers</p>
                         {row.blockers.length > 0 ? <ul className="mt-2 space-y-2 text-sm leading-6 text-amber-950">{row.blockers.map((blocker) => <li key={blocker}>{blocker}</li>)}</ul> : <p className="mt-2 text-sm leading-6 text-emerald-700">No deterministic Core blockers were found.</p>}
                       </div>
                       <div className="rounded-2xl border border-white bg-white p-4">
-                        <p className="text-sm font-bold text-slate-950">Required documents</p>
+                        <p id="documents" className="text-sm font-bold text-slate-950">Required documents</p>
                         <div className="mt-3 space-y-2">
                           {canViewSensitive ? row.requirements.map((requirement) => (
                             <div key={requirement.label} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm">
@@ -707,7 +731,7 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-slate-950">Go-Home Checklist</h2>
+                <h2 id="checklist" className="text-lg font-semibold text-slate-950">Go-Home Checklist</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">Internal handoff tasks for one active reservation.</p>
               </div>
               {activeReservations.length > 0 ? (
@@ -725,7 +749,7 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
             </section>
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-950">Readiness Boundary</h2>
+              <h2 id="related" className="text-lg font-semibold text-slate-950">Readiness Boundary</h2>
               <div className="mt-5 grid gap-3">
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-950">`core_go_home_effective_view` remains the schedule read source.</div>
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">Financial truth remains ledger-derived from `core_payment_balance_view`.</div>
@@ -739,3 +763,5 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
     </main>
   );
 }
+
+

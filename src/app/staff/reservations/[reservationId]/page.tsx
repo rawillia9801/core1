@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { SectionNav, SummaryStrip } from "../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -440,7 +441,7 @@ function RestrictedPanel({ text }: { text: string }) {
 
 function NotFoundMessage() {
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-[1000px] rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
           Not found
@@ -771,7 +772,7 @@ export default async function ReservationDetailPage({
     reservation?.external_reference || shortId(summary.reservation_id);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -810,6 +811,29 @@ export default async function ReservationDetailPage({
             </div>
           </div>
         </section>
+        <SummaryStrip
+          items={[
+            { label: "Status", value: formatKey(summary.reservation_status), note: `Ref ${reservationReference}` },
+            { label: "Balance", value: canViewSensitive ? formatCurrency(balance?.balance_due_cents ?? summary.balance_due_cents) : "Restricted", note: "ledger-derived" },
+            { label: "Go-home", value: formatDateTime(summary.go_home_planned_at), note: formatKey(goHome?.effective_status ?? summary.go_home_status) },
+            { label: "Checklist", value: `${completeChecklistCount} / ${checklistResult.rows.length}`, note: "complete or not applicable" },
+            { label: "Blockers", value: blockers.length, note: "deterministic readiness" },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { href: "#overview", label: "Overview" },
+            { href: "#people-puppy", label: "Buyer / Puppy" },
+            { href: "#financials", label: "Payments" },
+            { href: "#documents", label: "Documents" },
+            { href: "#go-home", label: "Go-Home" },
+            { href: "#blockers", label: "Blockers", count: blockers.length },
+            { href: "#related", label: "Related Records" },
+            { href: "#activity", label: "Activity" },
+          ]}
+        />
+
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
@@ -826,7 +850,7 @@ export default async function ReservationDetailPage({
           </section>
         ) : null}
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <section id="overview" className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <InfoItem label="Reservation" value={reservationReference} />
           <InfoItem label="Created" value={formatDateTime(summary.created_at)} />
           <InfoItem label="Reserved" value={formatDateTime(summary.reserved_at)} />
@@ -834,7 +858,7 @@ export default async function ReservationDetailPage({
           <InfoItem label="Blockers" value={blockers.length} />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <section id="people-puppy" className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold tracking-tight">Buyer / Family Context</h2>
             <dl className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -891,7 +915,7 @@ export default async function ReservationDetailPage({
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <h2 className="text-xl font-bold tracking-tight">Financial Truth</h2>
+                <h2 id="financials" className="text-xl font-bold tracking-tight">Financial Truth</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">
                   Balances are read from `core_payment_balance_view`; transaction direction comes from ledger `balance_effect`.
                 </p>
@@ -944,7 +968,7 @@ export default async function ReservationDetailPage({
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <h2 className="text-xl font-bold tracking-tight">Document Readiness Metadata</h2>
+                <h2 id="documents" className="text-xl font-bold tracking-tight">Document Readiness Metadata</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">
                   Metadata only. This page does not generate, upload, sign, expose, or send documents.
                 </p>
@@ -991,7 +1015,7 @@ export default async function ReservationDetailPage({
           <RestrictedPanel text="Document metadata is restricted to owner/admin while document visibility, storage, signature, and portal rules remain unfinished." />
         )}
 
-        <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <section id="go-home" className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold tracking-tight">Go-Home Readiness</h2>
             {goHome ? (
@@ -1051,7 +1075,7 @@ export default async function ReservationDetailPage({
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold tracking-tight">Blockers</h2>
+          <h2 id="blockers" className="text-xl font-bold tracking-tight">Blockers</h2>
           {blockers.length > 0 ? (
             <ul className="mt-5 grid gap-3 md:grid-cols-2">
               {blockers.map((blocker) => (
@@ -1068,7 +1092,7 @@ export default async function ReservationDetailPage({
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold tracking-tight">Internal Links</h2>
+          <h2 id="related" className="text-xl font-bold tracking-tight">Internal Links</h2>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href="/staff/payments" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Payments</Link>
             <Link href="/staff/go-home" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Go-Home</Link>
@@ -1085,7 +1109,7 @@ export default async function ReservationDetailPage({
         </section>
 
         {canViewSensitive ? (
-          <section className="grid gap-6 xl:grid-cols-2">
+          <section id="activity" className="grid gap-6 xl:grid-cols-2">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold tracking-tight">Event History</h2>
               <div className="mt-5 space-y-3">
@@ -1141,3 +1165,7 @@ export default async function ReservationDetailPage({
     </main>
   );
 }
+
+
+
+

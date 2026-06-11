@@ -389,7 +389,7 @@ export default async function DogProfilePage({
   ].filter(Boolean);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -866,3 +866,4 @@ export default async function DogProfilePage({
     </main>
   );
 }
+

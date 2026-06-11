@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { recordReservationPayment } from "../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -813,37 +814,44 @@ export default async function StaffPaymentsPage({
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">
-                Core Payments
-              </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                Payment Ledger & Account Readiness
-              </h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                Internal financial truth workspace for reservation accounts, ledger-derived balances, go-home payment readiness, document/payment context, and recent financial history.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/staff" className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
-                Dashboard
-              </Link>
-              <Link href="/staff/reservations" className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
-                Reservations
-              </Link>
-              <Link href="/staff/documents" className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
-                Documents
-              </Link>
-              <Link href="/staff/go-home" className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
-                Go-Home
-              </Link>
-            </div>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Core Payments"
+          title="Payment Ledger & Account Readiness"
+          summary="Internal financial truth workspace for reservation accounts, ledger-derived balances, payment entry, adjustments, go-home payment readiness, and financial history."
+          status={canViewFinancials ? "Owner/admin financial view" : "Restricted financial view"}
+          blockers={canViewFinancials ? `${attentionAccounts} account(s) need attention` : "Financial blockers restricted"}
+          nextAction={canViewFinancials ? "Review balance due and record only verified local ledger payments" : "Use owner/admin access for ledger review"}
+          links={[
+            { href: "/staff/payment-plans", label: "Payment Plans" },
+            { href: "/staff/reservations", label: "Reservations" },
+            { href: "/staff/documents", label: "Documents" },
+            { href: "/staff/go-home", label: "Go-Home" },
+          ]}
+        />
+
+        <SummaryStrip
+          items={[
+            { label: "Open balance", value: canViewFinancials ? formatCurrency(totalOpenBalance) : "Restricted", note: "ledger-derived" },
+            { label: "Paid in full", value: canViewFinancials ? paidInFullCount : "Restricted", note: "zero/negative balance" },
+            { label: "Attention", value: canViewFinancials ? attentionAccounts : "Restricted", note: "blocker count" },
+            { label: "Payments/deposits", value: canViewFinancials ? formatCurrency(totalPaymentsDeposits) : "Restricted", note: "posted decrease rows" },
+            { label: "Adjustments", value: canViewFinancials ? formatCurrency(totalFeesRefundsChargebacks + totalCredits) : "Restricted", note: "credits, fees, refunds, chargebacks" },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { href: "#overview", label: "Overview" },
+            { href: "#record-payment", label: "Record Payment" },
+            { href: "#accounts", label: "Accounts", count: accounts.length },
+            { href: "#ledger", label: "Ledger", count: ledgerResult.rows.length },
+            { href: "#attention", label: "Attention", count: attentionAccounts },
+            { href: "#audit", label: "Audit" },
+            { href: "#adjustments", label: "Adjustments" },
+          ]}
+        />
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
@@ -866,7 +874,7 @@ export default async function StaffPaymentsPage({
           <RestrictedPanel text="Payment ledger detail, account readiness, documents, financial events, and audit rows are restricted to owner/admin. Sensitive rows were not fetched for this profile." />
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section id="overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Contract Value" value={canViewFinancials ? formatCurrency(totalContractValue) : "Restricted"} note="Reservation contract totals from `core_payment_balance_view` or summary rows" />
           <StatCard label="Payments / Deposits" value={canViewFinancials ? formatCurrency(totalPaymentsDeposits) : "Restricted"} note="Posted deposit/payment ledger rows with decrease effect" />
           <StatCard label="Credits" value={canViewFinancials ? formatCurrency(totalCredits) : "Restricted"} note="Posted credit rows that reduce balance" />
@@ -877,7 +885,7 @@ export default async function StaffPaymentsPage({
           <StatCard label="Attention Accounts" value={canViewFinancials ? attentionAccounts : "Restricted"} note="Deterministic blocker count from current metadata" />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <section id="record-payment" className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-slate-950">Record Local Ledger Payment</h2>
@@ -995,7 +1003,7 @@ export default async function StaffPaymentsPage({
           </section>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section id="accounts" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-950">Payment Accounts</h2>
@@ -1097,7 +1105,7 @@ export default async function StaffPaymentsPage({
           )}
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <section id="ledger" className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-slate-950">Recent Ledger Transactions</h2>
@@ -1147,7 +1155,7 @@ export default async function StaffPaymentsPage({
 
           <section className="space-y-6">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-950">Attention / Blockers</h2>
+              <h2 id="attention" className="text-lg font-semibold text-slate-950">Attention / Blockers</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">
                 Deterministic blockers only. Missing fields stay explicit instead of invented.
               </p>
@@ -1178,7 +1186,7 @@ export default async function StaffPaymentsPage({
             </section>
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-950">Financial Events / Audit</h2>
+              <h2 id="audit" className="text-lg font-semibold text-slate-950">Financial Events / Audit</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">
                 Recent payment, adjustment, and cancellation history where safely linkable.
               </p>
@@ -1216,7 +1224,7 @@ export default async function StaffPaymentsPage({
           </section>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section id="adjustments" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-950">Balance Calculation Boundary</h2>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-950">
@@ -1242,3 +1250,7 @@ export default async function StaffPaymentsPage({
     </main>
   );
 }
+
+
+
+

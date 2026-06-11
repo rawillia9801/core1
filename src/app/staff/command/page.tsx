@@ -6,6 +6,7 @@ import {
   requireStaffProfile,
 } from "@/lib/staff-auth";
 import type { ReactNode } from "react";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -335,23 +336,10 @@ function isToday(value: string | null | undefined) {
   );
 }
 
-function StatusChip({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] ring-1 ring-sky-100/80 backdrop-blur">
-      <div className="flex items-center gap-2">
-        <span className="core-command-blink h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.85)]" />
-        <p className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-slate-400">
-          {label}
-        </p>
-      </div>
-      <p className="mt-1 text-sm font-bold text-slate-950">{value}</p>
-    </div>
-  );
-}
-
-function GlassPanel({ children, className = "" }: { children: ReactNode; className?: string }) {
+function GlassPanel({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
   return (
     <section
+      id={id}
       className={`rounded-[2rem] border border-white/75 bg-white/78 shadow-[0_24px_70px_rgba(15,23,42,0.09)] ring-1 ring-slate-200/60 backdrop-blur-xl ${className}`}
     >
       {children}
@@ -527,12 +515,14 @@ function SummaryLine({ label, value, note }: { label: string; value: string | nu
 }
 
 function ConsoleSection({
+  id,
   title,
   eyebrow,
   detail,
   cards,
   emptyText,
 }: {
+  id?: string;
   title: string;
   eyebrow: string;
   detail: string;
@@ -540,7 +530,7 @@ function ConsoleSection({
   emptyText: string;
 }) {
   return (
-    <GlassPanel className="p-6">
+    <GlassPanel id={id} className="p-6">
       <div className="mb-5">
         <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">{eyebrow}</p>
         <h2 className="mt-2 text-2xl font-black text-slate-950">{title}</h2>
@@ -1386,30 +1376,46 @@ export default async function StaffCommandPage() {
   ];
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_#dbeafe,_transparent_30%),radial-gradient(circle_at_90%_10%,rgba(125,211,252,0.24),transparent_26%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_43%,_#f0fdfa_100%)] px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen overflow-hidden px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1700px] space-y-6">
-        <GlassPanel className="relative overflow-hidden p-6 sm:p-8">
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(56,189,248,0.18)_38%,transparent_58%)]" />
-          <div className="relative grid gap-6 xl:grid-cols-[1.18fr_0.82fr] xl:items-end">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.35em] text-blue-700">
-                Core Command Console
-              </p>
-              <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
-                Core is online and ready to help.
-              </h1>
-              <p className="mt-4 max-w-4xl text-base leading-8 text-slate-600">
-                Your read-only command brain for business, kennel, family, and future smart-home operations. Ask Core to summarize, organize, prepare, or review — approval is required before anything sensitive changes.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <StatusChip label="AI provider" value="Not connected" />
-              <StatusChip label="Writes" value="Approval required" />
-              <StatusChip label="External systems" value="Off" />
-              <StatusChip label="Mode" value="Read-only" />
-            </div>
-          </div>
-        </GlassPanel>
+        <OperatorHeader
+          eyebrow="Core Command Console"
+          title="Core is online and ready to help."
+          summary="Your read-only command brain for business, kennel, family, and readiness operations. Core can summarize, organize, prepare, and review; approval is required before anything sensitive changes."
+          status="Read-only / safe"
+          blockers={priorityCards.length > 0 ? `${priorityCards.length} priority item(s)` : "No urgent priority items"}
+          nextAction={recommendedSteps[0]?.title ?? "Review today's command lanes"}
+          links={[
+            { href: "/staff", label: "Today" },
+            { href: "/staff/payment-plans", label: "Payment Plans" },
+            { href: "/staff/go-home/handoff", label: "Handoff" },
+            { href: "/staff/proposed-actions", label: "Proposed Actions" },
+          ]}
+        />
+
+        <SummaryStrip
+          items={[
+            { label: "Applications", value: applications.length, note: "recent rows" },
+            { label: "Reservations", value: activeReservationCount, note: `${openBalanceCount} open balance` },
+            { label: "Puppies", value: puppies.length, note: `${availablePuppyCount} available / ${reservedPuppyCount} reserved` },
+            { label: "Go-home", value: goHomeScheduledCount, note: `${goHomeUnscheduledCount} unscheduled` },
+            { label: "Communications", value: queuedNotificationCount, note: `${unsentNotificationCount} pending/preview` },
+            { label: "Proposals", value: canViewAudit ? proposedActions.length : "Restricted", note: "review state only" },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { href: "#today", label: "Today", count: priorityCards.length },
+            { href: "#neonatal", label: "Neonatal", count: puppyCards.length },
+            { href: "#buyers", label: "Buyers/Families", count: relationshipCards.length },
+            { href: "#payments", label: "Payments", count: readinessCards.length },
+            { href: "#communications", label: "Communications", count: communicationCards.length },
+            { href: "#events", label: "Events/Audit", count: eventAuditCards.length },
+            { href: "#proposals", label: "Proposed", count: proposedCards.length },
+            { href: "#system", label: "System" },
+          ]}
+        />
 
         <section className="rounded-[2rem] border border-cyan-200/70 bg-cyan-50/80 p-6 text-cyan-950 shadow-[0_18px_45px_rgba(14,165,233,0.08)] ring-1 ring-white/60 backdrop-blur">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -1435,6 +1441,7 @@ export default async function StaffCommandPage() {
         <RecommendedNextSteps steps={recommendedSteps} />
 
         <ConsoleSection
+          id="today"
           eyebrow="Today"
           title="Today's Priority Queue"
           detail="Owner/operator attention items derived from current Core metadata only."
@@ -1456,6 +1463,7 @@ export default async function StaffCommandPage() {
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ConsoleSection
+            id="neonatal"
             eyebrow="Neonatal"
             title="Neonatal / Puppy Command Summary"
             detail="Puppy cards show identity, status, latest observed weight, today's weight coverage, and private media metadata when present."
@@ -1463,6 +1471,7 @@ export default async function StaffCommandPage() {
             emptyText="No newborn/recent puppy records were found in the current Core read."
           />
           <ConsoleSection
+            id="dogs"
             eyebrow="Breeding Stock"
             title="Dogs / Breeding Stock Summary"
             detail="Dog cards summarize internal profile readiness, photo metadata, document metadata, and care/event history."
@@ -1473,6 +1482,7 @@ export default async function StaffCommandPage() {
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ConsoleSection
+            id="buyers"
             eyebrow="Relationships"
             title="Buyer / Family Relationship Summary"
             detail="Reservation-linked buyer, family, puppy, balance, and go-home context for human review."
@@ -1480,6 +1490,7 @@ export default async function StaffCommandPage() {
             emptyText="No reservation-linked buyer/family records were found in the current Core read."
           />
           <ConsoleSection
+            id="pipeline"
             eyebrow="Pipeline"
             title="Application / Reservation Pipeline"
             detail="High-level Core pipeline counts for applications, reservations, buyers, and family records."
@@ -1489,6 +1500,7 @@ export default async function StaffCommandPage() {
         </section>
 
         <ConsoleSection
+          id="assignment"
           eyebrow="Assignment"
           title="Puppy Buyer Assignment Links"
           detail="Puppies without active reservation assignments link to the puppy detail workflow where buyer assignment is created through Core reservations."
@@ -1498,6 +1510,7 @@ export default async function StaffCommandPage() {
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ConsoleSection
+            id="payments"
             eyebrow="Readiness"
             title="Payment / Document / Go-Home Readiness"
             detail="Read-only readiness indicators. This surface does not process payments or generate documents."
@@ -1505,6 +1518,7 @@ export default async function StaffCommandPage() {
             emptyText="No payment, document, or go-home readiness items were found."
           />
           <ConsoleSection
+            id="communications"
             eyebrow="Communications"
             title="Communications Preview"
             detail="Preview-only communication and phone safety context. No SMTP, Twilio, Facebook, or provider call is connected."
@@ -1515,6 +1529,7 @@ export default async function StaffCommandPage() {
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ConsoleSection
+            id="events"
             eyebrow="Timeline"
             title="Event / Audit Feed"
             detail="Recent operational events and owner/admin audit rows when safely visible."
@@ -1522,6 +1537,7 @@ export default async function StaffCommandPage() {
             emptyText="No event or audit rows were found for the current role."
           />
           <ConsoleSection
+            id="proposals"
             eyebrow="Future AI Boundary"
             title="Proposed Actions / Future AI Boundary"
             detail="Proposed actions are review records only. They do not execute business changes, contact providers, or update customer-facing systems."
@@ -1530,7 +1546,7 @@ export default async function StaffCommandPage() {
           />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
+        <section id="system" className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
           <GlassPanel className="p-6">
             <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-700">
               Helpful assistant surface
@@ -1658,3 +1674,4 @@ export default async function StaffCommandPage() {
     </main>
   );
 }
+

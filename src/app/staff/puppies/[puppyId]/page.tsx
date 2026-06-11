@@ -458,7 +458,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
 
   if (!puppy) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl space-y-6">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Puppies</p>
@@ -588,7 +588,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const warnings = [puppyResult.warning, litterResult.warning, litterPuppyResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -1003,3 +1003,4 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
     </main>
   );
 }
+

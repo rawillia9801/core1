@@ -274,7 +274,7 @@ function ResultMessage({
 
 function RestrictedMessage() {
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1000px]">
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
@@ -301,7 +301,7 @@ function RestrictedMessage() {
 
 function NotFoundMessage() {
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1000px]">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
@@ -484,7 +484,7 @@ export default async function ApplicationDetailPage({
     reviewerResult.warning;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -769,3 +769,4 @@ export default async function ApplicationDetailPage({
     </main>
   );
 }
+

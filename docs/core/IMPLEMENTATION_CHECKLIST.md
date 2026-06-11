@@ -102,6 +102,7 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/go-home/handoff` exists.
 - [x] `/staff/puppies/[puppyId]/handoff` exists.
 - [x] Go-home/handoff pages are internal readiness only.
+- [x] Go-home readiness and handoff surfaces were reorganized with compact command summaries, segmented section navigation, and shorter readiness/action sections while preserving controlled actions and safety boundaries.
 - [ ] Add shared multi-puppy pickup/delivery workflow.
 - [ ] Add go-home communication/document handoff rules.
 
@@ -114,6 +115,7 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/payments` exists as Payment Ledger & Account Readiness workspace.
 - [x] `/staff/payment-plans` exists as Payment Plan Command Center.
 - [x] Payment Plan Command Center reviews plan candidates, half-down target, estimated six-month payments, stale plans, open balances, registration holds, recent ledger rows, and linked buyer/family/puppy/reservation context.
+- [x] Payment ledger and payment-plan pages were reorganized into easier-to-scan operator workspaces with compact summaries, segmented lanes, account/readiness navigation, and clearer adjustment/readiness review without moving money or calling providers.
 - [x] Payment pages do not move money, create provider payment links, process refunds, send reminders, update portal visibility, or call payment providers.
 - [ ] Add further payment recording validation before broad staff/helper use.
 - [ ] Add financial adjustment UI only after authorization boundaries are hardened.
@@ -163,10 +165,12 @@ Core-native owner/operator operating system foundation
 ### Command, Events, Proposed Actions
 
 - [x] `/staff/command` exists as read-only Core OS Command Center.
+- [x] `/staff/command` was reorganized into a segmented command center with Today, Neonatal, Buyers/Families, Payments, Communications, Events/Audit, Proposed Actions, and System lanes while remaining read-only.
 - [x] `/staff/proposed-actions` exists as owner/admin proposal queue.
 - [x] `/staff/events` exists as read-only Events/Audit workspace.
 - [x] `/staff/kennel-logs` exists as read-only kennel event/audit history workspace.
 - [x] Proposed action approval remains review-state only and does not execute business changes.
+- [x] Long internal review/readiness pages now share compact operator workspace styling with command headers, summary rows, segmented navigation, subtler panels, and reduced card density; no auth, env, Supabase config, migrations, SMTP behavior, public form behavior, payment processor, Twilio/SMS/Facebook, AI, portal, server-action, or external-integration behavior changed.
 - [blocked] AI provider calls and AI execution remain blocked.
 
 ## Phase 2 — Staging / Selected Records

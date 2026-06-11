@@ -2,6 +2,7 @@ import Link from "next/link";
 import { updateGoHomeDetail } from "../../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../actions";
+import { SectionNav, SummaryStrip } from "../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -155,10 +156,6 @@ function formatDateTime(value: string | null | undefined) {
 function formatCurrency(value: number | null | undefined) {
   if (value === null || value === undefined) return "Not recorded";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value / 100);
-}
-
-function shortId(value: string | null | undefined) {
-  return value ? value.slice(0, 8) : "Not linked";
 }
 
 function isCompleteChecklist(status: string | null | undefined) {
@@ -361,7 +358,7 @@ export default async function StaffGoHomeHandoffPage() {
   const missingSchedule = rows.filter((row) => row.lane === "schedule").length;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -377,6 +374,24 @@ export default async function StaffGoHomeHandoffPage() {
             </div>
           </div>
         </section>
+        <SummaryStrip items={[
+          { label: "Active handoffs", value: rows.length, note: "reservations reviewed" },
+          { label: "Ready", value: lanes.find((lane) => lane.key === "ready")?.rows.length ?? 0, note: "clear blockers" },
+          { label: "Payment", value: lanes.find((lane) => lane.key === "payment")?.rows.length ?? 0, note: "balance due" },
+          { label: "Documents", value: lanes.find((lane) => lane.key === "documents")?.rows.length ?? 0, note: "metadata blockers" },
+          { label: "Checklist", value: lanes.find((lane) => lane.key === "checklist")?.rows.length ?? 0, note: "incomplete tasks" },
+        ]} />
+
+        <SectionNav items={[
+          { href: "#overview", label: "Overview" },
+          { href: "#lane-ready", label: "Ready" },
+          { href: "#lane-payment", label: "Payments" },
+          { href: "#lane-documents", label: "Documents" },
+          { href: "#lane-checklist", label: "Checklist" },
+          { href: "#lane-schedule", label: "Schedule" },
+          { href: "#lane-attention", label: "Blockers" },
+        ]} />
+
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Safety boundary</p>
@@ -390,7 +405,7 @@ export default async function StaffGoHomeHandoffPage() {
           </section>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section id="overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="Active handoffs" value={rows.length} note="Active reservation rows reviewed" />
           <StatCard label="Ready" value={lanes.find((lane) => lane.key === "ready")?.rows.length ?? 0} note="No deterministic blocker found" />
           <StatCard label="Upcoming 7 days" value={upcomingSevenDays} note="Scheduled soon from current metadata" />
@@ -400,7 +415,7 @@ export default async function StaffGoHomeHandoffPage() {
 
         <section className="grid gap-5 xl:grid-cols-3">
           {lanes.map((lane) => (
-            <section key={lane.key} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+            <section key={lane.key} id={`lane-${lane.key}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-lg font-bold text-slate-950">{lane.label}</h2>
                 <Badge>{lane.rows.length}</Badge>
@@ -457,3 +472,5 @@ export default async function StaffGoHomeHandoffPage() {
     </main>
   );
 }
+
+

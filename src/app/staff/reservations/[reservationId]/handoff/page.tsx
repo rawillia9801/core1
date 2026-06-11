@@ -2,6 +2,7 @@ import Link from "next/link";
 import { updateGoHomeDetail } from "../../../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../../../go-home/actions";
+import { SectionNav, SummaryStrip } from "../../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -169,7 +170,7 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
 
   if (!UUID_PATTERN.test(reservationId)) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight">Reservation handoff not found</h1>
           <Link href="/staff/go-home/handoff" className="mt-5 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Back to handoff command</Link>
@@ -203,7 +204,7 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
 
   if (!summary) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight">Reservation handoff not found</h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">No reservation summary row matched this reservation.</p>
@@ -221,7 +222,7 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
   const effectiveStatus = goHome?.effective_status ?? summary.go_home_status;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -240,6 +241,20 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
           </div>
         </section>
 
+        <SummaryStrip items={[
+          { label: "Date", value: formatDateTime(effectiveDate), note: formatKey(effectiveStatus) },
+          { label: "Balance", value: formatCurrency(balance?.balance_due_cents ?? summary.balance_due_cents), note: "ledger-derived" },
+          { label: "Checklist", value: `${completeChecklist} / ${checklistItems.length}`, note: "complete or not applicable" },
+          { label: "Documents", value: `${completeDocuments} / ${documents.length}`, note: "complete metadata" },
+        ]} />
+
+        <SectionNav items={[
+          { href: "#overview", label: "Overview" },
+          { href: "#schedule", label: "Schedule" },
+          { href: "#checklist", label: "Checklist" },
+          { href: "#schedule", label: "Actions" },
+        ]} />
+
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Safety boundary</p>
           <p className="mt-2 text-sm leading-6">This workspace is an internal owner/operator go-home handoff detail only. It does not send messages, process payments, generate documents, release registration papers, publish puppies, update the customer portal, or call external providers.</p>
@@ -247,7 +262,7 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
 
         {warnings.length > 0 ? <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950">{warnings.join(" / ")}</section> : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section id="overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <InfoItem label="Date" value={formatDateTime(effectiveDate)} />
           <InfoItem label="Method" value={formatKey(effectiveMethod)} />
           <InfoItem label="Location" value={display(effectiveLocation)} />
@@ -257,7 +272,7 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
 
         <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-950">Readiness Snapshot</h2>
+            <h2 id="checklist" className="text-lg font-bold text-slate-950">Readiness Snapshot</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>{completeChecklist} of {checklistItems.length} checklist</Badge>
               <Badge>{completeDocuments} of {documents.length} documents</Badge>
@@ -275,7 +290,7 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-950">Pickup / Delivery Controls</h2>
+            <h2 id="schedule" className="text-lg font-bold text-slate-950">Pickup / Delivery Controls</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">These forms use existing Core go-home actions and checklist actions only.</p>
             {canEdit ? (
               <div className="mt-5 grid gap-6 xl:grid-cols-2">
@@ -303,3 +318,6 @@ export default async function ReservationHandoffPage({ params }: { params: Promi
     </main>
   );
 }
+
+
+

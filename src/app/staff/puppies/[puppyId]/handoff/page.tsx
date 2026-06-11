@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { updateGoHomeDetail } from "../../../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../../../go-home/actions";
+import { SectionNav, SummaryStrip } from "../../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -230,7 +231,7 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
 
   if (!puppy) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight">Puppy handoff not found</h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">No Core puppy row matched {shortId(puppyId)}.</p>
@@ -278,7 +279,7 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
   const warnings = [puppyResult, reservationResult, weightResult, puppyEventResult, documentResult, goHomeResult, checklistResult].map((result) => result.warning).filter(Boolean) as string[];
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -294,6 +295,21 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
               {reservation ? <Link href={`/staff/reservations/${reservation.reservation_id}`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Reservation Detail</Link> : null}
             </div>
           </div>
+        <SummaryStrip items={[
+          { label: "Status", value: formatKey(puppy.status), note: formatKey(puppy.health_status) },
+          { label: "Latest weight", value: latest?.weight_grams ? `${latest.weight_grams} g` : "Not recorded", note: formatDateTime(latest?.measured_at) },
+          { label: "Reservation", value: reservation ? formatKey(reservation.reservation_status) : "Not linked", note: reservation ? display(reservation.buyer_name || reservation.buyer_email) : "assignment needed" },
+          { label: "Balance", value: reservation ? formatCurrency(reservation.balance_due_cents) : "Not linked", note: "ledger-derived marker" },
+          { label: "Documents", value: documents.length, note: "linked metadata" },
+        ]} />
+
+        <SectionNav items={[
+          { href: "#overview", label: "Overview" },
+          { href: "#care", label: "Health / Care" },
+          { href: "#checklist", label: "Checklist" },
+          { href: "#actions", label: "Actions" },
+        ]} />
+
         </section>
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
@@ -303,7 +319,7 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
 
         {warnings.length > 0 ? <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950">{warnings.join(" / ")}</section> : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section id="overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <InfoItem label="Latest weight" value={latest?.weight_grams ? `${latest.weight_grams} g` : "Not recorded"} />
           <InfoItem label="Weight date" value={formatDateTime(latest?.measured_at)} />
           <InfoItem label="Go-home date" value={formatDateTime(effectiveDate)} />
@@ -313,7 +329,7 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
 
         <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-950">Puppy Handoff Snapshot</h2>
+            <h2 id="care" className="text-lg font-bold text-slate-950">Puppy Handoff Snapshot</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>{formatKey(effectiveStatus)}</Badge>
               <Badge>{completeChecklist} of {checklistItems.length} checklist</Badge>
@@ -337,7 +353,7 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-950">Handoff Controls</h2>
+            <h2 id="actions" className="text-lg font-bold text-slate-950">Handoff Controls</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">Controls appear only when this puppy has a linked reservation. They use existing Core actions only.</p>
             {reservation && canEdit ? (
               <div className="mt-5 grid gap-6 xl:grid-cols-2">
@@ -365,3 +381,5 @@ export default async function PuppyHandoffPage({ params }: { params: Promise<{ p
     </main>
   );
 }
+
+
