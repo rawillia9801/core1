@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { updateGoHomeDetail } from "../../../application-actions";
+import type { ReactNode } from "react";
+import { updateGoHomeDetail } from "../../../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../../../go-home/actions";
 
@@ -198,11 +199,11 @@ function linkedDocuments(summary: ReservationSummaryRow | null, puppyId: string,
   });
 }
 
-function Badge({ children }: { children: React.ReactNode }) {
+function Badge({ children }: { children: ReactNode }) {
   return <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">{children}</span>;
 }
 
-function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
+function InfoItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</dt>
