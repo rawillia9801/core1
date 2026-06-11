@@ -1,50 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-function cleanUrl(value: string) {
-  return value.trim().replace(/\/$/, "");
-}
-
-function isHostedSupabaseUrl(value: string | undefined) {
-  if (!value) return false;
-
-  try {
-    const parsed = new URL(value);
-    const hostname = parsed.hostname.toLowerCase();
-
-    return (
-      parsed.protocol === "https:" &&
-      hostname.endsWith(".supabase.co") &&
-      hostname !== "localhost" &&
-      hostname !== "127.0.0.1" &&
-      hostname !== "0.0.0.0"
-    );
-  } catch {
-    return false;
-  }
-}
-
-function getHostedSupabaseUrl() {
-  const candidates = [
-    process.env.SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-  ];
-
-  const hostedUrl = candidates.find(isHostedSupabaseUrl);
-
-  if (!hostedUrl) {
-    throw new Error("Hosted Supabase URL is not configured. Set SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL to the hosted project URL.");
-  }
-
-  return cleanUrl(hostedUrl);
-}
-
 function getSupabaseAuthConfig() {
-  const supabaseUrl = getHostedSupabaseUrl();
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!anonKey) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured.");
+  if (!supabaseUrl || !anonKey) {
+    throw new Error("Supabase Auth environment variables are not configured.");
   }
 
   return { supabaseUrl, anonKey };
