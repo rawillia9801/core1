@@ -1,38 +1,53 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-function assertHostedSupabaseUrl(rawUrl: string) {
-  let parsed: URL;
+function cleanUrl(value: string) {
+  return value.trim().replace(/\/$/, "");
+}
+
+function isHostedSupabaseUrl(value: string | undefined) {
+  if (!value) return false;
 
   try {
-    parsed = new URL(rawUrl);
+    const parsed = new URL(value);
+    const hostname = parsed.hostname.toLowerCase();
+
+    return (
+      parsed.protocol === "https:" &&
+      hostname.endsWith(".supabase.co") &&
+      hostname !== "localhost" &&
+      hostname !== "127.0.0.1" &&
+      hostname !== "0.0.0.0"
+    );
   } catch {
-    throw new Error("Supabase Auth URL is invalid.");
+    return false;
+  }
+}
+
+function getHostedSupabaseUrl() {
+  const candidates = [
+    process.env.SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+  ];
+
+  const hostedUrl = candidates.find(isHostedSupabaseUrl);
+
+  if (!hostedUrl) {
+    throw new Error("Hosted Supabase URL is not configured. Set SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL to the hosted project URL.");
   }
 
-  const hostname = parsed.hostname.toLowerCase();
-  const isLocalSupabase =
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "0.0.0.0" ||
-    hostname.endsWith(".local");
-
-  if (isLocalSupabase) {
-    throw new Error("Local Supabase is not allowed for this Core environment. Use the hosted Supabase project URL.");
-  }
-
-  return rawUrl.replace(/\/$/, "");
+  return cleanUrl(hostedUrl);
 }
 
 function getSupabaseAuthConfig() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = getHostedSupabaseUrl();
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !anonKey) {
-    throw new Error("Supabase Auth environment variables are not configured.");
+  if (!anonKey) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured.");
   }
 
-  return { supabaseUrl: assertHostedSupabaseUrl(supabaseUrl), anonKey };
+  return { supabaseUrl, anonKey };
 }
 
 export async function createSupabaseServerClient() {
