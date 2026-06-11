@@ -2,9 +2,9 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and initial-build developer reference provided in June 2026.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the public/embedded Southwest Virginia Chihuahua application form, conditional SMTP receipt alerts, payment plan command center, and handoff work landed.
 
-This document should be read before starting work that touches Core architecture, build order, application review, auth, RLS, email preview, route structure, controlled RPCs, or owner/operator workflow.
+Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
 ## Document Overview
 
@@ -13,140 +13,125 @@ This document should be read before starting work that touches Core architecture
 - Local path: `C:\Users\rawil\core1`
 - Stack: Next.js App Router, TypeScript, Supabase/PostgreSQL, Vercel
 - Auth: Supabase Auth mapped to `core_profiles`
-- Current phase: Phase 1 - Internal Foundation, in progress and nearing completion
-- Docs reviewed in source document: 27 repository planning/reference documents from `docs/core/`
-- Alignment status: aligned, with specific urgent notes
+- Current phase: Phase 1 internal foundation with limited public application intake now present
+- Alignment status: aligned, but customer-facing/public-write hardening is now an active concern
 
 ## Alignment Verdict
 
-The project is aligned with the master Core OS vision. The architecture, safety model, build order, and governance philosophy are on the correct track.
+The project remains aligned with the master Core OS vision: Core is the governed source-of-truth operating system, not merely a dashboard, CRM, chatbot, public website, or portal.
 
 Confirmed correct:
 
-- Core-native owner/operator workflow is the correct build lane.
-- Zoho is cancelled and treated as historical reference only.
-- Governed command flow is consistently applied: validate, write, event, audit.
-- No AI writes, no autonomous sends, and no unsafe execution.
-- Internal-first, governed-second, customer-facing-later build order matches the master vision.
-- Email is preview-only with no live SMTP connected.
-- Core Nervous System and CoreFace are deferred to later phases.
+- Core-native owner/operator workflow remains the correct build lane.
+- Zoho is cancelled and historical only.
+- Governed command flow remains required: validate, write, event, audit where schema supports it.
+- No AI writes, no autonomous decisions, and no unsafe execution.
+- Public application intake can exist only as a narrow ingress path, not as a decision-making system.
+- Public website language must not expose Core/admin/staff/internal system terms.
+
+## Updated Implementation Reality
+
+Since the original Chapter 1 review, these additional pieces have landed:
+
+- `/staff/payment-plans` Payment Plan Command Center.
+- `/staff/go-home/handoff` Go-Home Handoff Command.
+- `/staff/reservations/[reservationId]/handoff` Reservation Handoff workspace.
+- `/staff/puppies/[puppyId]/handoff` Puppy Handoff workspace.
+- `/apply` and `/apply/received` public application routes.
+- `/embed/application` and `/embed/application/received` iframe-friendly website application routes.
+- Expanded website application form matching the uploaded PDF sections and terms/declarations.
+- Conditional SMTP owner alert and customer receipt confirmation for application submissions.
+
+These additions do not change the Core authority model. Application submission creates records and acknowledgements only. It must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, or make placement decisions automatically.
 
 ## Urgent And High-Priority Risks
 
-### 1. CORE_BUILD_ORDER.md Conflict Markers
+### 1. RLS Is Still The Biggest Production Risk
 
-Chapter 1 reported unresolved merge conflict markers in `CORE_BUILD_ORDER.md` as the most urgent housekeeping issue. Before building, Codex must check for:
+Row Level Security and public-write boundaries remain the biggest unresolved blocker between safe public intake and broader customer-facing access. The public application submit path currently uses a server-side controlled action and service-role write pattern. That can be acceptable only as a narrow, server-side ingress surface and must not be expanded into customer portal behavior without RLS and policy review.
 
-```text
-<<<<<<<
-=======
->>>>>>>
-```
+### 2. Public Application Submission Needs Validation
 
-If present, resolve into one authoritative build order aligned with the master manual.
+The embedded form now exists. It must be tested end-to-end:
 
-### 2. RLS Is The Biggest Production Risk
+- form renders cleanly in the public website iframe
+- no Core/admin/staff/internal wording appears
+- required fields and acknowledgements work
+- submission creates expected buyer/family/application/sections/event records
+- SMTP owner alert and customer confirmation work only when configured
+- failed SMTP does not hide application write failures or create unmanaged duplicates
 
-Row Level Security is the biggest unresolved blocker between local/dev and production or customer-facing use. The current server-side/service-role pattern is transitional and must not be treated as production-ready customer access.
+### 3. Internal Application Detail Review Must Show New Sections
 
-RLS must be a first-class build task before staging real customer-facing records or portal access.
+The application review surface must clearly display the new public sections:
 
-### 3. Application Detail Page Is The Most Overdue Feature
+- applicant info
+- puppy preferences
+- lifestyle/home
+- payment/agreement
+- terms/declarations/signature metadata
 
-The highest daily-use feature gap is:
+If the current application detail route does not cleanly show those records, application detail review is still the next daily-use hardening task.
 
-```text
-/staff/applications/[applicationId]
-```
+### 4. SMTP Send Logging Is Now Needed
 
-The application list and application creation exist, and approval foundation exists, but the detailed owner review page is the next most important workflow. It must show answers, duplicates, prior conversations/context where available, desired puppy, references, blockers, and review actions.
+SMTP application receipt behavior exists. Before any additional SMTP email types are added, Core needs durable send-attempt logging for owner/customer application receipt emails. This should record success/failure without exposing SMTP secrets.
 
-### 4. Proposed Action Execution Is Undefined
+### 5. Duplicate And Failed Intake Handling Is Needed
 
-The proposed action storage and review-state foundation exists. Approval must remain review-state only until a safe execution engine is designed. Do not make proposed action approval execute business changes without a separate approved design.
+Public application submission introduces repeat-submission and partial-failure risk. Core needs explicit duplicate handling, failed-intake behavior, and retry/dead-letter review rules.
 
-### 5. CURRENT_STATUS.md Must Stay Current
+### 6. Proposed Action Execution Remains Undefined
 
-`CURRENT_STATUS.md` is the central current-truth document. It must be updated after meaningful implementation changes so docs do not drift from repo state.
+The proposed action queue is review-state only. Approval must not execute business changes until a safe execution engine is separately designed.
 
-### 6. Smart Home Hardware Not Yet Purchased
+### 7. Smart Home Hardware Not Yet Purchased
 
-Smart kennel monitoring requires hardware that has not been purchased or installed. Planning can happen in parallel, but software must not pretend sensors/devices exist until they do.
-
-### 7. Hostinger SMTP Variables Should Be Documented Before Connection
-
-Email remains preview-only. Hostinger SMTP should not be connected until preview, approval, staging override, send logging, and test-send rules are implemented. Environment variable names should be documented before connection.
+Smart kennel monitoring remains future work. Software must not pretend sensors or devices exist until hardware exists and owner-approved integration rules are ready.
 
 ## Recommended Immediate Actions
 
-Priority order from Chapter 1:
-
 | Priority | Action | Reason |
 | --- | --- | --- |
-| 1 | Resolve merge conflict in `CORE_BUILD_ORDER.md` if still present. | Build order cannot be trusted if conflict markers exist. |
-| 2 | Build `/staff/applications/[applicationId]` detail page. | Most overdue daily-use workflow gap. |
-| 3 | Begin RLS design and policy tests. | Biggest blocker to production/customer-facing use. |
-| 4 | Add `.env.example` SMTP/email variable names with no secrets. | Prevents future Hostinger SMTP configuration from being forgotten. |
-| 5 | Update `CURRENT_STATUS.md` after every meaningful implementation change. | Central truth must stay current. |
-| 6 | Design proposed-action execution engine before assistant execution. | Required before AI-assisted workflows can safely execute. |
-| 7 | Order smart kennel hardware when ready. | Hardware has lead time. |
-| 8 | Verify unauthorized-role boundaries for current owner/admin-only actions. | Restricted actions need explicit tests. |
+| 1 | Validate `/embed/application` in the public website iframe. | It is now customer-facing. |
+| 2 | Validate submitted application records internally. | Public submission must create the expected Core truth. |
+| 3 | Verify SMTP receipt alerts. | Email is now a conditional live side effect. |
+| 4 | Add SMTP send-attempt logging. | Needed before expanding email. |
+| 5 | Add duplicate/failed intake handling. | Public intake needs safety and cleanup rules. |
+| 6 | Confirm application detail displays expanded sections. | Owner review must be usable. |
+| 7 | Continue RLS/security hardening. | Biggest production/customer-facing risk. |
+| 8 | Keep proposed action execution blocked. | Prevents accidental automated business changes. |
 
 ## Document-By-Document Review Summary
 
-Chapter 1 reviewed 27 docs and marked the overall documentation set aligned, with one urgent fix if still present.
-
-| Document | Status | Notes |
+| Document | Current Status | Notes |
 | --- | --- | --- |
-| `CURRENT_STATUS.md` | Aligned | Central truth document; keep updated. |
-| `CORE_BUILD_ORDER.md` | Fix if needed | Check for merge conflict markers and resolve if present. |
-| `CORE_V1_SCHEMA.md` | Aligned | Canonical schema and financial truth model are sound. |
-| `CORE_PROJECT_REVIEW_AND_COMPLETION_ESTIMATE.md` | Aligned | Timeline and major risks are realistic if kept updated. |
-| `CORE_STAFF_AUTH_PLAN.md` | Aligned | Supabase Auth to `core_profiles` mapping is correct. |
-| `CORE_STAGING_READINESS_CHECKLIST.md` | Aligned | Conservative hard-stop gates are appropriate. |
-| `CORE_APPLICATION_APPROVAL_WORKFLOW.md` | Aligned | Governed write pattern and denial guardrails are correct. |
-| `CORE_APPLICATION_INTAKE_ENDPOINT.md` | Aligned | Core-native intake active; Zoho-shaped function is history. |
-| `CORE_APPLICATION_INTAKE_MAPPING.md` | Aligned | Zoho field names are historical reference only. |
-| `CORE_NATIVE_APPLICATION_ENTRY_PLAN.md` | Aligned | `/staff/applications/new` exists; detail page is next. |
-| `CORE_RESERVATION_WORKFLOW.md` | Aligned | Double-reservation prevention and separated payment workflow are correct. |
-| `CORE_AUDIT_AND_EVENTS.md` | Aligned | Append-only audit model is correct. |
-| `CORE_PROPOSED_ACTION_APPROVAL_MODEL.md` | Aligned | Safety rules are correct; execution engine out of scope. |
-| `CORE_COMMAND_CONSOLE_PLAN.md` | Aligned | Read-only shell; no AI provider connected. |
-| `CORE_EMAIL_TEMPLATE_PREVIEW_PLAN.md` | Aligned | Preview-only foundation; Hostinger SMTP deferred. |
-| `CORE_RLS_ACCESS_MODEL.md` | Aligned / Not implemented | Policy direction correct; implementation still needed. |
-| `CORE_PHONE_LOOKUP.md` | Aligned | Read-only, no live Twilio. |
-| `CORE_FIRST_STAGING_ENVIRONMENT_PLAN.md` | Aligned | Vercel + separate Supabase project is correct. |
-| `CORE_SELECTED_REAL_DATA_STAGING_PLAN.md` | Aligned | Conservative selected-record staging only after gates. |
-| `CORE_SELECTED_REAL_DATA_FIELD_REVIEW_TEMPLATE.md` | Aligned | Field sensitivity review template is useful. |
-| `CORE_MIGRATION_MAP.md` | Aligned | Canonical destinations defined; Zoho excluded. |
-| `CORE_DASHBOARD_READ_ONLY_PLAN.md` | Aligned | Read-only workspaces implemented. |
-| `CORE_GO_HOME_EFFECTIVE_READ_MODEL.md` | Aligned | Cardinality and override logic are sound. |
-| `CORE_STAFF_AUTH_LOCAL_VERIFICATION.md` | Aligned | Local role-switch testing is local/dev only. |
-| `KENNEL_FORMS_CHECKPOINT.md` | Aligned | Kennel create/edit/archive loop verified. |
-| `CORE_DATABASE_SMOKE_TESTS.md` | Aligned | Rollback-safe test pattern is correct. |
-| `IMPLEMENTATION_CHECKLIST.md` | Aligned | Comprehensive tracking; must stay current. |
+| `CURRENT_STATUS.md` | Updated | Central current-state truth after public application and SMTP work. |
+| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, and payment plan work. |
+| `CORE_BUILD_ORDER.md` | Needs refresh when next build plan changes | Build order should now put public form validation, SMTP logging, duplicate handling, and application detail review at top. |
+| `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application and SMTP receipt gates. |
+| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects conditional SMTP and public application intake. |
+| `CHEROLEE_CORE_CHAPTER1_REFERENCE.md` | Updated | This file now reflects the current post-public-application reality. |
+| `CORE_PROJECT_REVIEW_AND_COMPLETION_ESTIMATE.md` | Needs refresh when estimates are next reviewed | Should recognize Phase 4A has begun but remains unverified/hardening. |
+| `CODEX_TASK_RUNBOOK.md` | Needs path correction only if missing docs are referenced | It currently points to this Chapter 1 reference under `docs/core/`. |
 
 ## Chapter 1 Scope
 
-Chapter 1 covers the Phase 1 Internal Foundation. A developer should be able to:
+Chapter 1 still covers the internal foundation, but the project has now crossed into a narrow Phase 4A surface: public application intake. Developers must treat that surface as sensitive because it writes real Core records and may send confirmation email when SMTP env vars are configured.
 
-- Set up local development.
-- Understand repo structure.
-- Apply migrations to a clean local Supabase database.
-- Run the application locally.
-- Sign in as owner/operator.
-- Create a Core-native application.
-- Approve it.
-- Create a reservation.
-- Record a payment.
-- Verify ledger-derived balance reduction.
-- Understand the governed write pattern.
-- Run rollback-safe SQL tests.
-- Understand what is intentionally blocked.
+A developer should now be able to:
+
+- Use the correct repo and branch.
+- Understand the owner/operator internal foundation.
+- Understand public application intake is narrow and non-decision-making.
+- Keep public website language separate from Core/internal language.
+- Preserve event/audit/write patterns where possible.
+- Avoid expanding SMTP beyond application receipt until send logging and approval rules exist.
+- Avoid expanding customer-facing behavior before RLS/security hardening.
 
 ## Development Environment
 
-Required tools:
+Required tools remain:
 
 - Node.js 18.x or 20.x LTS
 - npm 9.x or later
@@ -168,161 +153,83 @@ Never use:
 C:\Users\rawil\OneDrive\Documents\core1
 ```
 
-## Required Environment Variables
+## Environment Variables
 
-Local `.env.local` requires:
+Server/client Supabase values must stay out of Git. SMTP secrets must stay server-side.
 
-```text
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<local-anon-key>
-SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_SERVICE_ROLE_KEY=<local-service-role-key>
-CORE_INTAKE_SECRET=<local-dev-secret>
-EMAIL_PROVIDER=disabled
-EMAIL_SEND_ENABLED=false
-EMAIL_PREVIEW_ONLY=true
-```
-
-Future SMTP variable names, no values:
+Current relevant deployed variables include:
 
 ```text
-SMTP_HOST=
-SMTP_PORT=
-SMTP_USER=
-SMTP_PASSWORD=
-SMTP_FROM_ADDRESS=
-SMTP_REPLY_TO_ADDRESS=
-EMAIL_TEST_RECIPIENT=
-EMAIL_STAGING_OVERRIDE_RECIPIENT=
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_USER
+SMTP_PASS
+SMTP_FROM
+APPLICATION_EMAIL_TO
 ```
 
-## Route Map
+Do not commit real values.
 
-Technical routes under `/staff` remain owner/operator routes for now.
+## Route Map Highlights
 
-| Route | Purpose | Access |
+Public/customer-facing:
+
+| Route | Purpose | Boundary |
 | --- | --- | --- |
-| `/login` | Owner/operator sign-in. | Public non-sensitive. |
-| `/staff` | Main dashboard / daily command center. | Owner/Admin/Staff. |
-| `/staff/applications` | Application list. | Owner/Admin/Staff. |
-| `/staff/applications/new` | Core-native application entry. | Owner/Admin. |
-| `/staff/applications/[id]` | Application detail review. | Next build target; Owner/Admin. |
-| `/staff/buyers` | Read-only buyer workspace. | Owner/Admin/Staff. |
-| `/staff/families` | Read-only family workspace. | Owner/Admin/Staff. |
-| `/staff/dogs` | Dog list/add/edit/archive. | Owner/Admin for writes. |
-| `/staff/litters` | Litter list/add/edit/archive. | Owner/Admin for writes. |
-| `/staff/puppies` | Puppy list/add/edit/archive. | Owner/Admin for writes. |
-| `/staff/reservations` | Reservation workspace. | Owner/Admin/Staff. |
-| `/staff/payments` | Payment workspace. | Owner/Admin/Staff. |
-| `/staff/go-home` | Go-home detail and checklist. | Owner/Admin detail; Staff checklist. |
-| `/staff/documents` | Read-only document metadata. | Owner/Admin. |
-| `/staff/messages` | Read-only communications metadata. | Owner/Admin. |
-| `/staff/notifications` | Email preview queue/templates. | Owner/Admin. |
-| `/staff/phone-lookup` | Phone lookup safety. | Owner/Admin. |
-| `/staff/kennel-logs` | Kennel event/audit history. | Owner/Admin. |
-| `/staff/events` | Events/audit workspace. | Owner/Admin. |
-| `/staff/command` | Read-only Command Console shell. | Owner/Admin. |
-| `/staff/proposed-actions` | Proposal queue, review-state only. | Owner/Admin. |
+| `/apply` | Public puppy application page. | Application submission only. |
+| `/apply/received` | Public received page. | No private data. |
+| `/embed/application` | Iframe-friendly website application form. | No Core/internal wording. |
+| `/embed/application/received` | Iframe-friendly received page. | No private data. |
 
-## Controlled Write RPC Pattern
+Internal owner/operator:
 
-Every important business action must use a controlled PostgreSQL RPC.
+| Route | Purpose |
+| --- | --- |
+| `/staff` | Main owner/operator command dashboard. |
+| `/staff/applications` | Application list and review entry. |
+| `/staff/applications/new` | Private owner/admin application entry. |
+| `/staff/payment-plans` | Payment plan command center. |
+| `/staff/go-home/handoff` | Go-home handoff command. |
+| `/staff/reservations/[reservationId]/handoff` | Reservation handoff detail. |
+| `/staff/puppies/[puppyId]/handoff` | Puppy handoff detail. |
+| `/staff/command` | Read-only Core OS Command Center. |
+| `/staff/proposed-actions` | Proposed action review-state queue. |
 
-Pattern:
+## Controlled Write Rule
 
-```text
-validate input
-lock relevant rows
-check preconditions
-update canonical records
-write core_events
-write core_audit_log
-return structured result
-```
+Every important business action must use a controlled server/RPC path. Public application submission is a narrow server-side ingress path that writes only application-related records. It must not become a general direct table-write pattern for broader public/customer features.
 
-Do not bypass this pattern with direct table writes from server actions.
+## Current Do-Not-Build Without Separate Approval
 
-## Key RPCs
+- public portal
+- portal login/access
+- public puppy publishing from Core
+- payment processor integration
+- payment links
+- refunds/chargebacks through providers
+- document generation
+- signature provider integration
+- SMS/Twilio/Facebook messaging
+- AI write tools
+- proposed-action execution engine
+- smart kennel integrations
+- Home Assistant/cameras/CoreFace
 
-| RPC | What It Does | Key Rule |
-| --- | --- | --- |
-| `core_create_application_manual()` | Creates Core-native application. | No email/reservation/payment. |
-| `core_approve_application()` | Approves application and updates buyer status. | Rejects terminal statuses; event/audit. |
-| `core_create_reservation()` | Creates reservation and marks puppy reserved. | Blocks double-reservation. |
-| `core_record_reservation_payment()` | Records deposit/payment. | Ledger decrease only for payment/deposit. |
-| `core_record_financial_adjustment()` | Records credit/refund/fee/chargeback/adjustment. | Maps balance effect internally. |
-| `core_cancel_reservation()` | Cancels reservation with optional puppy release. | No refund/email; preserves ledger. |
-| `core_queue_notification()` | Queues notification record. | No sending. |
-| `core_update_go_home_detail()` | Creates/updates go-home detail. | Owner/admin. |
-| `core_upsert_go_home_checklist_item()` | Creates/updates checklist item. | Operational staff allowed. |
-| `core_create_dog()` | Creates dog record. | Owner/admin; event/audit. |
-| `core_create_litter()` | Creates litter record. | Owner/admin; event/audit. |
-| `core_create_puppy()` | Creates puppy record. | Owner/admin; event/audit. |
-| `core_update_dog/litter/puppy()` | Updates kennel records. | Owner/admin; archive style. |
-| `core_create_proposed_action()` | Creates proposal record. | Owner/admin; no execution. |
-| `core_approve_proposed_action()` | Approves review state only. | Does not execute business action. |
-| `core_reject_proposed_action()` | Rejects review state. | Review-only. |
+## Final Chapter 1 Direction
 
-## Notification Queue / Email Preview Foundation
-
-Current state:
-
-- Notifications can be queued.
-- Templates exist in draft/preview-only state.
-- No email is sent.
-- No provider is called.
-- Hostinger SMTP is recognized as future configuration, not active delivery.
-
-All nine template keys are draft/preview/send-disabled until later communications preview phase.
-
-## Testing Strategy
-
-Core uses rollback-safe SQL tests. Tests must run inside a transaction and end with `ROLLBACK`.
-
-Test categories:
-
-- schema smoke tests
-- application approval tests
-- reservation workflow tests
-- financial ledger tests
-- notification queue tests
-- go-home tests
-- kennel create/update/archive tests
-- proposed action tests
-- auth/role boundary tests
-
-## What Remains Blocked
-
-Blocked until later phases:
-
-- live email sending
-- Hostinger SMTP connection
-- Twilio live voice/SMS
-- Facebook Messenger webhook/send
-- AI provider connection
-- autonomous writes
-- proposed action execution engine
-- document generation/signature provider
-- live payment processor
-- customer-facing portal access to Core records
-- smart-home/device/camera control
-- Core Nervous System implementation
-- CoreFace/voice/display presence
-
-## Next Build Priorities
-
-Immediate next build priority:
+Core is still aligned. The next work must not drift into more surface area. Validate and harden what now exists:
 
 ```text
-/staff/applications/[applicationId]
+public application intake
+  -> internal review visibility
+  -> SMTP send logging
+  -> duplicate/failed intake handling
+  -> RLS/public-write boundary tests
 ```
 
-Build an application detail/review page with internal review actions, event/audit rows, and no external side effects.
-
-After that:
-
-1. RLS design and tests.
-2. `.env.example` with SMTP variable names only.
-3. Proposed action execution engine design, not implementation.
-4. Hostinger SMTP preview/test-send gate.
-5. Smart kennel hardware planning.
+Only after that should broader customer-facing or communication behavior expand.
