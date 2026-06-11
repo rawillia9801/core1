@@ -60,19 +60,34 @@ function socketLineReader(socket: net.Socket | tls.TLSSocket) {
   let buffer = "";
   const waiters: Array<(line: string) => void> = [];
 
-  socket.on("data", (chunk) => {
-    buffer += chunk.toString("utf8");
-    while (waiters.length > 0 && /\r?\n/.test(buffer)) {
-      const match = buffer.match(/\r?\n/);
-      if (!match || match.index === undefined) break;
-      const line = buffer.slice(0, match.index);
-      buffer = buffer.slice(match.index + match[0].length);
+  function takeLine() {
+    const match = buffer.match(/\r?\n/);
+    if (!match || match.index === undefined) return null;
+    const line = buffer.slice(0, match.index);
+    buffer = buffer.slice(match.index + match[0].length);
+    return line;
+  }
+
+  function flush() {
+    while (waiters.length > 0) {
+      const line = takeLine();
+      if (line === null) break;
       waiters.shift()?.(line);
     }
+  }
+
+  socket.on("data", (chunk) => {
+    buffer += chunk.toString("utf8");
+    flush();
   });
 
   return () =>
     new Promise<string>((resolve) => {
+      const line = takeLine();
+      if (line !== null) {
+        resolve(line);
+        return;
+      }
       waiters.push(resolve);
     });
 }
@@ -116,7 +131,7 @@ function buildMessage(config: SmtpConfig, input: SendMailInput) {
   const from = escapeHeader(config.from);
   const to = escapeHeader(input.to);
   const subject = escapeHeader(input.subject);
-  const replyTo = input.replyTo ? `Reply-To: ${escapeHeader(input.replyTo)}\r\n` : "";
+  const replyTo = input.replyTo ? [`Reply-To: ${escapeHeader(input.replyTo)}`] : [];
   const text = input.text.replace(/\r?\n/g, "\r\n");
   const html = input.html ?? `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap">${escapeHtml(input.text)}</pre>`;
 
@@ -124,7 +139,7 @@ function buildMessage(config: SmtpConfig, input: SendMailInput) {
     `From: ${from}`,
     `To: ${to}`,
     `Subject: ${subject}`,
-    replyTo.trimEnd(),
+    ...replyTo,
     "MIME-Version: 1.0",
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
     "",
@@ -140,9 +155,7 @@ function buildMessage(config: SmtpConfig, input: SendMailInput) {
     html,
     `--${boundary}--`,
     "",
-  ]
-    .filter((line) => line !== "")
-    .join("\r\n");
+  ].join("\r\n");
 }
 
 export async function sendSmtpMail(config: SmtpConfig, input: SendMailInput) {
