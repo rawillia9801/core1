@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,7 @@ function getSupabaseRestConfig() {
 
 async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
-  if (!config) return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+  if (!config) return { rows: [] as T[], warning: "Core read configuration is not available for server-side operational reads." };
   const url = new URL(`${config.restUrl}/${table}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   const response = await fetch(url, {
@@ -169,22 +170,21 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Buyer 360 Command Workspace</p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{buyerName(buyer)}</h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">Internal owner/operator read workspace for contact, family, applications, reservations, ledger-derived readiness, documents, communication metadata, events, and audit context.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/staff/buyers" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Buyers</Link>
-              <Link href={`/staff/buyers/${buyer.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Edit Buyer</Link>
-              <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Assign Buyer to Puppy</Link>
-              <Link href="/staff/reservations" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Create Reservation Context</Link>
-              {familyIds[0] ? <Link href={`/staff/families/${familyIds[0]}`} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Open family</Link> : null}
-            </div>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Buyer 360 Command Workspace"
+          title={buyerName(buyer)}
+          summary="Internal owner/operator workspace for contact, family, applications, reservations, ledger-derived readiness, documents, communication metadata, events, and audit context."
+          status={display(buyer.approval_status, "Unknown")}
+          blockers={attentionFlags.length > 0 ? `${attentionFlags.length} attention flag(s)` : "No deterministic flags"}
+          nextAction="Use related links to edit the buyer, open household context, assign puppy context, or review readiness lanes."
+          links={[
+            { href: "/staff/buyers", label: "Back to Buyers" },
+            { href: `/staff/buyers/${buyer.id}/edit`, label: "Edit Buyer" },
+            { href: "/staff/puppies", label: "Assign Buyer to Puppy" },
+            { href: "/staff/reservations", label: "Reservations" },
+            ...(familyIds[0] ? [{ href: `/staff/families/${familyIds[0]}`, label: "Open Family" }] : []),
+          ]}
+        />
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Internal boundary</p>
@@ -193,15 +193,28 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
 
         {warnings.length ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">{warnings.map((warning) => <p key={warning}>{warning}</p>)}</section> : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <InfoCard label="Status" value={<Badge>{display(buyer.approval_status, "Unknown")}</Badge>} note={display(buyer.source, "Source unknown")} />
-          <InfoCard label="Families" value={familyIds.length} note="Linked household records" />
-          <InfoCard label="Applications" value={applicationsResult.rows.length} note="Buyer-linked records" />
-          <InfoCard label="Reservations" value={reservationsResult.rows.length} note={`${activeReservationCount} active/open`} />
-          <InfoCard label="Balance due" value={formatMoney(balanceDue)} note="Ledger-derived across linked reservations" />
-        </section>
+        <SummaryStrip
+          items={[
+            { label: "Status", value: <Badge>{display(buyer.approval_status, "Unknown")}</Badge>, note: display(buyer.source, "Source unknown") },
+            { label: "Families", value: familyIds.length, note: "Linked household records" },
+            { label: "Applications", value: applicationsResult.rows.length, note: "Buyer-linked records" },
+            { label: "Reservations", value: reservationsResult.rows.length, note: `${activeReservationCount} active/open` },
+            { label: "Balance due", value: formatMoney(balanceDue), note: "Ledger-derived" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <SectionNav
+          items={[
+            { href: "#links", label: "Links" },
+            { href: "#identity", label: "Identity" },
+            { href: "#family", label: "Family", count: membersResult.rows.length },
+            { href: "#applications", label: "Applications", count: applicationsResult.rows.length },
+            { href: "#reservations", label: "Reservations", count: reservationsResult.rows.length },
+            { href: "#attention", label: "Flags", count: attentionFlags.length },
+          ]}
+        />
+
+        <section id="links" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Operational Links</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">Internal navigation for controlled correction and reservation assignment workflows.</p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -216,7 +229,7 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
 
         <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
           <div className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="identity" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Buyer Identity</h2>
               <dl className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <InfoCard label="Email" value={display(buyer.email)} />
@@ -229,7 +242,7 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
               {buyer.notes ? <p className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">{buyer.notes}</p> : null}
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="family" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Family Context</h2>
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 {membersResult.rows.length ? membersResult.rows.map((member) => {
@@ -245,14 +258,14 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
               </div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="applications" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Applications</h2>
               <div className="mt-5">
                 <TimelineList events={applicationsResult.rows.map((app) => ({ id: app.id, title: `${formatKey(app.status)} application`, note: `${formatDate(app.submitted_at)} / reviewed ${formatDate(app.reviewed_at)} / ${display(app.source, "source unknown")}`, href: `/staff/applications/${app.id}` }))} />
               </div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="reservations" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Reservations / Puppies / Go-Home</h2>
               <div className="mt-5">
                 <TimelineList events={reservationsResult.rows.map((reservation) => ({ id: reservation.reservation_id, title: `${reservation.puppy_name || reservation.puppy_collar_color || "Puppy"} / ${formatKey(reservation.reservation_status)}`, note: `Balance ${formatMoney(reservation.balance_due_cents)} / go-home ${formatKey(reservation.go_home_status)} ${formatDateTime(reservation.go_home_planned_at)}`, href: `/staff/reservations/${reservation.reservation_id}` }))} />
@@ -261,7 +274,7 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
           </div>
 
           <aside className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="attention" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Attention Flags</h2>
               <div className="mt-4 space-y-2">{attentionFlags.length ? attentionFlags.map((flag) => <div key={flag} className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">{flag}</div>) : <EmptyState text="No deterministic buyer attention flags from current Core metadata." />}</div>
             </section>

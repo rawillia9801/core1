@@ -2,6 +2,7 @@ import Link from "next/link";
 import { approveApplication, createReservation } from "../../application-actions";
 import { getDashboardData } from "../../dashboard-data";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ function ResultMessage({ outcome }: { outcome: string | undefined }) {
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Application workflow action failed. Check local server logs for details.
+        Application workflow action failed. Review the server action log for details.
       </p>
     );
   }
@@ -93,7 +94,7 @@ function ApprovalResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Application approval failed. Check local approval configuration and try again.
+        Application approval failed. Review approval configuration and try again.
       </p>
     );
   }
@@ -161,7 +162,7 @@ function ReservationResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Reservation creation failed. Check local server logs for details.
+        Reservation creation failed. Review the server action log for details.
       </p>
     );
   }
@@ -182,43 +183,34 @@ export default async function StaffApplicationsPage({
   const dashboard = await getDashboardData(staff);
   const { application, approval, reservation } = await searchParams;
   const isOwnerOrAdmin = staff.role === "owner" || staff.role === "admin";
+  const receivedCount = dashboard.applications.filter((row) =>
+    ["received", "needs_review"].includes(row.status.toLowerCase()),
+  ).length;
+  const approvedCount = dashboard.applications.filter((row) => row.status.toLowerCase() === "approved").length;
+  const reservationReadyCount = dashboard.applications.filter(
+    (row) => row.status.toLowerCase() === "approved" && row.hasReservationContext,
+  ).length;
 
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">
-                Core Applications
-              </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                Application Workspace
-              </h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                Dedicated staff workspace for Core-native applications. Core is the autonomous operator layer; this page is the controlled staff review surface around it.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/staff"
-                className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
-              >
-                Dashboard
-              </Link>
-              {isOwnerOrAdmin ? (
-                <Link
-                  href="/staff/applications/new"
-                  className="inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
-                >
-                  New Core Application
-                </Link>
-              ) : null}
-            </div>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Core Applications"
+          title="Application Workspace"
+          summary="Dedicated owner/operator review surface for submitted applications, buyer/family matching, reservation readiness, and preview-only communication context."
+          status={`${dashboard.applications.length} applications`}
+          blockers={receivedCount > 0 ? `${receivedCount} awaiting review` : "No review blockers"}
+          nextAction={reservationReadyCount > 0 ? `${reservationReadyCount} approved ready for reservation setup` : "Open the next submitted application"}
+          links={[
+            { href: "/staff", label: "Dashboard" },
+            ...(isOwnerOrAdmin ? [{ href: "/staff/applications/new", label: "New Core Application" }] : []),
+            { href: "/staff/buyers", label: "Buyers" },
+            { href: "/staff/families", label: "Families" },
+            { href: "/staff/reservations", label: "Reservations" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
+        <section id="boundary" className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
             Safety boundary
           </p>
@@ -231,33 +223,26 @@ export default async function StaffApplicationsPage({
         <ApprovalResult outcome={approval} />
         <ReservationResult outcome={reservation} />
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Applications</p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">{dashboard.applications.length}</p>
-            <p className="mt-2 text-sm text-slate-500">Current local Core rows</p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Available puppies</p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">{dashboard.availablePuppies.length}</p>
-            <p className="mt-2 text-sm text-slate-500">Selectable for reservation</p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Sections</p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">{dashboard.applicationSections.length}</p>
-            <p className="mt-2 text-sm text-slate-500">Latest application response groups</p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Notifications</p>
-            <Link href="/staff/notifications" className="mt-3 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
-              Preview queue
-            </Link>
-            <p className="mt-2 text-sm text-slate-500">Preview-only communication lane</p>
-          </div>
-        </section>
+        <SummaryStrip
+          items={[
+            { label: "Applications", value: dashboard.applications.length, note: "Core review rows" },
+            { label: "Awaiting review", value: receivedCount, note: "Received or needs review" },
+            { label: "Approved", value: approvedCount, note: "Internal status only" },
+            { label: "Available puppies", value: dashboard.availablePuppies.length, note: "Selectable for reservation" },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { href: "#boundary", label: "Boundary" },
+            { href: "#applications", label: "Applications", count: dashboard.applications.length },
+            { href: "#latest-detail", label: "Latest Detail", count: dashboard.applicationSections.length },
+            { href: "/staff/notifications", label: "Preview Queue" },
+          ]}
+        />
 
         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div id="applications" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-slate-950">Applications</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -382,13 +367,13 @@ export default async function StaffApplicationsPage({
                   );
                 })
               ) : (
-                <EmptyList text="No application rows found in local Supabase." />
+                <EmptyList text="No application rows found in Core yet." />
               )}
             </div>
           </div>
 
           <div className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="latest-detail" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-slate-950">Latest Application Detail</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -422,7 +407,7 @@ export default async function StaffApplicationsPage({
                     </article>
                   ))
                 ) : (
-                  <EmptyList text="No application section responses found for the latest local application." />
+                  <EmptyList text="No application section responses found for the latest application." />
                 )}
               </div>
             </section>
@@ -432,4 +417,5 @@ export default async function StaffApplicationsPage({
     </main>
   );
 }
+
 

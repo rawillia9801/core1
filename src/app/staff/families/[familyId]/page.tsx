@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ function getSupabaseRestConfig() {
 
 async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
-  if (!config) return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+  if (!config) return { rows: [] as T[], warning: "Core read configuration is not available for server-side operational reads." };
   const url = new URL(`${config.restUrl}/${table}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   const response = await fetch(url, { headers: { apikey: config.serviceRoleKey, authorization: `Bearer ${config.serviceRoleKey}` }, cache: "no-store" });
@@ -149,22 +150,21 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Family 360 Command Workspace</p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{familyName(family, membersResult.rows, buyersById)}</h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">Internal household command view for members, buyers, applications, reservations, go-home/payment readiness, documents, communications, events, and audit context.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/staff/families" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Families</Link>
-              <Link href={`/staff/families/${family.id}/edit`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Edit Family</Link>
-              <Link href="/staff/buyers" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Link Existing Buyer</Link>
-              <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Assign Puppy</Link>
-              {primaryBuyer ? <Link href={`/staff/buyers/${primaryBuyer.id}`} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Open buyer</Link> : null}
-            </div>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Family 360 Command Workspace"
+          title={familyName(family, membersResult.rows, buyersById)}
+          summary="Internal household command view for members, buyers, applications, reservations, go-home/payment readiness, documents, communications, events, and audit context."
+          status={display(family.status, "Unknown")}
+          blockers={attentionFlags.length > 0 ? `${attentionFlags.length} attention flag(s)` : "No deterministic flags"}
+          nextAction="Use related links to edit the household, open buyer context, assign puppy context, or review readiness lanes."
+          links={[
+            { href: "/staff/families", label: "Back to Families" },
+            { href: `/staff/families/${family.id}/edit`, label: "Edit Family" },
+            { href: "/staff/buyers", label: "Buyers" },
+            { href: "/staff/puppies", label: "Assign Puppy" },
+            ...(primaryBuyer ? [{ href: `/staff/buyers/${primaryBuyer.id}`, label: "Open Buyer" }] : []),
+          ]}
+        />
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Internal boundary</p>
@@ -173,15 +173,27 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
 
         {warnings.length ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">{warnings.map((warning) => <p key={warning}>{warning}</p>)}</section> : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <InfoCard label="Status" value={<Badge>{display(family.status, "Unknown")}</Badge>} />
-          <InfoCard label="Members" value={membersResult.rows.length} note="Linked buyer/profile rows" />
-          <InfoCard label="Applications" value={applicationsResult.rows.length} note="Family-linked records" />
-          <InfoCard label="Reservations" value={reservationsResult.rows.length} note={`${activeReservationCount} active/open`} />
-          <InfoCard label="Balance due" value={formatMoney(balanceDue)} note="Ledger-derived across linked reservations" />
-        </section>
+        <SummaryStrip
+          items={[
+            { label: "Status", value: <Badge>{display(family.status, "Unknown")}</Badge> },
+            { label: "Members", value: membersResult.rows.length, note: "Linked buyer/profile rows" },
+            { label: "Applications", value: applicationsResult.rows.length, note: "Family-linked records" },
+            { label: "Reservations", value: reservationsResult.rows.length, note: `${activeReservationCount} active/open` },
+            { label: "Balance due", value: formatMoney(balanceDue), note: "Ledger-derived" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <SectionNav
+          items={[
+            { href: "#links", label: "Links" },
+            { href: "#household", label: "Household", count: membersResult.rows.length },
+            { href: "#applications", label: "Applications", count: applicationsResult.rows.length },
+            { href: "#reservations", label: "Reservations", count: reservationsResult.rows.length },
+            { href: "#attention", label: "Flags", count: attentionFlags.length },
+          ]}
+        />
+
+        <section id="links" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Operational Links</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">Internal navigation for controlled household correction and buyer/puppy relationship workflows.</p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -197,7 +209,7 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
 
         <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
           <div className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="household" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Household / Member Context</h2>
               <dl className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <InfoCard label="Family ID" value={shortId(family.id)} />
@@ -219,19 +231,19 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
               </div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="applications" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Applications</h2>
               <div className="mt-5"><RowList rows={applicationsResult.rows.map((app) => ({ id: app.id, title: `${formatKey(app.status)} application`, note: `${formatDate(app.submitted_at)} / reviewed ${formatDate(app.reviewed_at)} / ${display(app.source, "source unknown")}`, href: `/staff/applications/${app.id}` }))} /></div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="reservations" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Reservations / Puppies / Go-Home</h2>
               <div className="mt-5"><RowList rows={reservationsResult.rows.map((reservation) => ({ id: reservation.reservation_id, title: `${reservation.puppy_name || reservation.puppy_collar_color || "Puppy"} / ${formatKey(reservation.reservation_status)}`, note: `${display(reservation.buyer_name)} / balance ${formatMoney(reservation.balance_due_cents)} / go-home ${formatKey(reservation.go_home_status)} ${formatDateTime(reservation.go_home_planned_at)}`, href: `/staff/reservations/${reservation.reservation_id}` }))} /></div>
             </section>
           </div>
 
           <aside className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="attention" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Attention Flags</h2>
               <div className="mt-4 space-y-2">{attentionFlags.length ? attentionFlags.map((flag) => <div key={flag} className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">{flag}</div>) : <EmptyState text="No deterministic family attention flags from current Core metadata." />}</div>
             </section>

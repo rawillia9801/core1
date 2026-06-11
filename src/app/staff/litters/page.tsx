@@ -96,7 +96,7 @@ async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
 
   if (!config) {
-    return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+    return { rows: [] as T[], warning: "Core read configuration is not available for server-side operational reads." };
   }
 
   const response = await fetch(buildUrl(config.restUrl, table, params), {
@@ -417,7 +417,7 @@ function ResultMessage({ searchParams }: { searchParams: { litter?: string; weig
   }
 
   if (searchParams.error === "failed") {
-    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">The neonatal log action failed. Check local server logs for details.</section>;
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">The neonatal log action failed. Review the server action log for details.</section>;
   }
 
   return null;
@@ -991,10 +991,11 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
                 );
               })}
             </div>
-          ) : <EmptyState text="No real litter records found in local Core yet." />}
+          ) : <EmptyState text="No litter records found in Core yet." />}
         </section>
       </div>
     </main>
   );
 }
+
 

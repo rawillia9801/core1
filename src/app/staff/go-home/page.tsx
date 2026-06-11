@@ -184,7 +184,7 @@ function buildUrl(restUrl: string, table: string, params: Record<string, string>
 async function readRows<T>(table: string, params: Record<string, string>): Promise<ReadResult<T>> {
   const config = getSupabaseRestConfig();
   if (!config) {
-    return { rows: [], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+    return { rows: [], warning: "Core read configuration is not available for server-side operational reads." };
   }
 
   const response = await fetch(buildUrl(config.restUrl, table, params), {
@@ -289,7 +289,7 @@ function ResultMessage({ type, outcome }: { type: "goHome" | "checklist"; outcom
   if (outcome === "invalid_datetime") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Enter a valid go-home date/time or leave it blank.</p>;
   if (outcome === "invalid_input") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Check the selected reservation, status, checklist item, and note lengths.</p>;
   if (outcome === "not_found" || outcome === "not_eligible") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">The selected reservation cannot receive that update.</p>;
-  return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">The action failed. Check local server logs for details.</p>;
+  return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">The action failed. Review the server action log for details.</p>;
 }
 
 function isActiveReservation(summary: ReservationSummaryRow) {
@@ -763,5 +763,6 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
     </main>
   );
 }
+
 
 

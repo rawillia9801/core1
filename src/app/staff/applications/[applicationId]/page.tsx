@@ -6,6 +6,7 @@ import {
   declineApplicationFromDetail,
   markApplicationNeedsInfoFromDetail,
 } from "./actions";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -129,7 +130,7 @@ async function readRows<T>(table: string, params: Record<string, string>) {
     return {
       rows: [] as T[],
       warning:
-        "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads.",
+        "Core read configuration is not available for server-side operational reads.",
     };
   }
 
@@ -466,6 +467,20 @@ export default async function ApplicationDetailPage({
   const normalizedStatus = status.toLowerCase();
   const canApprove = ["received", "needs_review"].includes(normalizedStatus);
   const canReview = !TERMINAL_STATUSES.has(normalizedStatus);
+  const blockers = [
+    !application.buyer_id ? "No buyer record linked." : null,
+    !application.family_id ? "No family record linked." : null,
+    sectionResult.rows.length === 0 ? "No submitted answer sections found." : null,
+    normalizedStatus === "needs_info" ? "Applicant information is marked incomplete." : null,
+    normalizedStatus === "approved" && reservationResult.rows.length === 0
+      ? "Approved application has no linked reservation yet."
+      : null,
+  ].filter((blocker): blocker is string => Boolean(blocker));
+  const nextAction = canApprove
+    ? "Review answers and approve, mark needs-info, or decline internally"
+    : normalizedStatus === "approved" && reservationResult.rows.length === 0
+      ? "Create reservation context from the application workspace"
+      : "Review linked buyer, family, reservation, event, and audit context";
   const resultMessage = ResultMessage({
     approved: query.approved,
     declined: query.declined,
@@ -486,37 +501,21 @@ export default async function ApplicationDetailPage({
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">
-                Application Review
-              </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                {buyerName(buyer)}
-              </h1>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Badge tone={statusTone(status)}>{formatKey(status)}</Badge>
-                <Badge>{application.source || "Source not recorded"}</Badge>
-                <Badge>{application.external_reference || shortId(application.id)}</Badge>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/staff/applications"
-                className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
-              >
-                Applications
-              </Link>
-              <Link
-                href="/staff"
-                className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Application Review"
+          title={buyerName(buyer)}
+          summary="Internal owner/operator command view for applicant identity, submitted answers, review status, linked buyer/family/reservation context, and safely linkable event/audit rows."
+          status={formatKey(status)}
+          blockers={blockers.length > 0 ? `${blockers.length} blocker(s)` : "No deterministic blockers"}
+          nextAction={nextAction}
+          links={[
+            { href: "/staff/applications", label: "Applications" },
+            ...(application.buyer_id ? [{ href: `/staff/buyers/${application.buyer_id}`, label: "Buyer 360" }] : []),
+            ...(application.family_id ? [{ href: `/staff/families/${application.family_id}`, label: "Family 360" }] : []),
+            { href: "/staff/reservations", label: "Reservations" },
+            { href: "/staff/command", label: "Command" },
+          ]}
+        />
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
@@ -539,16 +538,42 @@ export default async function ApplicationDetailPage({
           </section>
         ) : null}
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <InfoItem label="Status" value={formatKey(status)} />
-          <InfoItem label="Submitted" value={formatDateTime(application.submitted_at ?? application.created_at)} />
-          <InfoItem label="Reviewed" value={formatDateTime(application.reviewed_at)} />
-          <InfoItem label="Reviewer" value={reviewer?.display_name || reviewer?.email || "Not recorded"} />
-        </section>
+        <SummaryStrip
+          items={[
+            { label: "Status", value: <Badge tone={statusTone(status)}>{formatKey(status)}</Badge>, note: application.source || "Source not recorded" },
+            { label: "Submitted", value: formatDateTime(application.submitted_at ?? application.created_at), note: application.external_reference || shortId(application.id) },
+            { label: "Reviewed", value: formatDateTime(application.reviewed_at), note: reviewer?.display_name || reviewer?.email || "Reviewer not recorded" },
+            { label: "Blockers", value: blockers.length, note: reservationResult.rows.length ? `${reservationResult.rows.length} reservation link(s)` : "No reservation link" },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { href: "#applicant", label: "Applicant" },
+            { href: "#review", label: "Review" },
+            { href: "#answers", label: "Answers", count: sectionResult.rows.length },
+            { href: "#reservations", label: "Reservations", count: reservationResult.rows.length },
+            { href: "#events", label: "Events", count: eventResult.rows.length },
+            { href: "#audit", label: "Audit", count: auditResult.rows.length },
+          ]}
+        />
+
+        {blockers.length > 0 ? (
+          <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950 shadow-sm">
+            <p className="font-bold uppercase tracking-[0.18em] text-amber-700">Blockers / Attention</p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {blockers.map((blocker) => (
+                <li key={blocker} className="rounded-2xl border border-amber-200 bg-white/70 px-4 py-3 font-semibold">
+                  {blocker}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="applicant" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold tracking-tight">Applicant Contact</h2>
               <dl className="mt-5 grid gap-4 sm:grid-cols-2">
                 <InfoItem label="Email" value={buyer?.email || buyer?.email_normalized || "Not recorded"} />
@@ -558,6 +583,18 @@ export default async function ApplicationDetailPage({
                 <InfoItem label="Buyer ID" value={shortId(application.buyer_id)} />
                 <InfoItem label="Family ID" value={shortId(application.family_id)} />
               </dl>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {application.buyer_id ? (
+                  <Link href={`/staff/buyers/${application.buyer_id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+                    Open Buyer 360
+                  </Link>
+                ) : null}
+                {application.family_id ? (
+                  <Link href={`/staff/families/${application.family_id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+                    Open Family 360
+                  </Link>
+                ) : null}
+              </div>
               <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Family context
@@ -571,7 +608,7 @@ export default async function ApplicationDetailPage({
               </div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="review" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold tracking-tight">Review Workflow</h2>
               <dl className="mt-5 grid gap-4">
                 <InfoItem label="Current Decision / Status" value={formatKey(status)} />
@@ -622,7 +659,7 @@ export default async function ApplicationDetailPage({
           </div>
 
           <div className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="answers" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold tracking-tight">Application Answers</h2>
               <div className="mt-5 space-y-4">
                 {sectionResult.rows.length > 0 ? (
@@ -680,7 +717,7 @@ export default async function ApplicationDetailPage({
               </div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="reservations" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold tracking-tight">Linked Reservations</h2>
               <div className="mt-5 space-y-3">
                 {reservationResult.rows.length > 0 ? (
@@ -698,6 +735,9 @@ export default async function ApplicationDetailPage({
                         <InfoItem label="Contract Total" value={formatCurrency(reservation.contract_total_cents)} />
                         <InfoItem label="Balance Due" value={formatCurrency(reservation.balance_due_cents)} />
                       </dl>
+                      <Link href={`/staff/reservations/${reservation.reservation_id}`} className="mt-4 inline-flex rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+                        Open reservation
+                      </Link>
                     </article>
                   ))
                 ) : (
@@ -711,7 +751,7 @@ export default async function ApplicationDetailPage({
         </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section id="events" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold tracking-tight">Event History</h2>
             <div className="mt-5 space-y-3">
               {eventResult.rows.length > 0 ? (
@@ -739,7 +779,7 @@ export default async function ApplicationDetailPage({
             </div>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section id="audit" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold tracking-tight">Audit History</h2>
             <div className="mt-5 space-y-3">
               {auditResult.rows.length > 0 ? (

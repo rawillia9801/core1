@@ -183,7 +183,7 @@ export default async function CoreDashboard({
               {dashboard.dataSourceLabel}
             </p>
             <p className="mt-2 text-sm leading-6">
-              This overview reads local Core data server-side. The detailed staff workspaces now live in dedicated pages so the top navigation is the single workspace navigation.
+              This overview reads Core operational data server-side. Detailed owner/operator workspaces now live in dedicated pages so the left navigation remains the single workspace navigation.
             </p>
           </div>
         )}
@@ -345,7 +345,7 @@ export default async function CoreDashboard({
                   </div>
                 ))
               ) : (
-                <EmptyList text="No application rows found in local Supabase." />
+                <EmptyList text="No application rows found in Core yet." />
               )}
             </div>
           </SectionCard>
@@ -376,7 +376,7 @@ export default async function CoreDashboard({
                   </div>
                 ))
               ) : (
-                <EmptyList text="No reservation rows found in local Supabase." />
+                <EmptyList text="No reservation rows found in Core yet." />
               )}
             </div>
           </SectionCard>
@@ -454,7 +454,7 @@ export default async function CoreDashboard({
                 ))}
               </div>
             ) : (
-              <EmptyList text="No event rows found in local Supabase." />
+              <EmptyList text="No event rows found in Core yet." />
             )}
           </SectionCard>
 
@@ -475,3 +475,4 @@ export default async function CoreDashboard({
     </main>
   );
 }
+

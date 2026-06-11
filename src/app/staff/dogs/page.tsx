@@ -30,7 +30,7 @@ async function readDogs() {
   const config = getSupabaseRestConfig();
 
   if (!config) {
-    return { rows: [] as DogRow[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+    return { rows: [] as DogRow[], warning: "Core read configuration is not available for server-side operational reads." };
   }
 
   const url = new URL(`${config.restUrl}/core_dogs`);

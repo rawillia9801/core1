@@ -145,6 +145,9 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/families/new` and `/staff/families/[familyId]/edit` exist.
 - [x] Buyer/family linking uses controlled membership RPC with event/audit rows.
 - [x] Buyer/Family 360 remains internal visibility only.
+- [x] Buyer/family/application workspaces were completed with command headers, compact summaries, segmented section navigation, blocker/attention panels, next-action guidance, and cross-links to related applications, buyers, families, reservations, puppies, payments, documents, go-home, events, and Command.
+- [x] Application detail shows submitted application sections and linked applicant/contact/family/reservation/event/audit context clearly without auto-approval, customer messaging, payment processing, document generation, puppy publishing, portal behavior, or external-provider calls.
+- [x] Visible operator/customer-facing source wording no longer refers to local Supabase, local Core data, local database, local server, or development database.
 
 ### Document / Message / Notification Readiness
 

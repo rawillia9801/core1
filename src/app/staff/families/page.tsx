@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ function buildUrl(restUrl: string, table: string, params: Record<string, string>
 
 async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
-  if (!config) return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+  if (!config) return { rows: [] as T[], warning: "Core read configuration is not available for server-side operational reads." };
 
   const response = await fetch(buildUrl(config.restUrl, table, params), {
     headers: { apikey: config.serviceRoleKey, authorization: `Bearer ${config.serviceRoleKey}` },
@@ -175,22 +176,25 @@ export default async function StaffFamiliesPage() {
   const withReservationsCount = families.filter((family) => reservationsByFamily.has(family.id)).length;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Families</p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Families Workspace</h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                Real Core household records with buyer members, application context, reservations, puppy context, and portal access markers. Manual edits are internal only and do not invite portal users, send messages, create documents, or touch outside systems.
-              </p>
-            </div>
-            <Link href="/staff/families/new" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Create Family</Link>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Core Families"
+          title="Families Workspace"
+          summary="Internal owner/operator workspace for household records, buyer members, application context, reservation links, puppy context, and portal access markers."
+          status={`${families.length} families`}
+          blockers={families.length - withMembersCount > 0 ? `${families.length - withMembersCount} missing members` : "No member-link blocker"}
+          nextAction="Open a family 360, edit household details, or review linked buyer/application/reservation context"
+          links={[
+            { href: "/staff/families/new", label: "Create Family" },
+            { href: "/staff/buyers", label: "Buyers" },
+            { href: "/staff/applications", label: "Applications" },
+            { href: "/staff/reservations", label: "Reservations" },
+            { href: "/staff/command", label: "Command" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
+        <section id="boundary" className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Read-first safety boundary</p>
           <p className="mt-2 text-sm leading-6">Families are household groups. They help connect buyers, applications, reservations, and future portal access, but they are not the financial source of truth.</p>
         </section>
@@ -201,14 +205,26 @@ export default async function StaffFamiliesPage() {
           </section>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Families</p><p className="mt-3 text-3xl font-bold">{families.length}</p><p className="mt-2 text-sm text-slate-500">Core family records</p></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Active</p><p className="mt-3 text-3xl font-bold">{activeCount}</p><p className="mt-2 text-sm text-slate-500">Marked active</p></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">With members</p><p className="mt-3 text-3xl font-bold">{withMembersCount}</p><p className="mt-2 text-sm text-slate-500">Buyer/profile links</p></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">With reservations</p><p className="mt-3 text-3xl font-bold">{withReservationsCount}</p><p className="mt-2 text-sm text-slate-500">Linked transaction context</p></div>
-        </section>
+        <SummaryStrip
+          items={[
+            { label: "Families", value: families.length, note: "Core family records" },
+            { label: "Active", value: activeCount, note: "Marked active" },
+            { label: "With members", value: withMembersCount, note: "Buyer/profile links" },
+            { label: "With reservations", value: withReservationsCount, note: "Linked transaction context" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <SectionNav
+          items={[
+            { href: "#boundary", label: "Boundary" },
+            { href: "#family-records", label: "Family Records", count: families.length },
+            { href: "/staff/buyers", label: "Buyers" },
+            { href: "/staff/applications", label: "Applications" },
+            { href: "/staff/reservations", label: "Reservations" },
+          ]}
+        />
+
+        <section id="family-records" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5"><h2 className="text-lg font-semibold">Family Records</h2><p className="mt-1 text-sm leading-6 text-slate-500">Current Core family rows with member/application/reservation context when present.</p></div>
           {families.length > 0 ? (
             <div className="grid gap-4 xl:grid-cols-2">
@@ -263,7 +279,7 @@ export default async function StaffFamiliesPage() {
                 );
               })}
             </div>
-          ) : <EmptyState text="No real family records found in local Core yet." />}
+          ) : <EmptyState text="No family records found in Core yet." />}
         </section>
       </div>
     </main>

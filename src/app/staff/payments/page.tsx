@@ -179,7 +179,7 @@ async function readRows<T>(
     return {
       rows: [],
       warning:
-        "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads.",
+        "Core read configuration is not available for server-side operational reads.",
     };
   }
 
@@ -387,7 +387,7 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Deposit/payment recording failed. Check local server logs for details.
+        Deposit/payment recording failed. Review the server action log for details.
       </p>
     );
   }
@@ -1250,6 +1250,7 @@ export default async function StaffPaymentsPage({
     </main>
   );
 }
+
 
 
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
 
   if (!config) {
-    return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+    return { rows: [] as T[], warning: "Core read configuration is not available for server-side operational reads." };
   }
 
   const response = await fetch(buildUrl(config.restUrl, table, params), {
@@ -166,22 +167,25 @@ export default async function StaffBuyersPage() {
   const withReservationsCount = buyers.filter((buyer) => reservationsByBuyer.has(buyer.id)).length;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">Core Buyers</p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Buyers Workspace</h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                Real Core buyer/contact records with family membership, application, reservation, puppy, and balance context. Manual edits are internal only and do not send messages, documents, payments, portal invites, or external actions.
-              </p>
-            </div>
-            <Link href="/staff/buyers/new" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Create Buyer</Link>
-          </div>
-        </section>
+        <OperatorHeader
+          eyebrow="Core Buyers"
+          title="Buyers Workspace"
+          summary="Internal owner/operator workspace for customer contact records, family membership, application context, reservation links, puppy assignment visibility, and ledger-derived balance signals."
+          status={`${buyers.length} buyers`}
+          blockers={pendingCount > 0 ? `${pendingCount} pending` : "No pending buyer marker"}
+          nextAction="Open a buyer 360, edit contact details, or review linked family/reservation context"
+          links={[
+            { href: "/staff/buyers/new", label: "Create Buyer" },
+            { href: "/staff/families", label: "Families" },
+            { href: "/staff/applications", label: "Applications" },
+            { href: "/staff/reservations", label: "Reservations" },
+            { href: "/staff/command", label: "Command" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
+        <section id="boundary" className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Read-first safety boundary</p>
           <p className="mt-2 text-sm leading-6">Buyers are people/contact records. Financial truth remains on reservations and ledger rows, never copied onto buyer records.</p>
         </section>
@@ -192,14 +196,26 @@ export default async function StaffBuyersPage() {
           </section>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Buyers</p><p className="mt-3 text-3xl font-bold">{buyers.length}</p><p className="mt-2 text-sm text-slate-500">Core buyer records</p></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Approved</p><p className="mt-3 text-3xl font-bold">{approvedCount}</p><p className="mt-2 text-sm text-slate-500">Approval marker only</p></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Pending</p><p className="mt-3 text-3xl font-bold">{pendingCount}</p><p className="mt-2 text-sm text-slate-500">Awaiting decision/follow-up</p></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">With reservations</p><p className="mt-3 text-3xl font-bold">{withReservationsCount}</p><p className="mt-2 text-sm text-slate-500">Linked transaction context</p></div>
-        </section>
+        <SummaryStrip
+          items={[
+            { label: "Buyers", value: buyers.length, note: "Core buyer records" },
+            { label: "Approved", value: approvedCount, note: "Approval marker only" },
+            { label: "Pending", value: pendingCount, note: "Awaiting decision/follow-up" },
+            { label: "With reservations", value: withReservationsCount, note: "Linked transaction context" },
+          ]}
+        />
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <SectionNav
+          items={[
+            { href: "#boundary", label: "Boundary" },
+            { href: "#buyer-records", label: "Buyer Records", count: buyers.length },
+            { href: "/staff/families", label: "Families" },
+            { href: "/staff/applications", label: "Applications" },
+            { href: "/staff/reservations", label: "Reservations" },
+          ]}
+        />
+
+        <section id="buyer-records" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5"><h2 className="text-lg font-semibold">Buyer Records</h2><p className="mt-1 text-sm leading-6 text-slate-500">Current Core buyer rows with linked family/application/reservation context when present.</p></div>
           {buyers.length > 0 ? (
             <div className="grid gap-4 xl:grid-cols-2">
@@ -244,7 +260,7 @@ export default async function StaffBuyersPage() {
                 );
               })}
             </div>
-          ) : <EmptyState text="No real buyer records found in local Core yet." />}
+          ) : <EmptyState text="No buyer records found in Core yet." />}
         </section>
       </div>
     </main>

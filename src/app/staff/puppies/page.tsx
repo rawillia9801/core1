@@ -54,7 +54,7 @@ async function readRows<T>(table: string, params: Record<string, string>) {
   const config = getSupabaseRestConfig();
 
   if (!config) {
-    return { rows: [] as T[], warning: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads." };
+    return { rows: [] as T[], warning: "Core read configuration is not available for server-side operational reads." };
   }
 
   const response = await fetch(buildUrl(config.restUrl, table, params), {
@@ -200,7 +200,7 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
                 );
               })}
             </div>
-          ) : <EmptyState text="No puppy records found in local Core yet." />}
+          ) : <EmptyState text="No puppy records found in Core yet." />}
         </section>
       </div>
     </main>

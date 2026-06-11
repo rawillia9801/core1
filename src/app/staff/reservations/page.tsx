@@ -49,7 +49,7 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Deposit/payment recording failed. Check local server logs for details.
+        Deposit/payment recording failed. Review the server action log for details.
       </p>
     );
   }
@@ -77,7 +77,7 @@ function CancellationResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Reservation cancellation failed. Check local server logs for details.
+        Reservation cancellation failed. Review the server action log for details.
       </p>
     );
   }
@@ -141,7 +141,7 @@ export default async function StaffReservationsPage({
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Reservations</p>
             <p className="mt-3 text-3xl font-bold text-slate-950">{dashboard.reservations.length}</p>
-            <p className="mt-2 text-sm text-slate-500">Current local Core rows</p>
+            <p className="mt-2 text-sm text-slate-500">Core reservation rows</p>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Go-homes</p>
@@ -249,7 +249,7 @@ export default async function StaffReservationsPage({
                 );
               })
             ) : (
-              <EmptyList text="No reservation rows found in local Supabase." />
+              <EmptyList text="No reservation rows found in Core yet." />
             )}
           </div>
         </section>
@@ -257,3 +257,4 @@ export default async function StaffReservationsPage({
     </main>
   );
 }
+

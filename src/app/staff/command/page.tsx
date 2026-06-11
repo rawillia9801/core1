@@ -214,7 +214,7 @@ async function readRows<T>(table: string, params: Record<string, string>) {
     return {
       rows: [] as T[],
       warning:
-        "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for local Core reads.",
+        "Core read configuration is not available for server-side operational reads.",
     };
   }
 

@@ -746,7 +746,7 @@ function fallbackDashboardData(dataWarning: string | null = null): DashboardData
     dataSourceLabel: "Not connected",
     dataWarning:
       dataWarning ??
-      "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Add them to .env.local for local server-side reads.",
+      "Core read configuration is not available for server-side operational reads.",
   };
 }
 
@@ -1517,7 +1517,7 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
           : "border-emerald-200 bg-emerald-50 text-emerald-800",
       })),
       kennelNotes: [
-        "Dashboard now reads local Supabase data server-side.",
+        "Dashboard reads Core operational data server-side.",
         "No browser-side Supabase client is enabled.",
         "No dashboard write actions are enabled.",
         "Live Zoho, Twilio, payments, documents, and customer portal remain off.",
@@ -1570,3 +1570,4 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
     return fallbackDashboardData(message);
   }
 }
+

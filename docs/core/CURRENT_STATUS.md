@@ -128,6 +128,16 @@ Implemented and pushed:
 - Updated surfaces include the Command Center, payments, payment plans, go-home readiness, go-home handoff, reservation readiness, reservation handoff, puppy handoff, and other long internal review/readiness pages through the shared operator workspace styling.
 - This was a UI organization pass only. It did not change auth, environment configuration, Supabase config, local storage, migrations, SMTP behavior, public application behavior, payment processor behavior, Twilio/SMS/Facebook, AI, portal accounts, server actions, or external integrations.
 
+### Buyer / Family / Application Workspace Completion
+
+Implemented and pushed:
+
+- `/staff/applications`, `/staff/applications/[applicationId]`, `/staff/buyers`, `/staff/buyers/[buyerId]`, `/staff/families`, and `/staff/families/[familyId]` were completed as easier-to-scan internal owner/operator workspaces.
+- Application detail now surfaces applicant identity/contact/address, family and buyer links, submitted answer sections, review status, blockers, next action guidance, reservation links, event context, and audit context without changing review action boundaries.
+- Buyer and family workspaces now use command headers, compact summary strips, segmented navigation, attention flags, and stronger links across applications, buyers, families, reservations, payments, documents, go-home, events, and Command.
+- Visible operator/customer-facing source wording no longer refers to local Supabase/local Core data/local database/local server/development database.
+- This was a UI/readability and wording pass only. It did not change auth, database schema, migrations, environment files, Supabase config, local storage, SMTP behavior, public application behavior, payment processor behavior, Twilio/SMS/Facebook, AI, customer pages, server actions, or external integrations.
+
 ## Current Operational Workflow
 
 Current implemented workflow now includes:
