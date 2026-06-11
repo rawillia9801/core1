@@ -830,7 +830,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-lg font-semibold">Weight History / Timeline</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">Newest local observations remain stored in Core; no new rows are created here.</p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Newest Core observations remain available for review; no new rows are created here.</p>
             </div>
             {weights.length > 0 ? (
               <div className="space-y-3">

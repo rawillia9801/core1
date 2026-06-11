@@ -167,12 +167,16 @@ Core-native owner/operator operating system foundation
 
 ### Command, Events, Proposed Actions
 
+- [x] Shared `/staff` operator shell upgraded with grouped deep-navy navigation, light command top bar, account/status area, compact mobile navigation, warm operational background, white panels, soft blue accents, amber attention accents, tighter spacing, and modern command-system hierarchy.
+- [x] Shared operator UI helpers now cover shell, page headers, metric cards, panels, section tabs, status pills, alert panels, activity rows, quick actions, and summary grids without adding a third-party UI library.
 - [x] `/staff/command` exists as read-only Core OS Command Center.
 - [x] `/staff/command` was reorganized into a segmented command center with Today, Neonatal, Buyers/Families, Payments, Communications, Events/Audit, Proposed Actions, and System lanes while remaining read-only.
 - [x] `/staff/proposed-actions` exists as owner/admin proposal queue.
 - [x] `/staff/events` exists as read-only Events/Audit workspace.
 - [x] `/staff/kennel-logs` exists as read-only kennel event/audit history workspace.
 - [x] Proposed action approval remains review-state only and does not execute business changes.
+- [x] Operator visual system pass applies broadly to command, payments, payment plans, go-home, go-home handoff, applications, application detail, buyers, buyer detail, families, family detail, reservation detail, reservation handoff, puppy detail, puppy handoff, and the main overview/readiness workspaces while preserving existing behavior.
+- [x] Visible operator-facing source wording now uses Core operational language such as `Core Operational Overview` and no longer refers to `LOCAL SUPABASE READ-ONLY`, `local Supabase`, `local Core data`, `local database`, `local server`, or `development database`.
 - [x] Long internal review/readiness pages now share compact operator workspace styling with command headers, summary rows, segmented navigation, subtler panels, and reduced card density; no auth, env, Supabase config, migrations, SMTP behavior, public form behavior, payment processor, Twilio/SMS/Facebook, AI, portal, server-action, or external-integration behavior changed.
 - [blocked] AI provider calls and AI execution remain blocked.
 

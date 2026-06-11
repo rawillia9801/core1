@@ -1561,7 +1561,7 @@ export async function getDashboardData(staff: StaffProfile): Promise<DashboardDa
       }),
       taskBoard,
       readScopes,
-      dataSourceLabel: "Local Supabase read-only",
+      dataSourceLabel: "Core Operational Overview",
       dataWarning: null,
     };
   } catch (error) {

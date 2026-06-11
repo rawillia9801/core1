@@ -17,6 +17,17 @@ Zoho One is cancelled and historical reference only. Zoho must not be treated as
 
 ## Most Recent Implemented Work
 
+### Core Operator Shell Visual System
+
+Implemented and pushed:
+
+- The shared internal `/staff` shell was upgraded into a Core Command Center operator interface with grouped deep-navy navigation, a light top command bar, account/status area, compact mobile navigation, warm operational background, white panels, soft blue accents, amber attention accents, and tighter spacing.
+- `src/app/staff/operator-ui.tsx` now includes reusable operator UI helpers for the shell, page headers, metrics, panels, tabs, status pills, alert panels, activity rows, quick actions, and summary grids.
+- The upgraded visual system applies broadly across the internal operator workspace, including command, payment, payment-plan, go-home, handoff, application, buyer, family, reservation, and puppy readiness/detail surfaces through the shared shell and operator workspace styling.
+- The `/staff` overview wording now uses `Core Operational Overview` and describes server-side Core operational reads without local/development source wording.
+- Visible operator-facing wording was cleaned so current-product copy no longer refers to `LOCAL SUPABASE READ-ONLY`, `local Supabase`, `local Core data`, `local database`, `local server`, or `development database`.
+- This was a visual system and operator wording pass only. It did not change auth, environment files, Supabase config, migrations, SMTP behavior, public application behavior, payment processor behavior, Twilio/SMS/Facebook, AI, customer portal behavior, customer-facing pages, server-action behavior, or external integrations.
+
 ### Public / Embeddable Puppy Application
 
 Implemented and pushed:

@@ -280,8 +280,8 @@ function ResultMessage({ type, outcome }: { type: "goHome" | "checklist"; outcom
     return (
       <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
         {type === "goHome"
-          ? "Go-home detail saved locally in Core. No customer message, document, payment, portal, listing, or external system was triggered."
-          : "Go-home checklist item saved locally in Core. No customer message, document, payment, portal, listing, or external system was triggered."}
+          ? "Go-home detail saved in Core. No customer message, document, payment, portal, listing, or external system was triggered."
+          : "Go-home checklist item saved in Core. No customer message, document, payment, portal, listing, or external system was triggered."}
       </p>
     );
   }

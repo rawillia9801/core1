@@ -347,7 +347,7 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "success") {
     return (
       <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-        Deposit/payment recorded locally. Balance due has been refreshed from the ledger.
+        Deposit/payment recorded in Core. Balance due has been refreshed from the ledger.
       </p>
     );
   }
@@ -822,7 +822,7 @@ export default async function StaffPaymentsPage({
           summary="Internal financial truth workspace for reservation accounts, ledger-derived balances, payment entry, adjustments, go-home payment readiness, and financial history."
           status={canViewFinancials ? "Owner/admin financial view" : "Restricted financial view"}
           blockers={canViewFinancials ? `${attentionAccounts} account(s) need attention` : "Financial blockers restricted"}
-          nextAction={canViewFinancials ? "Review balance due and record only verified local ledger payments" : "Use owner/admin access for ledger review"}
+          nextAction={canViewFinancials ? "Review balance due and record only verified Core ledger payments" : "Use owner/admin access for ledger review"}
           links={[
             { href: "/staff/payment-plans", label: "Payment Plans" },
             { href: "/staff/reservations", label: "Reservations" },
@@ -888,7 +888,7 @@ export default async function StaffPaymentsPage({
         <section id="record-payment" className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
-              <h2 className="text-lg font-semibold text-slate-950">Record Local Ledger Payment</h2>
+              <h2 className="text-lg font-semibold text-slate-950">Record Core Ledger Payment</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">
                 Existing internal action for posted deposit/payment rows only. It calls the controlled Core RPC and does not contact any payment provider.
               </p>
@@ -970,11 +970,11 @@ export default async function StaffPaymentsPage({
                 </label>
 
                 <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">
-                  Record Local Ledger Payment
+                  Record Core Ledger Payment
                 </button>
               </form>
             ) : (
-              <EmptyState text="No active reservations are available for local deposit/payment ledger entry." />
+              <EmptyState text="No active reservations are available for Core deposit/payment ledger entry." />
             )}
           </section>
 

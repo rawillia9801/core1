@@ -25,7 +25,7 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "success") {
     return (
       <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-        Deposit/payment recorded locally. Balance due has been refreshed from the ledger.
+        Deposit/payment recorded in Core. Balance due has been refreshed from the ledger.
       </p>
     );
   }
@@ -61,7 +61,7 @@ function CancellationResult({ outcome }: { outcome: string | undefined }) {
   if (outcome === "success") {
     return (
       <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-        Reservation cancelled locally. No refund was issued and ledger history was not modified.
+        Reservation cancelled in Core. No refund was issued and ledger history was not modified.
       </p>
     );
   }
@@ -99,7 +99,7 @@ export default async function StaffReservationsPage({
   const canViewFinancials = dashboard.readScopes.canViewSensitiveFinancials;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -111,7 +111,7 @@ export default async function StaffReservationsPage({
                 Reservation Workspace
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                Dedicated staff workspace for reservation status, balance visibility, local deposit/payment entries, and guarded cancellation.
+                Dedicated operator workspace for reservation status, balance visibility, Core deposit/payment entries, and guarded cancellation.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export default async function StaffReservationsPage({
             Safety boundary
           </p>
           <p className="mt-2 text-sm leading-6">
-            Payments recorded here are local Core ledger entries only. No payment processor, refund, customer email, or Hostinger SMTP delivery is connected.
+            Payments recorded here are Core ledger entries only. No payment processor, refund, customer email, or Hostinger SMTP delivery is connected.
           </p>
         </section>
 
@@ -166,7 +166,7 @@ export default async function StaffReservationsPage({
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-slate-950">Reservations</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Ledger-derived balance and guarded local actions for active reservation records.
+              Ledger-derived balance and guarded Core actions for active reservation records.
             </p>
           </div>
 

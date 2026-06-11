@@ -16,7 +16,7 @@ type SearchParams = {
 const workspaceLinks = [
   { href: "/staff/applications", label: "Applications", helper: "Review, approve, and reserve" },
   { href: "/staff/reservations", label: "Reservations", helper: "Balances, payments, cancellations" },
-  { href: "/staff/payments", label: "Payments", helper: "Local ledger entry and activity" },
+  { href: "/staff/payments", label: "Payments", helper: "Core ledger entry and activity" },
   { href: "/staff/notifications", label: "Notifications", helper: "Templates, rules, attempt logs" },
 ] as const;
 
@@ -132,10 +132,10 @@ function WorkflowNotice({ searchParams }: { searchParams: SearchParams }) {
       ? "Reservation created. Puppy status is now reserved; no payment was recorded."
       : null,
     searchParams.payment === "success"
-      ? "Deposit/payment recorded locally. Balance due has been refreshed from the ledger."
+      ? "Deposit/payment recorded in Core. Balance due has been refreshed from the ledger."
       : null,
     searchParams.cancellation === "success"
-      ? "Reservation cancelled locally. No refund was issued and ledger history was not modified."
+      ? "Reservation cancelled in Core. No refund was issued and ledger history was not modified."
       : null,
   ].filter(Boolean);
 
@@ -168,7 +168,7 @@ export default async function CoreDashboard({
   const resolvedSearchParams = await searchParams;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 pb-12 pt-5 text-slate-950 sm:px-6 lg:px-8">
+    <main className="operator-workspace min-h-screen px-4 pb-12 pt-5 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         {dashboard.dataWarning ? (
           <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-amber-950 shadow-sm sm:p-5">
@@ -208,10 +208,10 @@ export default async function CoreDashboard({
                 Southwest Virginia Chihuahua
               </p>
               <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                Cherolee Core Overview
+                Core Operational Overview
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                Core is the autonomous operator layer being built to help run the business. This page is now the overview only; the staff operating work happens in the dedicated workspace pages above.
+                Core is the governed operator layer for the business. This page is the overview; detailed owner/operator workspaces live in dedicated pages so the left navigation remains the single workspace navigation.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -320,7 +320,7 @@ export default async function CoreDashboard({
         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <SectionCard
             title="Recent Applications"
-            description="Latest local Core applications. Use the Applications workspace for approval and reservation creation."
+            description="Latest Core applications. Use the Applications workspace for approval and reservation creation."
           >
             <div className="space-y-3">
               {dashboard.applications.length > 0 ? (
@@ -414,7 +414,7 @@ export default async function CoreDashboard({
                   </div>
                 ))
               ) : (
-                <EmptyList text="No go-home rows found in the local effective view." />
+                <EmptyList text="No go-home rows found in the Core effective view." />
               )}
             </div>
           </SectionCard>
