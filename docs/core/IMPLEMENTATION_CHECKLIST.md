@@ -133,6 +133,11 @@ Core-native owner/operator operating system foundation
 - [x] Buyer/reservation assignment exists through reservation model.
 - [x] Dog profile, dog health events, dog document vault, and dog private document upload exist.
 - [x] Dog/puppy private media upload foundation exists.
+- [x] `/staff/media` exists as an internal Media Command Center using existing `core_kennel_media` private dog/puppy photo metadata.
+- [x] Media Command Center shows overall media readiness, dogs missing primary photos, puppies missing primary photos, puppies with stale/no recent photos, records with media but no primary image, litter gallery readiness derived from linked puppy photos, recent private media activity, and links back to dog/puppy/litter records.
+- [x] `/staff/dogs/[dogId]` and `/staff/puppies/[puppyId]` include media readiness summaries, primary-photo status, gallery counts, missing-media blockers, and links to the Media Command Center while preserving existing private upload/delete behavior.
+- [x] `/staff/litters` includes litter media readiness derived from linked puppy media rows, dam/sire context, missing litter gallery signals, and missing puppy photo/primary blockers.
+- [x] `/staff/litters/[litterId]` exists as a read-only internal litter media readiness detail page. Direct litter uploads remain unavailable because the current media table supports dog and puppy entity types only.
 - [x] Kennel workflows remain internal only and do not diagnose animals, publish puppies, message customers, update a portal, process payments, generate documents, call AI/providers, or control devices.
 
 ### Buyer / Family / Relationship Workspaces

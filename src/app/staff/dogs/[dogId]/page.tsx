@@ -368,6 +368,13 @@ export default async function DogProfilePage({
 
   const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
   const mediaWarning = mediaResult.warning ? "Private photo storage is not available from the current Core schema yet." : null;
+  const primaryDogPhoto = mediaPreviews.find((media) => media.is_primary) ?? null;
+  const latestDogPhotoAt = mediaPreviews.map((media) => media.uploaded_at).filter(Boolean).sort().at(-1) ?? null;
+  const mediaBlockers = [
+    mediaPreviews.length === 0 ? "No media record found for this dog." : null,
+    !primaryDogPhoto ? "Primary image not recorded." : null,
+    documentsResult.rows.length === 0 ? "No dog document metadata recorded." : null,
+  ].filter(Boolean);
   const warnings = [dogResult, littersResult, puppiesResult, reservationsResult, buyersResult, familiesResult, healthResult, documentsResult, { warning: mediaWarning }, eventsResult, auditResult]
     .map((result) => result.warning)
     .filter(Boolean);
@@ -401,6 +408,7 @@ export default async function DogProfilePage({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Link href="/staff/media" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Media Center</Link>
               <Link href="/staff/dogs" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Dogs</Link>
               <Link href={`/staff/dogs/${dog.id}/edit`} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Edit dog</Link>
             </div>
@@ -474,10 +482,28 @@ export default async function DogProfilePage({
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold">Private Dog Photos</h2>
+                  <h2 className="text-lg font-semibold">Media Readiness / Private Dog Photos</h2>
                   <p className="mt-1 text-sm leading-6 text-slate-500">Internal kennel-media photos only. Images render through short-lived signed URLs; raw storage paths stay hidden.</p>
                 </div>
                 <Badge>{mediaPreviews.length} photo{mediaPreviews.length === 1 ? "" : "s"}</Badge>
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                <InfoCard label="Primary photo" value={primaryDogPhoto ? "Recorded" : "Not recorded"} note={primaryDogPhoto?.title || primaryDogPhoto?.file_name || undefined} />
+                <InfoCard label="Gallery count" value={mediaPreviews.length} note="Private kennel-media rows" />
+                <InfoCard label="Latest photo" value={formatDateTime(latestDogPhotoAt)} note="Internal upload timestamp" />
+              </div>
+              <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+                {mediaBlockers.length > 0 ? (
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+                    <p className="font-bold">Media attention</p>
+                    <ul className="mt-2 space-y-1">
+                      {mediaBlockers.map((blocker) => <li key={blocker}>{blocker}</li>)}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">Dog media readiness is clear from current Core rows.</div>
+                )}
+                <Link href="/staff/media#dogs" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Open Media Center</Link>
               </div>
               {mediaPreviews.length ? (
                 <div className="mt-5 grid gap-4 md:grid-cols-2">

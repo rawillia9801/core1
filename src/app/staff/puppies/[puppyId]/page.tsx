@@ -577,6 +577,15 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const applications = applicationResult.rows;
   const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
   const mediaWarning = mediaResult.warning ? "Private photo storage is not available from the current Core schema yet." : null;
+  const primaryPuppyPhoto = mediaPreviews.find((media) => media.is_primary) ?? null;
+  const latestPuppyPhotoAt = mediaPreviews.map((media) => media.uploaded_at).filter(Boolean).sort().at(-1) ?? null;
+  const latestPuppyPhotoAge = daysSince(latestPuppyPhotoAt);
+  const mediaBlockers = [
+    mediaPreviews.length === 0 ? "No media record found for this puppy." : null,
+    !primaryPuppyPhoto ? "Primary image not recorded." : null,
+    latestPuppyPhotoAt === null || (latestPuppyPhotoAge !== null && latestPuppyPhotoAge > 30) ? "Recent photo refresh needed." : null,
+    activeReservation && mediaPreviews.length === 0 ? "Assigned puppy has no internal photo for go-home review." : null,
+  ].filter(Boolean);
   const operationalEvents = uniqueEvents([...directEventResult.rows, ...relatedEventResult.rows]);
   const latest = latestWeight(weights);
   const birth = birthWeightForPuppy(puppy, litter, weights);
@@ -600,6 +609,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Link href="/staff/media" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Media Center</Link>
               <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Back to Puppies</Link>
               <Link href={`/staff/puppies/${puppy.id}/edit`} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Edit Puppy</Link>
             </div>
@@ -747,10 +757,49 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">Private Puppy Photos</h2>
+              <h2 className="text-lg font-semibold">Media Readiness / Private Puppy Photos</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">Internal owner/operator puppy media only. Photos render through short-lived signed URLs and are not public listings.</p>
             </div>
             <Badge>{mediaPreviews.length} photo{mediaPreviews.length === 1 ? "" : "s"}</Badge>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+              <p className="text-xs font-semibold uppercase text-slate-400">Primary photo</p>
+              <p className="mt-2 font-bold text-slate-950">{primaryPuppyPhoto ? "Recorded" : "Not recorded"}</p>
+              <p className="mt-1 text-slate-500">{primaryPuppyPhoto?.title || primaryPuppyPhoto?.file_name || "Primary image not recorded"}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+              <p className="text-xs font-semibold uppercase text-slate-400">Recent photo</p>
+              <p className="mt-2 font-bold text-slate-950">{formatDateTime(latestPuppyPhotoAt)}</p>
+              <p className="mt-1 text-slate-500">{latestPuppyPhotoAge === null ? "No media record found" : `${latestPuppyPhotoAge} day(s) old`}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+              <p className="text-xs font-semibold uppercase text-slate-400">Gallery count</p>
+              <p className="mt-2 font-bold text-slate-950">{mediaPreviews.length}</p>
+              <p className="mt-1 text-slate-500">Private kennel-media rows</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+              <p className="text-xs font-semibold uppercase text-slate-400">Go-home media</p>
+              <p className="mt-2 font-bold text-slate-950">{activeReservation ? "Reservation linked" : "No active reservation"}</p>
+              <p className="mt-1 text-slate-500">{activeReservation ? formatDateTime(activeReservation.go_home_planned_at) : "Go-home media need depends on assignment"}</p>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+            {mediaBlockers.length > 0 ? (
+              <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+                <p className="font-bold">Media attention</p>
+                <ul className="mt-2 space-y-1">
+                  {mediaBlockers.map((blocker) => <li key={blocker}>{blocker}</li>)}
+                </ul>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">Puppy media readiness is clear from current Core rows.</div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/media#puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Media Center</Link>
+              {activeReservation ? <Link href={`/staff/reservations/${activeReservation.reservation_id}/handoff`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Reservation Handoff</Link> : null}
+              <Link href={`/staff/puppies/${puppy.id}/handoff`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Puppy Handoff</Link>
+            </div>
           </div>
           {mediaPreviews.length > 0 ? (
             <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">

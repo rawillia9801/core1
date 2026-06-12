@@ -291,18 +291,20 @@ export function OperatorSection({
 }
 
 export function OperatorPanel({
+  id,
   title,
   description,
   action,
   children,
 }: {
+  id?: string;
   title?: string;
   description?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <section className="operator-panel">
+    <section id={id} className="operator-panel">
       {title || description || action ? (
         <div className="operator-panel__header">
           <div>

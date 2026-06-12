@@ -17,6 +17,18 @@ Zoho One is cancelled and historical reference only. Zoho must not be treated as
 
 ## Most Recent Implemented Work
 
+### Internal Media Management Center
+
+Implemented and pushed:
+
+- `/staff/media` was added as an internal Media Command Center for owner/operator media readiness across dogs, puppies, and litters.
+- The media center reads existing `core_kennel_media` private metadata rows for dog and puppy photos, including primary image markers, uploaded timestamps, private file metadata, and short-lived signed preview URLs when server-side storage configuration is available.
+- Media readiness now highlights dogs missing primary photos, puppies missing primary photos, puppies with no recent photo signal, records with media but no primary image, litters missing gallery signals, and recent private media activity.
+- The current `core_kennel_media` table supports `dog` and `puppy` entity types only, so litter media readiness is derived from linked puppy photos and primary puppy image markers. No direct litter upload behavior was added.
+- `/staff/dogs/[dogId]`, `/staff/puppies/[puppyId]`, and `/staff/litters` now include clearer internal media readiness summaries and links to the Media Command Center.
+- `/staff/litters/[litterId]` was added as a read-only internal litter media readiness detail page using existing litter, dog, puppy, and private puppy media rows.
+- Existing dog/puppy private upload and delete actions were left in place and reused only where they already existed. This pass did not create storage buckets, storage policies, migrations, upload behavior, public media URLs, public pages, customer portal media, or external integrations.
+
 ### Core Operator Shell Visual System
 
 Implemented and pushed:

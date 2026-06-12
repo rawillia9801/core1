@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import type { KennelMediaRow } from "@/lib/kennel-media";
 import { recordPuppyCareObservation, recordPuppyWeight } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -429,7 +430,7 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
   const { litter } = resolvedSearchParams;
   const canLogCare = staff.role === "owner" || staff.role === "admin";
 
-  const [litterResult, dogResult, puppyResult, weightResult, puppyEventResult] = await Promise.all([
+  const [litterResult, dogResult, puppyResult, weightResult, puppyEventResult, mediaResult] = await Promise.all([
     readRows<LitterRow>("core_litters", {
       select: "id,external_reference,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes,created_at,updated_at",
       order: "created_at.desc",
@@ -453,6 +454,12 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
       order: "event_at.desc",
       limit: "1000",
     }),
+    readRows<KennelMediaRow>("core_kennel_media", {
+      select: "id,entity_type,dog_id,puppy_id,title,file_name,file_mime_type,file_size_bytes,storage_bucket,storage_path,is_primary,visibility,notes,uploaded_at,uploaded_by_profile_id",
+      entity_type: "eq.puppy",
+      order: "uploaded_at.desc.nullslast",
+      limit: "1000",
+    }),
   ]);
 
   const litters = litterResult.rows;
@@ -460,6 +467,7 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
   const puppiesByLitter = new Map<string, PuppyRow[]>();
   const weightsByPuppy = new Map<string, WeightLogRow[]>();
   const eventsByPuppy = new Map<string, PuppyEventRow[]>();
+  const mediaByPuppy = new Map<string, KennelMediaRow[]>();
 
   for (const puppy of puppyResult.rows) {
     if (!puppy.litter_id) {
@@ -477,6 +485,11 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
   for (const event of puppyEventResult.rows) {
     if (!event.puppy_id) continue;
     eventsByPuppy.set(event.puppy_id, [...(eventsByPuppy.get(event.puppy_id) ?? []), event]);
+  }
+
+  for (const media of mediaResult.rows) {
+    if (!media.puppy_id) continue;
+    mediaByPuppy.set(media.puppy_id, [...(mediaByPuppy.get(media.puppy_id) ?? []), media]);
   }
 
   const litterById = new Map(litters.map((row) => [row.id, row]));
@@ -513,6 +526,12 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
     return litterRow ? isNeonatalLitter(litterRow) || isActiveStatus(litterRow.status) : daysSince(puppy.birth_at) !== null && (daysSince(puppy.birth_at) ?? 99) <= NEONATAL_WINDOW_DAYS;
   });
   const todayWeights = weightResult.rows.filter((weight) => isSameLocalDay(weight.measured_at)).length;
+  const littersMissingMedia = litters.filter((row) => {
+    const puppies = linkedPuppies(row, puppiesByLitter);
+    return puppies.length === 0 || !puppies.some((puppy) => (mediaByPuppy.get(puppy.id) ?? []).length > 0);
+  });
+  const puppiesMissingMedia = puppyResult.rows.filter((puppy) => (mediaByPuppy.get(puppy.id) ?? []).length === 0);
+  const puppiesMissingPrimaryMedia = puppyResult.rows.filter((puppy) => !(mediaByPuppy.get(puppy.id) ?? []).some((media) => media.is_primary));
   const puppyWatchRows = neonatalPuppies
     .map((puppy) => {
       const litterRow = puppy.litter_id ? litterById.get(puppy.litter_id) : undefined;
@@ -537,6 +556,7 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Link href="/staff/media#litters" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Media Center</Link>
               <Link href="/staff/litters/new" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Add Litter</Link>
               <Link href="/staff/puppies/new" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">Add Puppy</Link>
             </div>
@@ -551,9 +571,9 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
         {litter ? <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">Litter action result: {litter}</section> : null}
         <ResultMessage searchParams={resolvedSearchParams} />
 
-        {litterResult.warning || dogResult.warning || puppyResult.warning || weightResult.warning || puppyEventResult.warning ? (
+        {litterResult.warning || dogResult.warning || puppyResult.warning || weightResult.warning || puppyEventResult.warning || mediaResult.warning ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">
-            {litterResult.warning ?? dogResult.warning ?? puppyResult.warning ?? weightResult.warning ?? puppyEventResult.warning}
+            {litterResult.warning ?? dogResult.warning ?? puppyResult.warning ?? weightResult.warning ?? puppyEventResult.warning ?? mediaResult.warning}
           </section>
         ) : null}
 
@@ -562,6 +582,57 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
           <StatCard label="Born" value={bornCount} note="Have birth date" />
           <StatCard label="Expected" value={expectedCount} note="Expected, not born" />
           <StatCard label="Puppies" value={totalPuppies} note="Recorded/linked count" />
+          <StatCard label="Litter media gaps" value={littersMissingMedia.length} note="Derived from puppy photos" />
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">Internal Media Readiness</p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-950">Litter Gallery Signals</h2>
+              <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-600">The current private media table stores dog and puppy photos. Litter readiness is derived from linked puppy media and primary puppy photo markers; no direct litter gallery upload path is added here.</p>
+            </div>
+            <Link href="/staff/media#litters" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Open Media Center</Link>
+          </div>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            <StatCard label="Puppy media rows" value={mediaResult.rows.length} note="Private kennel-media rows linked to puppies" />
+            <StatCard label="Puppies missing photos" value={puppiesMissingMedia.length} note="No puppy media record found" />
+            <StatCard label="Puppies missing primary" value={puppiesMissingPrimaryMedia.length} note="Primary image not recorded" />
+          </div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-2">
+            {litters.slice(0, 12).map((row) => {
+              const puppies = linkedPuppies(row, puppiesByLitter);
+              const photoCount = puppies.reduce((count, puppy) => count + (mediaByPuppy.get(puppy.id) ?? []).length, 0);
+              const primaryCount = puppies.filter((puppy) => (mediaByPuppy.get(puppy.id) ?? []).some((media) => media.is_primary)).length;
+              const blockers = [
+                puppies.length === 0 ? "No puppies linked." : null,
+                photoCount === 0 ? "No linked puppy photos found." : null,
+                puppies.length > 0 && primaryCount < puppies.length ? `${puppies.length - primaryCount} puppy primary image marker(s) missing.` : null,
+              ].filter(Boolean);
+
+              return (
+                <article key={row.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-slate-950">{litterName(row)}</p>
+                      <p className="mt-1 text-sm text-slate-600">Dam: {dogName(row.dam_id ? dogsById.get(row.dam_id) : undefined)} / Sire: {dogName(row.sire_id ? dogsById.get(row.sire_id) : undefined)}</p>
+                    </div>
+                    <Badge tone={blockers.length ? "bg-amber-50 text-amber-700 ring-amber-100" : "bg-emerald-50 text-emerald-700 ring-emerald-100"}>{blockers.length ? "Needs media" : "Media signal ready"}</Badge>
+                  </div>
+                  <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+                    <InfoItem label="Puppies" value={puppies.length} />
+                    <InfoItem label="Gallery photos" value={photoCount} />
+                    <InfoItem label="Primary puppy photos" value={`${primaryCount} / ${puppies.length}`} />
+                  </dl>
+                  {blockers.length > 0 ? <p className="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-950">{blockers.join(" ")}</p> : null}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link href={`/staff/litters/${row.id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">Open litter media readiness</Link>
+                    {puppies.slice(0, 3).map((puppy) => <Link key={puppy.id} href={`/staff/puppies/${puppy.id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">{puppyName(puppy)}</Link>)}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
