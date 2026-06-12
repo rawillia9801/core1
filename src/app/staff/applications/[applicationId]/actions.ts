@@ -12,7 +12,10 @@ type ReviewOutcome =
   | "needs_info"
   | "note_added"
   | "unauthorized"
-  | "failed";
+  | "invalid_input"
+  | "rpc_failed"
+  | "config_missing"
+  | "save_failed";
 
 function logApplicationDetailFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
@@ -21,23 +24,26 @@ function logApplicationDetailFailure(reason: string, details?: Record<string, un
 }
 
 function getReviewConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Application review detail actions are disabled until staging/production authorization is approved.");
-  }
-
   const supabaseUrl = (
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Local/development application review configuration is incomplete.");
+    throw new Error("Application review configuration is incomplete.");
   }
 
   return {
     restUrl: `${supabaseUrl}/rest/v1`,
     serviceRoleKey,
   };
+}
+
+function classifyReviewException(error: unknown): ReviewOutcome {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  return message.includes("configuration") || message.includes("supabase") || message.includes("service")
+    ? "config_missing"
+    : "save_failed";
 }
 
 function serverHeaders(serviceRoleKey: string) {
@@ -76,13 +82,23 @@ async function requireOwnerOrAdmin() {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
-  const { restUrl, serviceRoleKey } = getReviewConfig();
-  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
-    method: "POST",
-    headers: serverHeaders(serviceRoleKey),
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  let response: Response;
+
+  try {
+    const { restUrl, serviceRoleKey } = getReviewConfig();
+    response = await fetch(`${restUrl}/rpc/${functionName}`, {
+      method: "POST",
+      headers: serverHeaders(serviceRoleKey),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch (error) {
+    logApplicationDetailFailure("application review RPC threw before response", {
+      functionName,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return classifyReviewException(error);
+  }
 
   if (!response.ok) {
     const responseBody = await response.text().catch(() => "");
@@ -91,10 +107,10 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
       httpStatus: response.status,
       responseBody,
     });
-    return false;
+    return "rpc_failed";
   }
 
-  return true;
+  return "success";
 }
 
 function revalidateApplicationSurfaces(applicationId: string) {
@@ -105,7 +121,7 @@ function revalidateApplicationSurfaces(applicationId: string) {
 
 function redirectToDetail(applicationId: string, outcome: ReviewOutcome): never {
   const param =
-    outcome === "failed" || outcome === "unauthorized"
+    ["unauthorized", "invalid_input", "rpc_failed", "config_missing", "save_failed"].includes(outcome)
       ? `error=${outcome}`
       : `${outcome}=1`;
   redirect(`/staff/applications/${applicationId}?${param}`);
@@ -116,7 +132,7 @@ export async function approveApplicationFromDetail(formData: FormData) {
   const decisionNotes = String(formData.get("decisionNotes") ?? "").trim().slice(0, 1000);
 
   if (!applicationId) {
-    redirect("/staff/applications?approval=error");
+    redirect("/staff/applications?approval=invalid_input");
   }
 
   const staff = await requireOwnerOrAdmin();
@@ -131,12 +147,12 @@ export async function approveApplicationFromDetail(formData: FormData) {
     p_queue_notification: false,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateApplicationSurfaces(applicationId);
     redirectToDetail(applicationId, "approved");
   }
 
-  redirectToDetail(applicationId, "failed");
+  redirectToDetail(applicationId, ok);
 }
 
 export async function declineApplicationFromDetail(formData: FormData) {
@@ -144,7 +160,7 @@ export async function declineApplicationFromDetail(formData: FormData) {
   const decisionNotes = cleanText(formData.get("decisionNotes"), 2000);
 
   if (!applicationId) {
-    redirect("/staff/applications?approval=error");
+    redirect("/staff/applications?approval=invalid_input");
   }
 
   const staff = await requireOwnerOrAdmin();
@@ -153,7 +169,7 @@ export async function declineApplicationFromDetail(formData: FormData) {
   }
 
   if (!decisionNotes) {
-    redirectToDetail(applicationId, "failed");
+    redirectToDetail(applicationId, "invalid_input");
   }
 
   const ok = await postRpc("core_decline_application", {
@@ -162,12 +178,12 @@ export async function declineApplicationFromDetail(formData: FormData) {
     p_decision_notes: decisionNotes,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateApplicationSurfaces(applicationId);
     redirectToDetail(applicationId, "declined");
   }
 
-  redirectToDetail(applicationId, "failed");
+  redirectToDetail(applicationId, ok);
 }
 
 export async function markApplicationNeedsInfoFromDetail(formData: FormData) {
@@ -175,7 +191,7 @@ export async function markApplicationNeedsInfoFromDetail(formData: FormData) {
   const decisionNotes = cleanText(formData.get("decisionNotes"), 2000);
 
   if (!applicationId) {
-    redirect("/staff/applications?approval=error");
+    redirect("/staff/applications?approval=invalid_input");
   }
 
   const staff = await requireOwnerOrAdmin();
@@ -184,7 +200,7 @@ export async function markApplicationNeedsInfoFromDetail(formData: FormData) {
   }
 
   if (!decisionNotes) {
-    redirectToDetail(applicationId, "failed");
+    redirectToDetail(applicationId, "invalid_input");
   }
 
   const ok = await postRpc("core_mark_application_needs_info", {
@@ -193,12 +209,12 @@ export async function markApplicationNeedsInfoFromDetail(formData: FormData) {
     p_decision_notes: decisionNotes,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateApplicationSurfaces(applicationId);
     redirectToDetail(applicationId, "needs_info");
   }
 
-  redirectToDetail(applicationId, "failed");
+  redirectToDetail(applicationId, ok);
 }
 
 export async function addApplicationReviewNoteFromDetail(formData: FormData) {
@@ -206,7 +222,7 @@ export async function addApplicationReviewNoteFromDetail(formData: FormData) {
   const reviewNote = cleanText(formData.get("reviewNote"), 2000);
 
   if (!applicationId) {
-    redirect("/staff/applications?approval=error");
+    redirect("/staff/applications?approval=invalid_input");
   }
 
   const staff = await requireOwnerOrAdmin();
@@ -215,7 +231,7 @@ export async function addApplicationReviewNoteFromDetail(formData: FormData) {
   }
 
   if (!reviewNote) {
-    redirectToDetail(applicationId, "failed");
+    redirectToDetail(applicationId, "invalid_input");
   }
 
   const ok = await postRpc("core_add_application_review_note", {
@@ -224,10 +240,10 @@ export async function addApplicationReviewNoteFromDetail(formData: FormData) {
     p_review_note: reviewNote,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateApplicationSurfaces(applicationId);
     redirectToDetail(applicationId, "note_added");
   }
 
-  redirectToDetail(applicationId, "failed");
+  redirectToDetail(applicationId, ok);
 }

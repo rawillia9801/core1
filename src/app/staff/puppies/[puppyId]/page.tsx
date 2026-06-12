@@ -463,9 +463,27 @@ function InfoItem({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-export default async function StaffPuppyDetailPage({ params }: { params: Promise<{ puppyId: string }> }) {
+function PuppyActionResult({ outcome }: { outcome?: string }) {
+  if (outcome === "updated") return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold leading-6 text-emerald-900">Puppy record updated in Core. No public listing, payment, document, message, portal, or external provider action was triggered.</section>;
+  if (outcome === "unauthorized") return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">Only owner/admin can change puppy records.</section>;
+  if (outcome === "invalid_input") return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">Check puppy form values, allowed status/sex/listing options, dates, money amounts, and field lengths.</section>;
+  if (outcome === "missing_identifier") return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">Enter at least one puppy identifier: name, collar color, or external reference.</section>;
+  if (outcome === "config_missing") return <section className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">Core server action configuration is incomplete for puppy actions.</section>;
+  if (outcome === "rpc_missing_or_failed") return <section className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">Puppy RPC failed or is not available. Check the deployed Core action before retrying.</section>;
+  if (outcome === "save_failed" || outcome === "error") return <section className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">Puppy action failed. Review the server action log for safe details.</section>;
+  return null;
+}
+
+export default async function StaffPuppyDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ puppyId: string }>;
+  searchParams: Promise<{ puppy?: string }>;
+}) {
   const staff = await requireStaffProfile();
   const { puppyId } = await params;
+  const { puppy: puppyOutcome } = await searchParams;
   const canViewAudit = staff.role === "owner" || staff.role === "admin";
 
   const puppyResult = await readRows<PuppyRow>("core_puppies", {
@@ -650,6 +668,8 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
             This timeline is internal owner/operator observation review only. It does not diagnose puppies, message customers, publish puppies, update a portal, connect smart-home/cameras/devices, call external providers, create documents, or process payments.
           </p>
         </section>
+
+        <PuppyActionResult outcome={puppyOutcome} />
 
         {warnings.length > 0 ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{warnings[0]}</section>

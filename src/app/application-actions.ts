@@ -97,6 +97,13 @@ function serverHeaders(serviceRoleKey: string) {
   };
 }
 
+function classifyActionException(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  return message.includes("configuration") || message.includes("service_role") || message.includes("supabase")
+    ? "config_missing"
+    : "save_failed";
+}
+
 async function requireAuthorizedDashboardStaff(
   action: Parameters<typeof canStaffPerformDashboardAction>[1],
   logFailure: (reason: string, details?: Record<string, unknown>) => void,
@@ -120,7 +127,7 @@ async function requireAuthorizedDashboardStaff(
 export async function approveApplication(formData: FormData) {
   const applicationId = String(formData.get("applicationId") ?? "").trim();
   const decisionNotes = String(formData.get("decisionNotes") ?? "").trim().slice(0, 1000);
-  let outcome = "error";
+  let outcome = "save_failed";
   let staff: StaffProfile | null = null;
 
   try {
@@ -138,6 +145,7 @@ export async function approveApplication(formData: FormData) {
 
   if (!UUID_PATTERN.test(applicationId)) {
     logApprovalFailure("invalid application id submitted", { applicationId });
+    outcome = "invalid_input";
   } else {
     try {
       const { restUrl, serviceRoleKey } = getDashboardActionConfig("Approval", logApprovalFailure);
@@ -163,7 +171,7 @@ export async function approveApplication(formData: FormData) {
 
         if (!applicationRow) {
           logApprovalFailure("application status lookup returned no row", { applicationId });
-          outcome = "error";
+          outcome = "missing_links";
         } else if (!status || !APPROVABLE_STATUSES.has(status)) {
           logApprovalFailure("application is not eligible for approval", {
             applicationId,
@@ -193,6 +201,7 @@ export async function approveApplication(formData: FormData) {
               httpStatus: approvalResponse.status,
               responseBody,
             });
+            outcome = "rpc_failed";
           }
         }
       }
@@ -201,7 +210,7 @@ export async function approveApplication(formData: FormData) {
         applicationId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
-      outcome = "error";
+      outcome = classifyActionException(error);
     }
   }
 
@@ -266,7 +275,7 @@ export async function createReservation(formData: FormData) {
   const deposit = parseOptionalNonNegativeDollars(formData.get("depositRequiredDollars"));
   const saleType = String(formData.get("saleType") ?? "").trim().slice(0, 100);
   const notes = String(formData.get("notes") ?? "").trim().slice(0, 1000);
-  let outcome = "error";
+  let outcome = "save_failed";
   let staff: StaffProfile | null = null;
 
   try {
@@ -287,7 +296,7 @@ export async function createReservation(formData: FormData) {
       hasValidApplicationId: UUID_PATTERN.test(applicationId),
       hasValidPuppyId: UUID_PATTERN.test(puppyId),
     });
-    redirect("/staff?reservation=error");
+    redirect("/staff?reservation=invalid_input");
   }
 
   if (!contractTotalCents || !deposit.valid) {
@@ -334,7 +343,7 @@ export async function createReservation(formData: FormData) {
           applicationId,
           status: application.status,
         });
-        outcome = "not_approved";
+        outcome = "not_eligible";
       } else if (!application.buyer_id || !application.family_id) {
         logReservationFailure("approved application lacks buyer or family linkage", {
           applicationId,
@@ -364,7 +373,7 @@ export async function createReservation(formData: FormData) {
               puppyId,
               status: puppy?.status ?? null,
             });
-            outcome = "puppy_unavailable";
+            outcome = "not_eligible";
           } else {
             const activeReservationResponse = await fetch(
               `${restUrl}/core_reservations?select=id&puppy_id=eq.${puppyId}&status=not.in.(cancelled,void,released)&limit=1`,
@@ -385,7 +394,7 @@ export async function createReservation(formData: FormData) {
                 logReservationFailure("selected puppy already has active reservation", {
                   puppyId,
                 });
-                outcome = "puppy_unavailable";
+                outcome = "blocked";
               } else {
                 const rpcResponse = await fetch(`${restUrl}/rpc/core_create_reservation`, {
                   method: "POST",
@@ -415,6 +424,7 @@ export async function createReservation(formData: FormData) {
                     httpStatus: rpcResponse.status,
                     responseBody,
                   });
+                  outcome = "rpc_failed";
                 }
               }
             }
@@ -428,6 +438,7 @@ export async function createReservation(formData: FormData) {
       puppyId,
       error: error instanceof Error ? error.message : "Unknown error",
     });
+    outcome = classifyActionException(error);
   }
 
   redirect(`/staff?reservation=${outcome}`);
@@ -441,7 +452,7 @@ export async function recordReservationPayment(formData: FormData) {
   const externalReference = String(formData.get("externalReference") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   const ineligibleStatuses = new Set(["cancelled", "void", "released"]);
-  let outcome = "error";
+  let outcome = "save_failed";
   let staff: StaffProfile | null = null;
 
   try {
@@ -546,6 +557,7 @@ export async function recordReservationPayment(formData: FormData) {
             httpStatus: rpcResponse.status,
             responseBody,
           });
+          outcome = "rpc_failed";
         }
       }
     }
@@ -555,6 +567,7 @@ export async function recordReservationPayment(formData: FormData) {
       entryType,
       error: error instanceof Error ? error.message : "Unknown error",
     });
+    outcome = classifyActionException(error);
   }
 
   redirect(`/staff?payment=${outcome}`);
@@ -566,7 +579,7 @@ export async function cancelReservation(formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
   const releasePuppy = formData.get("releasePuppy") === "on";
   const releasedPuppyStatus = String(formData.get("releasedPuppyStatus") ?? "available").trim().toLowerCase();
-  let outcome = "error";
+  let outcome = "save_failed";
   let staff: StaffProfile | null = null;
 
   try {
@@ -663,6 +676,7 @@ export async function cancelReservation(formData: FormData) {
             httpStatus: rpcResponse.status,
             responseBody,
           });
+          outcome = "rpc_failed";
         }
       }
     }
@@ -671,6 +685,7 @@ export async function cancelReservation(formData: FormData) {
       reservationId,
       error: error instanceof Error ? error.message : "Unknown error",
     });
+    outcome = classifyActionException(error);
   }
 
   redirect(`/staff?cancellation=${outcome}`);
@@ -686,7 +701,7 @@ export async function updateGoHomeDetail(formData: FormData) {
   const balanceClearedStatus = String(formData.get("balanceClearedStatus") ?? "").trim().toLowerCase();
   const contactNotes = String(formData.get("contactNotes") ?? "").trim();
   const individualNotes = String(formData.get("individualNotes") ?? "").trim();
-  let outcome = "error";
+  let outcome = "save_failed";
   let staff: StaffProfile | null = null;
 
   try {
@@ -801,6 +816,7 @@ export async function updateGoHomeDetail(formData: FormData) {
             httpStatus: rpcResponse.status,
             responseBody,
           });
+          outcome = "rpc_failed";
         }
       }
     }
@@ -809,6 +825,7 @@ export async function updateGoHomeDetail(formData: FormData) {
       reservationId,
       error: error instanceof Error ? error.message : "Unknown error",
     });
+    outcome = classifyActionException(error);
   }
 
   redirect(`/staff/go-home?goHome=${outcome}`);

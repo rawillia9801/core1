@@ -385,10 +385,26 @@ function PaymentResult({ outcome }: { outcome: string | undefined }) {
     );
   }
 
-  if (outcome === "error") {
+  if (outcome === "rpc_failed") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-        Deposit/payment recording failed. Review the server action log for details.
+        Payment recording RPC failed. Check the deployed Core action before retrying.
+      </p>
+    );
+  }
+
+  if (outcome === "config_missing") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Core server action configuration is incomplete for payment recording.
+      </p>
+    );
+  }
+
+  if (outcome === "save_failed" || outcome === "error") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Deposit/payment recording failed. Review the server action log for safe details.
       </p>
     );
   }

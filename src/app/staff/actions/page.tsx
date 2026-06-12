@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, OperatorStatusPill, SectionNav, SummaryStrip } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -268,8 +269,12 @@ export default async function StaffActionsPage() {
   const familiesById = new Map(familyResult.rows.map((row) => [row.id, row]));
   const activeReservations = reservationResult.rows.filter(isActiveReservation);
   const activeReservationByPuppy = new Map(activeReservations.filter((row) => row.puppy_id).map((row) => [row.puppy_id as string, row]));
+  const puppiesByLitter = new Map<string, PuppyRow[]>();
   const mediaByDog = new Map<string, MediaRow[]>();
   const mediaByPuppy = new Map<string, MediaRow[]>();
+  for (const puppy of puppyResult.rows) {
+    if (puppy.litter_id) puppiesByLitter.set(puppy.litter_id, [...(puppiesByLitter.get(puppy.litter_id) ?? []), puppy]);
+  }
   for (const media of mediaResult.rows) {
     if (media.entity_type === "dog" && media.dog_id) mediaByDog.set(media.dog_id, [...(mediaByDog.get(media.dog_id) ?? []), media]);
     if (media.entity_type === "puppy" && media.puppy_id) mediaByPuppy.set(media.puppy_id, [...(mediaByPuppy.get(media.puppy_id) ?? []), media]);
@@ -318,6 +323,39 @@ export default async function StaffActionsPage() {
       mode: "Review only" as const,
       blockers: [],
     })),
+  ].slice(0, 10);
+
+  const cleanupActions: ActionRow[] = [
+    ...buyerResult.rows
+      .filter((buyer) => !buyer.email && !buyer.phone || ["needs_review", "pending", "unknown", ""].includes(normalized(buyer.approval_status)))
+      .slice(0, 5)
+      .map((buyer) => ({
+        id: `buyer-cleanup-${buyer.id}`,
+        lane: "cleanup",
+        priority: (!buyer.email && !buyer.phone ? "High" : "Medium") as "High" | "Medium",
+        title: `${buyerName(buyer)} buyer cleanup`,
+        detail: `${display(buyer.email, "No email")} / ${display(buyer.phone, "No phone")}.`,
+        status: formatKey(buyer.approval_status),
+        href: `/staff/buyers/${buyer.id}`,
+        actionLabel: "Review Buyer",
+        mode: "Review only" as const,
+        blockers: [!buyer.email && !buyer.phone ? "No contact method" : "", !buyer.approval_status ? "Approval status missing" : ""].filter(Boolean),
+      })),
+    ...familyResult.rows
+      .filter((family) => !family.name || ["needs_review", "pending", "unknown", ""].includes(normalized(family.status)))
+      .slice(0, 5)
+      .map((family) => ({
+        id: `family-cleanup-${family.id}`,
+        lane: "cleanup",
+        priority: (!family.name ? "High" : "Medium") as "High" | "Medium",
+        title: `${familyName(family)} family cleanup`,
+        detail: `Family status ${formatKey(family.status)}.`,
+        status: formatKey(family.status),
+        href: `/staff/families/${family.id}`,
+        actionLabel: "Review Family",
+        mode: "Review only" as const,
+        blockers: [!family.name ? "Family name missing" : "", !family.status ? "Family status missing" : ""].filter(Boolean),
+      })),
   ].slice(0, 10);
 
   const reservationActions: ActionRow[] = activeReservations
@@ -424,6 +462,21 @@ export default async function StaffActionsPage() {
       mode: "Review only" as const,
       blockers: ["Missing primary media"],
     })),
+    ...litterResult.rows.filter((litter) => {
+      const puppies = puppiesByLitter.get(litter.id) ?? [];
+      return puppies.length === 0 || !puppies.some((puppy) => (mediaByPuppy.get(puppy.id) ?? []).length > 0);
+    }).slice(0, 5).map((litter) => ({
+      id: `media-litter-${litter.id}`,
+      lane: "media",
+      priority: "Low" as const,
+      title: `${display(litter.litter_name, "Litter")} missing gallery signal`,
+      detail: "Litter readiness is derived from linked puppy private media rows.",
+      status: formatKey(litter.status),
+      href: `/staff/litters/${litter.id}`,
+      actionLabel: "Review Litter Media",
+      mode: "Review only" as const,
+      blockers: ["Missing litter gallery signal"],
+    })),
   ].slice(0, 10);
 
   const proposedActions: ActionRow[] = proposalResult.rows
@@ -442,7 +495,7 @@ export default async function StaffActionsPage() {
       blockers: normalized(proposal.risk_level) === "blocked" ? ["Blocked risk level"] : [],
     }));
 
-  const allRows = [...applicationActions, ...matchingActions, ...reservationActions, ...documentActions, ...paymentActions, ...goHomeActions, ...mediaActions, ...proposedActions];
+  const allRows = [...applicationActions, ...matchingActions, ...cleanupActions, ...reservationActions, ...documentActions, ...paymentActions, ...goHomeActions, ...mediaActions, ...proposedActions];
   const blockedRows = allRows.filter((row) => row.blockers.length > 0);
   const recentRows = allRows.filter((row) => row.mode === "Action available").slice(0, 10);
   const warnings = [applicationResult, buyerResult, familyResult, puppyResult, dogResult, litterResult, reservationResult, documentResult, mediaResult, proposalResult].map((result) => result.warning).filter(Boolean);
@@ -473,6 +526,7 @@ export default async function StaffActionsPage() {
           items={[
             { label: "Applications", value: applicationActions.length, note: "review actions" },
             { label: "Matching", value: matchingActions.length, note: "review-only" },
+            { label: "Cleanup", value: cleanupActions.length, note: "buyer/family review" },
             { label: "Reservations", value: reservationActions.length, note: "readiness" },
             { label: "Documents", value: documentActions.length, note: "metadata review" },
             { label: "Payments", value: paymentActions.length, note: "controlled ledger action where available" },
@@ -480,11 +534,21 @@ export default async function StaffActionsPage() {
           ]}
         />
 
+        <ActionPanel
+          nextAction={blockedRows[0]?.title ?? recentRows[0]?.title ?? allRows[0]?.title ?? "Review Core action lanes"}
+          blockers={blockedRows.length}
+          mode={recentRows.length > 0 ? "available" : blockedRows.length > 0 ? "blocked" : "review-only"}
+          href={blockedRows[0]?.href ?? recentRows[0]?.href ?? "/staff/command"}
+          linkLabel="Open Next"
+          detail="This central queue links only to existing server-action/RPC-backed workspaces or review-only pages."
+        />
+
         <SectionNav
           items={[
             { href: "#overview", label: "Overview", count: allRows.length },
             { href: "#applications", label: "Application Review", count: applicationActions.length },
             { href: "#matching", label: "Matching / Assignment", count: matchingActions.length },
+            { href: "#cleanup", label: "Buyer / Family Cleanup", count: cleanupActions.length },
             { href: "#reservations", label: "Reservations", count: reservationActions.length },
             { href: "#documents", label: "Documents", count: documentActions.length },
             { href: "#payments", label: "Payments", count: paymentActions.length },
@@ -501,6 +565,7 @@ export default async function StaffActionsPage() {
         <div className="grid gap-6 xl:grid-cols-2">
           <LaneSection id="applications" title="Application Review" rows={applicationActions} empty="No applications currently need review." />
           <LaneSection id="matching" title="Matching / Assignment" rows={matchingActions} empty="No matching or assignment review rows are currently queued." />
+          <LaneSection id="cleanup" title="Buyer / Family Cleanup" rows={cleanupActions} empty="No buyer or family cleanup rows are currently queued." />
           <LaneSection id="reservations" title="Reservations" rows={reservationActions} empty="No reservation readiness items are currently queued." />
           <LaneSection id="documents" title="Documents" rows={documentActions} empty="No document review rows are currently queued." />
           <LaneSection id="payments" title="Payments" rows={paymentActions} empty="No payment account review rows are currently queued." />

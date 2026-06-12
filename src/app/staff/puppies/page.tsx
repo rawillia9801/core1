@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -137,6 +138,14 @@ function PuppyResultMessage({ outcome }: { outcome: string | undefined }) {
     return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">Puppy record saved. No public listing, payment, document, message, portal, or external provider action was triggered.</section>;
   }
 
+  if (outcome === "updated") {
+    return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">Puppy record updated in Core. No public listing, payment, document, message, portal, or external provider action was triggered.</section>;
+  }
+
+  if (outcome === "deleted") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Puppy record was marked unavailable/hidden in Core. Linked history was not hard-deleted.</section>;
+  }
+
   if (outcome === "unauthorized") {
     return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Only owner/admin can add puppy records.</section>;
   }
@@ -202,6 +211,8 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
   const availableCount = puppies.filter((row) => row.status?.toLowerCase() === "available").length;
   const reservedCount = puppies.filter((row) => reservationsByPuppy.has(row.id)).length;
   const listedCount = puppies.filter((row) => row.public_listing_status?.toLowerCase() === "public").length;
+  const assignmentReadyCount = puppies.filter((row) => row.status?.toLowerCase() === "available" && !reservationsByPuppy.has(row.id)).length;
+  const attentionCount = puppies.filter((row) => !row.name && !row.collar_color && !row.external_reference).length;
 
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -222,6 +233,13 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Real data only</p><p className="mt-2 text-sm leading-6">This workspace reads Core puppy and active reservation data. No public website updates, messages, documents, payments, or external systems are triggered.</p></section>
         <PuppyResultMessage outcome={puppy} />
+        <ActionPanel
+          nextAction={assignmentReadyCount > 0 ? "Review available puppies for matching or reservation assignment" : "Review puppy records and create the next needed puppy"}
+          blockers={attentionCount}
+          mode={assignmentReadyCount > 0 ? "review-only" : "available"}
+          href="/staff/actions#matching"
+          detail="Puppy actions link to existing create/edit/detail and matching review workflows only; no automatic assignment, public publishing, messaging, documents, or payments are connected."
+        />
         {puppyResult.warning || reservationResult.warning ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{puppyResult.warning ?? reservationResult.warning}</section> : null}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

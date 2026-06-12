@@ -46,7 +46,7 @@ function getActionConfig() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Local/development proposed action configuration is incomplete.");
+    throw new Error("Proposed action configuration is incomplete.");
   }
 
   return {
@@ -127,13 +127,23 @@ function parseProposedChange(value: string) {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
-  const { restUrl, serviceRoleKey } = getActionConfig();
-  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
-    method: "POST",
-    headers: serverHeaders(serviceRoleKey),
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  let response: Response;
+
+  try {
+    const { restUrl, serviceRoleKey } = getActionConfig();
+    response = await fetch(`${restUrl}/rpc/${functionName}`, {
+      method: "POST",
+      headers: serverHeaders(serviceRoleKey),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch (error) {
+    logProposedActionFailure("proposed action RPC threw before response", {
+      functionName,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return "config_missing";
+  }
 
   if (!response.ok) {
     const responseBody = await response.text().catch(() => "");
@@ -142,10 +152,10 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
       httpStatus: response.status,
       responseBody,
     });
-    return false;
+    return "rpc_failed";
   }
 
-  return true;
+  return "success";
 }
 
 function revalidateProposedActionSurfaces() {
@@ -165,7 +175,7 @@ export async function createProposedAction(formData: FormData) {
     logProposedActionFailure("proposal create staff auth failed", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    redirect("/staff/proposed-actions?error=failed");
+    redirect("/staff/proposed-actions?error=save_failed");
   }
 
   const title = cleanText(formData.get("title"), 200);
@@ -192,7 +202,7 @@ export async function createProposedAction(formData: FormData) {
     !title.value ||
     !actionType.value
   ) {
-    redirect("/staff/proposed-actions?error=failed");
+    redirect("/staff/proposed-actions?error=invalid_input");
   }
 
   const proposedChange = {
@@ -218,19 +228,19 @@ export async function createProposedAction(formData: FormData) {
     p_expires_at: null,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateProposedActionSurfaces();
     redirect("/staff/proposed-actions?created=1");
   }
 
-  redirect("/staff/proposed-actions?error=failed");
+  redirect(`/staff/proposed-actions?error=${ok}`);
 }
 
 export async function approveProposedAction(formData: FormData) {
   const proposedActionId = cleanOptionalUuid(formData.get("proposed_action_id"));
 
   if (!proposedActionId.valid || !proposedActionId.value) {
-    redirect("/staff/proposed-actions?error=failed");
+    redirect("/staff/proposed-actions?error=invalid_input");
   }
 
   let staff: StaffProfile;
@@ -244,7 +254,7 @@ export async function approveProposedAction(formData: FormData) {
     logProposedActionFailure("proposal approve staff auth failed", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    redirect("/staff/proposed-actions?error=failed");
+    redirect("/staff/proposed-actions?error=save_failed");
   }
 
   const ok = await postRpc("core_approve_proposed_action", {
@@ -252,12 +262,12 @@ export async function approveProposedAction(formData: FormData) {
     p_actor_profile_id: staff.id,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateProposedActionSurfaces();
     redirect("/staff/proposed-actions?approved=1");
   }
 
-  redirect("/staff/proposed-actions?error=failed");
+  redirect(`/staff/proposed-actions?error=${ok}`);
 }
 
 export async function rejectProposedAction(formData: FormData) {
@@ -265,7 +275,7 @@ export async function rejectProposedAction(formData: FormData) {
   const rejectionReason = cleanText(formData.get("rejection_reason"), 1000);
 
   if (!proposedActionId.valid || !proposedActionId.value || !rejectionReason.valid) {
-    redirect("/staff/proposed-actions?error=failed");
+    redirect("/staff/proposed-actions?error=invalid_input");
   }
 
   let staff: StaffProfile;
@@ -279,7 +289,7 @@ export async function rejectProposedAction(formData: FormData) {
     logProposedActionFailure("proposal reject staff auth failed", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    redirect("/staff/proposed-actions?error=failed");
+    redirect("/staff/proposed-actions?error=save_failed");
   }
 
   const ok = await postRpc("core_reject_proposed_action", {
@@ -288,10 +298,10 @@ export async function rejectProposedAction(formData: FormData) {
     p_rejection_reason: rejectionReason.value || null,
   });
 
-  if (ok) {
+  if (ok === "success") {
     revalidateProposedActionSurfaces();
     redirect("/staff/proposed-actions?rejected=1");
   }
 
-  redirect("/staff/proposed-actions?error=failed");
+  redirect(`/staff/proposed-actions?error=${ok}`);
 }

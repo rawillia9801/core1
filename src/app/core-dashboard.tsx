@@ -118,26 +118,61 @@ function TaskList({
 
 function WorkflowNotice({ searchParams }: { searchParams: SearchParams }) {
   const notices = [
-    searchParams.application === "created"
-      ? "Application created. Application received notification queued for preview only; no email was sent."
-      : null,
-    searchParams.application === "created-no-notification"
-      ? "Application created. No applicant email was supplied, so no email-channel notification was queued."
-      : null,
-    searchParams.application === "created-notification-warning"
-      ? "Application created, but the preview-only notification could not be queued. No email was sent."
-      : null,
-    searchParams.approval === "success" ? "Application approved. No email was sent." : null,
-    searchParams.reservation === "success"
-      ? "Reservation created. Puppy status is now reserved; no payment was recorded."
-      : null,
-    searchParams.payment === "success"
-      ? "Deposit/payment recorded in Core. Balance due has been refreshed from the ledger."
-      : null,
-    searchParams.cancellation === "success"
-      ? "Reservation cancelled in Core. No refund was issued and ledger history was not modified."
-      : null,
-  ].filter(Boolean);
+    notice(searchParams.application, {
+      created: ["success", "Application created. Application received notification queued for preview only; no email was sent."],
+      "created-no-notification": ["success", "Application created. No applicant email was supplied, so no email-channel notification was queued."],
+      "created-notification-warning": ["warning", "Application created, but the preview-only notification could not be queued. No email was sent."],
+    }),
+    notice(searchParams.approval, {
+      success: ["success", "Application approved. No email was sent."],
+      unauthorized: ["warning", "Your role cannot approve applications."],
+      invalid_input: ["warning", "Application approval could not run because the submitted application reference was invalid."],
+      not_eligible: ["warning", "Application approval was blocked because the application is not in an approvable status."],
+      missing_links: ["warning", "Application approval could not continue because required linked records were missing."],
+      rpc_failed: ["error", "Application approval RPC failed. Check the deployed Core action before retrying."],
+      config_missing: ["error", "Core server action configuration is incomplete for application approval."],
+      save_failed: ["error", "Application approval failed. Review the server action log for safe details."],
+      error: ["error", "Application approval failed. Review the server action log for safe details."],
+    }),
+    notice(searchParams.reservation, {
+      success: ["success", "Reservation created. Puppy status is now reserved; no payment was recorded."],
+      unauthorized: ["warning", "Your role cannot create reservations."],
+      invalid_input: ["warning", "Reservation creation needs valid application, puppy, and amount inputs."],
+      invalid_money: ["warning", "Reservation creation needs a valid contract total and deposit amount."],
+      invalid_amounts: ["warning", "Reservation deposit cannot be greater than the contract total."],
+      not_eligible: ["warning", "Reservation creation was blocked because the application or puppy is not eligible."],
+      missing_links: ["warning", "Reservation creation needs linked buyer and family records."],
+      blocked: ["warning", "Reservation creation was blocked because the puppy already has an active reservation."],
+      rpc_failed: ["error", "Reservation creation RPC failed. Check the deployed Core action before retrying."],
+      config_missing: ["error", "Core server action configuration is incomplete for reservation creation."],
+      save_failed: ["error", "Reservation creation failed. Review the server action log for safe details."],
+      error: ["error", "Reservation creation failed. Review the server action log for safe details."],
+    }),
+    notice(searchParams.payment, {
+      success: ["success", "Deposit/payment recorded in Core. Balance due has been refreshed from the ledger."],
+      unauthorized: ["warning", "Your role cannot record deposits or payments."],
+      invalid_input: ["warning", "Payment entry needs a valid reservation, entry type, and optional detail lengths."],
+      invalid_money: ["warning", "Payment entry needs a valid positive amount."],
+      not_found: ["warning", "Payment entry could not find the selected reservation."],
+      not_eligible: ["warning", "The selected reservation cannot accept a recorded deposit/payment."],
+      rpc_failed: ["error", "Payment recording RPC failed. Check the deployed Core action before retrying."],
+      config_missing: ["error", "Core server action configuration is incomplete for payment recording."],
+      save_failed: ["error", "Payment recording failed. Review the server action log for safe details."],
+      error: ["error", "Payment recording failed. Review the server action log for safe details."],
+    }),
+    notice(searchParams.cancellation, {
+      success: ["success", "Reservation cancelled in Core. No refund was issued and ledger history was not modified."],
+      unauthorized: ["warning", "Your role cannot cancel reservations."],
+      invalid_input: ["warning", "Reservation cancellation needs valid bounded inputs."],
+      invalid_reason: ["warning", "Reservation cancellation needs a reason before saving."],
+      not_found: ["warning", "Reservation cancellation could not find the selected reservation."],
+      not_eligible: ["warning", "The selected reservation cannot be cancelled from its current status."],
+      rpc_failed: ["error", "Reservation cancellation RPC failed. Check the deployed Core action before retrying."],
+      config_missing: ["error", "Core server action configuration is incomplete for cancellation."],
+      save_failed: ["error", "Reservation cancellation failed. Review the server action log for safe details."],
+      error: ["error", "Reservation cancellation failed. Review the server action log for safe details."],
+    }),
+  ].filter((item): item is { tone: "success" | "warning" | "error"; text: string } => Boolean(item));
 
   if (notices.length === 0) {
     return null;
@@ -145,16 +180,31 @@ function WorkflowNotice({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <div className="space-y-2">
-      {notices.map((notice) => (
+      {notices.map((item) => (
         <p
-          key={notice}
-          className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
+          key={item.text}
+          className={`rounded-2xl border p-3 text-sm ${
+            item.tone === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : item.tone === "warning"
+                ? "border-amber-200 bg-amber-50 text-amber-900"
+                : "border-red-200 bg-red-50 text-red-800"
+          }`}
         >
-          {notice}
+          {item.text}
         </p>
       ))}
     </div>
   );
+}
+
+function notice(
+  value: string | undefined,
+  messages: Record<string, ["success" | "warning" | "error", string]>,
+) {
+  if (!value || !messages[value]) return null;
+  const [tone, text] = messages[value];
+  return { tone, text };
 }
 
 export default async function CoreDashboard({

@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Controlled Action Workflow Layer.
+- Current as of this documentation pass after the Production Action Workflow + Reliability Layer.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -75,6 +75,8 @@ Core-native owner/operator operating system foundation
 - [x] Private manual application creation is enabled for authenticated owner/admin users in production; the earlier blanket production block was removed.
 - [x] Manual application failures now return specific operator-safe outcomes instead of redirecting to generic `/staff?application=error`.
 - [x] Manual application result messages cover created, created-no-notification, created-notification-warning, unauthorized, invalid_contact, invalid_terms, invalid_input, existing_customer_needs_review, duplicate_customer_needs_review, save_failed, rpc_failed, and config_missing.
+- [x] Application detail review actions are enabled for authenticated owner/admin production use through the existing server-side Core REST/RPC configuration path.
+- [x] Application detail review failures classify invalid input, RPC failure, missing config, save failure, and unauthorized states without exposing raw service-role/database errors on screen.
 - [x] Application approval RPC exists: `core_approve_application`.
 - [x] Application list exists at `/staff/applications`.
 - [x] `/staff/matching` exists as an internal Puppy Assignment / Matchmaking / Waitlist Command Center.
@@ -100,6 +102,7 @@ Core-native owner/operator operating system foundation
 
 - [x] Reservation creation RPC exists: `core_create_reservation`.
 - [x] Reservation creation blocks duplicate active puppy reservations.
+- [x] Reservation, payment, cancellation, and go-home actions classify invalid input, not eligible, missing links, blocked, RPC failure, missing config, and save failure outcomes where determinable.
 - [x] `/staff/reservations` exists.
 - [x] `/staff/reservations/[reservationId]` exists.
 - [x] `/staff/reservations/[reservationId]/handoff` exists.
@@ -133,6 +136,7 @@ Core-native owner/operator operating system foundation
 
 - [x] Dog, litter, and puppy create RPCs exist.
 - [x] Puppy creation now classifies save failures for unauthorized, invalid_input, missing_identifier, rpc_missing_or_failed, config_missing, litter_not_found, invalid_litter, duplicate_identifier, and save_failed instead of generic `puppy=error`.
+- [x] Dog, litter, and puppy manage result messages now cover classified authorization, input, config, RPC, and save failure outcomes.
 - [x] Puppy create form/action alignment was reviewed for field names, optional UUID/date/money inputs, and allowed sex/status/public listing status values.
 - [x] Dog, litter, and puppy list/new/edit/detail/archive routes exist where applicable.
 - [x] Neonatal Litter Command workflow exists.
@@ -195,12 +199,14 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/command` was reorganized into a segmented command center with Today, Neonatal, Buyers/Families, Payments, Communications, Events/Audit, Proposed Actions, and System lanes while remaining read-only.
 - [x] `/staff/actions` exists as the Controlled Action Command Center.
 - [x] `/staff/actions` consolidates existing safe action entry points and review-only links across application review, matching, reservation readiness, payment ledger review, payment plans, documents, media, go-home, handoff, puppy detail, and proposed-action review.
-- [x] Shared compact Action panels link major internal command/readiness pages back to `/staff/actions` with next-action, blocker, mode, and safety-boundary context.
+- [x] `/staff/actions` also shows buyer/family cleanup rows and litter gallery/media readiness rows using existing data only.
+- [x] Shared compact Action panels link major internal command/readiness pages back to `/staff/actions` with next-action, blocker, mode, and safety-boundary context, including command, actions, application list/new/detail, matching, reservation detail, payments, payment plans, documents, media, go-home, handoff, puppies, puppy detail, litters, and litter detail.
 - [x] `/staff/proposed-actions` exists as owner/admin proposal queue.
 - [x] `/staff/proposed-actions` is visually/navigationally connected to `/staff/actions`.
 - [x] `/staff/events` exists as read-only Events/Audit workspace.
 - [x] `/staff/kennel-logs` exists as read-only kennel event/audit history workspace.
 - [x] Proposed action approval remains review-state only and does not execute business changes.
+- [x] Proposed-action review flows classify invalid input, RPC failure, missing config, save failure, and unauthorized outcomes.
 - [x] Controlled action workflow did not add new mutation workflows, RPCs, migrations, auth changes, env changes, storage policies, provider calls, media upload behavior, document generation, signing behavior, customer portal behavior, or customer-facing pages.
 - [x] Operator visual system pass applies broadly to command, payments, payment plans, go-home, go-home handoff, applications, application detail, buyers, buyer detail, families, family detail, reservation detail, reservation handoff, puppy detail, puppy handoff, and the main overview/readiness workspaces while preserving existing behavior.
 - [x] Visible operator-facing source wording now uses Core operational language such as `Core Operational Overview` and no longer refers to `LOCAL SUPABASE READ-ONLY`, `local Supabase`, `local Core data`, `local database`, `local server`, or `development database`.

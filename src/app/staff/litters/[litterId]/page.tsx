@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import type { KennelMediaRow } from "@/lib/kennel-media";
 import { OperatorAlertPanel, OperatorHeader, OperatorPanel, SectionNav, SummaryStrip } from "../../operator-ui";
+import { ActionPanel } from "../../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -214,6 +215,14 @@ export default async function LitterDetailPage({ params }: { params: Promise<{ l
             { label: "Puppies with primary", value: `${puppiesWithPrimary} / ${puppies.length}`, note: "Primary image marker" },
             { label: "Direct litter upload", value: "Not available", note: "Current media table supports dog/puppy only" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={blockers.length > 1 ? "Review litter media and linked puppy primary-photo gaps" : "Review litter matching and puppy readiness"}
+          blockers={Math.max(blockers.length - 1, 0)}
+          mode="review-only"
+          href="/staff/actions#media"
+          detail="Litter detail actions are review-only links into existing puppy, media, and matching workspaces; no direct litter upload or public publishing behavior is added."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

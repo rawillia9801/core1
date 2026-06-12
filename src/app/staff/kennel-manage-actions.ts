@@ -142,13 +142,23 @@ function cleanOptionalMoneyCents(value: FormDataEntryValue | null) {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
-  const { restUrl, serviceRoleKey } = getActionConfig();
-  const response = await fetch(`${restUrl}/rpc/${functionName}`, {
-    method: "POST",
-    headers: serverHeaders(serviceRoleKey),
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  let response: Response;
+
+  try {
+    const { restUrl, serviceRoleKey } = getActionConfig();
+    response = await fetch(`${restUrl}/rpc/${functionName}`, {
+      method: "POST",
+      headers: serverHeaders(serviceRoleKey),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch (error) {
+    logKennelManageFailure("kennel management RPC threw before response", {
+      functionName,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return "config_missing";
+  }
 
   if (!response.ok) {
     const responseBody = await response.text().catch(() => "");
@@ -157,10 +167,10 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
       httpStatus: response.status,
       responseBody,
     });
-    return false;
+    return "rpc_missing_or_failed";
   }
 
-  return true;
+  return "success";
 }
 
 export async function updateDog(formData: FormData) {
@@ -205,7 +215,7 @@ export async function updateDog(formData: FormData) {
 
   revalidatePath("/staff/dogs");
   revalidatePath("/staff/litters");
-  redirect(`/staff/dogs?dog=${ok ? "updated" : "error"}`);
+  redirect(`/staff/dogs?dog=${ok === "success" ? "updated" : ok}`);
 }
 
 export async function archiveDog(formData: FormData) {
@@ -223,7 +233,7 @@ export async function archiveDog(formData: FormData) {
 
   revalidatePath("/staff/dogs");
   revalidatePath("/staff/litters");
-  redirect(`/staff/dogs?dog=${ok ? "deleted" : "error"}`);
+  redirect(`/staff/dogs?dog=${ok === "success" ? "deleted" : ok}`);
 }
 
 export async function updateLitter(formData: FormData) {
@@ -278,7 +288,7 @@ export async function updateLitter(formData: FormData) {
 
   revalidatePath("/staff/litters");
   revalidatePath("/staff/puppies");
-  redirect(`/staff/litters?litter=${ok ? "updated" : "error"}`);
+  redirect(`/staff/litters?litter=${ok === "success" ? "updated" : ok}`);
 }
 
 export async function archiveLitter(formData: FormData) {
@@ -296,7 +306,7 @@ export async function archiveLitter(formData: FormData) {
 
   revalidatePath("/staff/litters");
   revalidatePath("/staff/puppies");
-  redirect(`/staff/litters?litter=${ok ? "deleted" : "error"}`);
+  redirect(`/staff/litters?litter=${ok === "success" ? "deleted" : ok}`);
 }
 
 export async function updatePuppy(formData: FormData) {
@@ -360,7 +370,7 @@ export async function updatePuppy(formData: FormData) {
   revalidatePath(`/staff/puppies/${puppyId.value}/edit`);
   revalidatePath("/staff/litters");
   revalidatePath("/staff/command");
-  redirect(`/staff/puppies/${puppyId.value}?puppy=${ok ? "updated" : "error"}`);
+  redirect(`/staff/puppies/${puppyId.value}?puppy=${ok === "success" ? "updated" : ok}`);
 }
 
 export async function archivePuppy(formData: FormData) {
@@ -379,5 +389,5 @@ export async function archivePuppy(formData: FormData) {
   revalidatePath("/staff/puppies");
   revalidatePath("/staff/litters");
   revalidatePath("/staff/command");
-  redirect(`/staff/puppies?puppy=${ok ? "deleted" : "error"}`);
+  redirect(`/staff/puppies?puppy=${ok === "success" ? "deleted" : ok}`);
 }

@@ -281,6 +281,22 @@ function StatusMessage({
     return "Your profile is not authorized to change proposed action records.";
   }
 
+  if (error === "invalid_input") {
+    return "Proposed action update needs valid fields and a valid proposal reference.";
+  }
+
+  if (error === "rpc_failed") {
+    return "Proposed action RPC failed. Check the deployed Core proposal action before retrying.";
+  }
+
+  if (error === "config_missing") {
+    return "Core server action configuration is incomplete for proposed actions.";
+  }
+
+  if (error === "save_failed") {
+    return "Proposed action update failed. Review the server action log for safe details.";
+  }
+
   if (error) {
     return "Proposed action update failed. Check the fields and try again.";
   }

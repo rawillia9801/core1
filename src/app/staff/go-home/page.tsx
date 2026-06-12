@@ -290,7 +290,10 @@ function ResultMessage({ type, outcome }: { type: "goHome" | "checklist"; outcom
   if (outcome === "invalid_datetime") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Enter a valid go-home date/time or leave it blank.</p>;
   if (outcome === "invalid_input") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Check the selected reservation, status, checklist item, and note lengths.</p>;
   if (outcome === "not_found" || outcome === "not_eligible") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">The selected reservation cannot receive that update.</p>;
-  return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">The action failed. Review the server action log for details.</p>;
+  if (outcome === "rpc_failed") return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">Go-home RPC failed. Check the deployed Core action before retrying.</p>;
+  if (outcome === "config_missing") return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">Core server action configuration is incomplete for go-home updates.</p>;
+  if (outcome === "save_failed") return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">Go-home update failed. Review the server action log for safe details.</p>;
+  return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">The action failed. Review the server action log for safe details.</p>;
 }
 
 function isActiveReservation(summary: ReservationSummaryRow) {

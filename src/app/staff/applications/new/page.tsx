@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createManualApplication } from "./actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { ActionPanel } from "../../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -230,6 +231,14 @@ export default async function NewStaffApplicationPage({
         </section>
 
         <ResultMessage outcome={application} />
+
+        <ActionPanel
+          nextAction={canCreateManualApplication ? "Create a controlled manual application" : "Use owner/admin access for manual application entry"}
+          blockers={canCreateManualApplication ? 0 : 1}
+          mode={canCreateManualApplication ? "available" : "blocked"}
+          href="/staff/actions#applications"
+          detail="Manual application entry uses the existing owner/admin RPC-backed save action and never creates reservations, payments, documents, portal accounts, or public records."
+        />
 
         {!canCreateManualApplication ? (
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950">

@@ -76,6 +76,12 @@ function ResultMessage({ value }: { value?: string }) {
   if (value === "success") return <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Dog record created in Core.</p>;
   if (value === "updated") return <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Dog record updated in Core.</p>;
   if (value === "deleted") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Dog record was marked inactive in Core.</p>;
+  if (value === "unauthorized") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Only owner/admin can change dog records.</p>;
+  if (value === "invalid_input") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Check dog form values, allowed status/sex options, dates, and field lengths.</p>;
+  if (value === "missing_name") return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Enter at least a call name or registered name before saving.</p>;
+  if (value === "config_missing") return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">Core server action configuration is incomplete for dog actions.</p>;
+  if (value === "rpc_missing_or_failed") return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">Dog RPC failed or is not available. Check the deployed Core action before retrying.</p>;
+  if (value === "save_failed" || value === "error") return <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">Dog action failed. Review the server action log for safe details.</p>;
   if (!value) return null;
   return <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Dog action result: {value}</p>;
 }

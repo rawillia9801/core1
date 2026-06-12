@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Controlled Action Workflow Layer.
+- Current as of this documentation pass after the Production Action Workflow + Reliability Layer.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -124,9 +124,13 @@ Checks:
 - [ ] Server actions use authenticated staff actor IDs where applicable.
 - [ ] `/staff/actions` is protected and accessible only through authenticated internal owner/operator access.
 - [ ] `/staff/actions` shows only existing action entry points or review-only links; it does not invent new mutation workflows.
-- [ ] Action panels on command, application, matching, reservation, payment, payment-plan, document, media, go-home, handoff, puppy detail, and proposed-action pages link to the correct controlled action lane.
+- [ ] `/staff/actions` includes application review, matching/assignment, buyer/family cleanup, reservation, document, payment, go-home, media, litter media, blocked, recent, and proposed-action review lanes without automatic execution.
+- [ ] Action panels on command, actions, application list/new/detail, matching, reservation, payment, payment-plan, document, media, go-home, handoff, puppy list/detail, litter list/detail, and proposed-action pages link to the correct controlled action lane.
 - [ ] Proposed action approval remains review-state only and does not execute business changes.
 - [ ] Controlled action links do not trigger email, SMS, Facebook, Twilio, payment processor, document generation, signing provider, portal visibility, public listing, AI, or storage-policy side effects.
+- [ ] Application detail review actions classify invalid input, RPC failure, missing config, save failure, and unauthorized outcomes without showing raw database/service-role errors.
+- [ ] Reservation, payment, cancellation, and go-home actions classify invalid input, not eligible, missing links, blocked, RPC failure, missing config, and save failure outcomes where determinable.
+- [ ] Dog, litter, puppy, and proposed-action manage/review flows show safe operator messages for classified config/RPC/save/input outcomes.
 - [ ] `/staff/applications/new` manual application creation works for authenticated owner/admin users in deployed production configuration.
 - [ ] `/staff/applications/new` blocks staff/helper and unauthenticated users from creating manual applications.
 - [ ] Manual application duplicate/existing-customer outcomes are operator-safe and do not expose raw database errors.

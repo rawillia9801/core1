@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Controlled Action Workflow Layer.
+- Current as of this documentation pass after the Production Action Workflow + Reliability Layer.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,19 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Production Action Workflow + Reliability Layer
+
+Implemented and pushed:
+
+- The Controlled Action Command Center was extended with buyer/family cleanup rows and litter gallery/media readiness rows, all using existing data and review-only links where no mutation support exists.
+- Compact action panels now also appear on `/staff/actions`, `/staff/applications/new`, `/staff/puppies`, `/staff/litters`, and `/staff/litters/[litterId]`.
+- Application detail review actions no longer have a production-only block; they use authenticated owner/admin checks and the existing server-side Core REST/RPC configuration path.
+- Application detail review outcomes now classify invalid input, RPC failure, missing config, save failure, and unauthorized states without showing raw service-role/database errors on screen.
+- Reservation, payment, cancellation, and go-home server actions now classify invalid input, not eligible, missing links, blocked, RPC failure, missing config, and save failure outcomes instead of falling back to generic `error` where the cause can be classified.
+- Dog, litter, puppy, and proposed-action manage/review flows now return safer classified outcomes for config/RPC/save/input failures and show operator-facing messages.
+- Dashboard, payment, go-home, application detail, dog, litter, puppy list, puppy detail, and proposed-action pages now show safer result messages for classified action outcomes.
+- This pass did not add migrations, tables, new unsafe mutations, auth model changes, env changes, Supabase config changes, local Supabase commands, SMTP behavior changes, payment processor behavior, Twilio/SMS/Facebook behavior, AI, public application form changes, customer portal behavior, customer-facing page changes, storage policies, media upload behavior, document generation, or signing-provider behavior.
 
 ### Controlled Action Workflow Layer
 

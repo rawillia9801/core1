@@ -288,6 +288,10 @@ function ResultMessage({
   if (needsInfo) return "Application marked needs-info internally. No customer message or external provider call was triggered.";
   if (noteAdded) return "Internal review note added. No external side effect occurred.";
   if (error === "unauthorized") return "Your profile is not authorized for application review actions.";
+  if (error === "invalid_input") return "Application review action needs a valid application reference and required review notes.";
+  if (error === "rpc_failed") return "Application review RPC failed. Check that the deployed Core review action is available before retrying.";
+  if (error === "config_missing") return "Core server action configuration is incomplete for application review.";
+  if (error === "save_failed") return "Application review action failed. Review the server action log for safe details.";
   if (error) return "Application review action failed. Check the fields and try again.";
   return null;
 }
@@ -519,6 +523,9 @@ export default async function ApplicationDetailPage({
     noteAdded: query.note_added,
     error: query.error,
   });
+  const resultTone = query.error
+    ? "border-red-200 bg-red-50 text-red-800"
+    : "border-emerald-200 bg-emerald-50 text-emerald-900";
   const warning =
     applicationResult.warning ??
     buyerResult.warning ??
@@ -564,7 +571,7 @@ export default async function ApplicationDetailPage({
         </section>
 
         {resultMessage ? (
-          <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold leading-6 text-emerald-900">
+          <section className={`rounded-3xl border p-4 text-sm font-semibold leading-6 ${resultTone}`}>
             {resultMessage}
           </section>
         ) : null}

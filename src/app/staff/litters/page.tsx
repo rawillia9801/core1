@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import type { KennelMediaRow } from "@/lib/kennel-media";
 import { recordPuppyCareObservation, recordPuppyWeight } from "./actions";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -401,6 +402,38 @@ function InfoItem({ label, value }: { label: string; value: ReactNode }) {
 }
 
 function ResultMessage({ searchParams }: { searchParams: { litter?: string; weight_recorded?: string; observation_recorded?: string; error?: string } }) {
+  if (searchParams.litter === "success") {
+    return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">Litter record created in Core.</section>;
+  }
+
+  if (searchParams.litter === "updated") {
+    return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">Litter record updated in Core.</section>;
+  }
+
+  if (searchParams.litter === "deleted") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">Litter record was archived in Core.</section>;
+  }
+
+  if (searchParams.litter === "unauthorized") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">Only owner/admin can change litter records.</section>;
+  }
+
+  if (searchParams.litter === "invalid_input" || searchParams.litter === "same_parents" || searchParams.litter === "invalid_counts") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">Check litter form values, parent links, counts, dates, and field lengths.</section>;
+  }
+
+  if (searchParams.litter === "config_missing") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">Core server action configuration is incomplete for litter actions.</section>;
+  }
+
+  if (searchParams.litter === "rpc_missing_or_failed") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">Litter RPC failed or is not available. Check the deployed Core action before retrying.</section>;
+  }
+
+  if (searchParams.litter === "save_failed" || searchParams.litter === "error") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">Litter action failed. Review the server action log for safe details.</section>;
+  }
+
   if (searchParams.weight_recorded === "1") {
     return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">Puppy weight recorded. Core stored the observation only and did not message customers, publish puppies, diagnose, or call external providers.</section>;
   }
@@ -570,6 +603,14 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
 
         {litter ? <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">Litter action result: {litter}</section> : null}
         <ResultMessage searchParams={resolvedSearchParams} />
+
+        <ActionPanel
+          nextAction={neonatalLitters.length > 0 ? "Review neonatal litter care and linked puppy readiness" : expectedSetupRows.length > 0 ? "Review expected litter setup blockers" : "Review litter media and record readiness"}
+          blockers={missingDueDateCount + littersMissingMedia.length + puppiesMissingMedia.length + puppiesMissingPrimaryMedia.length}
+          mode={canLogCare ? "available" : "review-only"}
+          href="/staff/actions#media"
+          detail="Litter actions use existing litter, puppy care, and media-readiness workflows only; direct litter uploads, public publishing, messaging, payments, documents, and provider calls remain disconnected."
+        />
 
         {litterResult.warning || dogResult.warning || puppyResult.warning || weightResult.warning || puppyEventResult.warning || mediaResult.warning ? (
           <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">

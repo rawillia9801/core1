@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the internal Puppy Assignment / Matchmaking / Waitlist Command Center work landed.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the Production Action Workflow + Reliability Layer work landed.
 
 Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
@@ -43,8 +43,10 @@ Since the original Chapter 1 review, these additional pieces have landed:
 - Conditional SMTP owner alert and customer receipt confirmation for application submissions.
 - `/staff/matching` internal Puppy Assignment / Matchmaking / Waitlist Command Center.
 - Compact matching/readiness context on related application, buyer, family, puppy, litter, and reservation detail pages.
+- `/staff/actions` Controlled Action Command Center with existing-action and review-only queues.
+- Classified operator-facing outcomes for application detail review, reservation/payment/go-home actions, kennel manage actions, and proposed-action review.
 
-These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores are advisory only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
+These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores and action queues are advisory or operator-confirmed only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
 
 ## Urgent And High-Priority Risks
 
@@ -83,9 +85,9 @@ SMTP application receipt behavior exists. Before any additional SMTP email types
 
 Public application submission introduces repeat-submission and partial-failure risk. Core needs explicit duplicate handling, failed-intake behavior, and retry/dead-letter review rules.
 
-### 6. Proposed Action Execution Remains Undefined
+### 6. Controlled Action Execution Remains Bounded
 
-The proposed action queue is review-state only. Approval must not execute business changes until a safe execution engine is separately designed.
+The action command center may expose existing safe server actions and existing RPC-backed actions, but missing workflows stay review-only. The proposed action queue is review-state only. Approval must not execute business changes until a safe execution engine is separately designed.
 
 ### 7. Matching Must Stay Advisory Until Write Rules Exist
 

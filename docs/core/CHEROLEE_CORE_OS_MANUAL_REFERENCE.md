@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the internal Puppy Assignment / Matchmaking / Waitlist Command Center work.
+Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the Production Action Workflow + Reliability Layer work.
 
 This is not a replacement for implementation docs. It explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
 
@@ -50,8 +50,8 @@ Screens only matter if they read and write the correct source of truth.
 
 | Capability | What It Does | Current State |
 | --- | --- | --- |
-| Owner Command Center | Daily priorities, blockers, alerts, metrics, and next actions in one cockpit. | Internal read-only command center exists. |
-| Application Management | Receive, review, approve, deny, waitlist, and convert applicants with audit trail. | Private entry, public/embedded intake, application review, and internal matching decision-support exist; review validation/hardening still needed. |
+| Owner Command Center | Daily priorities, blockers, alerts, metrics, and next actions in one cockpit. | Internal command center and controlled action command center exist. |
+| Application Management | Receive, review, approve, deny, waitlist, and convert applicants with audit trail. | Private entry, public/embedded intake, application review, classified action outcomes, and internal matching decision-support exist; review validation/hardening still needed. |
 | Buyer & Family CRM | Track households, history, preferences, puppies, payments, and conversations. | Buyer/Family 360 workspaces exist internally. |
 | Waitlist Management | Capture timing, preferences, fee status, priority, renewal, and expiration. | Internal matching/waitlist readiness view exists; dedicated write workflow still future. |
 | Dog Records | Sire/dam profiles, registry, DNA status, health notes, retirement, and pedigree. | Internal dog profile and document vault exist. |
@@ -64,7 +64,7 @@ Screens only matter if they read and write the correct source of truth.
 | Customer Portal | Puppy updates, documents, payments, messages, resources. | Not implemented. |
 | Kennel Monitoring | Temperature, humidity, motion, camera status, distress alerts. | Not connected; planning only. |
 | Smart Home Control | Lights, plugs, displays, speakers, alerts through Home Assistant. | Not connected; planning only. |
-| AI Assistant | Read, summarize, draft, propose, and match under guardrails. | Proposed-action foundation exists; AI providers blocked. |
+| AI Assistant | Read, summarize, draft, propose, and match under guardrails. | Proposed-action review foundation is connected to `/staff/actions`; AI providers blocked. |
 | Core Nervous System | Health signals, dependencies, incidents, recovery. | Future. |
 | CoreFace / Presence | Visual expression of system state. | Future. |
 | Reporting | Revenue, receivables, placements, response time, kennel health, build status. | Partial internal summaries exist. |
