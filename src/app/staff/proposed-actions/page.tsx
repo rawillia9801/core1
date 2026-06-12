@@ -4,6 +4,7 @@ import {
   createProposedAction,
   rejectProposedAction,
 } from "./actions";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -429,6 +430,14 @@ export default async function ProposedActionsPage({
             {statusMessage}
           </section>
         ) : null}
+
+        <ActionPanel
+          nextAction={needsReviewCount > 0 ? "Review proposed action records" : "Review central action queue"}
+          blockers={highOrBlockedCount}
+          mode="review-only"
+          href="/staff/actions#proposed"
+          detail="Proposed Actions remain review records only; approval updates proposal state and does not execute business changes."
+        />
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard

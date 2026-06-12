@@ -3,6 +3,7 @@ import { updateGoHomeDetail } from "../../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../actions";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
+import { ActionPanel } from "../../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -381,6 +382,14 @@ export default async function StaffGoHomeHandoffPage() {
           { label: "Documents", value: lanes.find((lane) => lane.key === "documents")?.rows.length ?? 0, note: "metadata blockers" },
           { label: "Checklist", value: lanes.find((lane) => lane.key === "checklist")?.rows.length ?? 0, note: "incomplete tasks" },
         ]} />
+
+        <ActionPanel
+          nextAction={missingSchedule > 0 ? "Review missing schedule or handoff location" : "Review handoff blockers"}
+          blockers={rows.filter((row) => row.blockers.length > 0).length}
+          mode={canViewSensitive ? "available" : "review-only"}
+          href="/staff/actions#go-home"
+          detail="Handoff actions use existing go-home detail and checklist controls only; no payment, document, customer portal, or provider side effects are added."
+        />
 
         <SectionNav items={[
           { href: "#overview", label: "Overview" },

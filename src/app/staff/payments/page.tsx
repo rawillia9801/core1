@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { recordReservationPayment } from "../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -839,6 +840,14 @@ export default async function StaffPaymentsPage({
             { label: "Payments/deposits", value: canViewFinancials ? formatCurrency(totalPaymentsDeposits) : "Restricted", note: "posted decrease rows" },
             { label: "Adjustments", value: canViewFinancials ? formatCurrency(totalFeesRefundsChargebacks + totalCredits) : "Restricted", note: "credits, fees, refunds, chargebacks" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={canViewFinancials ? "Review payment accounts and verified ledger-entry actions" : "Review payment account summary"}
+          blockers={canViewFinancials ? attentionAccounts : 0}
+          mode={canViewFinancials ? "available" : "review-only"}
+          href="/staff/actions#payments"
+          detail="Payment actions use the existing Core ledger recording workflow only; no processor, refund, payment link, or money movement is connected."
         />
 
         <SectionNav

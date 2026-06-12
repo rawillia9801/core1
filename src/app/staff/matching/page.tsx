@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -547,6 +548,14 @@ export default async function MatchingPage() {
             { label: "Unmatched approved", value: unmatchedApprovedApplicants.length, note: "Approved without active reservation" },
             { label: "Reservation ready", value: reservationReady.length, note: "Readiness signal only" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={reservationReady.length ? "Review reservation-ready match candidates" : "Review match blockers and missing preference data"}
+          blockers={blockedMatches.length}
+          mode="review-only"
+          href="/staff/actions#matching"
+          detail="Matching actions remain review-only; reservation creation stays in existing operator-confirmed workflows."
         />
 
         <SectionNav

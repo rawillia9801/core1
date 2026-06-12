@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -745,6 +746,14 @@ export default async function StaffDocumentsPage() {
           <StatCard label="Reservation Blockers" value={reservationBlockerCount} note="Active reservations with document blockers" />
           <StatCard label="Go-Home Blockers" value={goHomeBlockerCount} note="Document packet or go-home readiness blockers" />
         </section>
+
+        <ActionPanel
+          nextAction={missingRequirementCount > 0 ? "Review missing document requirements" : "Review document metadata readiness"}
+          blockers={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount}
+          mode="review-only"
+          href="/staff/actions#documents"
+          detail="Document actions are metadata review links only; no generation, upload, signing, email, or provider workflow is connected."
+        />
 
         <nav className="operator-section-nav" aria-label="Document readiness sections">
           <a href="#overview"><span>Overview</span><small>{documents.length}</small></a>

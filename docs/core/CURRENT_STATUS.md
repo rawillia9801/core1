@@ -2,12 +2,12 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the internal manual application and puppy save production bug fix.
+- Current as of this documentation pass after the Controlled Action Workflow Layer.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
-- Active local working folder for this pass: `C:\Users\rawil\OneDrive\Documents\core1-ui-worktree`
-- The dirty normal checkout was not touched.
+- Active local working folder for this pass: `C:\Users\rawil\core1-ui-worktree`
+- OneDrive worktrees/checkouts are not active work locations for this project.
 
 ## Current Direction
 
@@ -16,6 +16,18 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Controlled Action Workflow Layer
+
+Implemented and pushed:
+
+- `/staff/actions` was added as the internal Action Command Center.
+- The action center consolidates existing safe action entry points and review-only links across applications, matching, reservations, payments, payment plans, documents, media, go-home, handoff, puppy detail, and proposed actions.
+- A shared compact `ActionPanel` now appears on key internal command/readiness pages to show next action, blocker count, action mode, and a link back into the controlled action queue.
+- `/staff/proposed-actions` now connects visually and navigationally back to `/staff/actions`; proposed action approval remains review-state only and does not execute business changes.
+- Action rows use existing server actions/RPC-backed workflows only where those already exist, including application review, reservation/payment/go-home/checklist workflows, kennel record actions, media actions, and proposed-action review records.
+- Review-only areas remain review-only when no mutation support exists.
+- This pass did not add new server actions, RPCs, migrations, auth changes, environment changes, Supabase config changes, storage policy changes, media upload behavior, document generation, signing providers, payment processor behavior, Twilio/SMS/Facebook behavior, AI behavior, public application behavior, customer portal behavior, or customer-facing pages.
 
 ### Internal Manual Application And Puppy Save Bug Fix
 

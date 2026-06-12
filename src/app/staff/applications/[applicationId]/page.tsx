@@ -7,6 +7,7 @@ import {
   markApplicationNeedsInfoFromDetail,
 } from "./actions";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
+import { ActionPanel } from "../../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -582,6 +583,14 @@ export default async function ApplicationDetailPage({
             { label: "Blockers", value: blockers.length, note: reservationResult.rows.length ? `${reservationResult.rows.length} reservation link(s)` : "No reservation link" },
             { label: "Documents", value: `${completeDocuments} / ${documentResult.rows.length}`, note: "buyer/family linked metadata" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={nextAction}
+          blockers={blockers.length}
+          mode={TERMINAL_STATUSES.has(normalizedStatus) ? "review-only" : "available"}
+          href="/staff/actions#applications"
+          detail="Application detail actions stay inside existing review controls; matching and reservation review remain operator-confirmed."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -9,6 +9,7 @@ import {
 } from "./actions";
 import { type KennelMediaRow, withKennelMediaSignedUrls } from "@/lib/kennel-media";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { ActionPanel } from "../../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -662,6 +663,14 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
           <StatCard label="Photos" value={mediaPreviews.length} note="Private kennel-media only" />
           <StatCard label="Documents" value={`${completeDocumentCount} / ${documentResult.rows.length}`} note="Puppy-linked metadata" />
         </section>
+
+        <ActionPanel
+          nextAction={activeReservation ? "Review active reservation and handoff readiness" : "Review matching and reservation assignment"}
+          blockers={watchSignals.length}
+          mode={activeReservation ? "review-only" : "available"}
+          href="/staff/actions#matching"
+          detail="Puppy actions use existing reservation assignment, media, care, and detail workflows only."
+        />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

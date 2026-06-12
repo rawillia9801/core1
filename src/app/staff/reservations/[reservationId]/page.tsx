@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
+import { ActionPanel } from "../../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -819,6 +820,14 @@ export default async function ReservationDetailPage({
             { label: "Checklist", value: `${completeChecklistCount} / ${checklistResult.rows.length}`, note: "complete or not applicable" },
             { label: "Blockers", value: blockers.length, note: "deterministic readiness" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={blockers.length > 0 ? "Resolve reservation blockers" : "Review reservation handoff readiness"}
+          blockers={blockers.length}
+          mode={canViewSensitive ? "available" : "review-only"}
+          href="/staff/actions#reservations"
+          detail="Reservation actions route through existing payment, document, go-home, and handoff workspaces."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

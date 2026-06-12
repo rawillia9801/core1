@@ -4,6 +4,7 @@ import { updateGoHomeDetail } from "../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "./actions";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -583,6 +584,14 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
             { label: "Documents", value: canViewSensitive ? missingDocumentCount : "Restricted", note: "missing/incomplete" },
             { label: "Checklist", value: incompleteChecklistCount, note: "incomplete items" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={blockedCount > 0 || setupCount > 0 ? "Review go-home blockers and setup gaps" : "Review go-home handoff queue"}
+          blockers={missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount}
+          mode={canViewSensitive ? "available" : "review-only"}
+          href="/staff/actions#go-home"
+          detail="Go-home actions route through existing schedule/detail and checklist controls only; no messages, payments, documents, portal, or provider calls are connected."
         />
 
         <SectionNav

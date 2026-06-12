@@ -10,6 +10,7 @@ const primaryNavigation = [
     label: "Operations",
     items: [
       { href: "/staff/command", label: "Command Center", ready: true },
+      { href: "/staff/actions", label: "Actions", ready: true },
       { href: "/staff/applications", label: "Applications", ready: true },
       { href: "/staff/buyers", label: "Buyers", ready: true },
       { href: "/staff/families", label: "Families", ready: true },

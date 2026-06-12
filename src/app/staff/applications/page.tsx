@@ -3,6 +3,7 @@ import { approveApplication, createReservation } from "../../application-actions
 import { getDashboardData } from "../../dashboard-data";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -278,6 +279,14 @@ export default async function StaffApplicationsPage({
         <ResultMessage outcome={application} />
         <ApprovalResult outcome={approval} />
         <ReservationResult outcome={reservation} />
+
+        <ActionPanel
+          nextAction={receivedCount > 0 ? "Review received applications" : reservationReadyCount > 0 ? "Review approved applications for reservation setup" : "Review application action queue"}
+          blockers={receivedCount}
+          mode={isOwnerOrAdmin && receivedCount > 0 ? "available" : "review-only"}
+          href="/staff/actions#applications"
+          detail="Application actions use existing approval and reservation workflows only where they are already available."
+        />
 
         <SummaryStrip
           items={[

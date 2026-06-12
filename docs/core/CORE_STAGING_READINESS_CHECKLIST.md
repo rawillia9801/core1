@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the internal manual application and puppy save production bug fix.
+- Current as of this documentation pass after the Controlled Action Workflow Layer.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -122,6 +122,11 @@ Checks:
 ## Action Authorization Readiness
 
 - [ ] Server actions use authenticated staff actor IDs where applicable.
+- [ ] `/staff/actions` is protected and accessible only through authenticated internal owner/operator access.
+- [ ] `/staff/actions` shows only existing action entry points or review-only links; it does not invent new mutation workflows.
+- [ ] Action panels on command, application, matching, reservation, payment, payment-plan, document, media, go-home, handoff, puppy detail, and proposed-action pages link to the correct controlled action lane.
+- [ ] Proposed action approval remains review-state only and does not execute business changes.
+- [ ] Controlled action links do not trigger email, SMS, Facebook, Twilio, payment processor, document generation, signing provider, portal visibility, public listing, AI, or storage-policy side effects.
 - [ ] `/staff/applications/new` manual application creation works for authenticated owner/admin users in deployed production configuration.
 - [ ] `/staff/applications/new` blocks staff/helper and unauthenticated users from creating manual applications.
 - [ ] Manual application duplicate/existing-customer outcomes are operator-safe and do not expose raw database errors.

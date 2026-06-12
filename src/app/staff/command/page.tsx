@@ -7,6 +7,7 @@ import {
 } from "@/lib/staff-auth";
 import type { ReactNode } from "react";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -1402,6 +1403,14 @@ export default async function StaffCommandPage() {
             { label: "Communications", value: queuedNotificationCount, note: `${unsentNotificationCount} pending/preview` },
             { label: "Proposals", value: canViewAudit ? proposedActions.length : "Restricted", note: "review state only" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={recommendedSteps[0]?.title ?? "Review the central action queue"}
+          blockers={priorityCards.length}
+          mode="review-only"
+          href="/staff/actions"
+          detail="Action Command Center consolidates existing safe actions and review-only links across Core."
         />
 
         <SectionNav

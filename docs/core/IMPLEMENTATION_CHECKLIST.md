@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the internal manual application and puppy save production bug fix.
+- Current as of this documentation pass after the Controlled Action Workflow Layer.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -25,7 +25,7 @@ Core-native owner/operator operating system foundation
   -> buyer/family 360 workspaces
   -> internal matching / waitlist decision-support review
   -> document/message/payment/go-home readiness workspaces
-  -> command center and proposed-action review foundation
+  -> controlled action command center and proposed-action review foundation
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -47,7 +47,8 @@ Core-native owner/operator operating system foundation
 
 - [x] Active repo confirmed as `rawillia9801/core1` on `main`.
 - [x] Correct local path is `C:\Users\rawil\core1`.
-- [x] Wrong OneDrive checkout is excluded from active work.
+- [x] Active UI worktree path is `C:\Users\rawil\core1-ui-worktree`.
+- [x] OneDrive worktrees/checkouts are excluded from active work.
 - [x] Next.js App Router / TypeScript scaffold exists.
 - [x] Supabase project structure exists.
 - [x] Canonical docs live under `docs/core/`.
@@ -192,10 +193,15 @@ Core-native owner/operator operating system foundation
 - [x] Shared operator UI helpers now cover shell, page headers, metric cards, panels, section tabs, status pills, alert panels, activity rows, quick actions, and summary grids without adding a third-party UI library.
 - [x] `/staff/command` exists as read-only Core OS Command Center.
 - [x] `/staff/command` was reorganized into a segmented command center with Today, Neonatal, Buyers/Families, Payments, Communications, Events/Audit, Proposed Actions, and System lanes while remaining read-only.
+- [x] `/staff/actions` exists as the Controlled Action Command Center.
+- [x] `/staff/actions` consolidates existing safe action entry points and review-only links across application review, matching, reservation readiness, payment ledger review, payment plans, documents, media, go-home, handoff, puppy detail, and proposed-action review.
+- [x] Shared compact Action panels link major internal command/readiness pages back to `/staff/actions` with next-action, blocker, mode, and safety-boundary context.
 - [x] `/staff/proposed-actions` exists as owner/admin proposal queue.
+- [x] `/staff/proposed-actions` is visually/navigationally connected to `/staff/actions`.
 - [x] `/staff/events` exists as read-only Events/Audit workspace.
 - [x] `/staff/kennel-logs` exists as read-only kennel event/audit history workspace.
 - [x] Proposed action approval remains review-state only and does not execute business changes.
+- [x] Controlled action workflow did not add new mutation workflows, RPCs, migrations, auth changes, env changes, storage policies, provider calls, media upload behavior, document generation, signing behavior, customer portal behavior, or customer-facing pages.
 - [x] Operator visual system pass applies broadly to command, payments, payment plans, go-home, go-home handoff, applications, application detail, buyers, buyer detail, families, family detail, reservation detail, reservation handoff, puppy detail, puppy handoff, and the main overview/readiness workspaces while preserving existing behavior.
 - [x] Visible operator-facing source wording now uses Core operational language such as `Core Operational Overview` and no longer refers to `LOCAL SUPABASE READ-ONLY`, `local Supabase`, `local Core data`, `local database`, `local server`, or `development database`.
 - [x] Long internal review/readiness pages now share compact operator workspace styling with command headers, summary rows, segmented navigation, subtler panels, and reduced card density; no auth, env, Supabase config, migrations, SMTP behavior, public form behavior, payment processor, Twilio/SMS/Facebook, AI, portal, server-action, or external-integration behavior changed.
@@ -265,9 +271,10 @@ SMTP application receipt email is implemented but conditional on environment con
 
 ## Immediate Next Ordered Tasks
 
-1. Validate deployed `/embed/application` submission end-to-end.
-2. Verify internal owner/admin application review visibility for the expanded sections.
-3. Add SMTP send-attempt logging for owner and customer receipt emails.
-4. Add duplicate application handling.
-5. Add public write/RLS boundary tests.
-6. Continue RLS/security hardening before broader customer-facing access.
+1. Validate protected `/staff/actions` and action-panel routes with real owner/admin access.
+2. Validate deployed `/embed/application` submission end-to-end.
+3. Verify internal owner/admin application review visibility for the expanded sections.
+4. Add SMTP send-attempt logging for owner and customer receipt emails.
+5. Add duplicate application handling.
+6. Add public write/RLS boundary tests.
+7. Continue RLS/security hardening before broader customer-facing access.

@@ -10,6 +10,7 @@ import {
   SectionNav,
   SummaryStrip,
 } from "../operator-ui";
+import { ActionPanel } from "../action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -236,6 +237,14 @@ export default async function StaffMediaPage() {
             { label: "Puppies missing primary", value: puppiesMissingPrimary.length, note: "Active puppy records" },
             { label: "Litters missing gallery", value: littersMissingGallery.length, note: "Derived from linked puppy photos" },
           ]}
+        />
+
+        <ActionPanel
+          nextAction={attentionCount > 0 ? "Review missing primary photos and stale puppy galleries" : "Review media readiness queue"}
+          blockers={attentionCount}
+          mode="review-only"
+          href="/staff/actions#media"
+          detail="Media actions link to existing private dog and puppy media workflows only; no upload behavior, storage policy, public URL, or portal publishing changes are added."
         />
 
         <SectionNav
