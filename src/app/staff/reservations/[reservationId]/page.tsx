@@ -821,6 +821,28 @@ export default async function ReservationDetailPage({
           ]}
         />
 
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Matching / Assignment Context</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                This reservation is the current buyer/family plus puppy assignment record. Matching remains review-only and does not alter this reservation.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge tone={statusTone(summary.reservation_status)}>{formatKey(summary.reservation_status)}</Badge>
+                <Badge>{summary.application_id ? "Application linked" : "No application link"}</Badge>
+                <Badge>{summary.puppy_id ? "Puppy linked" : "No puppy link"}</Badge>
+                <Badge>{blockers.length} blocker(s)</Badge>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/matching" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Matching</Link>
+              {summary.application_id ? <Link href={`/staff/applications/${summary.application_id}`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Application</Link> : null}
+              {summary.puppy_id ? <Link href={`/staff/puppies/${summary.puppy_id}`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Puppy</Link> : null}
+            </div>
+          </div>
+        </section>
+
         <SectionNav
           items={[
             { href: "#overview", label: "Overview" },

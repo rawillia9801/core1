@@ -531,6 +531,8 @@ export default async function ApplicationDetailPage({
   const completeDocuments = documentResult.rows.filter((document) =>
     isCompleteDocumentStatus(document.status),
   ).length;
+  const puppyPreferenceSection = sectionResult.rows.find((section) => section.section_key === "puppy_preferences");
+  const puppyPreferenceResponses = puppyPreferenceSection?.responses ?? {};
 
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -581,6 +583,31 @@ export default async function ApplicationDetailPage({
             { label: "Documents", value: `${completeDocuments} / ${documentResult.rows.length}`, note: "buyer/family linked metadata" },
           ]}
         />
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Matching Readiness</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Internal matching signal only. No puppy is assigned and no reservation is created from this panel.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge tone={statusTone(status)}>{formatKey(status)}</Badge>
+                <Badge>{reservationResult.rows.length ? "Reservation linked" : "No reservation link"}</Badge>
+                <Badge>{blockers.length} blocker(s)</Badge>
+                <Badge>{documentResult.rows.length ? `${completeDocuments} of ${documentResult.rows.length} docs` : "No document record found"}</Badge>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Preferences: gender {formatValue(puppyPreferenceResponses.preferredGender) || "preference not recorded"} / coat {formatValue(puppyPreferenceResponses.preferredCoatType) || "preference not recorded"} / color {formatValue(puppyPreferenceResponses.colorPreference) || "preference not recorded"}.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/matching" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Matching</Link>
+              <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Available puppies</Link>
+              {reservationResult.rows[0]?.reservation_id ? <Link href={`/staff/reservations/${reservationResult.rows[0].reservation_id}`} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Reservation</Link> : null}
+            </div>
+          </div>
+        </section>
 
         <SectionNav
           items={[

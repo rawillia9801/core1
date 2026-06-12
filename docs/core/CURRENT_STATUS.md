@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the internal Documents / Contracts Readiness Center work.
+- Current as of this documentation pass after the internal Puppy Assignment / Matchmaking / Waitlist Command Center work.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,17 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Internal Puppy Assignment / Matchmaking / Waitlist Command Center
+
+Implemented and pushed:
+
+- `/staff/matching` was added as an internal decision-support command center for puppy matching, assignment review, and waitlist readiness.
+- The matching center reads existing application, application section, buyer, family, buyer preference, puppy, litter, dog, reservation summary, document, media, and event metadata.
+- Readiness now shows applicant preferences, waitlist candidates, available puppies, reservation-ready lanes, blockers, recent reserved activity, and suggested applicant/puppy fit scores.
+- Matching labels are advisory only, including strong fit, possible fit, needs review, blocked, already reserved, missing preference data, and missing puppy data.
+- Related application, buyer, family, puppy, litter, and reservation detail pages now surface compact matching/readiness context and links back to the Matching Command Center where existing data supports it.
+- This pass did not approve or deny applications, assign puppies, create reservations, move money, send messages, generate documents, expose customer-facing matching, create AI/provider behavior, add migrations, or alter storage/auth/environment configuration.
 
 ### Internal Documents / Contracts Readiness Center
 
@@ -180,6 +191,7 @@ Current implemented workflow now includes:
 ```text
 private owner/operator application entry
   -> application review
+  -> internal matching / waitlist decision-support review
   -> approval / reservation creation
   -> deposit/payment ledger recording
   -> ledger-derived balance review
@@ -219,6 +231,7 @@ Internal owner/operator routes include, among others:
 - `/staff/buyers/[buyerId]`
 - `/staff/families`
 - `/staff/families/[familyId]`
+- `/staff/matching`
 - `/staff/dogs`
 - `/staff/dogs/[dogId]`
 - `/staff/litters`

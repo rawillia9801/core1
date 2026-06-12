@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the public/embedded website application form and conditional SMTP application receipt alerts were added.
+- Current as of this documentation pass after the internal Puppy Assignment / Matchmaking / Waitlist Command Center was added.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -133,6 +133,7 @@ Checks:
 
 - [ ] Exact real records are selected and approved by the owner before staging selected internal data.
 - [ ] Public application test submissions use either test applicants or explicitly approved real submissions.
+- [ ] Any real matching, assignment, or waitlist review records are explicitly owner-approved before inspection in `/staff/matching`.
 - [ ] No bulk import is included.
 - [ ] No payment processor records are included.
 - [ ] No document/signature records are included unless explicitly approved.
@@ -171,6 +172,9 @@ Confirm all remain off unless explicitly approved:
 - [ ] Cameras.
 - [ ] Smart mirror or display automations.
 - [ ] Automatic approvals.
+- [ ] Automatic denials.
+- [ ] Automatic waitlist decisions.
+- [ ] Automatic puppy assignments.
 - [ ] Automatic reservations.
 - [ ] Automatic payments, refunds, fees, chargebacks, or credits.
 
@@ -180,6 +184,7 @@ SMTP application receipt emails are the only current live external side-effect p
 
 - [ ] Application appears in `/staff/applications`.
 - [ ] Application detail view shows submitted sections clearly.
+- [ ] `/staff/matching` can read the submitted puppy preference section for owner/operator review only.
 - [ ] Buyer/family records are created and link correctly.
 - [ ] Event row exists for application receipt.
 - [ ] Owner/admin can review the submitted answers.
@@ -189,6 +194,19 @@ SMTP application receipt emails are the only current live external side-effect p
 - [ ] No portal visibility occurred.
 - [ ] No public puppy listing behavior changed.
 - [ ] No automatic approval/denial/waitlist decision occurred.
+- [ ] No automatic matching score changed a record, created a reservation, sent a message, moved money, generated a document, or called an external provider.
+
+## Internal Matching / Waitlist Readiness
+
+- [ ] `/staff/matching` is accessible only through protected internal owner/operator access.
+- [ ] Matching recommendations are visually presented as advisory decision-support, not final decisions.
+- [ ] Available puppy, applicant, waitlist, reservation-ready, blocker, and recent activity lanes are reviewed against known records.
+- [ ] Detail links return to the correct application, buyer, family, puppy, litter, and reservation records where present.
+- [ ] Missing preference data and missing puppy data are clearly flagged instead of guessed.
+- [ ] Matching review does not approve or deny applications.
+- [ ] Matching review does not assign puppies or create reservations.
+- [ ] Matching review does not send email, SMS, portal messages, Facebook messages, or Twilio events.
+- [ ] Matching review does not create payment, document, upload, signature, AI, or provider side effects.
 
 ## Rollback Plan
 

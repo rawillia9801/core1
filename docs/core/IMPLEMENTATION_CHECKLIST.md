@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after deployment of the public/embedded Southwest Virginia Chihuahua puppy application form and conditional SMTP application receipt alerts.
+- Current as of this documentation pass after deployment of the internal Puppy Assignment / Matchmaking / Waitlist Command Center.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -23,6 +23,7 @@ Core-native owner/operator operating system foundation
   -> private application/reservation/payment workflow
   -> kennel/litter/puppy/dog operational workspaces
   -> buyer/family 360 workspaces
+  -> internal matching / waitlist decision-support review
   -> document/message/payment/go-home readiness workspaces
   -> command center and proposed-action review foundation
   -> public/embedded website application intake
@@ -72,6 +73,9 @@ Core-native owner/operator operating system foundation
 - [x] Private application entry creates buyer, family, application, sections, events, and audit rows.
 - [x] Application approval RPC exists: `core_approve_application`.
 - [x] Application list exists at `/staff/applications`.
+- [x] `/staff/matching` exists as an internal Puppy Assignment / Matchmaking / Waitlist Command Center.
+- [x] Matching reads existing application sections, buyer/family context, buyer preferences, puppy/litter/dog records, reservation summary rows, document metadata, private media metadata, and events for decision-support only.
+- [x] Matching shows applicant preference fit, available puppy lanes, waitlist candidates, reservation-ready review, blockers, recent reserved activity, and source-record links without approving, denying, reserving, assigning, messaging, charging, generating documents, or calling providers.
 - [x] Public `/apply` application route exists.
 - [x] Public `/apply/received` confirmation route exists.
 - [x] Embeddable `/embed/application` route exists for website iframe use.
@@ -138,6 +142,7 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/dogs/[dogId]` and `/staff/puppies/[puppyId]` include media readiness summaries, primary-photo status, gallery counts, missing-media blockers, and links to the Media Command Center while preserving existing private upload/delete behavior.
 - [x] `/staff/litters` includes litter media readiness derived from linked puppy media rows, dam/sire context, missing litter gallery signals, and missing puppy photo/primary blockers.
 - [x] `/staff/litters/[litterId]` exists as a read-only internal litter media readiness detail page. Direct litter uploads remain unavailable because the current media table supports dog and puppy entity types only.
+- [x] Puppy, litter, and reservation detail pages include compact matching/assignment context and links to `/staff/matching` without changing reservation or assignment behavior.
 - [x] Kennel workflows remain internal only and do not diagnose animals, publish puppies, message customers, update a portal, process payments, generate documents, call AI/providers, or control devices.
 
 ### Buyer / Family / Relationship Workspaces
@@ -152,6 +157,7 @@ Core-native owner/operator operating system foundation
 - [x] Buyer/Family 360 remains internal visibility only.
 - [x] Buyer/family/application workspaces were completed with command headers, compact summaries, segmented section navigation, blocker/attention panels, next-action guidance, and cross-links to related applications, buyers, families, reservations, puppies, payments, documents, go-home, events, and Command.
 - [x] Application detail shows submitted application sections and linked applicant/contact/family/reservation/event/audit context clearly without auto-approval, customer messaging, payment processing, document generation, puppy publishing, portal behavior, or external-provider calls.
+- [x] Application, buyer, and family detail pages include compact matching/readiness context and links to `/staff/matching` where existing data supports it.
 - [x] Visible operator/customer-facing source wording no longer refers to local Supabase, local Core data, local database, local server, or development database.
 
 ### Document / Message / Notification Readiness

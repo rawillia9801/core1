@@ -178,6 +178,7 @@ export default async function LitterDetailPage({ params }: { params: Promise<{ l
   const dogsById = new Map(dogResult.rows.map((dog) => [dog.id, dog]));
   const puppies = puppyResult.rows;
   const media = mediaResult.rows.filter((row) => row.puppy_id && puppies.some((puppy) => puppy.id === row.puppy_id));
+  const availablePuppies = puppies.filter((puppy) => puppy.status?.toLowerCase() === "available");
   const puppiesWithMedia = puppies.filter((puppy) => mediaForPuppy(media, puppy.id).length > 0).length;
   const puppiesWithPrimary = puppies.filter((puppy) => hasPrimary(mediaForPuppy(media, puppy.id))).length;
   const blockers = [
@@ -214,6 +215,27 @@ export default async function LitterDetailPage({ params }: { params: Promise<{ l
             { label: "Direct litter upload", value: "Not available", note: "Current media table supports dog/puppy only" },
           ]}
         />
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Matching Readiness</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Litter-level matching signal from linked puppy availability, sex counts, media readiness, and parent context.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge tone={availablePuppies.length ? "green" : "slate"}>{availablePuppies.length} available puppy(ies)</Badge>
+                <Badge>{puppies.length} linked puppy(ies)</Badge>
+                <Badge>{puppiesWithPrimary} with primary photo</Badge>
+                <Badge>{Math.max(blockers.length - 1, 0)} blocker(s)</Badge>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/matching" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Matching</Link>
+              <Link href="/staff/puppies" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Puppies</Link>
+            </div>
+          </div>
+        </section>
 
         <SectionNav
           items={[

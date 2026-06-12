@@ -13,6 +13,7 @@ const primaryNavigation = [
       { href: "/staff/applications", label: "Applications", ready: true },
       { href: "/staff/buyers", label: "Buyers", ready: true },
       { href: "/staff/families", label: "Families", ready: true },
+      { href: "/staff/matching", label: "Matching", ready: true },
       { href: "/staff/reservations", label: "Reservations", ready: true },
       { href: "/staff/puppies", label: "Puppies", ready: true },
       { href: "/staff/dogs", label: "Dogs", ready: true },

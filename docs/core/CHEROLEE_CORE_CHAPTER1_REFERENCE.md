@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the internal Documents / Contracts Readiness Center work landed.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the internal Puppy Assignment / Matchmaking / Waitlist Command Center work landed.
 
 Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
@@ -14,7 +14,7 @@ Read this before work that touches Core architecture, build order, application r
 - Stack: Next.js App Router, TypeScript, Supabase/PostgreSQL, Vercel
 - Auth: Supabase Auth mapped to `core_profiles`
 - Current phase: Phase 1 internal foundation with limited public application intake now present
-- Alignment status: aligned, but customer-facing/public-write hardening is now an active concern
+- Alignment status: aligned, with customer-facing/public-write hardening and owner-approved matching review still active concerns
 
 ## Alignment Verdict
 
@@ -41,8 +41,10 @@ Since the original Chapter 1 review, these additional pieces have landed:
 - `/embed/application` and `/embed/application/received` iframe-friendly website application routes.
 - Expanded website application form matching the uploaded PDF sections and terms/declarations.
 - Conditional SMTP owner alert and customer receipt confirmation for application submissions.
+- `/staff/matching` internal Puppy Assignment / Matchmaking / Waitlist Command Center.
+- Compact matching/readiness context on related application, buyer, family, puppy, litter, and reservation detail pages.
 
-These additions do not change the Core authority model. Application submission creates records and acknowledgements only. It must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, or make placement decisions automatically.
+These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores are advisory only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
 
 ## Urgent And High-Priority Risks
 
@@ -85,7 +87,11 @@ Public application submission introduces repeat-submission and partial-failure r
 
 The proposed action queue is review-state only. Approval must not execute business changes until a safe execution engine is separately designed.
 
-### 7. Smart Home Hardware Not Yet Purchased
+### 7. Matching Must Stay Advisory Until Write Rules Exist
+
+The internal matching center can help the owner compare applicant preferences, available puppies, waitlist status, documents, media, and reservation context. It must not become an assignment engine until explicit owner-approved write rules, audit requirements, and reservation workflow boundaries are designed.
+
+### 8. Smart Home Hardware Not Yet Purchased
 
 Smart kennel monitoring remains future work. Software must not pretend sensors or devices exist until hardware exists and owner-approved integration rules are ready.
 
@@ -99,19 +105,20 @@ Smart kennel monitoring remains future work. Software must not pretend sensors o
 | 4 | Add SMTP send-attempt logging. | Needed before expanding email. |
 | 5 | Add duplicate/failed intake handling. | Public intake needs safety and cleanup rules. |
 | 6 | Confirm application detail displays expanded sections. | Owner review must be usable. |
-| 7 | Continue RLS/security hardening. | Biggest production/customer-facing risk. |
-| 8 | Keep proposed action execution blocked. | Prevents accidental automated business changes. |
+| 7 | Validate `/staff/matching` against owner-approved records only. | Matching guidance must stay advisory and fact-based. |
+| 8 | Continue RLS/security hardening. | Biggest production/customer-facing risk. |
+| 9 | Keep proposed action execution blocked. | Prevents accidental automated business changes. |
 
 ## Document-By-Document Review Summary
 
 | Document | Current Status | Notes |
 | --- | --- | --- |
-| `CURRENT_STATUS.md` | Updated | Central current-state truth after internal document/contract readiness work. |
+| `CURRENT_STATUS.md` | Updated | Central current-state truth after internal matching/waitlist decision-support work. |
 | `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, payment plan, media, and document readiness work. |
 | `CORE_BUILD_ORDER.md` | Needs refresh when next build plan changes | Build order should now put public form validation, SMTP logging, duplicate handling, and application detail review at top. |
-| `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application and SMTP receipt gates. |
-| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects internal document/contract readiness plus blocked generation/signature behavior. |
-| `CHEROLEE_CORE_CHAPTER1_REFERENCE.md` | Updated | This file now reflects the current post-document-readiness reality. |
+| `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application, SMTP receipt, and internal matching/waitlist readiness gates. |
+| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects internal matching/waitlist decision-support plus blocked automated assignment behavior. |
+| `CHEROLEE_CORE_CHAPTER1_REFERENCE.md` | Updated | This file now reflects the current post-matching reality. |
 | `CORE_PROJECT_REVIEW_AND_COMPLETION_ESTIMATE.md` | Needs refresh when estimates are next reviewed | Should recognize Phase 4A has begun but remains unverified/hardening. |
 | `CODEX_TASK_RUNBOOK.md` | Needs path correction only if missing docs are referenced | It currently points to this Chapter 1 reference under `docs/core/`. |
 
@@ -124,6 +131,7 @@ A developer should now be able to:
 - Use the correct repo and branch.
 - Understand the owner/operator internal foundation.
 - Understand public application intake is narrow and non-decision-making.
+- Understand internal matching is advisory decision-support only.
 - Keep public website language separate from Core/internal language.
 - Preserve event/audit/write patterns where possible.
 - Avoid expanding SMTP beyond application receipt until send logging and approval rules exist.
@@ -193,6 +201,7 @@ Internal owner/operator:
 | `/staff` | Main owner/operator command dashboard. |
 | `/staff/applications` | Application list and review entry. |
 | `/staff/applications/new` | Private owner/admin application entry. |
+| `/staff/matching` | Internal matching, assignment, and waitlist decision-support. |
 | `/staff/payment-plans` | Payment plan command center. |
 | `/staff/go-home/handoff` | Go-home handoff command. |
 | `/staff/reservations/[reservationId]/handoff` | Reservation handoff detail. |
@@ -217,6 +226,7 @@ Every important business action must use a controlled server/RPC path. Public ap
 - SMS/Twilio/Facebook messaging
 - AI write tools
 - proposed-action execution engine
+- automatic matching or puppy assignment engine
 - smart kennel integrations
 - Home Assistant/cameras/CoreFace
 
