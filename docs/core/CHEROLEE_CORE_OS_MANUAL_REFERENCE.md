@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the public/embedded application and conditional SMTP receipt work.
+Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the internal Documents / Contracts Readiness Center work.
 
 This is not a replacement for implementation docs. It explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
 
@@ -57,7 +57,7 @@ Screens only matter if they read and write the correct source of truth.
 | Dog Records | Sire/dam profiles, registry, DNA status, health notes, retirement, and pedigree. | Internal dog profile and document vault exist. |
 | Litter & Puppy Tracking | Lifecycle from planned litter to placed puppy, with weights and milestones. | Internal kennel, litter, puppy, neonatal and media workflows exist. |
 | Payments & Financing | Ledger truth, payment plans, deposits, refunds, reminders. | Internal ledger/payment plan readiness exists; no processor. |
-| Document Management | Deposit agreements, bills of sale, health guarantees, financing addenda, transport agreements. | Metadata/readiness only; no generation/signature provider. |
+| Document Management | Deposit agreements, bills of sale, health guarantees, financing addenda, transport agreements. | Internal Document Command Center and metadata detail route exist; no generation/signature provider. |
 | Automated Email / SMTP | Application confirmations, approval notices, reminders, owner alerts. | Conditional SMTP only for application receipt owner/customer alerts. Broader email remains blocked. |
 | Communications Hub | Facebook, email, website chat, SMS, portal messages, calls. | Metadata/readiness/preview only. |
 | Phone & Voice / Twilio | Caller lookup, voice menu, summaries, escalation. | Phone lookup safety exists; Twilio not connected. |
@@ -139,7 +139,7 @@ Financial truth is ledger-based. Every payment, deposit, fee, credit, refund, fi
 
 Current implementation includes internal payment ledger readiness and a Payment Plan Command Center. These are internal review tools only and do not move money, create payment links, process refunds, or contact providers.
 
-Document state must be evidence-based. A document is complete only when Core has the correct party, puppy/reservation/payment terms, signed or accepted state, and audit event.
+Document state must be evidence-based. A document is complete only when Core has the correct party, puppy/reservation/payment terms, signed or accepted state, and audit event. Current internal UI reads existing `core_documents` and `core_document_versions` metadata for readiness and source-record navigation only.
 
 Required document types include:
 
@@ -150,7 +150,7 @@ Required document types include:
 - Transport Agreement
 - Application Copy
 
-Document generation and signature provider integration remain blocked until explicitly approved.
+Document generation, upload expansion, portal visibility, and signature provider integration remain blocked until explicitly approved.
 
 ## Automated Email And Communications
 

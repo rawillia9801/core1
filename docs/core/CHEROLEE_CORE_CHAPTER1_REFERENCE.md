@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the public/embedded Southwest Virginia Chihuahua application form, conditional SMTP receipt alerts, payment plan command center, and handoff work landed.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the internal Documents / Contracts Readiness Center work landed.
 
 Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
@@ -106,12 +106,12 @@ Smart kennel monitoring remains future work. Software must not pretend sensors o
 
 | Document | Current Status | Notes |
 | --- | --- | --- |
-| `CURRENT_STATUS.md` | Updated | Central current-state truth after public application and SMTP work. |
-| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, and payment plan work. |
+| `CURRENT_STATUS.md` | Updated | Central current-state truth after internal document/contract readiness work. |
+| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, payment plan, media, and document readiness work. |
 | `CORE_BUILD_ORDER.md` | Needs refresh when next build plan changes | Build order should now put public form validation, SMTP logging, duplicate handling, and application detail review at top. |
 | `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application and SMTP receipt gates. |
-| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects conditional SMTP and public application intake. |
-| `CHEROLEE_CORE_CHAPTER1_REFERENCE.md` | Updated | This file now reflects the current post-public-application reality. |
+| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects internal document/contract readiness plus blocked generation/signature behavior. |
+| `CHEROLEE_CORE_CHAPTER1_REFERENCE.md` | Updated | This file now reflects the current post-document-readiness reality. |
 | `CORE_PROJECT_REVIEW_AND_COMPLETION_ESTIMATE.md` | Needs refresh when estimates are next reviewed | Should recognize Phase 4A has begun but remains unverified/hardening. |
 | `CODEX_TASK_RUNBOOK.md` | Needs path correction only if missing docs are referenced | It currently points to this Chapter 1 reference under `docs/core/`. |
 

@@ -234,8 +234,8 @@ function isCompleteStatus(status: string | null) {
   );
 }
 
-function isAttentionStatus(status: string | null) {
-  return ["failed", "missing", "void", "cancelled", "expired", "blocked", "rejected"].includes(
+function isReplacedOrStaleStatus(status: string | null) {
+  return ["replaced", "stale", "superseded", "expired", "void", "cancelled"].includes(
     normalizeText(status),
   );
 }
@@ -616,11 +616,18 @@ export default async function StaffDocumentsPage() {
   const completedCount = documents.filter((document) =>
     isCompleteStatus(document.status),
   ).length;
-  const pendingCount = documents.filter((document) =>
-    isPendingStatus(document.status),
-  ).length;
-  const attentionCount = documents.filter((document) =>
-    isAttentionStatus(document.status),
+  const signedFiledCount = completedCount;
+  const pendingSignatureCount = documents.filter((document) => {
+    const documentVersions = versionsByDocument.get(document.id) ?? [];
+    return (
+      ["pending signature", "pending_signature", "sent", "generated", "draft", "pending"].includes(
+        normalizeText(document.status),
+      ) ||
+      documentVersions.some((version) => isPendingStatus(version.status) && !version.signed_at)
+    );
+  }).length;
+  const replacedStaleCount = documents.filter((document) =>
+    isReplacedOrStaleStatus(document.status),
   ).length;
   const latestVersionCount = documents.filter((document) =>
     versions.some(
@@ -628,9 +635,6 @@ export default async function StaffDocumentsPage() {
         version.document_id === document.id &&
         version.version_number === document.current_version_number,
     ),
-  ).length;
-  const signedVersionCount = versions.filter(
-    (version) => Boolean(version.signed_at) || isCompleteStatus(version.status),
   ).length;
 
   const groupedDocuments = new Map<string, DocumentRow[]>();
@@ -666,6 +670,20 @@ export default async function StaffDocumentsPage() {
     (count, row) => count + row.blockers.length,
     0,
   );
+  const missingRequirementCount = readinessRows.reduce(
+    (count, row) =>
+      count +
+      row.requirements.filter((requirement) =>
+        ["missing", "incomplete", "unknown"].includes(requirement.status),
+      ).length,
+    0,
+  );
+  const reservationBlockerCount = readinessRows.filter((row) => row.blockers.length > 0).length;
+  const goHomeBlockerCount = readinessRows.filter((row) =>
+    row.blockers.length > 0 ||
+    row.documentPacketChecklist?.status === "incomplete" ||
+    row.documentPacketChecklist?.status === "pending",
+  ).length;
   const warning =
     documentResult.warning ??
     versionResult.warning ??
@@ -681,10 +699,10 @@ export default async function StaffDocumentsPage() {
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-700">
-                Core Documents
+                Core Documents / Contracts
               </p>
               <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                Document Readiness
+                Document Command Center
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
                 Internal Core document requirement and readiness workspace for reservations,
@@ -720,14 +738,29 @@ export default async function StaffDocumentsPage() {
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="Documents" value={documents.length} note="Core metadata records" />
-          <StatCard label="Ready / Complete" value={completedCount} note="Signed, accepted, filed, or ready statuses" />
-          <StatCard label="Pending / Draft" value={pendingCount} note="Draft, pending, generated, or review statuses" />
-          <StatCard label="Attention" value={attentionCount} note="Expired, blocked, missing, failed, void, or rejected statuses" />
-          <StatCard label="Latest Versions" value={latestVersionCount} note={`${signedVersionCount} signed/complete version marker(s)`} />
+          <StatCard label="Missing Docs" value={missingRequirementCount} note="Missing, incomplete, or unknown required metadata" />
+          <StatCard label="Pending Signature" value={pendingSignatureCount} note="Sent, pending, draft, or unsigned pending versions" />
+          <StatCard label="Signed / Filed" value={signedFiledCount} note="Signed, accepted, filed, complete, or ready statuses" />
+          <StatCard label="Replaced / Stale" value={replacedStaleCount} note="Replaced, superseded, stale, expired, void, or cancelled" />
+          <StatCard label="Reservation Blockers" value={reservationBlockerCount} note="Active reservations with document blockers" />
+          <StatCard label="Go-Home Blockers" value={goHomeBlockerCount} note="Document packet or go-home readiness blockers" />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <nav className="operator-section-nav" aria-label="Document readiness sections">
+          <a href="#overview"><span>Overview</span><small>{documents.length}</small></a>
+          <a href="#missing"><span>Missing</span><small>{missingRequirementCount}</small></a>
+          <a href="#pending-signature"><span>Pending Signature</span><small>{pendingSignatureCount}</small></a>
+          <a href="#signed-filed"><span>Signed / Filed</span><small>{signedFiledCount}</small></a>
+          <a href="#reservation-docs"><span>Reservation Docs</span><small>{groupedDocuments.get("reservation")?.length ?? 0}</small></a>
+          <a href="#puppy-docs"><span>Puppy Docs</span><small>{groupedDocuments.get("puppy")?.length ?? 0}</small></a>
+          <a href="#payment-plan-docs"><span>Payment Plan Docs</span><small>{documents.filter((document) => matchesRequirement(document, "Financing Addendum")).length}</small></a>
+          <a href="#go-home-docs"><span>Go-Home Docs</span><small>{goHomeBlockerCount}</small></a>
+          <a href="#replaced-stale"><span>Replaced / Stale</span><small>{replacedStaleCount}</small></a>
+          <a href="#activity"><span>Activity</span><small>{latestVersionCount}</small></a>
+        </nav>
+
+        <section id="overview" className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <section id="activity" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-lg font-semibold">Document Records</h2>
               <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -803,6 +836,9 @@ export default async function StaffDocumentsPage() {
                                 Reservation readiness
                               </Link>
                             ) : null}
+                            <Link href={`/staff/documents/${document.id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800">
+                              Document detail
+                            </Link>
                             {linkedReservation?.application_id ? (
                               <Link href={`/staff/applications/${linkedReservation.application_id}`} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800">
                                 Application
@@ -890,6 +926,10 @@ export default async function StaffDocumentsPage() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Document blockers</p>
                   <p className="mt-2 text-3xl font-bold">{totalBlockers}</p>
                 </div>
+                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-950">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Pending signature</p>
+                  <p className="mt-2 text-3xl font-bold">{pendingSignatureCount}</p>
+                </div>
               </div>
               <p className="mt-4 text-sm leading-6 text-slate-500">
                 These blockers do not update the database, stop a go-home workflow, send
@@ -899,7 +939,7 @@ export default async function StaffDocumentsPage() {
           </section>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section id="reservation-docs" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Reservation Document Requirements</h2>
@@ -974,7 +1014,17 @@ export default async function StaffDocumentsPage() {
 
                     <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                       {requirements.map((requirement) => (
-                        <div key={requirement.label} className={`rounded-2xl border p-4 text-sm ${requirementTone(requirement.status)}`}>
+                        <div
+                          id={
+                            requirement.status === "missing" || requirement.status === "incomplete" || requirement.status === "unknown"
+                              ? "missing"
+                              : requirement.status === "ready"
+                                ? "signed-filed"
+                                : undefined
+                          }
+                          key={requirement.label}
+                          className={`rounded-2xl border p-4 text-sm ${requirementTone(requirement.status)}`}
+                        >
                           <div className="flex items-start justify-between gap-3">
                             <p className="font-bold">{requirement.label}</p>
                             <span className="rounded-full bg-white/70 px-2 py-1 text-xs font-bold">
@@ -983,9 +1033,12 @@ export default async function StaffDocumentsPage() {
                           </div>
                           <p className="mt-2 leading-6">{requirement.note}</p>
                           {requirement.document ? (
-                            <p className="mt-2 text-xs font-semibold uppercase tracking-wide">
+                            <Link
+                              href={`/staff/documents/${requirement.document.id}`}
+                              className="mt-2 inline-flex text-xs font-semibold uppercase tracking-wide underline"
+                            >
                               {documentName(requirement.document)} / {formatKey(requirement.document.status)}
-                            </p>
+                            </Link>
                           ) : null}
                         </div>
                       ))}
@@ -1022,6 +1075,42 @@ export default async function StaffDocumentsPage() {
           ) : (
             <EmptyState text="No active reservation rows are available for document requirement evaluation." />
           )}
+        </section>
+
+        <section id="pending-signature" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold">Pending Signature / Review</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            Existing document records that appear sent, draft, generated, pending, or have unsigned pending version metadata.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {documents.filter((document) => {
+              const documentVersions = versionsByDocument.get(document.id) ?? [];
+              return ["pending signature", "pending_signature", "sent", "generated", "draft", "pending"].includes(normalizeText(document.status)) || documentVersions.some((version) => isPendingStatus(version.status) && !version.signed_at);
+            }).length > 0 ? documents.filter((document) => {
+              const documentVersions = versionsByDocument.get(document.id) ?? [];
+              return ["pending signature", "pending_signature", "sent", "generated", "draft", "pending"].includes(normalizeText(document.status)) || documentVersions.some((version) => isPendingStatus(version.status) && !version.signed_at);
+            }).map((document) => (
+              <Link key={document.id} href={`/staff/documents/${document.id}`} className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+                <strong className="block text-slate-950">{documentName(document)}</strong>
+                {formatKey(document.status)} / {groupLabel(linkGroup(document))}
+              </Link>
+            )) : <EmptyState text="No pending signature or draft document metadata was found." />}
+          </div>
+        </section>
+
+        <section id="replaced-stale" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold">Replaced / Stale</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            Existing document records with replaced, superseded, stale, expired, void, or cancelled status.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {documents.filter((document) => isReplacedOrStaleStatus(document.status)).length > 0 ? documents.filter((document) => isReplacedOrStaleStatus(document.status)).map((document) => (
+              <Link key={document.id} href={`/staff/documents/${document.id}`} className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-6 text-rose-950">
+                <strong className="block text-slate-950">{documentName(document)}</strong>
+                {formatKey(document.status)} / Updated {formatDateTime(document.updated_at)}
+              </Link>
+            )) : <EmptyState text="No replaced, stale, expired, void, or cancelled document metadata was found." />}
+          </div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

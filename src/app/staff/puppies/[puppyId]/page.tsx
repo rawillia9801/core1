@@ -158,6 +158,18 @@ type ApplicationRow = {
   submitted_at: string | null;
 };
 
+type DocumentRow = {
+  id: string;
+  reservation_id: string | null;
+  buyer_id: string | null;
+  family_id: string | null;
+  puppy_id: string | null;
+  document_type: string | null;
+  title: string | null;
+  status: string | null;
+  updated_at: string | null;
+};
+
 const ATTENTION_TERMS = ["weak", "watch", "fading", "not nursing", "cold", "losing", "loss", "risk", "concern"];
 
 function getSupabaseRestConfig() {
@@ -389,6 +401,12 @@ function safeDetails(details: Record<string, unknown> | null | undefined) {
   return safePairs.length > 0 ? safePairs.join(" / ") : "Details present, hidden from preview";
 }
 
+function isCompleteDocumentStatus(status: string | null | undefined) {
+  return ["signed", "completed", "complete", "filed", "approved", "accepted", "ready"].includes(
+    normalizeText(status),
+  );
+}
+
 function watchSignalsForPuppy(puppy: PuppyRow, litter: LitterRow | null | undefined, weights: WeightLogRow[], events: PuppyEventRow[]) {
   const signals: string[] = [];
   const latest = latestWeight(weights);
@@ -472,7 +490,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
     );
   }
 
-  const [litterResult, litterPuppyResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, reservationResult, buyerResult, familyResult, applicationResult, auditResult] = await Promise.all([
+  const [litterResult, litterPuppyResult, weightResult, puppyEventResult, mediaResult, directEventResult, relatedEventResult, reservationResult, buyerResult, familyResult, applicationResult, documentResult, auditResult] = await Promise.all([
     puppy.litter_id
       ? readRows<LitterRow>("core_litters", {
           select: "id,external_reference,litter_name,dam_id,sire_id,expected_birth_at,birth_at,total_puppies,female_count,male_count,status,details_pending,notes,metadata,created_at,updated_at",
@@ -540,6 +558,12 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
       order: "created_at.desc",
       limit: "500",
     }),
+    readRows<DocumentRow>("core_documents", {
+      select: "id,reservation_id,buyer_id,family_id,puppy_id,document_type,title,status,updated_at",
+      puppy_id: `eq.${puppy.id}`,
+      order: "updated_at.desc",
+      limit: "50",
+    }),
     canViewAudit
       ? readRows<AuditRow>("core_audit_log", {
           select: "id,actor_type,actor_profile_id,actor_identifier,source,action,entity_table,entity_id,request_context,outcome,error_message,created_at",
@@ -576,6 +600,9 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const families = familyResult.rows;
   const applications = applicationResult.rows;
   const mediaPreviews = await withKennelMediaSignedUrls(mediaResult.rows);
+  const completeDocumentCount = documentResult.rows.filter((document) =>
+    isCompleteDocumentStatus(document.status),
+  ).length;
   const mediaWarning = mediaResult.warning ? "Private photo storage is not available from the current Core schema yet." : null;
   const primaryPuppyPhoto = mediaPreviews.find((media) => media.is_primary) ?? null;
   const latestPuppyPhotoAt = mediaPreviews.map((media) => media.uploaded_at).filter(Boolean).sort().at(-1) ?? null;
@@ -594,7 +621,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
   const priceCents = centsFromMetadata(puppy.metadata, ["price_cents", "asking_price_cents", "sale_price_cents"]);
   const depositAmountCents = centsFromMetadata(puppy.metadata, ["deposit_amount_cents", "deposit_cents", "deposit_required_cents"]);
   const internalCostCents = centsFromMetadata(puppy.metadata, ["internal_cost_cents", "cost_cents", "expense_basis_cents"]);
-  const warnings = [puppyResult.warning, litterResult.warning, litterPuppyResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
+  const warnings = [puppyResult.warning, litterResult.warning, litterPuppyResult.warning, weightResult.warning, puppyEventResult.warning, mediaWarning, directEventResult.warning, relatedEventResult.warning, reservationResult.warning, buyerResult.warning, familyResult.warning, applicationResult.warning, documentResult.warning, auditResult.warning, dogResult.warning].filter(Boolean);
 
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -633,6 +660,7 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
           <StatCard label="Latest weight" value={weightLabel(latest)} note={latest ? formatDateTime(latest.measured_at) : "No weight logs"} />
           <StatCard label="Watch flags" value={watchSignals.length} note="Deterministic owner attention flags" />
           <StatCard label="Photos" value={mediaPreviews.length} note="Private kennel-media only" />
+          <StatCard label="Documents" value={`${completeDocumentCount} / ${documentResult.rows.length}`} note="Puppy-linked metadata" />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
@@ -709,6 +737,40 @@ export default async function StaffPuppyDetailPage({ params }: { params: Promise
               <EmptyState text="This puppy is not linked to a litter row yet." />
             )}
           </section>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Document / Contract Readiness</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Puppy-linked document metadata only. Reservation, buyer, and family documents are reviewed from their own source records or the Document Command Center.
+              </p>
+            </div>
+            <Link href="/staff/documents#puppy-docs" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">
+              Document Center
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {documentResult.rows.length > 0 ? (
+              documentResult.rows.slice(0, 6).map((document) => (
+                <article key={document.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-slate-950">{document.title || formatKey(document.document_type)}</p>
+                      <p className="mt-1 text-slate-500">Updated {formatDateTime(document.updated_at)}</p>
+                    </div>
+                    <Badge tone={statusTone(document.status)}>{formatKey(document.status)}</Badge>
+                  </div>
+                  <Link href={`/staff/documents/${document.id}`} className="mt-3 inline-flex rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">
+                    Open document detail
+                  </Link>
+                </article>
+              ))
+            ) : (
+              <EmptyState text="No puppy-linked document record found. Review reservation, buyer, and family records if this puppy has a document packet through another relationship." />
+            )}
+          </div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

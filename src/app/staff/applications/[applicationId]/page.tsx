@@ -106,6 +106,18 @@ type ProfileRow = {
   email: string | null;
 };
 
+type DocumentRow = {
+  id: string;
+  title: string | null;
+  document_type: string | null;
+  status: string | null;
+  reservation_id: string | null;
+  family_id: string | null;
+  buyer_id: string | null;
+  puppy_id: string | null;
+  updated_at: string | null;
+};
+
 function getSupabaseRestConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -222,6 +234,12 @@ function statusTone(status: string | null | undefined) {
     return "bg-amber-50 text-amber-700 ring-amber-100";
   }
   return "bg-blue-50 text-blue-700 ring-blue-100";
+}
+
+function isCompleteDocumentStatus(status: string | null | undefined) {
+  return ["signed", "completed", "complete", "filed", "approved", "accepted", "ready"].includes(
+    (status ?? "").toLowerCase(),
+  );
 }
 
 function Badge({ children, tone }: { children: React.ReactNode; tone?: string }) {
@@ -410,6 +428,7 @@ export default async function ApplicationDetailPage({
     eventResult,
     auditResult,
     reviewerResult,
+    documentResult,
   ] = await Promise.all([
     application.buyer_id
       ? readRows<BuyerRow>("core_buyers", {
@@ -458,6 +477,17 @@ export default async function ApplicationDetailPage({
           limit: "1",
         })
       : Promise.resolve({ rows: [] as ProfileRow[], warning: null }),
+    application.buyer_id || application.family_id
+      ? readRows<DocumentRow>("core_documents", {
+          select: "id,title,document_type,status,reservation_id,family_id,buyer_id,puppy_id,updated_at",
+          or: `(${[
+            application.buyer_id ? `buyer_id.eq.${application.buyer_id}` : null,
+            application.family_id ? `family_id.eq.${application.family_id}` : null,
+          ].filter(Boolean).join(",")})`,
+          order: "updated_at.desc",
+          limit: "50",
+        })
+      : Promise.resolve({ rows: [] as DocumentRow[], warning: null }),
   ]);
 
   const buyer = buyerResult.rows[0] ?? null;
@@ -496,7 +526,11 @@ export default async function ApplicationDetailPage({
     reservationResult.warning ??
     eventResult.warning ??
     auditResult.warning ??
-    reviewerResult.warning;
+    reviewerResult.warning ??
+    documentResult.warning;
+  const completeDocuments = documentResult.rows.filter((document) =>
+    isCompleteDocumentStatus(document.status),
+  ).length;
 
   return (
     <main className="operator-workspace min-h-screen px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -544,6 +578,7 @@ export default async function ApplicationDetailPage({
             { label: "Submitted", value: formatDateTime(application.submitted_at ?? application.created_at), note: application.external_reference || shortId(application.id) },
             { label: "Reviewed", value: formatDateTime(application.reviewed_at), note: reviewer?.display_name || reviewer?.email || "Reviewer not recorded" },
             { label: "Blockers", value: blockers.length, note: reservationResult.rows.length ? `${reservationResult.rows.length} reservation link(s)` : "No reservation link" },
+            { label: "Documents", value: `${completeDocuments} / ${documentResult.rows.length}`, note: "buyer/family linked metadata" },
           ]}
         />
 
@@ -553,6 +588,7 @@ export default async function ApplicationDetailPage({
             { href: "#review", label: "Review" },
             { href: "#answers", label: "Answers", count: sectionResult.rows.length },
             { href: "#reservations", label: "Reservations", count: reservationResult.rows.length },
+            { href: "#documents", label: "Documents", count: documentResult.rows.length },
             { href: "#events", label: "Events", count: eventResult.rows.length },
             { href: "#audit", label: "Audit", count: auditResult.rows.length },
           ]}
@@ -743,6 +779,44 @@ export default async function ApplicationDetailPage({
                 ) : (
                   <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
                     No linked reservation found for this application.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <section id="documents" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight">Document / Contract Readiness</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                    Application rows do not own document records directly. This panel shows existing buyer/family-linked document metadata only.
+                  </p>
+                </div>
+                <Link href="/staff/documents" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+                  Document Center
+                </Link>
+              </div>
+              <div className="mt-5 space-y-3">
+                {documentResult.rows.length > 0 ? (
+                  documentResult.rows.map((document) => (
+                    <article key={document.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="font-bold text-slate-950">{document.title || formatKey(document.document_type)}</p>
+                          <p className="mt-1 text-sm text-slate-600">
+                            Updated {formatDateTime(document.updated_at)} / Reservation {shortId(document.reservation_id)}
+                          </p>
+                        </div>
+                        <Badge tone={statusTone(document.status)}>{formatKey(document.status)}</Badge>
+                      </div>
+                      <Link href={`/staff/documents/${document.id}`} className="mt-3 inline-flex rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+                        Open document detail
+                      </Link>
+                    </article>
+                  ))
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
+                    No document record found for the linked buyer or family on this application. Reservation-specific documents may appear after reservation context is created.
                   </p>
                 )}
               </div>

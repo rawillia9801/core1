@@ -1003,6 +1003,9 @@ export default async function ReservationDetailPage({
                       <p className="mt-3 text-sm leading-6 text-slate-600">
                         {safeMetadataSummary(document.metadata)}
                       </p>
+                      <Link href={`/staff/documents/${document.id}`} className="mt-3 inline-flex rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+                        Open document detail
+                      </Link>
                     </article>
                   );
                 })

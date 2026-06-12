@@ -157,6 +157,11 @@ Core-native owner/operator operating system foundation
 ### Document / Message / Notification Readiness
 
 - [x] `/staff/documents` exists as owner/admin document readiness workspace.
+- [x] `/staff/documents` now functions as an internal Document Command Center using existing `core_documents` and `core_document_versions` metadata.
+- [x] `/staff/documents/[documentId]` exists as a metadata-only internal document detail route with linked reservation, buyer, family, and puppy context where recorded.
+- [x] Document readiness shows total documents, missing requirements, pending signature/review, signed/filed records, replaced/stale records, reservation blockers, go-home blockers, version metadata, relationship links, and no-record-found empty states.
+- [x] Application detail, buyer/family 360, reservation detail, puppy detail, go-home/handoff, and payment-plan workspaces include compact document readiness, counts, or links where existing data supports them.
+- [x] Document readiness remains internal visibility only and does not generate documents, request signatures, upload files, create buckets/policies, expose public URLs, update portal visibility, send messages, process payments, or call external providers.
 - [x] `/staff/messages` exists as owner/admin communications readiness workspace.
 - [x] `/staff/notifications` exists as notification preview/templates/attempt-log workspace.
 - [x] Notification queue and template foundations exist.

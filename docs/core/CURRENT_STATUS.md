@@ -2,12 +2,12 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the deployed public/embedded application form work.
+- Current as of this documentation pass after the internal Documents / Contracts Readiness Center work.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
-- Active local working folder: `C:\Users\rawil\core1`
-- The duplicate OneDrive checkout is not the working repository.
+- Active local working folder for this pass: `C:\Users\rawil\OneDrive\Documents\core1-ui-worktree`
+- The dirty normal checkout was not touched.
 
 ## Current Direction
 
@@ -16,6 +16,18 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Internal Documents / Contracts Readiness Center
+
+Implemented and pushed:
+
+- `/staff/documents` was upgraded into an internal Document Command Center for owner/admin document and contract readiness.
+- `/staff/documents/[documentId]` was added as a metadata-only document detail route.
+- The document center reads existing `core_documents` and `core_document_versions` rows and shows total documents, missing document requirements, pending signature/review, signed/filed records, replaced/stale records, reservation blockers, and go-home blockers.
+- Document readiness is derived only from existing metadata linked by reservation, buyer, family, or puppy IDs. Application context is inferred only through linked reservation/buyer/family context because `core_documents` does not own `application_id`.
+- Related internal pages now surface compact document/readiness context or direct links where existing data supports it, including application detail, buyer/family 360, reservation detail, puppy detail, go-home/handoff, and payment-plan workflows.
+- The navigation label now uses `Documents / Contracts`.
+- This pass did not add document generation, file upload behavior, storage buckets, storage policies, migrations, public URLs, customer portal document visibility, signing-provider integration, email/SMS sending, payment behavior, or external-provider calls.
 
 ### Internal Media Management Center
 
@@ -172,6 +184,7 @@ private owner/operator application entry
   -> deposit/payment ledger recording
   -> ledger-derived balance review
   -> payment plan command review
+  -> document/contract readiness review
   -> reservation readiness review
   -> go-home detail update
   -> go-home checklist review
@@ -220,6 +233,7 @@ Internal owner/operator routes include, among others:
 - `/staff/go-home`
 - `/staff/go-home/handoff`
 - `/staff/documents`
+- `/staff/documents/[documentId]`
 - `/staff/messages`
 - `/staff/notifications`
 - `/staff/phone-lookup`

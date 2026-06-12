@@ -21,7 +21,7 @@ const primaryNavigation = [
       { href: "/staff/go-home", label: "Go-Home", ready: true },
       { href: "/staff/payments", label: "Payments", ready: true },
       { href: "/staff/payment-plans", label: "Payment Plans", ready: true },
-      { href: "/staff/documents", label: "Documents", ready: true },
+      { href: "/staff/documents", label: "Documents / Contracts", ready: true },
     ],
   },
   {

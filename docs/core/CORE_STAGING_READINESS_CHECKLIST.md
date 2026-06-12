@@ -136,6 +136,7 @@ Checks:
 - [ ] No bulk import is included.
 - [ ] No payment processor records are included.
 - [ ] No document/signature records are included unless explicitly approved.
+- [ ] Any document metadata used in the internal Document Command Center is explicitly approved for owner/admin staging review before real records are inspected.
 - [ ] No Twilio/Facebook/SMS records are included.
 - [ ] No customer portal records are included.
 - [ ] No Zoho modules, exports, or payloads are included.
@@ -159,6 +160,8 @@ Confirm all remain off unless explicitly approved:
 - [ ] Refund/chargeback provider actions.
 - [ ] Document generation.
 - [ ] Signature provider.
+- [ ] Document upload/storage policy changes.
+- [ ] Public or portal document visibility.
 - [ ] Customer portal.
 - [ ] Public website replacement beyond embedding the application form.
 - [ ] Twilio/SMS/calls.

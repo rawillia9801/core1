@@ -252,7 +252,7 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
               <h2 className="text-lg font-semibold">Payment / Document Context</h2>
               <div className="mt-5 space-y-5">
                 <RowList rows={ledgerResult.rows.slice(0, 5).map((ledger) => ({ id: ledger.id, title: `${formatKey(ledger.entry_type)} / ${formatMoney(ledger.amount_cents)}`, note: `${formatKey(ledger.status)} / ${formatDateTime(ledger.occurred_at)}` }))} />
-                <RowList rows={documentsResult.rows.slice(0, 5).map((document) => ({ id: document.id, title: display(document.title, formatKey(document.document_type)), note: `${formatKey(document.status)} / updated ${formatDateTime(document.updated_at)}`, href: "/staff/documents" }))} />
+                <RowList rows={documentsResult.rows.slice(0, 5).map((document) => ({ id: document.id, title: display(document.title, formatKey(document.document_type)), note: `${formatKey(document.status)} / updated ${formatDateTime(document.updated_at)}`, href: `/staff/documents/${document.id}` }))} />
               </div>
             </section>
 
