@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the internal Puppy Assignment / Matchmaking / Waitlist Command Center was added.
+- Current as of this documentation pass after the internal manual application and puppy save production bug fix.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -122,6 +122,11 @@ Checks:
 ## Action Authorization Readiness
 
 - [ ] Server actions use authenticated staff actor IDs where applicable.
+- [ ] `/staff/applications/new` manual application creation works for authenticated owner/admin users in deployed production configuration.
+- [ ] `/staff/applications/new` blocks staff/helper and unauthenticated users from creating manual applications.
+- [ ] Manual application duplicate/existing-customer outcomes are operator-safe and do not expose raw database errors.
+- [ ] `/staff/puppies/new` puppy creation works for authenticated owner/admin users in deployed production configuration.
+- [ ] Puppy creation failure outcomes are operator-safe and do not expose raw database errors.
 - [ ] Public application submission is restricted to the public application write surface only.
 - [ ] Public application submission cannot write reservations, payments, documents, or portal users.
 - [ ] Audit/event attribution is understood for public anonymous submissions.
@@ -179,6 +184,15 @@ Confirm all remain off unless explicitly approved:
 - [ ] Automatic payments, refunds, fees, chargebacks, or credits.
 
 SMTP application receipt emails are the only current live external side-effect path, and only when SMTP env vars are configured.
+
+## Internal Save Action Readiness
+
+- [ ] Manual application creation does not redirect to plain `/staff?application=error`.
+- [ ] Manual application creation returns a specific outcome for invalid contact, missing terms, invalid input, duplicate/existing customer review, RPC failure, save failure, and missing Core server action configuration.
+- [ ] Manual application creation still calls only the controlled `core_create_application_manual` RPC and does not create reservations, payments, documents, portal accounts, public listings, or external-provider side effects.
+- [ ] Puppy creation does not redirect to generic `puppy=error` when a failure can be classified.
+- [ ] Puppy creation returns a specific outcome for invalid input, missing identifier, RPC missing/failure, missing Core server action configuration, missing/invalid litter, duplicate identifier, and save failure.
+- [ ] Puppy creation still calls only the controlled `core_create_puppy` RPC and does not publish puppies, process payments, create documents, message customers, update portal visibility, or call external providers.
 
 ## Verification After Public Application Submission
 

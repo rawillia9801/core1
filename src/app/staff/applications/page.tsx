@@ -55,7 +55,63 @@ function ResultMessage({ outcome }: { outcome: string | undefined }) {
     );
   }
 
-  if (outcome === "error") {
+  if (outcome === "invalid_contact") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Manual application needs applicant name plus email or phone.
+      </p>
+    );
+  }
+
+  if (outcome === "invalid_terms") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Terms acknowledgement is required before creating a manual application.
+      </p>
+    );
+  }
+
+  if (outcome === "invalid_input") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Manual application input needs review before saving.
+      </p>
+    );
+  }
+
+  if (outcome === "existing_customer_needs_review") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Existing customer context needs owner review before another manual application is saved.
+      </p>
+    );
+  }
+
+  if (outcome === "duplicate_customer_needs_review") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        A matching customer or application record needs owner review before saving another manual application.
+      </p>
+    );
+  }
+
+  if (outcome === "rpc_failed") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Manual application RPC failed. Check that the Core manual application action is deployed and available.
+      </p>
+    );
+  }
+
+  if (outcome === "config_missing") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Core server action configuration is incomplete.
+      </p>
+    );
+  }
+
+  if (outcome === "save_failed" || outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
         Application workflow action failed. Review the server action log for details.

@@ -15,6 +15,24 @@ const LITTER_STATUSES = new Set(["planned", "expected", "born", "active", "close
 const PUPPY_STATUSES = new Set(["unavailable", "available", "hold", "reserved", "placed", "kept", "deceased"]);
 const PUBLIC_LISTING_STATUSES = new Set(["private", "public", "hidden", "coming_soon"]);
 
+type KennelRpcResult =
+  | { ok: true }
+  | {
+      ok: false;
+      outcome: KennelRpcFailureOutcome;
+    };
+
+type KennelRpcFailureOutcome =
+  | "config_missing"
+  | "unauthorized"
+  | "invalid_input"
+  | "missing_identifier"
+  | "rpc_missing_or_failed"
+  | "litter_not_found"
+  | "invalid_litter"
+  | "duplicate_identifier"
+  | "save_failed";
+
 function logKennelFailure(reason: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production") {
     console.error("[core kennel]", reason, details ?? {});
@@ -28,7 +46,7 @@ function getActionConfig() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    logKennelFailure("missing local/development action configuration", {
+    logKennelFailure("missing Core server action configuration", {
       hasSupabaseUrl: Boolean(supabaseUrl),
       hasServiceRoleKey: Boolean(serviceRoleKey),
     });
@@ -150,10 +168,69 @@ function redirectWith(path: string, key: string, outcome: string) {
 }
 
 async function postRpc(functionName: string, body: Record<string, unknown>) {
+  const result = await postRpcDetailed(functionName, body);
+  return result.ok;
+}
+
+function classifyKennelRpcFailure(functionName: string, status: number, responseBody: string): KennelRpcFailureOutcome {
+  const lowerBody = responseBody.toLowerCase();
+
+  if (status === 401 || status === 403 || lowerBody.includes("not authorized") || lowerBody.includes("unauthorized")) {
+    return "unauthorized";
+  }
+
+  if (lowerBody.includes("puppy identifier is required") || lowerBody.includes("identifier is required")) {
+    return "missing_identifier";
+  }
+
+  if (lowerBody.includes("litter not found")) {
+    return "litter_not_found";
+  }
+
+  if (
+    lowerBody.includes("invalid litter") ||
+    lowerBody.includes("litter_id") ||
+    lowerBody.includes("core_puppies_litter_id_fkey") ||
+    lowerBody.includes("foreign key")
+  ) {
+    return "invalid_litter";
+  }
+
+  if (
+    lowerBody.includes("duplicate") ||
+    lowerBody.includes("unique") ||
+    lowerBody.includes("already exists") ||
+    lowerBody.includes("23505")
+  ) {
+    return "duplicate_identifier";
+  }
+
+  if (
+    status === 404 ||
+    lowerBody.includes("pgrst202") ||
+    lowerBody.includes("could not find") ||
+    lowerBody.includes("function") ||
+    lowerBody.includes("schema cache")
+  ) {
+    return "rpc_missing_or_failed";
+  }
+
+  if (functionName === "core_create_puppy" && lowerBody.includes("invalid puppy")) {
+    return "invalid_input";
+  }
+
+  if (status >= 400 && status < 500) {
+    return "invalid_input";
+  }
+
+  return "save_failed";
+}
+
+async function postRpcDetailed(functionName: string, body: Record<string, unknown>): Promise<KennelRpcResult> {
   const config = getActionConfig();
 
   if (!config) {
-    return false;
+    return { ok: false, outcome: "config_missing" };
   }
 
   const response = await fetch(`${config.restUrl}/rpc/${functionName}`, {
@@ -170,10 +247,10 @@ async function postRpc(functionName: string, body: Record<string, unknown>) {
       httpStatus: response.status,
       responseBody,
     });
-    return false;
+    return { ok: false, outcome: classifyKennelRpcFailure(functionName, response.status, responseBody) };
   }
 
-  return true;
+  return { ok: true };
 }
 
 export async function createDog(formData: FormData) {
@@ -346,7 +423,7 @@ export async function createPuppy(formData: FormData) {
     redirectWith("/staff/puppies", "puppy", "invalid_input");
   }
 
-  const ok = await postRpc("core_create_puppy", {
+  const result = await postRpcDetailed("core_create_puppy", {
     p_actor_profile_id: staff.id,
     p_litter_id: litterId.value,
     p_name: name.value || null,
@@ -367,11 +444,11 @@ export async function createPuppy(formData: FormData) {
     p_notes: notes.value || null,
   });
 
-  if (ok) {
+  if (result.ok) {
     revalidatePath("/staff/puppies");
     revalidatePath("/staff/litters");
     redirectWith("/staff/puppies", "puppy", "success");
+  } else {
+    redirectWith("/staff/puppies", "puppy", result.outcome);
   }
-
-  redirectWith("/staff/puppies", "puppy", "error");
 }

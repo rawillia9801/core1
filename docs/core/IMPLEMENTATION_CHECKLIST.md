@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after deployment of the internal Puppy Assignment / Matchmaking / Waitlist Command Center.
+- Current as of this documentation pass after the internal manual application and puppy save production bug fix.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -71,6 +71,9 @@ Core-native owner/operator operating system foundation
 - [x] Private owner/admin application entry exists at `/staff/applications/new`.
 - [x] Core-native manual application creation RPC exists: `core_create_application_manual`.
 - [x] Private application entry creates buyer, family, application, sections, events, and audit rows.
+- [x] Private manual application creation is enabled for authenticated owner/admin users in production; the earlier blanket production block was removed.
+- [x] Manual application failures now return specific operator-safe outcomes instead of redirecting to generic `/staff?application=error`.
+- [x] Manual application result messages cover created, created-no-notification, created-notification-warning, unauthorized, invalid_contact, invalid_terms, invalid_input, existing_customer_needs_review, duplicate_customer_needs_review, save_failed, rpc_failed, and config_missing.
 - [x] Application approval RPC exists: `core_approve_application`.
 - [x] Application list exists at `/staff/applications`.
 - [x] `/staff/matching` exists as an internal Puppy Assignment / Matchmaking / Waitlist Command Center.
@@ -128,6 +131,8 @@ Core-native owner/operator operating system foundation
 ### Kennel, Dog, Litter, Puppy Operations
 
 - [x] Dog, litter, and puppy create RPCs exist.
+- [x] Puppy creation now classifies save failures for unauthorized, invalid_input, missing_identifier, rpc_missing_or_failed, config_missing, litter_not_found, invalid_litter, duplicate_identifier, and save_failed instead of generic `puppy=error`.
+- [x] Puppy create form/action alignment was reviewed for field names, optional UUID/date/money inputs, and allowed sex/status/public listing status values.
 - [x] Dog, litter, and puppy list/new/edit/detail/archive routes exist where applicable.
 - [x] Neonatal Litter Command workflow exists.
 - [x] Expected Litters / Whelping Prep workflow exists.

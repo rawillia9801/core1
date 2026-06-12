@@ -5,6 +5,30 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 export const dynamic = "force-dynamic";
 
 function ResultMessage({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "created") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Core-native application created.
+      </p>
+    );
+  }
+
+  if (outcome === "created-no-notification") {
+    return (
+      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        Core-native application created. No applicant email was supplied, so no email-channel notification was queued.
+      </p>
+    );
+  }
+
+  if (outcome === "created-notification-warning") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Core-native application created, but the preview-only notification could not be queued.
+      </p>
+    );
+  }
+
   if (outcome === "unauthorized") {
     return (
       <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
@@ -37,7 +61,39 @@ function ResultMessage({ outcome }: { outcome: string | undefined }) {
     );
   }
 
-  if (outcome === "error") {
+  if (outcome === "existing_customer_needs_review") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Existing customer context needs owner review before this manual application can be saved.
+      </p>
+    );
+  }
+
+  if (outcome === "duplicate_customer_needs_review") {
+    return (
+      <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        A matching customer or application record needs owner review before saving another manual application.
+      </p>
+    );
+  }
+
+  if (outcome === "rpc_failed") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Manual application RPC failed. Check that the Core manual application action is deployed and available.
+      </p>
+    );
+  }
+
+  if (outcome === "config_missing") {
+    return (
+      <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        Core server action configuration is incomplete.
+      </p>
+    );
+  }
+
+  if (outcome === "save_failed" || outcome === "error") {
     return (
       <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
         Manual application creation failed. Review the server action log for safe error details.

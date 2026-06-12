@@ -132,6 +132,54 @@ function EmptyState({ text }: { text: string }) {
   return <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">{text}</div>;
 }
 
+function PuppyResultMessage({ outcome }: { outcome: string | undefined }) {
+  if (outcome === "success") {
+    return <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">Puppy record saved. No public listing, payment, document, message, portal, or external provider action was triggered.</section>;
+  }
+
+  if (outcome === "unauthorized") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Only owner/admin can add puppy records.</section>;
+  }
+
+  if (outcome === "invalid_input") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Check puppy form values, allowed status/sex/listing options, dates, money amounts, and field lengths.</section>;
+  }
+
+  if (outcome === "missing_identifier") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Enter at least one puppy identifier: name, collar color, or external reference.</section>;
+  }
+
+  if (outcome === "litter_required") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Select a litter before saving this puppy.</section>;
+  }
+
+  if (outcome === "litter_not_found") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">The selected litter was not found. Refresh the form and choose a current Core litter.</section>;
+  }
+
+  if (outcome === "invalid_litter") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">The litter selection is not valid for this puppy save.</section>;
+  }
+
+  if (outcome === "duplicate_identifier") {
+    return <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">A matching puppy identifier needs owner review before saving another puppy record.</section>;
+  }
+
+  if (outcome === "rpc_missing_or_failed") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">Puppy create RPC failed or is not available. Check the deployed Core RPC signature before retrying.</section>;
+  }
+
+  if (outcome === "config_missing") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">Core server action configuration is incomplete.</section>;
+  }
+
+  if (outcome === "save_failed" || outcome === "error") {
+    return <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">Puppy save failed. Review the server action log for safe error details.</section>;
+  }
+
+  return null;
+}
+
 export default async function StaffPuppiesPage({ searchParams }: { searchParams: Promise<{ puppy?: string }> }) {
   await requireStaffProfile();
   const { puppy } = await searchParams;
@@ -173,7 +221,7 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
         </section>
 
         <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">Real data only</p><p className="mt-2 text-sm leading-6">This workspace reads Core puppy and active reservation data. No public website updates, messages, documents, payments, or external systems are triggered.</p></section>
-        {puppy ? <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">Puppy action result: {puppy}</section> : null}
+        <PuppyResultMessage outcome={puppy} />
         {puppyResult.warning || reservationResult.warning ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{puppyResult.warning ?? reservationResult.warning}</section> : null}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

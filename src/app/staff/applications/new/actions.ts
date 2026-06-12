@@ -14,7 +14,11 @@ type ManualApplicationOutcome =
   | "invalid_contact"
   | "invalid_terms"
   | "invalid_input"
-  | "error";
+  | "existing_customer_needs_review"
+  | "duplicate_customer_needs_review"
+  | "save_failed"
+  | "rpc_failed"
+  | "config_missing";
 
 type ManualApplicationRpcResult = {
   buyer_id: string | null;
@@ -43,27 +47,65 @@ function isRedirectError(error: unknown) {
 }
 
 function getManualApplicationConfig() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Manual application entry is disabled until staging/production authorization is approved.");
-  }
-
   const supabaseUrl = (
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    logManualApplicationFailure("missing local/development manual application configuration", {
+    logManualApplicationFailure("missing Core server action configuration", {
       hasSupabaseUrl: Boolean(supabaseUrl),
       hasServiceRoleKey: Boolean(serviceRoleKey),
     });
-    throw new Error("Local/development manual application configuration is incomplete.");
+    return null;
   }
 
   return {
     restUrl: `${supabaseUrl}/rest/v1`,
     serviceRoleKey,
   };
+}
+
+function classifyManualApplicationRpcFailure(status: number, responseBody: string): ManualApplicationOutcome {
+  const lowerBody = responseBody.toLowerCase();
+
+  if (status === 401 || status === 403 || lowerBody.includes("not authorized") || lowerBody.includes("unauthorized")) {
+    return "unauthorized";
+  }
+
+  if (
+    lowerBody.includes("duplicate") ||
+    lowerBody.includes("unique") ||
+    lowerBody.includes("already exists") ||
+    lowerBody.includes("23505")
+  ) {
+    return "duplicate_customer_needs_review";
+  }
+
+  if (
+    lowerBody.includes("existing buyer") ||
+    lowerBody.includes("existing customer") ||
+    lowerBody.includes("multiple buyers") ||
+    lowerBody.includes("multiple families")
+  ) {
+    return "existing_customer_needs_review";
+  }
+
+  if (
+    status === 404 ||
+    lowerBody.includes("pgrst202") ||
+    lowerBody.includes("could not find") ||
+    lowerBody.includes("function") ||
+    lowerBody.includes("schema cache")
+  ) {
+    return "rpc_failed";
+  }
+
+  if (status >= 400 && status < 500) {
+    return "invalid_input";
+  }
+
+  return "save_failed";
 }
 
 function serverHeaders(serviceRoleKey: string) {
@@ -160,7 +202,7 @@ async function queueApplicationReceivedNotification({
 }
 
 export async function createManualApplication(formData: FormData) {
-  let outcome: ManualApplicationOutcome = "error";
+  let outcome: ManualApplicationOutcome = "save_failed";
 
   try {
     const staff = await requireStaffProfile();
@@ -247,7 +289,13 @@ export async function createManualApplication(formData: FormData) {
       redirect("/staff/applications/new?application=invalid_terms");
     }
 
-    const { restUrl, serviceRoleKey } = getManualApplicationConfig();
+    const config = getManualApplicationConfig();
+
+    if (!config) {
+      redirect("/staff/applications/new?application=config_missing");
+    }
+
+    const { restUrl, serviceRoleKey } = config;
     const rpcResponse = await fetch(`${restUrl}/rpc/core_create_application_manual`, {
       method: "POST",
       headers: serverHeaders(serviceRoleKey),
@@ -307,7 +355,7 @@ export async function createManualApplication(formData: FormData) {
         httpStatus: rpcResponse.status,
         responseBody,
       });
-      outcome = "error";
+      outcome = classifyManualApplicationRpcFailure(rpcResponse.status, responseBody);
     }
   } catch (error) {
     if (isRedirectError(error)) {
@@ -317,8 +365,12 @@ export async function createManualApplication(formData: FormData) {
     logManualApplicationFailure("manual application action threw an error", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    outcome = "error";
+    outcome = "save_failed";
   }
 
-  redirect(`/staff?application=${outcome}`);
+  if (outcome === "created" || outcome === "created-no-notification" || outcome === "created-notification-warning") {
+    redirect(`/staff/applications?application=${outcome}`);
+  }
+
+  redirect(`/staff/applications/new?application=${outcome}`);
 }

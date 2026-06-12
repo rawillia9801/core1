@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the internal Puppy Assignment / Matchmaking / Waitlist Command Center work.
+- Current as of this documentation pass after the internal manual application and puppy save production bug fix.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,19 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Internal Manual Application And Puppy Save Bug Fix
+
+Implemented and pushed:
+
+- `/staff/applications/new` manual application creation no longer has a blanket production block.
+- Manual application creation still requires authenticated `requireStaffProfile()` access and remains restricted to owner/admin users.
+- Manual application creation now uses the same server-side Core REST/RPC configuration path in production and development, with production-safe configuration wording.
+- Manual application failures now redirect back to `/staff/applications/new` with specific operator outcomes instead of plain `/staff?application=error`.
+- `/staff/applications` and `/staff/applications/new` now show safe messages for created, created-no-notification, created-notification-warning, unauthorized, invalid_contact, invalid_terms, invalid_input, existing_customer_needs_review, duplicate_customer_needs_review, save_failed, rpc_failed, and config_missing.
+- `/staff/puppies` puppy create failures now classify configuration, authorization, invalid input, missing identifier, RPC missing/signature failure, missing/invalid litter, duplicate identifier, and save failure outcomes instead of showing generic `puppy=error`.
+- The puppy create form/action contract was reviewed for field names, optional UUID/date/money handling, and allowed `sex`, `status`, and `publicListingStatus` values.
+- This pass did not change RPCs, migrations, auth model, environment files, Supabase config, local Supabase, SMTP behavior, public application behavior, customer-facing pages, payments, Twilio/SMS/Facebook, AI, media uploads, document generation, or signing providers.
 
 ### Internal Puppy Assignment / Matchmaking / Waitlist Command Center
 
