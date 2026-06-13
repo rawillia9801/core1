@@ -6,6 +6,7 @@ import {
   SectionNav,
   SummaryStrip,
 } from "../operator-ui";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -332,7 +333,7 @@ export default async function StaffCommunicationsPage() {
     readRows<ApplicationRow>("core_applications", { select: "id,status,buyer_id,family_id,submitted_at,created_at", order: "created_at.desc", limit: "250" }),
     readRows<BuyerRow>("core_buyers", { select: "id,first_name,last_name,preferred_name,email,phone,approval_status", order: "created_at.desc", limit: "500" }),
     readRows<FamilyRow>("core_families", { select: "id,name,status", order: "created_at.desc", limit: "500" }),
-    readRows<ReservationRow>("core_reservation_summary", { select: "reservation_id,reservation_status,buyer_id,buyer_name,buyer_email,buyer_phone,family_id,family_name,puppy_id,puppy_name,application_id,balance_due_cents,go_home_planned_at,go_home_status,go_home_checklist_status,go_home_balance_cleared_status,created_at", order: "created_at.desc", limit: "250" }),
+    readRows<ReservationRow>("core_reservation_summary_view", { select: "reservation_id,reservation_status,buyer_id,buyer_name,buyer_email,buyer_phone,family_id,family_name,puppy_id,puppy_name,application_id,balance_due_cents,go_home_planned_at,go_home_status,go_home_checklist_status,go_home_balance_cleared_status,created_at", order: "created_at.desc", limit: "250" }),
     readRows<DocumentRow>("core_documents", { select: "id,reservation_id,buyer_id,family_id,puppy_id,document_type,title,status,updated_at", order: "updated_at.desc.nullslast", limit: "250" }),
     readRows<EventRow>("core_events", { select: "id,event_type,event_at,summary,buyer_id,family_id,application_id,reservation_id,puppy_id,related_table,related_id,source", order: "event_at.desc", limit: "250" }),
   ]);
@@ -570,6 +571,13 @@ export default async function StaffCommunicationsPage() {
             Safe operator links are provided for review. No customer message is sent from this command center, and no raw provider payloads, SMTP secrets, service-role errors, or external request bodies are shown.
           </p>
         </section>
+
+        <ProposedActionPanel
+          nextAction={followUps[0]?.title ?? queueAttention[0]?.notification_type ?? "Review communication intelligence"}
+          blockers={queueAttention.length + failedAttempts.length + missingContact.length}
+          priority={queueAttention.length + failedAttempts.length + missingContact.length > 0 ? "high" : followUps.length > 0 ? "normal" : "watch"}
+          detail="Communication intelligence explains follow-up, notification, and contact review needs without sending messages."
+        />
 
         {warnings.length > 0 ? (
           <section className="rounded-3xl border border-amber-200 bg-white p-5 text-amber-950 shadow-sm">

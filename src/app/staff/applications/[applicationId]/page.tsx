@@ -9,6 +9,7 @@ import {
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
+import { ProposedActionPanel } from "../../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -607,6 +608,13 @@ export default async function ApplicationDetailPage({
           blockers={blockers.length}
           mode={blockers.length > 0 ? "attention" : "review"}
           detail="No approval, denial, reservation, or customer message is sent from this panel."
+        />
+
+        <ProposedActionPanel
+          nextAction={blockers.length > 0 ? "Application missing required review data" : "Review application intelligence signals"}
+          blockers={blockers.length}
+          priority={blockers.length > 0 ? "high" : "watch"}
+          detail="Rule signals stay review-only and point back to the best existing workspace."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

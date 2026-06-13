@@ -41,7 +41,7 @@ const primaryNavigation = [
     items: [
       { href: "/staff", label: "Overview", ready: true },
       { href: "/staff/kennel-logs", label: "Kennel Logs", ready: true },
-      { href: "/staff/proposed-actions", label: "Proposed Actions", ready: true },
+      { href: "/staff/proposed-actions", label: "Intelligence / Proposed Actions", ready: true },
       { href: "/staff/go-home/handoff", label: "Go-Home Handoff", ready: true },
     ],
   },

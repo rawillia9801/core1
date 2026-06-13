@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -1420,6 +1421,13 @@ export default async function StaffCommandPage() {
           blockers={unsentNotificationCount}
           mode={unsentNotificationCount > 0 ? "attention" : "review"}
           detail="Communication follow-ups are review links only; no customer message is sent from Command."
+        />
+
+        <ProposedActionPanel
+          nextAction={proposedCards[0]?.title ?? priorityCards[0]?.title ?? "Review Core intelligence signals"}
+          blockers={priorityCards.length}
+          priority={priorityCards.length > 0 ? "high" : proposedCards.length > 0 ? "normal" : "watch"}
+          detail="Deterministic readiness rules and persisted proposed-action records stay review-only from Command."
         />
 
         <SectionNav

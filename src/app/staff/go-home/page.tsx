@@ -6,6 +6,7 @@ import { upsertGoHomeChecklistItem } from "./actions";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -604,6 +605,13 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           blockers={missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount}
           mode={blockedCount > 0 || setupCount > 0 ? "attention" : "review"}
           detail="No go-home reminder, customer update, payment request, or portal message is sent from this panel."
+        />
+
+        <ProposedActionPanel
+          nextAction={blockedCount > 0 ? "Go-home scheduled but readiness is blocked" : setupCount > 0 ? "Handoff needs final review" : "Review go-home intelligence"}
+          blockers={missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount}
+          priority={blockedCount > 0 ? "urgent" : setupCount > 0 ? "high" : "watch"}
+          detail="Go-home intelligence points to checklist, payment, document, media, and handoff review only."
         />
 
         <SectionNav

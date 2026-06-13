@@ -3,6 +3,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -565,6 +566,13 @@ export default async function MatchingPage() {
           blockers={blockedMatches.length}
           mode={blockedMatches.length > 0 ? "attention" : "review"}
           detail="No puppy assignment, reservation, or customer message is created from matching readiness."
+        />
+
+        <ProposedActionPanel
+          nextAction={blockedMatches.length > 0 ? "Review blocked matching/readiness data" : reservationReady.length > 0 ? "Available puppy has approved applicant match signals" : "Review matching intelligence"}
+          blockers={blockedMatches.length}
+          priority={blockedMatches.length > 0 ? "high" : reservationReady.length > 0 ? "normal" : "watch"}
+          detail="Matching intelligence is advisory only and cannot assign puppies or create reservations."
         />
 
         <SectionNav

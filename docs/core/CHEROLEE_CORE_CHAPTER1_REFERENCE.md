@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the Communications + Notification Command Center work landed.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the Core Intelligence / Readiness Rules / Proposed Action Engine work landed.
 
 Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
@@ -46,8 +46,9 @@ Since the original Chapter 1 review, these additional pieces have landed:
 - `/staff/actions` Controlled Action Command Center with existing-action and review-only queues.
 - Classified operator-facing outcomes for application detail review, reservation/payment/go-home actions, kennel manage actions, and proposed-action review.
 - `/staff/communications` Communications / Follow-Ups Command Center with existing message, notification, template, delivery-attempt, event, and source-record readiness only.
+- `/staff/proposed-actions` Core Intelligence / Readiness Rules workspace with deterministic dynamic readiness rows plus persisted proposal review records.
 
-These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores, action queues, and communication follow-up prompts are advisory or operator-confirmed only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
+These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores, action queues, communication follow-up prompts, and Core Intelligence readiness rows are advisory or operator-confirmed only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
 
 ## Urgent And High-Priority Risks
 
@@ -117,7 +118,7 @@ Smart kennel monitoring remains future work. Software must not pretend sensors o
 | Document | Current Status | Notes |
 | --- | --- | --- |
 | `CURRENT_STATUS.md` | Updated | Central current-state truth after internal matching/waitlist decision-support work. |
-| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, payment plan, media, document, communications, and notification readiness work. |
+| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, payment plan, media, document, communications, notification readiness, and deterministic Core Intelligence work. |
 | `CORE_BUILD_ORDER.md` | Needs refresh when next build plan changes | Build order should now put public form validation, SMTP logging, duplicate handling, and application detail review at top. |
 | `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application, SMTP receipt, and internal matching/waitlist readiness gates. |
 | `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects internal matching/waitlist decision-support plus blocked automated assignment behavior. |

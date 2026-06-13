@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Communications + Notification Command Center.
+- Current as of this documentation pass after the Core Intelligence / Readiness Rules / Proposed Action Engine.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,19 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Core Intelligence / Readiness Rules / Proposed Action Engine
+
+Implemented and pushed:
+
+- `/staff/proposed-actions` was upgraded into the internal Core Intelligence / Readiness Rules / Proposed Actions workspace.
+- The workspace keeps existing `core_proposed_actions` proposal records and review-state-only approve/reject controls intact.
+- The workspace now also generates deterministic rule-based readiness rows from existing Core data only: applications, buyers, families, preferences, puppies, litters, dogs, reservations, documents, private media metadata, notifications, delivery attempts, financial ledger rows, weight logs, and events.
+- Rule rows now show title, reason, priority, category, blockers, related-record links, suggested workspace, and review-only/action-available indicator.
+- Rule categories cover applications, matching, reservations, payments, documents, media, communications, go-home, and kennel/care readiness.
+- Compact Core Intelligence panels now appear on command, actions, proposed-actions, application list/detail, matching, reservation detail, payments, payment plans, documents, media, communications, go-home, go-home handoff, puppy detail, and litter detail pages.
+- Navigation now labels `/staff/proposed-actions` as `Intelligence / Proposed Actions`.
+- This pass did not add migrations, tables, AI/provider calls, automatic decision-making, automatic approvals/denials, puppy assignment, reservation creation, customer messaging, email/SMS/Facebook/Twilio behavior, payment movement, refunds, document generation, media upload behavior, public/customer-facing pages, auth changes, env changes, Supabase config changes, storage policy changes, signing providers, or local Supabase commands.
 
 ### Communications + Notification Command Center
 

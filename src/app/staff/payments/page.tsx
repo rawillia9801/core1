@@ -5,6 +5,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -873,6 +874,13 @@ export default async function StaffPaymentsPage({
           blockers={canViewFinancials ? attentionAccounts : 0}
           mode={canViewFinancials && attentionAccounts > 0 ? "attention" : "review"}
           detail="No reminder, payment link, refund message, or processor call is triggered from this panel."
+        />
+
+        <ProposedActionPanel
+          nextAction={canViewFinancials && attentionAccounts > 0 ? "Payment account has balance issue" : "Review payment readiness rules"}
+          blockers={canViewFinancials ? attentionAccounts : 0}
+          priority={canViewFinancials && attentionAccounts > 0 ? "high" : "watch"}
+          detail="Payment intelligence can point to review/record workflows only; it never moves money or calls processors."
         />
 
         <SectionNav

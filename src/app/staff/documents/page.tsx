@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -762,6 +763,13 @@ export default async function StaffDocumentsPage() {
           blockers={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount}
           mode={pendingSignatureCount > 0 || reservationBlockerCount > 0 || goHomeBlockerCount > 0 ? "attention" : "review"}
           detail="No document generation, signing request, email, upload, or customer portal update is triggered here."
+        />
+
+        <ProposedActionPanel
+          nextAction={missingRequirementCount > 0 ? "Missing document requirement needs review" : pendingSignatureCount > 0 ? "Document pending signature/review" : "Review document intelligence"}
+          blockers={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount}
+          priority={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount > 0 ? "high" : "watch"}
+          detail="Document intelligence uses metadata only and cannot generate, send, upload, or request signatures."
         />
 
         <nav className="operator-section-nav" aria-label="Document readiness sections">

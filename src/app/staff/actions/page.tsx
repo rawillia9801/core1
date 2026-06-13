@@ -3,6 +3,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, OperatorStatusPill, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -550,6 +551,13 @@ export default async function StaffActionsPage() {
           blockers={0}
           mode="review"
           detail="Links only; no email, SMS, portal message, Facebook message, or provider call is triggered here."
+        />
+
+        <ProposedActionPanel
+          nextAction={proposedActions[0]?.title ?? blockedRows[0]?.title ?? "Review rule-based proposed action signals"}
+          blockers={blockedRows.length}
+          priority={blockedRows.length > 0 ? "high" : proposedActions.length > 0 ? "normal" : "watch"}
+          detail="Use Proposed Actions for deterministic readiness reasons; use Actions for existing safe action entry points."
         />
 
         <SectionNav

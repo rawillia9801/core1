@@ -5,6 +5,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -295,6 +296,13 @@ export default async function StaffApplicationsPage({
           blockers={receivedCount}
           mode={receivedCount > 0 ? "attention" : "review"}
           detail="Application communication prompts are review-only and do not send customer messages."
+        />
+
+        <ProposedActionPanel
+          nextAction={receivedCount > 0 ? "Application received but not reviewed" : reservationReadyCount > 0 ? "Approved applicant without reservation review" : "Review application readiness rules"}
+          blockers={receivedCount}
+          priority={receivedCount > 0 ? "high" : reservationReadyCount > 0 ? "normal" : "watch"}
+          detail="Proposed action signals explain why application, buyer, family, and matching records need owner review."
         />
 
         <SummaryStrip

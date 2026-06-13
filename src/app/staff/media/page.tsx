@@ -11,6 +11,7 @@ import {
   SummaryStrip,
 } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -245,6 +246,13 @@ export default async function StaffMediaPage() {
           mode="review-only"
           href="/staff/actions#media"
           detail="Media actions link to existing private dog and puppy media workflows only; no upload behavior, storage policy, public URL, or portal publishing changes are added."
+        />
+
+        <ProposedActionPanel
+          nextAction={attentionCount > 0 ? "Media readiness has missing primary or stale photo signals" : "Review media intelligence"}
+          blockers={attentionCount}
+          priority={attentionCount > 0 ? "high" : "watch"}
+          detail="Media intelligence uses existing private metadata only and cannot upload, publish, or change storage policy."
         />
 
         <SectionNav

@@ -3,6 +3,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
+import { ProposedActionPanel } from "../../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -837,6 +838,13 @@ export default async function ReservationDetailPage({
           blockers={summary.buyer_email || summary.buyer_phone ? blockers.length : blockers.length + 1}
           mode={blockers.length > 0 || (!summary.buyer_email && !summary.buyer_phone) ? "attention" : "review"}
           detail="No payment request, document link, email, SMS, or portal message is sent from this panel."
+        />
+
+        <ProposedActionPanel
+          nextAction={blockers.length > 0 ? "Reservation has blocker" : "Review reservation readiness rules"}
+          blockers={blockers.length}
+          priority={blockers.length > 0 ? "high" : "watch"}
+          detail="Reservation intelligence points to payment, document, go-home, media, or matching workspaces without executing changes."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

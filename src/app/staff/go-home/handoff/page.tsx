@@ -5,6 +5,7 @@ import { upsertGoHomeChecklistItem } from "../actions";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
+import { ProposedActionPanel } from "../../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -398,6 +399,13 @@ export default async function StaffGoHomeHandoffPage() {
           blockers={rows.filter((row) => row.blockers.length > 0).length}
           mode={rows.some((row) => row.blockers.length > 0) ? "attention" : "review"}
           detail="No reminder, customer update, payment request, or portal message is sent from this handoff panel."
+        />
+
+        <ProposedActionPanel
+          nextAction={missingSchedule > 0 ? "Handoff needs schedule/location review" : "Review final handoff intelligence"}
+          blockers={rows.filter((row) => row.blockers.length > 0).length}
+          priority={rows.some((row) => row.blockers.length > 0) ? "urgent" : "watch"}
+          detail="Handoff intelligence is review-only and cannot send reminders or update customer-facing state."
         />
 
         <SectionNav items={[

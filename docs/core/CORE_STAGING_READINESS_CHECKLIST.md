@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Communications + Notification Command Center.
+- Current as of this documentation pass after the Core Intelligence / Readiness Rules / Proposed Action Engine.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -132,6 +132,10 @@ Checks:
 
 - [ ] Server actions use authenticated staff actor IDs where applicable.
 - [ ] `/staff/actions` is protected and accessible only through authenticated internal owner/operator access.
+- [ ] `/staff/proposed-actions` is protected and redirects cleanly when unauthenticated.
+- [ ] `/staff/proposed-actions` shows deterministic readiness rules from existing data only and does not require AI or new tables.
+- [ ] Readiness rule rows show why they appear, priority, category, blockers, related links, and next workspace.
+- [ ] Core Intelligence panels on major internal pages remain compact and link to `/staff/proposed-actions`.
 - [ ] `/staff/actions` shows only existing action entry points or review-only links; it does not invent new mutation workflows.
 - [ ] `/staff/actions` includes application review, matching/assignment, buyer/family cleanup, reservation, document, payment, go-home, media, litter media, blocked, recent, and proposed-action review lanes without automatic execution.
 - [ ] Action panels on command, actions, application list/new/detail, matching, reservation, payment, payment-plan, document, media, go-home, handoff, puppy list/detail, litter list/detail, and proposed-action pages link to the correct controlled action lane.

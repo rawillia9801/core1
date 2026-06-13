@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Communications + Notification Command Center.
+- Current as of this documentation pass after the Core Intelligence / Readiness Rules / Proposed Action Engine.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -27,6 +27,7 @@ Core-native owner/operator operating system foundation
   -> document/message/payment/go-home readiness workspaces
   -> controlled action command center and proposed-action review foundation
   -> communications / notification / follow-up command center
+  -> deterministic Core intelligence / readiness rules / proposed action engine
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -209,7 +210,12 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/actions` also shows buyer/family cleanup rows and litter gallery/media readiness rows using existing data only.
 - [x] Shared compact Action panels link major internal command/readiness pages back to `/staff/actions` with next-action, blocker, mode, and safety-boundary context, including command, actions, application list/new/detail, matching, reservation detail, payments, payment plans, documents, media, go-home, handoff, puppies, puppy detail, litters, and litter detail.
 - [x] `/staff/proposed-actions` exists as owner/admin proposal queue.
-- [x] `/staff/proposed-actions` is visually/navigationally connected to `/staff/actions`.
+- [x] `/staff/proposed-actions` is upgraded as the Core Intelligence / Readiness Rules / Proposed Actions workspace.
+- [x] `/staff/proposed-actions` is visually/navigationally connected to `/staff/actions`, `/staff/command`, `/staff/matching`, `/staff/communications`, `/staff/documents`, and `/staff/media`.
+- [x] `/staff/proposed-actions` displays persisted `core_proposed_actions` proposal records and deterministic dynamic readiness rows derived from existing Core data only.
+- [x] Readiness rows include reason, priority, category, related-record links, blocker count, suggested workspace, and review-only/action-available indicator.
+- [x] Rule categories cover application/buyer/family, matching, reservation, payment, document, media, communication, go-home/handoff, and kennel/care readiness.
+- [x] Compact Core Intelligence panels appear on command, actions, proposed-actions, application list/detail, matching, reservation detail, payments, payment plans, documents, media, communications, go-home, go-home handoff, puppy detail, and litter detail pages.
 - [x] `/staff/events` exists as read-only Events/Audit workspace.
 - [x] `/staff/kennel-logs` exists as read-only kennel event/audit history workspace.
 - [x] Proposed action approval remains review-state only and does not execute business changes.

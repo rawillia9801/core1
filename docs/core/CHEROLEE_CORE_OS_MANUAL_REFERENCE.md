@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the Communications + Notification Command Center work.
+Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the Core Intelligence / Readiness Rules / Proposed Action Engine work.
 
 This is not a replacement for implementation docs. It explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
 
@@ -64,7 +64,7 @@ Screens only matter if they read and write the correct source of truth.
 | Customer Portal | Puppy updates, documents, payments, messages, resources. | Not implemented. |
 | Kennel Monitoring | Temperature, humidity, motion, camera status, distress alerts. | Not connected; planning only. |
 | Smart Home Control | Lights, plugs, displays, speakers, alerts through Home Assistant. | Not connected; planning only. |
-| AI Assistant | Read, summarize, draft, propose, and match under guardrails. | Proposed-action review foundation is connected to `/staff/actions`; AI providers blocked. |
+| AI Assistant | Read, summarize, draft, propose, and match under guardrails. | Deterministic Core Intelligence / proposed-action readiness exists; AI providers remain blocked. |
 | Core Nervous System | Health signals, dependencies, incidents, recovery. | Future. |
 | CoreFace / Presence | Visual expression of system state. | Future. |
 | Reporting | Revenue, receivables, placements, response time, kennel health, build status. | Partial internal summaries exist. |
@@ -90,6 +90,8 @@ Golden rule:
 ```text
 No interface gets to make the final decision. The dashboard, public forms, portal, Facebook, Twilio, smart-home devices, and assistant surfaces all pass through Core authority. Every meaningful action creates a durable event or audit record where the schema supports it.
 ```
+
+Current Core Intelligence status: `/staff/proposed-actions` now combines persisted `core_proposed_actions` review records with deterministic readiness rules derived from existing Core data. These rules explain attention, blockers, urgency, related records, and next workspace links. They are not AI and do not execute business decisions.
 
 ## Source Of Truth Domains
 

@@ -4,6 +4,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import type { KennelMediaRow } from "@/lib/kennel-media";
 import { OperatorAlertPanel, OperatorHeader, OperatorPanel, SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
+import { ProposedActionPanel } from "../../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -223,6 +224,13 @@ export default async function LitterDetailPage({ params }: { params: Promise<{ l
           mode="review-only"
           href="/staff/actions#media"
           detail="Litter detail actions are review-only links into existing puppy, media, and matching workspaces; no direct litter upload or public publishing behavior is added."
+        />
+
+        <ProposedActionPanel
+          nextAction={blockers.length > 1 ? "Litter readiness incomplete" : "Review litter intelligence"}
+          blockers={Math.max(blockers.length - 1, 0)}
+          priority={blockers.length > 1 ? "high" : "watch"}
+          detail="Litter intelligence derives from linked puppy, dog, and private media rows only."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

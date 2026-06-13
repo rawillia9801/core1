@@ -11,6 +11,7 @@ import { type KennelMediaRow, withKennelMediaSignedUrls } from "@/lib/kennel-med
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
+import { ProposedActionPanel } from "../../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -699,6 +700,13 @@ export default async function StaffPuppyDetailPage({
           blockers={watchSignals.length}
           mode={watchSignals.length > 0 ? "attention" : "review"}
           detail="No puppy update, portal message, media publish, email, or SMS is sent from this panel."
+        />
+
+        <ProposedActionPanel
+          nextAction={watchSignals.length > 0 ? "Puppy health/care status needs review" : activeReservation ? "Review puppy reservation readiness" : "Review puppy matching/media intelligence"}
+          blockers={watchSignals.length}
+          priority={watchSignals.length > 0 ? "urgent" : "watch"}
+          detail="Puppy intelligence can point to care, media, matching, reservation, document, and go-home review only."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
