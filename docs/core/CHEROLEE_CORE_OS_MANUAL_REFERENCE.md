@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the Breeding Program / Kennel Care / Puppy Growth Command Center work.
+Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the SMTP Email Delivery / Template / Notification Test Center work.
 
 This is not a replacement for implementation docs. It explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
 
@@ -58,8 +58,8 @@ Screens only matter if they read and write the correct source of truth.
 | Litter & Puppy Tracking | Lifecycle from planned litter to placed puppy, with weights and milestones. | Internal breeding/care command center, kennel, litter, puppy, neonatal, growth/care, and media workflows exist. |
 | Payments & Financing | Ledger truth, payment plans, deposits, refunds, reminders. | Internal ledger/payment plan readiness exists; no processor. |
 | Document Management | Deposit agreements, bills of sale, health guarantees, financing addenda, transport agreements. | Internal Document Command Center and metadata detail route exist; no generation/signature provider. |
-| Automated Email / SMTP | Application confirmations, approval notices, reminders, owner alerts. | Conditional SMTP only for application receipt owner/customer alerts. Broader email remains blocked. |
-| Communications Hub | Facebook, email, website chat, SMS, portal messages, calls. | Internal communications/follow-up command center exists for metadata, notification readiness, and review prompts only. |
+| Automated Email / SMTP | Application confirmations, approval notices, reminders, owner alerts. | Conditional application receipt SMTP plus owner/admin typed-recipient test email exist. Broader workflow email remains blocked. |
+| Communications Hub | Facebook, email, website chat, SMS, portal messages, calls. | Internal communications/follow-up and email readiness centers exist for metadata, notification readiness, template previews, test-send verification, and review prompts only. |
 | Phone & Voice / Twilio | Caller lookup, voice menu, summaries, escalation. | Phone lookup safety exists; Twilio not connected. |
 | Customer Portal | Puppy updates, documents, payments, messages, resources. | Customer-facing private portal remains blocked; internal Core-to-portal bridge/readiness now exists for existing portal tables. |
 | Kennel Monitoring | Temperature, humidity, motion, camera status, distress alerts. | Not connected; planning only. |
@@ -164,9 +164,10 @@ Current implementation status:
 
 - SMTP helper exists at `src/lib/core/smtp-mailer.ts`.
 - Public application submission can attempt an owner alert and customer receipt confirmation when SMTP env vars are configured.
+- `/staff/email` now provides internal SMTP readiness checks, customer-safe template previews, existing notification/log review, and an owner/admin-only one-recipient SMTP test action.
 - Customer-facing application receipt email must contain no Core/admin/internal wording.
 - `/staff/communications` now centralizes internal message, notification, delivery-attempt, template, event, and follow-up readiness metadata without sending customer messages.
-- Broader automated email remains blocked until send logging, test-send-to-owner, copy approval, and owner/operator approval rules are complete.
+- Broader automated email remains blocked until durable send logging, copy approval, duplicate protection, and owner/operator approval rules are complete.
 
 Core is intended eventually to send or draft emails for:
 

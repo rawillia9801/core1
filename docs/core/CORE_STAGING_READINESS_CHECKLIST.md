@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Breeding Program / Kennel Care / Puppy Growth Command Center.
+- Current as of this documentation pass after the SMTP Email Delivery / Template / Notification Test Center.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -117,6 +117,16 @@ Checks:
 - [ ] SMTP failure does not create duplicate application records on retry without owner review.
 - [ ] SMTP failure state is visible enough to investigate.
 - [ ] Future send logging is added before expanding SMTP beyond application receipt.
+
+## Internal Email / Notification Test Center Readiness
+
+- [ ] `/staff/email`, `/staff/email/test`, `/staff/email/templates`, `/staff/email/notifications`, and `/staff/email/logs` are protected and redirect cleanly when unauthenticated.
+- [ ] SMTP readiness shows configured/missing status only and never displays SMTP password values, service-role keys, raw env dumps, or provider credentials.
+- [ ] Owner/admin SMTP test action sends exactly one typed-recipient test email and does not send on page load.
+- [ ] SMTP test failures are classified as config_missing, invalid_recipient, unauthorized, smtp_auth_failed, smtp_connection_failed, smtp_rejected, or send_failed without raw provider credential output.
+- [ ] Template preview pages use customer-safe Southwest Virginia Chihuahua language and do not send emails from preview cards.
+- [ ] Notification/log views reuse existing `core_notifications`, `core_message_templates`, and `core_notification_delivery_attempts`; no duplicate queue/log table is introduced.
+- [ ] Communications, actions, proposed-actions, application, buyer/family, reservation, document, payment, and go-home pages link back to email readiness without triggering customer sends.
 
 ## Buyer Portal Placeholder Readiness
 

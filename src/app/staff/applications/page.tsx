@@ -5,6 +5,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
@@ -296,6 +297,13 @@ export default async function StaffApplicationsPage({
           blockers={receivedCount}
           mode={receivedCount > 0 ? "attention" : "review"}
           detail="Application communication prompts are review-only and do not send customer messages."
+        />
+
+        <EmailReadinessPanel
+          templateStatus="review_required"
+          notificationStatus={receivedCount > 0 ? "needs_review" : "not_recorded"}
+          href="/staff/email/templates"
+          detail="Application email templates remain customer-safe previews unless sent through an approved existing flow or the one-recipient test page."
         />
 
         <ProposedActionPanel

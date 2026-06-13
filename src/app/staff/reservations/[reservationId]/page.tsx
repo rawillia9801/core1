@@ -3,6 +3,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
+import { EmailReadinessPanel } from "../../email-readiness-panel";
 import { ProposedActionPanel } from "../../proposed-action-panel";
 import { PortalStatusPanel } from "../../portal-status-panel";
 
@@ -841,6 +842,14 @@ export default async function ReservationDetailPage({
           blockers={summary.buyer_email || summary.buyer_phone ? blockers.length : blockers.length + 1}
           mode={blockers.length > 0 || (!summary.buyer_email && !summary.buyer_phone) ? "attention" : "review"}
           detail="No payment request, document link, email, SMS, or portal message is sent from this panel."
+        />
+
+        <EmailReadinessPanel
+          recipientEmail={summary.buyer_email}
+          templateStatus={blockers.length > 0 ? "review_required" : "available"}
+          notificationStatus={summary.buyer_email ? "review_required" : "missing_recipient"}
+          href="/staff/email/notifications"
+          detail="Reservation email readiness checks recipient presence and points to queue/template review before any customer follow-up."
         />
 
         <ProposedActionPanel

@@ -7,6 +7,7 @@ import {
 } from "./actions";
 import { ActionPanel } from "../action-panel";
 import { BreedingCarePanel } from "../breeding-care-panel";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import {
   OperatorHeader,
@@ -1314,6 +1315,13 @@ export default async function ProposedActionsPage({
           taskSignals={urgentRows.length}
           href="/staff/breeding"
           detail="Proposed-action integration stays deterministic and review-only; kennel/care rows link back to the breeding center."
+        />
+
+        <EmailReadinessPanel
+          templateStatus={categoryRows("Communications").length > 0 ? "review_required" : "available"}
+          notificationStatus={categoryRows("Communications").length > 0 ? "needs_review" : "not_recorded"}
+          href="/staff/email"
+          detail="Email proposed-action integration is review-only; no proposed action approval sends messages or activates templates."
         />
 
         <SummaryStrip

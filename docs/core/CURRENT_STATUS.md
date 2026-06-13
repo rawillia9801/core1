@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Breeding Program / Kennel Care / Puppy Growth Command Center.
+- Current as of this documentation pass after the SMTP Email Delivery / Template / Notification Test Center.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,21 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### SMTP Email Delivery / Template / Notification Test Center
+
+Implemented and pushed:
+
+- `/staff/email` was added as the internal Email Command Center for SMTP configuration readiness, safe test-send controls, template previews, notification queue readiness, and delivery-attempt log review.
+- Internal email subroutes now exist for `/staff/email/test`, `/staff/email/templates`, `/staff/email/notifications`, and `/staff/email/logs`.
+- SMTP readiness checks now show configured/missing status for `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM`, plus safe from/reply-to/security summaries without exposing password values, service-role keys, raw env dumps, or provider credentials.
+- A safe owner/admin-only SMTP test action now sends exactly one typed-recipient test email using the configured SMTP sender. It classifies results as `sent`, `config_missing`, `invalid_recipient`, `unauthorized`, `smtp_auth_failed`, `smtp_connection_failed`, `smtp_rejected`, or `send_failed`.
+- Where the existing `core_notification_delivery_attempts` table is available, the test action records safe test attempt metadata without storing SMTP secrets or raw provider credential data.
+- Template readiness previews now cover application received, application approved, application needs review, reservation confirmed, deposit/payment reminder, document ready, document signed/received, go-home readiness, general buyer follow-up, and puppy update notice using customer-safe Southwest Virginia Chihuahua language.
+- Notification and log views reuse existing `core_notifications`, `core_message_templates`, and `core_notification_delivery_attempts`; no duplicate queue or template system was created.
+- Compact Email / Notification Readiness panels now appear on communications, actions, proposed-actions, applications, application detail, buyer detail, family detail, reservation detail, documents, payments, and go-home pages.
+- Internal navigation now includes `Email / Notifications`.
+- This pass did not change auth model, env files, Supabase config, local Supabase, migrations, payment processors, Twilio/SMS/Facebook, AI, public application form behavior, customer portal behavior, storage policies, media upload behavior, document generation, signing providers, automatic customer messaging, or existing application receipt behavior.
 
 ### Breeding Program / Kennel Care / Puppy Growth Command Center
 

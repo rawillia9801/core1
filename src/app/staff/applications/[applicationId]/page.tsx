@@ -9,6 +9,7 @@ import {
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
+import { EmailReadinessPanel } from "../../email-readiness-panel";
 import { ProposedActionPanel } from "../../proposed-action-panel";
 import { PortalStatusPanel } from "../../portal-status-panel";
 
@@ -611,6 +612,14 @@ export default async function ApplicationDetailPage({
           blockers={blockers.length}
           mode={blockers.length > 0 ? "attention" : "review"}
           detail="No approval, denial, reservation, or customer message is sent from this panel."
+        />
+
+        <EmailReadinessPanel
+          recipientEmail={buyer?.email}
+          templateStatus="review_required"
+          notificationStatus={application.status === "received" ? "queued" : "not_recorded"}
+          href="/staff/email"
+          detail="Review application email template and notification readiness before any applicant follow-up."
         />
 
         <ProposedActionPanel

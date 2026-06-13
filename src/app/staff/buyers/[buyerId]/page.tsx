@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { CommunicationPanel } from "../../communication-panel";
+import { EmailReadinessPanel } from "../../email-readiness-panel";
 import { PortalStatusPanel } from "../../portal-status-panel";
 
 export const dynamic = "force-dynamic";
@@ -214,6 +215,14 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
           blockers={buyer.email || buyer.phone ? 0 : 1}
           mode={buyer.email || buyer.phone ? "review" : "blocked"}
           detail="This panel links to readiness only; it does not invite portal users or send messages."
+        />
+
+        <EmailReadinessPanel
+          recipientEmail={buyer.email}
+          templateStatus={applicationsResult.rows.length > 0 || reservationsResult.rows.length > 0 ? "review_required" : "not_recorded"}
+          notificationStatus={messagesResult.rows.some((message) => message.channel === "email") ? "sent" : "not_recorded"}
+          href="/staff/email"
+          detail="Buyer email readiness uses contact detail plus existing message/notification metadata; it does not send outreach."
         />
 
         <PortalStatusPanel

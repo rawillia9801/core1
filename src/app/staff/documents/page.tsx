@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
 
@@ -764,6 +765,13 @@ export default async function StaffDocumentsPage() {
           blockers={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount}
           mode={pendingSignatureCount > 0 || reservationBlockerCount > 0 || goHomeBlockerCount > 0 ? "attention" : "review"}
           detail="No document generation, signing request, email, upload, or customer portal update is triggered here."
+        />
+
+        <EmailReadinessPanel
+          templateStatus={pendingSignatureCount > 0 ? "review_required" : "available"}
+          notificationStatus={pendingSignatureCount > 0 ? "needs_review" : "not_recorded"}
+          href="/staff/email/templates"
+          detail="Document email readiness is template/queue review only; document generation and signature requests remain disconnected."
         />
 
         <ProposedActionPanel

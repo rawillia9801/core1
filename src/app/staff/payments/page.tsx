@@ -5,6 +5,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
 
@@ -875,6 +876,13 @@ export default async function StaffPaymentsPage({
           blockers={canViewFinancials ? attentionAccounts : 0}
           mode={canViewFinancials && attentionAccounts > 0 ? "attention" : "review"}
           detail="No reminder, payment link, refund message, or processor call is triggered from this panel."
+        />
+
+        <EmailReadinessPanel
+          templateStatus={attentionAccounts > 0 ? "review_required" : "available"}
+          notificationStatus={attentionAccounts > 0 ? "needs_review" : "not_recorded"}
+          href="/staff/email/templates"
+          detail="Payment reminder templates stay review-only; no payment email, link, or provider action is sent from this workspace."
         />
 
         <ProposedActionPanel

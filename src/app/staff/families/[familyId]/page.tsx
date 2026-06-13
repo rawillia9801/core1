@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { CommunicationPanel } from "../../communication-panel";
+import { EmailReadinessPanel } from "../../email-readiness-panel";
 import { PortalStatusPanel } from "../../portal-status-panel";
 
 export const dynamic = "force-dynamic";
@@ -194,6 +195,14 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
           blockers={membersResult.rows.length === 0 ? 1 : 0}
           mode={membersResult.rows.length === 0 ? "attention" : "review"}
           detail="This panel uses existing communication metadata only and does not send messages."
+        />
+
+        <EmailReadinessPanel
+          recipientEmail={primaryBuyer?.email}
+          templateStatus={applicationsResult.rows.length > 0 || reservationsResult.rows.length > 0 ? "review_required" : "not_recorded"}
+          notificationStatus={conversationsResult.rows.some((conversation) => conversation.channel === "email") ? "sent" : "not_recorded"}
+          href="/staff/email"
+          detail="Family email readiness uses the primary buyer contact when available and links to template/notification review."
         />
 
         <PortalStatusPanel

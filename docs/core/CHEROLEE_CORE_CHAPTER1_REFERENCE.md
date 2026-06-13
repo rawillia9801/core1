@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the Breeding Program / Kennel Care / Puppy Growth Command Center work landed.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the SMTP Email Delivery / Template / Notification Test Center work landed.
 
 Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
@@ -49,8 +49,11 @@ Since the original Chapter 1 review, these additional pieces have landed:
 - `/staff/proposed-actions` Core Intelligence / Readiness Rules workspace with deterministic dynamic readiness rows plus persisted proposal review records.
 - `/staff/portal` Core-to-Buyer Portal Bridge / Portal Readiness Command Center for existing portal table readiness.
 - `/staff/breeding` Breeding Program / Kennel Care / Puppy Growth Command Center with focused internal routes for dogs, pairings, pregnancies, whelping, litters, puppy growth/care, calendar, tasks, and alerts.
+- `/staff/email` SMTP Email Delivery / Template / Notification Test Center with safe SMTP readiness checks, owner/admin typed-recipient test send, customer-safe template previews, notification readiness, and delivery-attempt log review.
 
 These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores, action queues, communication follow-up prompts, and Core Intelligence readiness rows are advisory or operator-confirmed only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
+
+The email test center does add a controlled live side-effect: owner/admin users may send exactly one explicitly typed SMTP test email from `/staff/email/test`. It does not activate automated workflow messages, customer template sending, payment reminders, document notices, portal updates, SMS, Facebook, Twilio, AI, or external signing behavior.
 
 Breeding/care readiness is also advisory and internal only. It reads existing Core and legacy breeding/care tables where available, but it must not automate breeding decisions, diagnose animals, publish puppies, update portal visibility, create schema, connect devices, send messages, or call providers.
 
@@ -87,9 +90,9 @@ The application review surface must clearly display the new public sections:
 
 If the current application detail route does not cleanly show those records, application detail review is still the next daily-use hardening task.
 
-### 4. SMTP Send Logging Is Now Needed
+### 4. SMTP Send Logging Still Needs Production Hardening
 
-SMTP application receipt behavior exists. Before any additional SMTP email types are added, Core needs durable send-attempt logging for owner/customer application receipt emails. This should record success/failure without exposing SMTP secrets.
+SMTP application receipt behavior and owner/admin test sending exist. The test action records safe delivery-attempt metadata where the existing table is available, but broader workflow email still needs durable logging, duplicate-send protection, copy approval, and reconciliation rules before expansion.
 
 ### 5. Duplicate And Failed Intake Handling Is Needed
 

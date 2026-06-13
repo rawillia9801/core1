@@ -3,6 +3,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, OperatorStatusPill, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
 import { BreedingCarePanel } from "../breeding-care-panel";
@@ -553,6 +554,13 @@ export default async function StaffActionsPage() {
           blockers={0}
           mode="review"
           detail="Links only; no email, SMS, portal message, Facebook message, or provider call is triggered here."
+        />
+
+        <EmailReadinessPanel
+          templateStatus="review_required"
+          notificationStatus={blockedRows.length > 0 ? "needs_review" : "not_recorded"}
+          href="/staff/email"
+          detail="Email readiness stays separate from action execution; use it to review SMTP, templates, notification queue, and safe logs."
         />
 
         <ProposedActionPanel

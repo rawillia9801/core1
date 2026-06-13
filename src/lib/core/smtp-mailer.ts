@@ -39,6 +39,54 @@ export function getSmtpConfig(): SmtpConfig | null {
   return { host, port, secure, user, pass, from, ownerTo };
 }
 
+export function getSmtpDeliveryConfig(): SmtpConfig | null {
+  const host = env("SMTP_HOST");
+  const user = env("SMTP_USER") || env("SMTP_USERNAME");
+  const pass = env("SMTP_PASS") || env("SMTP_PASSWORD");
+  const from = env("SMTP_FROM") || env("APPLICATION_EMAIL_FROM");
+  const ownerTo = env("APPLICATION_EMAIL_TO") || env("APPLICATION_ALERT_TO") || env("SMTP_OWNER_TO");
+  const port = Number(env("SMTP_PORT") || "465");
+  const secure = env("SMTP_SECURE") ? env("SMTP_SECURE") !== "false" : port === 465;
+
+  if (!host || !user || !pass || !from || !Number.isFinite(port)) {
+    return null;
+  }
+
+  return { host, port, secure, user, pass, from, ownerTo };
+}
+
+export function getSmtpReadiness() {
+  const host = env("SMTP_HOST");
+  const portText = env("SMTP_PORT") || "465";
+  const port = Number(portText);
+  const secure = env("SMTP_SECURE") ? env("SMTP_SECURE") !== "false" : port === 465;
+  const user = env("SMTP_USER") || env("SMTP_USERNAME");
+  const pass = env("SMTP_PASS") || env("SMTP_PASSWORD");
+  const from = env("SMTP_FROM") || env("APPLICATION_EMAIL_FROM");
+  const replyTo = env("SMTP_REPLY_TO");
+  const ownerTo = env("APPLICATION_EMAIL_TO") || env("APPLICATION_ALERT_TO") || env("SMTP_OWNER_TO");
+  const required = [
+    { key: "SMTP_HOST", configured: Boolean(host) },
+    { key: "SMTP_PORT", configured: Number.isFinite(port) },
+    { key: "SMTP_SECURE", configured: Boolean(env("SMTP_SECURE")) },
+    { key: "SMTP_USER", configured: Boolean(user) },
+    { key: "SMTP_PASS", configured: Boolean(pass) },
+    { key: "SMTP_FROM", configured: Boolean(from) },
+  ];
+
+  return {
+    configured: required.every((item) => item.configured),
+    host: host || "Not configured",
+    port: Number.isFinite(port) ? port : null,
+    secure,
+    from: from || "Not configured",
+    replyTo: replyTo || null,
+    ownerTo: ownerTo || null,
+    required,
+    missing: required.filter((item) => !item.configured).map((item) => item.key),
+  };
+}
+
 function escapeHeader(value: string) {
   return value.replace(/[\r\n]+/g, " ").trim();
 }

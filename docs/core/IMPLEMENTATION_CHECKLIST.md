@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Breeding Program / Kennel Care / Puppy Growth Command Center.
+- Current as of this documentation pass after the SMTP Email Delivery / Template / Notification Test Center.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -31,6 +31,7 @@ Core-native owner/operator operating system foundation
   -> buyer portal / my puppy portal readiness foundation with unlinked safe states
   -> core-to-buyer portal bridge / puppy portal readiness layer
   -> breeding program / kennel care / puppy growth command center
+  -> smtp email delivery / template / notification test center
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -50,6 +51,7 @@ Core-native owner/operator operating system foundation
 - No document generation/signature provider is connected.
 - No SMS/Twilio/Facebook/AI/smart-home/camera behavior is connected.
 - SMTP application receipt email is the only currently implemented live external side-effect path, and it runs only when server-side SMTP environment variables are configured.
+- Internal SMTP test email is owner/admin-only, typed-recipient-only, and sends exactly one test message; it must not become automatic customer messaging.
 
 ## Phase 0 — Repository And Guardrails
 
@@ -194,6 +196,13 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/messages` exists as owner/admin communications readiness workspace.
 - [x] `/staff/notifications` exists as notification preview/templates/attempt-log workspace.
 - [x] `/staff/communications` exists as the internal Communications / Follow-Ups Command Center.
+- [x] `/staff/email` exists as the internal SMTP Email Delivery / Template / Notification Test Center.
+- [x] `/staff/email/test`, `/staff/email/templates`, `/staff/email/notifications`, and `/staff/email/logs` exist.
+- [x] Email Command Center shows SMTP configured/missing status, safe from/reply-to/security summaries, notification queue readiness, template readiness, and delivery-attempt log status without exposing SMTP passwords, service-role keys, raw env dumps, or raw provider credential data.
+- [x] Owner/admin-only SMTP test action exists and sends exactly one typed-recipient test email with classified outcomes: sent, config_missing, invalid_recipient, unauthorized, smtp_auth_failed, smtp_connection_failed, smtp_rejected, and send_failed.
+- [x] SMTP test attempts use the existing `core_notification_delivery_attempts` table when available for safe metadata logging; no new migrations or duplicate logging tables were added.
+- [x] Customer-safe template previews exist for application received, application approved, application needs review, reservation confirmed, deposit/payment reminder, document ready, document signed/received, go-home readiness, general buyer follow-up, and puppy update notice.
+- [x] Compact Email / Notification Readiness panels appear on communications, actions, proposed-actions, applications, application detail, buyer detail, family detail, reservation detail, documents, payments, and go-home pages.
 - [x] Communications Command Center reads existing `core_conversations`, `core_messages`, `core_message_templates`, `core_notifications`, `core_notification_delivery_attempts`, `core_events`, applications, buyers, families, reservations, and document metadata.
 - [x] Communications readiness shows open/unresolved metadata, queued/pending/sent notification states, recent queued notifications, failed/blocked/skipped attempt states, missing recipient/template review states, template safety, recent activity, and source-record links.
 - [x] Communications follow-up prompts cover application review, missing follow-up signal, approved-without-reservation review, buyer/family contact gaps, document signature/review, payment owner review, go-home communication readiness, matching review, and reservation blockers.
@@ -207,7 +216,7 @@ Core-native owner/operator operating system foundation
 - [x] Public application submission attempts owner/customer SMTP receipt emails only when server-side SMTP env vars are configured.
 - [~] SMTP application receipt is implemented but send logging for each SMTP attempt still needs to be added.
 - [ ] Add send logging for SMTP owner/customer receipt attempts.
-- [ ] Add test-send-to-owner workflow before expanding SMTP beyond application receipt.
+- [x] Add owner/admin typed-recipient SMTP test workflow before expanding SMTP beyond application receipt.
 - [blocked] Keep denial/approval/payment/go-home/customer-update emails blocked until approval, logging, and copy rules are complete.
 
 ### Command, Events, Proposed Actions

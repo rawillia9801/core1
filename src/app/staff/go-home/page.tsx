@@ -6,6 +6,7 @@ import { upsertGoHomeChecklistItem } from "./actions";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
 import { BreedingCarePanel } from "../breeding-care-panel";
@@ -607,6 +608,13 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           blockers={missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount}
           mode={blockedCount > 0 || setupCount > 0 ? "attention" : "review"}
           detail="No go-home reminder, customer update, payment request, or portal message is sent from this panel."
+        />
+
+        <EmailReadinessPanel
+          templateStatus={blockedCount > 0 || setupCount > 0 ? "review_required" : "available"}
+          notificationStatus={blockedCount > 0 || setupCount > 0 ? "needs_review" : "not_recorded"}
+          href="/staff/email/templates"
+          detail="Go-home email readiness points to customer-safe template review; no go-home message sends automatically."
         />
 
         <ProposedActionPanel

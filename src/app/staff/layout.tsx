@@ -32,6 +32,7 @@ const primaryNavigation = [
     label: "Communication",
     items: [
       { href: "/staff/communications", label: "Communications / Follow-Ups", ready: true },
+      { href: "/staff/email", label: "Email / Notifications", ready: true },
       { href: "/staff/messages", label: "Messages", ready: true },
       { href: "/staff/notifications", label: "Notifications", ready: true },
       { href: "/staff/events", label: "Events", ready: true },

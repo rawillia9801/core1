@@ -6,6 +6,7 @@ import {
   SectionNav,
   SummaryStrip,
 } from "../operator-ui";
+import { EmailReadinessPanel } from "../email-readiness-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 
 export const dynamic = "force-dynamic";
@@ -577,6 +578,13 @@ export default async function StaffCommunicationsPage() {
           blockers={queueAttention.length + failedAttempts.length + missingContact.length}
           priority={queueAttention.length + failedAttempts.length + missingContact.length > 0 ? "high" : followUps.length > 0 ? "normal" : "watch"}
           detail="Communication intelligence explains follow-up, notification, and contact review needs without sending messages."
+        />
+
+        <EmailReadinessPanel
+          templateStatus={templates.length > 0 ? "available" : "missing_template"}
+          notificationStatus={queueAttention.length > 0 || failedAttempts.length > 0 ? "needs_review" : queued.length > 0 ? "queued" : "not_recorded"}
+          href="/staff/email"
+          detail="Email readiness uses the same notification, template, and delivery-attempt metadata shown here, plus SMTP configuration checks."
         />
 
         {warnings.length > 0 ? (
