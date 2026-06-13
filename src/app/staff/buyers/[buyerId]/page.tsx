@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { CommunicationPanel } from "../../communication-panel";
+import { PortalStatusPanel } from "../../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -158,6 +159,9 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
   const familiesById = new Map(familyResult.rows.map((family) => [family.id, family]));
   const activeReservationCount = reservationsResult.rows.filter((reservation) => !["cancelled", "completed"].includes((reservation.reservation_status ?? "").toLowerCase())).length;
   const balanceDue = reservationsResult.rows.reduce((sum, reservation) => sum + (reservation.balance_due_cents ?? 0), 0);
+  const portalAccessStatus = membersResult.rows.find((member) => member.portal_access_status && member.portal_access_status !== "not_invited")?.portal_access_status ?? membersResult.rows[0]?.portal_access_status;
+  const portalReadyDocuments = documentsResult.rows.filter((document) => ["signed", "complete", "filed"].includes((document.status ?? "").toLowerCase())).length;
+  const portalGoHomeReady = reservationsResult.rows.some((reservation) => ["scheduled", "ready", "complete", "completed"].includes((reservation.go_home_status ?? "").toLowerCase()));
   const attentionFlags = [
     !buyer.email && !buyer.phone ? "No email or primary phone recorded." : null,
     !buyer.approval_status ? "Approval status missing." : null,
@@ -210,6 +214,14 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
           blockers={buyer.email || buyer.phone ? 0 : 1}
           mode={buyer.email || buyer.phone ? "review" : "blocked"}
           detail="This panel links to readiness only; it does not invite portal users or send messages."
+        />
+
+        <PortalStatusPanel
+          accountStatus={portalAccessStatus}
+          puppyAssigned={reservationsResult.rows.some((reservation) => Boolean(reservation.puppy_id))}
+          documentReadyCount={portalReadyDocuments}
+          documentTotalCount={documentsResult.rows.length}
+          goHomeReady={portalGoHomeReady}
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

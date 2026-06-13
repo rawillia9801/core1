@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Core Intelligence / Readiness Rules / Proposed Action Engine.
+- Current as of this documentation pass after the Buyer Portal / My Puppy Portal readiness foundation.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -22,10 +22,22 @@ The following public routes now exist and must be included in staging/production
 - `/apply/received`
 - `/embed/application`
 - `/embed/application/received`
+- `/portal`
+- `/portal/mypuppy`
+- `/portal/application`
+- `/portal/reservation`
+- `/portal/documents`
+- `/portal/payments`
+- `/portal/go-home`
+- `/portal/messages`
+- `/portal/updates`
+- `/portal/resources`
 
 The embedded form is intended for the Southwest Virginia Chihuahua public website. It must not expose internal Core branding, staff wording, admin wording, private IDs, private data, or owner/operator-only workflow information.
 
 The application submit action can create Core application records and can attempt SMTP receipt emails when SMTP env vars are configured.
+
+The portal routes are readiness placeholders only until secure customer account linking and access-policy work are complete. They must not query or expose private buyer, family, application, reservation, document, payment, go-home, message, staff, audit, storage, service-role, or provider details while unlinked.
 
 ## Environment Readiness
 
@@ -105,6 +117,20 @@ Checks:
 - [ ] SMTP failure does not create duplicate application records on retry without owner review.
 - [ ] SMTP failure state is visible enough to investigate.
 - [ ] Future send logging is added before expanding SMTP beyond application receipt.
+
+## Buyer Portal Placeholder Readiness
+
+- [ ] `/portal` renders without staff/admin/internal wording or private data.
+- [ ] `/portal/mypuppy` renders a safe no-puppy-assigned/unlinked state.
+- [ ] `/portal/application` renders only customer-safe application placeholder status while unlinked.
+- [ ] `/portal/reservation` renders only customer-safe reservation placeholder status while unlinked.
+- [ ] `/portal/documents` renders only customer-safe document placeholder status while unlinked.
+- [ ] `/portal/payments` renders only customer-safe read-only payment placeholder status while unlinked.
+- [ ] `/portal/go-home` renders customer-safe schedule/checklist placeholder content while unlinked.
+- [ ] `/portal/messages`, `/portal/updates`, and `/portal/resources` render without private message history or staff links.
+- [ ] Portal pages show that portal account linking is required before private records can display.
+- [ ] Portal pages do not query all customers client-side or expose raw database, service-role, storage, audit, provider, internal blocker, private note, or proposed-action details.
+- [blocked] Private portal record display remains blocked until secure customer identity lookup, RLS/access policy review, and customer account linking are implemented.
 
 ## Staff Access Readiness
 

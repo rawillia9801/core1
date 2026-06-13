@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Core Intelligence / Readiness Rules / Proposed Action Engine.
+- Current as of this documentation pass after the Buyer Portal / My Puppy Portal readiness foundation.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -28,6 +28,7 @@ Core-native owner/operator operating system foundation
   -> controlled action command center and proposed-action review foundation
   -> communications / notification / follow-up command center
   -> deterministic Core intelligence / readiness rules / proposed action engine
+  -> buyer portal / my puppy portal readiness foundation with unlinked safe states
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -38,6 +39,7 @@ Core-native owner/operator operating system foundation
 - Zoho One is cancelled and historical only.
 - Existing `/staff` route names are technical names; product language should remain owner/operator/Core Command Center language.
 - Public website/application pages must not expose internal Core/admin/staff wording.
+- Buyer portal pages must stay placeholder/customer-safe until secure account linking and access policies exist.
 - No payment processor is connected.
 - No portal account is created from application submission.
 - No application approval, denial, waitlist decision, reservation, puppy assignment, or payment happens automatically.
@@ -262,14 +264,19 @@ Core-native owner/operator operating system foundation
 
 Still not complete:
 
-- [ ] Full customer portal.
+- [~] Buyer portal / My Puppy Portal readiness foundation routes exist with safe unlinked placeholder states.
+- [x] `/portal` customer-safe dashboard route exists.
+- [x] `/portal/mypuppy`, `/portal/application`, `/portal/reservation`, `/portal/documents`, `/portal/payments`, `/portal/go-home`, `/portal/messages`, `/portal/updates`, and `/portal/resources` routes exist.
+- [x] Portal pages do not query private Core records before secure account linking exists.
+- [x] Internal buyer/family/reservation/puppy detail pages include portal-readiness panels from existing internal metadata.
+- [ ] Full customer portal with secure private record display.
 - [ ] Family login/access model.
-- [ ] My puppy page.
-- [ ] Documents page.
-- [ ] Payments page.
-- [ ] Go-home page.
-- [ ] Messages page.
-- [ ] Resources/care-guide page.
+- [blocked] My puppy private data display.
+- [blocked] Documents private data display.
+- [blocked] Payments private data display.
+- [blocked] Go-home private data display.
+- [blocked] Messages private data display.
+- [x] Resources/care-guide placeholder page.
 - [ ] Document generation/signature provider.
 - [ ] Payment processor integration.
 - [ ] Portal messaging.

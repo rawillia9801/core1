@@ -4,6 +4,7 @@ import { SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
 import { ProposedActionPanel } from "../../proposed-action-panel";
+import { PortalStatusPanel } from "../../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -771,6 +772,8 @@ export default async function ReservationDetailPage({
   const completeChecklistCount = checklistResult.rows.filter((item) =>
     isChecklistComplete(item.status),
   ).length;
+  const portalReadyDocuments = documentResult.rows.filter((document) => ["signed", "complete", "filed"].includes((document.status ?? "").toLowerCase())).length;
+  const portalGoHomeReady = goHome ? ["scheduled", "ready", "complete", "completed"].includes((goHome.effective_status ?? goHome.detail_status ?? "").toLowerCase()) : false;
   const reservationReference =
     reservation?.external_reference || shortId(summary.reservation_id);
 
@@ -845,6 +848,14 @@ export default async function ReservationDetailPage({
           blockers={blockers.length}
           priority={blockers.length > 0 ? "high" : "watch"}
           detail="Reservation intelligence points to payment, document, go-home, media, or matching workspaces without executing changes."
+        />
+
+        <PortalStatusPanel
+          accountStatus={reservation?.portal_access_status}
+          puppyAssigned={Boolean(summary.puppy_id)}
+          documentReadyCount={portalReadyDocuments}
+          documentTotalCount={documentResult.rows.length}
+          goHomeReady={portalGoHomeReady}
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -152,7 +152,7 @@ Required document types include:
 - Transport Agreement
 - Application Copy
 
-Document generation, upload expansion, portal visibility, and signature provider integration remain blocked until explicitly approved.
+Document generation, upload expansion, private portal visibility, and signature provider integration remain blocked until explicitly approved. The current `/portal` routes are safe placeholder/readiness pages only and do not display private records before secure account linking exists.
 
 ## Automated Email And Communications
 

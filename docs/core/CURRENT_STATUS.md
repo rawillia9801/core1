@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Core Intelligence / Readiness Rules / Proposed Action Engine.
+- Current as of this documentation pass after the Buyer Portal / My Puppy Portal readiness foundation.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,18 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Buyer Portal / My Puppy Portal Readiness Foundation
+
+Implemented and pushed:
+
+- `/portal` was added as the customer-facing My Puppy Portal foundation.
+- Customer-safe portal routes now exist for `/portal/mypuppy`, `/portal/application`, `/portal/reservation`, `/portal/documents`, `/portal/payments`, `/portal/go-home`, `/portal/messages`, `/portal/updates`, and `/portal/resources`.
+- Portal navigation now covers Home, My Puppy, Application, Reservation, Documents, Payments, Go-Home, Messages, Updates, and Resources.
+- Secure buyer account linking/RLS-backed customer identity lookup is not implemented yet, so portal pages do not query private Core records and show safe unlinked placeholder states.
+- Portal pages consistently state that portal account linking is required before private records can display, and avoid staff/internal links, raw IDs, internal notes, audit details, service-role errors, private storage URLs, payment actions, document generation, or provider behavior.
+- Internal buyer, family, reservation, and puppy detail pages now include compact portal readiness panels showing account link status, puppy assignment visibility, document readiness, and go-home readiness from already-loaded internal metadata.
+- This pass did not add auth changes, portal account creation, invite emails, RLS/policy work, migrations, storage policies, media upload behavior, document generation, signing providers, SMTP changes, payment processors, Twilio/SMS/Facebook behavior, AI, public application behavior, or customer messaging.
 
 ### Core Intelligence / Readiness Rules / Proposed Action Engine
 

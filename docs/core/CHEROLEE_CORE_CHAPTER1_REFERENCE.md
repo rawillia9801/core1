@@ -56,6 +56,8 @@ These additions do not change the Core authority model. Application submission c
 
 Row Level Security and public-write boundaries remain the biggest unresolved blocker between safe public intake and broader customer-facing access. The public application submit path currently uses a server-side controlled action and service-role write pattern. That can be acceptable only as a narrow, server-side ingress surface and must not be expanded into customer portal behavior without RLS and policy review.
 
+The current `/portal` route family is a buyer portal readiness foundation only. It shows customer-safe unlinked placeholder states and must not be treated as private customer record access until secure account linking and access policies exist.
+
 ### 2. Public Application Submission Needs Validation
 
 The embedded form now exists. It must be tested end-to-end:

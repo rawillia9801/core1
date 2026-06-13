@@ -12,6 +12,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
 import { ProposedActionPanel } from "../../proposed-action-panel";
+import { PortalStatusPanel } from "../../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -707,6 +708,15 @@ export default async function StaffPuppyDetailPage({
           blockers={watchSignals.length}
           priority={watchSignals.length > 0 ? "urgent" : "watch"}
           detail="Puppy intelligence can point to care, media, matching, reservation, document, and go-home review only."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          puppyAssigned={Boolean(activeReservation)}
+          documentReadyCount={completeDocumentCount}
+          documentTotalCount={documentResult.rows.length}
+          goHomeReady={activeReservation ? ["scheduled", "ready", "complete", "completed"].includes((activeReservation.go_home_status ?? "").toLowerCase()) : false}
+          detail="Puppy portal visibility remains gated by a linked buyer portal account and customer-safe reservation context."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
