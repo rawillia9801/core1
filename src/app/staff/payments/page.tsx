@@ -6,6 +6,7 @@ import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
+import { PortalStatusPanel } from "../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -881,6 +882,13 @@ export default async function StaffPaymentsPage({
           blockers={canViewFinancials ? attentionAccounts : 0}
           priority={canViewFinancials && attentionAccounts > 0 ? "high" : "watch"}
           detail="Payment intelligence can point to review/record workflows only; it never moves money or calls processors."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          paymentReadyCount={canViewFinancials ? Math.max(accounts.length - attentionAccounts, 0) : 0}
+          href="/staff/portal/payments"
+          detail="Portal payment bridge compares Core ledger/reservation readiness with existing buyer payment account, payment, and payment-plan portal records."
         />
 
         <SectionNav

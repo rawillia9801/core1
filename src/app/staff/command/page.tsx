@@ -10,6 +10,7 @@ import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
+import { PortalStatusPanel } from "../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -865,6 +866,7 @@ export default async function StaffCommandPage() {
   const openBalanceCount = canViewFinancials
     ? reservations.filter((row) => (row.balance_due_cents ?? 0) > 0).length
     : "Restricted";
+  const openBalanceNumber = typeof openBalanceCount === "number" ? openBalanceCount : 0;
   const proposedNeedsReviewCount = countByStatus(proposedActions, ["needs_review"]);
   const proposedHighRiskCount = proposedActions.filter((row) =>
     ["high", "blocked"].includes(normalized(row.risk_level)),
@@ -1428,6 +1430,17 @@ export default async function StaffCommandPage() {
           blockers={priorityCards.length}
           priority={priorityCards.length > 0 ? "high" : proposedCards.length > 0 ? "normal" : "watch"}
           detail="Deterministic readiness rules and persisted proposed-action records stay review-only from Command."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          documentReadyCount={canViewAudit ? Math.max(documents.length - draftDocumentCount, 0) : 0}
+          documentTotalCount={canViewAudit ? documents.length : 0}
+          paymentReadyCount={canViewFinancials ? Math.max(activeReservationCount - openBalanceNumber, 0) : 0}
+          updateMessageCount={communicationCards.length}
+          goHomeReady={goHomeBlockerCount === 0 && goHomeUnscheduledCount === 0}
+          href="/staff/portal"
+          detail="Portal bridge overview shows whether existing Core buyer, puppy, document, payment, message, update, and go-home records are connected to existing portal tables."
         />
 
         <SectionNav

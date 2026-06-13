@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Buyer Portal / My Puppy Portal readiness foundation.
+- Current as of this documentation pass after the Core-to-Buyer Portal Bridge / Puppy Portal readiness layer.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -29,6 +29,7 @@ Core-native owner/operator operating system foundation
   -> communications / notification / follow-up command center
   -> deterministic Core intelligence / readiness rules / proposed action engine
   -> buyer portal / my puppy portal readiness foundation with unlinked safe states
+  -> core-to-buyer portal bridge / puppy portal readiness layer
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -40,6 +41,7 @@ Core-native owner/operator operating system foundation
 - Existing `/staff` route names are technical names; product language should remain owner/operator/Core Command Center language.
 - Public website/application pages must not expose internal Core/admin/staff wording.
 - Buyer portal pages must stay placeholder/customer-safe until secure account linking and access policies exist.
+- Internal portal bridge pages may read existing portal tables for owner/operator readiness only; they must not create portal accounts, messages, payments, document actions, or customer visibility.
 - No payment processor is connected.
 - No portal account is created from application submission.
 - No application approval, denial, waitlist decision, reservation, puppy assignment, or payment happens automatically.
@@ -265,6 +267,13 @@ Core-native owner/operator operating system foundation
 Still not complete:
 
 - [~] Buyer portal / My Puppy Portal readiness foundation routes exist with safe unlinked placeholder states.
+- [x] `/staff/portal` exists as the internal Core-to-Buyer Portal Bridge / Portal Readiness Command Center.
+- [x] `/staff/portal/buyers`, `/staff/portal/puppies`, `/staff/portal/documents`, `/staff/portal/payments`, `/staff/portal/messages`, `/staff/portal/updates`, and `/staff/portal/resources` exist as internal bridge readiness routes.
+- [x] Portal bridge reads existing portal tables where available instead of inventing a second portal model.
+- [x] Portal bridge maps Core buyers, puppies, reservations, documents, payments, transportation/go-home, messages, updates, and resources to existing portal records where direct or review-safe matching data supports it.
+- [x] Missing Core-to-portal links are shown as review states, not fabricated relationships.
+- [x] Buyer/family/application/reservation/puppy/detail and documents/payments/go-home/actions/command pages include compact internal Portal Readiness panels.
+- [x] Internal navigation includes `Portal Readiness`.
 - [x] `/portal` customer-safe dashboard route exists.
 - [x] `/portal/mypuppy`, `/portal/application`, `/portal/reservation`, `/portal/documents`, `/portal/payments`, `/portal/go-home`, `/portal/messages`, `/portal/updates`, and `/portal/resources` routes exist.
 - [x] Portal pages do not query private Core records before secure account linking exists.

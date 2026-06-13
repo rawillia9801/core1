@@ -3,6 +3,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
+import { PortalStatusPanel } from "../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -770,6 +771,14 @@ export default async function StaffDocumentsPage() {
           blockers={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount}
           priority={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount > 0 ? "high" : "watch"}
           detail="Document intelligence uses metadata only and cannot generate, send, upload, or request signatures."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          documentReadyCount={signedFiledCount}
+          documentTotalCount={documents.length}
+          href="/staff/portal/documents"
+          detail="Portal document bridge compares Core document metadata with existing buyer document, document, and contract portal records."
         />
 
         <nav className="operator-section-nav" aria-label="Document readiness sections">

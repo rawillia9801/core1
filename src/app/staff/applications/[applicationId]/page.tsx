@@ -10,6 +10,7 @@ import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
 import { CommunicationPanel } from "../../communication-panel";
 import { ProposedActionPanel } from "../../proposed-action-panel";
+import { PortalStatusPanel } from "../../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -76,8 +77,10 @@ type ReservationRow = {
   reserved_at: string | null;
   buyer_name: string | null;
   buyer_email: string | null;
+  puppy_id: string | null;
   puppy_name: string | null;
   puppy_status: string | null;
+  go_home_status: string | null;
   contract_total_cents: number | null;
   deposit_required_cents: number | null;
   balance_due_cents: number | null;
@@ -459,7 +462,7 @@ export default async function ApplicationDetailPage({
     }),
     readRows<ReservationRow>("core_reservation_summary_view", {
       select:
-        "reservation_id,reservation_status,reserved_at,buyer_name,buyer_email,puppy_name,puppy_status,contract_total_cents,deposit_required_cents,balance_due_cents",
+        "reservation_id,reservation_status,reserved_at,buyer_name,buyer_email,puppy_id,puppy_name,puppy_status,go_home_status,contract_total_cents,deposit_required_cents,balance_due_cents",
       application_id: `eq.${applicationId}`,
       order: "reserved_at.desc.nullslast",
       limit: "5",
@@ -615,6 +618,16 @@ export default async function ApplicationDetailPage({
           blockers={blockers.length}
           priority={blockers.length > 0 ? "high" : "watch"}
           detail="Rule signals stay review-only and point back to the best existing workspace."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          puppyAssigned={reservationResult.rows.some((reservation) => Boolean(reservation.puppy_id))}
+          documentReadyCount={completeDocuments}
+          documentTotalCount={documentResult.rows.length}
+          goHomeReady={reservationResult.rows.some((reservation) => ["scheduled", "ready", "complete", "completed"].includes((reservation.go_home_status ?? "").toLowerCase()))}
+          href="/staff/portal/buyers"
+          detail="Portal bridge review checks whether this applicant's Core buyer/family context is connected to existing buyer portal records."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

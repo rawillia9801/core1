@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Buyer Portal / My Puppy Portal readiness foundation.
+- Current as of this documentation pass after the Core-to-Buyer Portal Bridge / Puppy Portal readiness layer.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,20 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Core-to-Buyer Portal Bridge / Puppy Portal Readiness Layer
+
+Implemented and pushed:
+
+- `/staff/portal` was added as the internal Portal Readiness Command Center.
+- Internal bridge subroutes now exist for `/staff/portal/buyers`, `/staff/portal/puppies`, `/staff/portal/documents`, `/staff/portal/payments`, `/staff/portal/messages`, `/staff/portal/updates`, and `/staff/portal/resources`.
+- The portal bridge reads existing Core records plus existing buyer/puppy portal tables where available: `buyer_portal_profiles`, `buyer_documents`, `buyer_messages`, `buyer_payment_accounts`, `buyer_payments`, `buyer_payment_plans`, `buyer_transportation_requests`, `portal_updates`, `portal_resources`, `breeder_portal_content`, `breeder_settings`, `breeder_policies`, `breeder_branding`, `buyers`, `buyer_applications`, `puppies`, `contracts`, `documents`, `payments`, `payment_plans`, and `transportation`.
+- Core-to-portal mapping is read-only and conservative. It matches direct IDs where present and falls back to email/phone/name matching only as a review signal. Missing links show `Portal link not established` or `Core record not connected to portal record`.
+- Readiness now shows portal profile totals, linked/invited/active profile counts, Core buyers without portal profiles, profiles without assigned puppies, portal puppy visibility, buyer-visible documents, pending/signed document signals, unread/unresolved buyer messages, update/resource visibility, payment-plan/payment rows, transportation/go-home rows, and attention items with Core review links.
+- Compact Portal Readiness panels now appear on buyer detail, family detail, application detail, reservation detail, puppy detail, documents, payments, go-home, actions, and command pages.
+- Internal navigation now includes `Portal Readiness`.
+- Customer-facing `/portal` placeholder pages were not changed in this pass.
+- This pass did not add auth changes, account creation, invite emails, RLS/policy work, migrations, storage policies, media upload behavior, document generation, signing providers, SMTP changes, payment processors, Twilio/SMS/Facebook behavior, AI, public application behavior, customer messaging, payment movement, or external-provider calls.
 
 ### Buyer Portal / My Puppy Portal Readiness Foundation
 

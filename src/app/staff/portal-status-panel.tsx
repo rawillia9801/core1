@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { OperatorStatusPill } from "./operator-ui";
 
 type PortalStatusPanelProps = {
@@ -5,7 +6,10 @@ type PortalStatusPanelProps = {
   puppyAssigned?: boolean;
   documentReadyCount?: number;
   documentTotalCount?: number;
+  paymentReadyCount?: number;
+  updateMessageCount?: number;
   goHomeReady?: boolean;
+  href?: string;
   detail?: string;
 };
 
@@ -23,7 +27,10 @@ export function PortalStatusPanel({
   puppyAssigned = false,
   documentReadyCount = 0,
   documentTotalCount = 0,
+  paymentReadyCount = 0,
+  updateMessageCount = 0,
   goHomeReady = false,
+  href = "/staff/portal",
   detail = "Portal account linking is required before private records can display.",
 }: PortalStatusPanelProps) {
   const linked = isLinkedStatus(accountStatus);
@@ -42,7 +49,7 @@ export function PortalStatusPanel({
           {linked ? "Account link recorded" : "Account link required"}
         </OperatorStatusPill>
       </div>
-      <dl className="mt-5 grid gap-3 md:grid-cols-4">
+      <dl className="mt-5 grid gap-3 md:grid-cols-6">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Account</dt>
           <dd className="mt-2 text-sm font-semibold capitalize text-slate-900">{normalizeStatus(accountStatus)}</dd>
@@ -59,7 +66,20 @@ export function PortalStatusPanel({
           <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Go-home</dt>
           <dd className="mt-2 text-sm font-semibold text-slate-900">{goHomeReady ? "Ready signal" : "Not ready"}</dd>
         </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Payments</dt>
+          <dd className="mt-2 text-sm font-semibold text-slate-900">{paymentReadyCount} ready signal(s)</dd>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Updates</dt>
+          <dd className="mt-2 text-sm font-semibold text-slate-900">{updateMessageCount} message/update signal(s)</dd>
+        </div>
       </dl>
+      <div className="mt-4">
+        <Link href={href} className="inline-flex rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
+          Open Portal Readiness
+        </Link>
+      </div>
     </section>
   );
 }

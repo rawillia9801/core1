@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Buyer Portal / My Puppy Portal readiness foundation.
+- Current as of this documentation pass after the Core-to-Buyer Portal Bridge / Puppy Portal readiness layer.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -131,6 +131,15 @@ Checks:
 - [ ] Portal pages show that portal account linking is required before private records can display.
 - [ ] Portal pages do not query all customers client-side or expose raw database, service-role, storage, audit, provider, internal blocker, private note, or proposed-action details.
 - [blocked] Private portal record display remains blocked until secure customer identity lookup, RLS/access policy review, and customer account linking are implemented.
+
+## Internal Portal Bridge Readiness
+
+- [ ] `/staff/portal` is protected and redirects cleanly when unauthenticated.
+- [ ] `/staff/portal/buyers`, `/staff/portal/puppies`, `/staff/portal/documents`, `/staff/portal/payments`, `/staff/portal/messages`, `/staff/portal/updates`, and `/staff/portal/resources` are protected and redirect cleanly when unauthenticated.
+- [ ] Portal bridge reads existing buyer/puppy portal tables where available and does not create a second portal data model.
+- [ ] Missing links display as `Portal link not established` or `Core record not connected to portal record`.
+- [ ] Portal bridge does not create portal accounts, invite emails, customer messages, payment links, document generation, signature requests, storage URLs, or customer-visible changes.
+- [ ] Buyer/family/application/reservation/puppy/detail and documents/payments/go-home/actions/command pages show compact Portal Readiness panels without exposing private portal data to public routes.
 
 ## Staff Access Readiness
 

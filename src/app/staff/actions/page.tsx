@@ -4,6 +4,7 @@ import { OperatorHeader, OperatorStatusPill, SectionNav, SummaryStrip } from "..
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
+import { PortalStatusPanel } from "../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -558,6 +559,16 @@ export default async function StaffActionsPage() {
           blockers={blockedRows.length}
           priority={blockedRows.length > 0 ? "high" : proposedActions.length > 0 ? "normal" : "watch"}
           detail="Use Proposed Actions for deterministic readiness reasons; use Actions for existing safe action entry points."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          documentReadyCount={documentActions.filter((row) => row.blockers.length === 0).length}
+          documentTotalCount={documentActions.length}
+          paymentReadyCount={paymentActions.filter((row) => row.blockers.length === 0).length}
+          goHomeReady={goHomeActions.every((row) => row.blockers.length === 0)}
+          href="/staff/portal"
+          detail="Portal bridge readiness is review-only and links existing Core action lanes to existing buyer/puppy portal records."
         />
 
         <SectionNav

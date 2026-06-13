@@ -7,6 +7,7 @@ import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
+import { PortalStatusPanel } from "../portal-status-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -612,6 +613,15 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           blockers={missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount}
           priority={blockedCount > 0 ? "urgent" : setupCount > 0 ? "high" : "watch"}
           detail="Go-home intelligence points to checklist, payment, document, media, and handoff review only."
+        />
+
+        <PortalStatusPanel
+          accountStatus="not_invited"
+          documentReadyCount={Math.max(readinessRows.length - missingDocumentCount, 0)}
+          documentTotalCount={readinessRows.length}
+          goHomeReady={blockedCount === 0 && setupCount === 0}
+          href="/staff/portal#transport"
+          detail="Portal go-home bridge compares Core schedule/checklist readiness with existing transportation portal records."
         />
 
         <SectionNav

@@ -47,6 +47,7 @@ Since the original Chapter 1 review, these additional pieces have landed:
 - Classified operator-facing outcomes for application detail review, reservation/payment/go-home actions, kennel manage actions, and proposed-action review.
 - `/staff/communications` Communications / Follow-Ups Command Center with existing message, notification, template, delivery-attempt, event, and source-record readiness only.
 - `/staff/proposed-actions` Core Intelligence / Readiness Rules workspace with deterministic dynamic readiness rows plus persisted proposal review records.
+- `/staff/portal` Core-to-Buyer Portal Bridge / Portal Readiness Command Center for existing portal table readiness.
 
 These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores, action queues, communication follow-up prompts, and Core Intelligence readiness rows are advisory or operator-confirmed only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
 
@@ -57,6 +58,8 @@ These additions do not change the Core authority model. Application submission c
 Row Level Security and public-write boundaries remain the biggest unresolved blocker between safe public intake and broader customer-facing access. The public application submit path currently uses a server-side controlled action and service-role write pattern. That can be acceptable only as a narrow, server-side ingress surface and must not be expanded into customer portal behavior without RLS and policy review.
 
 The current `/portal` route family is a buyer portal readiness foundation only. It shows customer-safe unlinked placeholder states and must not be treated as private customer record access until secure account linking and access policies exist.
+
+The current `/staff/portal` route family is internal owner/operator readiness only. It may compare existing Core rows to existing portal tables, but it must not create portal accounts, expose private records to unlinked customers, send messages, move money, generate documents, or alter portal visibility.
 
 ### 2. Public Application Submission Needs Validation
 

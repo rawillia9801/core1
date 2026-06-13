@@ -61,7 +61,7 @@ Screens only matter if they read and write the correct source of truth.
 | Automated Email / SMTP | Application confirmations, approval notices, reminders, owner alerts. | Conditional SMTP only for application receipt owner/customer alerts. Broader email remains blocked. |
 | Communications Hub | Facebook, email, website chat, SMS, portal messages, calls. | Internal communications/follow-up command center exists for metadata, notification readiness, and review prompts only. |
 | Phone & Voice / Twilio | Caller lookup, voice menu, summaries, escalation. | Phone lookup safety exists; Twilio not connected. |
-| Customer Portal | Puppy updates, documents, payments, messages, resources. | Not implemented. |
+| Customer Portal | Puppy updates, documents, payments, messages, resources. | Customer-facing private portal remains blocked; internal Core-to-portal bridge/readiness now exists for existing portal tables. |
 | Kennel Monitoring | Temperature, humidity, motion, camera status, distress alerts. | Not connected; planning only. |
 | Smart Home Control | Lights, plugs, displays, speakers, alerts through Home Assistant. | Not connected; planning only. |
 | AI Assistant | Read, summarize, draft, propose, and match under guardrails. | Deterministic Core Intelligence / proposed-action readiness exists; AI providers remain blocked. |
@@ -152,7 +152,7 @@ Required document types include:
 - Transport Agreement
 - Application Copy
 
-Document generation, upload expansion, private portal visibility, and signature provider integration remain blocked until explicitly approved. The current `/portal` routes are safe placeholder/readiness pages only and do not display private records before secure account linking exists.
+Document generation, upload expansion, private portal visibility, and signature provider integration remain blocked until explicitly approved. The current `/portal` routes are safe placeholder/readiness pages only and do not display private records before secure account linking exists. The internal `/staff/portal` bridge reads existing portal tables for owner/operator readiness only.
 
 ## Automated Email And Communications
 
