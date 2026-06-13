@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Production Action Workflow + Reliability Layer.
+- Current as of this documentation pass after the Communications + Notification Command Center.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,18 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Communications + Notification Command Center
+
+Implemented and pushed:
+
+- `/staff/communications` was added as the internal Communications / Follow-Ups Command Center.
+- The communications center reads existing `core_conversations`, `core_messages`, `core_message_templates`, `core_notifications`, `core_notification_delivery_attempts`, `core_events`, applications, buyers, families, reservations, and document metadata.
+- Readiness now shows open/unresolved communication metadata, queued/pending/sent notification counts, recent queued notifications, failed/blocked/skipped delivery attempts, missing-recipient/template attention states, template safety status, recent activity, and source-record links.
+- Follow-up prompts now cover application review, applications without follow-up signal, approved applications without reservation, missing buyer contact detail, document signature/review, payment owner review, go-home communication readiness, matching follow-up, and reservation blockers.
+- Compact communication/follow-up panels now appear on command, actions, application list/detail, buyer/family detail, matching, reservation detail, payments, payment plans, documents, go-home, go-home handoff, and puppy detail workspaces.
+- `/staff/messages` and `/staff/notifications` now link back to the Communications Command Center; `/staff/notifications` handles read failures with sanitized classified warning text instead of raw REST/provider error bodies.
+- This pass did not add migrations, tables, new send behavior, Twilio/SMS/Facebook behavior, AI, SMTP configuration, payment processors, customer portal behavior, customer-facing pages, storage policies, media uploads, document generation, signing providers, auth changes, env changes, Supabase config changes, or local Supabase commands.
 
 ### Production Action Workflow + Reliability Layer
 

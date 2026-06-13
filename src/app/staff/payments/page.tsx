@@ -4,6 +4,7 @@ import { recordReservationPayment } from "../../application-actions";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -864,6 +865,14 @@ export default async function StaffPaymentsPage({
           mode={canViewFinancials ? "available" : "review-only"}
           href="/staff/actions#payments"
           detail="Payment actions use the existing Core ledger recording workflow only; no processor, refund, payment link, or money movement is connected."
+        />
+
+        <CommunicationPanel
+          latestStatus={canViewFinancials ? `${attentionAccounts} payment account(s) need owner review` : "Payment communication status is restricted"}
+          nextFollowUp="Review ledger facts and reservation context before any payment-related outreach."
+          blockers={canViewFinancials ? attentionAccounts : 0}
+          mode={canViewFinancials && attentionAccounts > 0 ? "attention" : "review"}
+          detail="No reminder, payment link, refund message, or processor call is triggered from this panel."
         />
 
         <SectionNav

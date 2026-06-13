@@ -148,8 +148,7 @@ async function readRows<T>(
   });
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`${table} read failed: ${response.status} ${body}`.trim());
+    throw new Error(`warning: ${table} read skipped (${response.status}).`);
   }
 
   return (await response.json()) as T[];
@@ -295,41 +294,35 @@ async function getNotificationPreviews() {
   }
 
   const { restUrl, serviceRoleKey } = config;
-  const notifications = await readRows<NotificationRow>(
-    restUrl,
-    serviceRoleKey,
-    "core_notifications",
-    {
-      select:
-        "id,family_id,buyer_id,template_id,notification_type,channel,status,scheduled_at,sent_at,payload,created_at",
-      status: "eq.queued",
-      order: "created_at.desc",
-      limit: "25",
-    },
-  );
-  const seededTemplates = await readRows<MessageTemplateRow>(
-    restUrl,
-    serviceRoleKey,
-    "core_message_templates",
-    {
-      select:
-        "id,template_key,name,channel,subject_template,body_template,status,metadata,created_at,updated_at",
-      channel: "eq.email",
-      order: "template_key.asc",
-      limit: "50",
-    },
-  );
-  const deliveryAttempts = await readRows<DeliveryAttemptRow>(
-    restUrl,
-    serviceRoleKey,
-    "core_notification_delivery_attempts",
-    {
-      select:
-        "id,notification_id,template_id,provider,channel,status,recipient_email,recipient_phone,subject,idempotency_key,external_message_id,attempt_number,attempted_at,completed_at,error_message,response_payload,metadata,created_at",
-      order: "created_at.desc",
-      limit: "25",
-    },
-  );
+  const warnings: string[] = [];
+  const safeRead = async <T,>(table: string, params: Record<string, string>) => {
+    try {
+      return await readRows<T>(restUrl, serviceRoleKey, table, params);
+    } catch (error) {
+      warnings.push(error instanceof Error ? error.message : `warning: ${table} read skipped.`);
+      return [] as T[];
+    }
+  };
+  const notifications = await safeRead<NotificationRow>("core_notifications", {
+    select:
+      "id,family_id,buyer_id,template_id,notification_type,channel,status,scheduled_at,sent_at,payload,created_at",
+    status: "eq.queued",
+    order: "created_at.desc",
+    limit: "25",
+  });
+  const seededTemplates = await safeRead<MessageTemplateRow>("core_message_templates", {
+    select:
+      "id,template_key,name,channel,subject_template,body_template,status,metadata,created_at,updated_at",
+    channel: "eq.email",
+    order: "template_key.asc",
+    limit: "50",
+  });
+  const deliveryAttempts = await safeRead<DeliveryAttemptRow>("core_notification_delivery_attempts", {
+    select:
+      "id,notification_id,template_id,provider,channel,status,recipient_email,recipient_phone,subject,idempotency_key,external_message_id,attempt_number,attempted_at,completed_at,error_message,response_payload,metadata,created_at",
+    order: "created_at.desc",
+    limit: "25",
+  });
   const templatesById = new Map(seededTemplates.map((template) => [template.id, template]));
 
   return {
@@ -341,7 +334,7 @@ async function getNotificationPreviews() {
     ),
     templates: seededTemplates.map(toTemplatePreview),
     attempts: deliveryAttempts.map(toAttemptPreview),
-    warning: null,
+    warning: warnings.length > 0 ? warnings.join(" ") : null,
   };
 }
 
@@ -417,9 +410,14 @@ export default async function StaffNotificationsPage() {
                 seeded templates, and blocked/previewed delivery attempt logs.
               </p>
             </div>
-            <Link href="/staff" className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
-              Back to dashboard
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/staff/communications" className="inline-flex rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
+                Communications
+              </Link>
+              <Link href="/staff" className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800">
+                Back to dashboard
+              </Link>
+            </div>
           </div>
         </section>
 

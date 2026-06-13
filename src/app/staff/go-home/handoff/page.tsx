@@ -4,6 +4,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "../actions";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
+import { CommunicationPanel } from "../../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -389,6 +390,14 @@ export default async function StaffGoHomeHandoffPage() {
           mode={canViewSensitive ? "available" : "review-only"}
           href="/staff/actions#go-home"
           detail="Handoff actions use existing go-home detail and checklist controls only; no payment, document, customer portal, or provider side effects are added."
+        />
+
+        <CommunicationPanel
+          latestStatus={`${rows.filter((row) => row.blockers.length > 0).length} handoff(s) need communication readiness review`}
+          nextFollowUp={missingSchedule > 0 ? "Confirm schedule/location/contact details before handoff follow-up." : "Review handoff blockers before any go-home communication."}
+          blockers={rows.filter((row) => row.blockers.length > 0).length}
+          mode={rows.some((row) => row.blockers.length > 0) ? "attention" : "review"}
+          detail="No reminder, customer update, payment request, or portal message is sent from this handoff panel."
         />
 
         <SectionNav items={[

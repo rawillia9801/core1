@@ -8,6 +8,7 @@ import {
 } from "./actions";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
+import { CommunicationPanel } from "../../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -598,6 +599,14 @@ export default async function ApplicationDetailPage({
           mode={TERMINAL_STATUSES.has(normalizedStatus) ? "review-only" : "available"}
           href="/staff/actions#applications"
           detail="Application detail actions stay inside existing review controls; matching and reservation review remain operator-confirmed."
+        />
+
+        <CommunicationPanel
+          latestStatus={`Application communication status: ${formatKey(application.status)}`}
+          nextFollowUp={blockers.length > 0 ? "Resolve review blockers before applicant follow-up." : "Review applicant contact, notifications, and matching context before outreach."}
+          blockers={blockers.length}
+          mode={blockers.length > 0 ? "attention" : "review"}
+          detail="No approval, denial, reservation, or customer message is sent from this panel."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, OperatorStatusPill, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -541,6 +542,14 @@ export default async function StaffActionsPage() {
           href={blockedRows[0]?.href ?? recentRows[0]?.href ?? "/staff/command"}
           linkLabel="Open Next"
           detail="This central queue links only to existing server-action/RPC-backed workspaces or review-only pages."
+        />
+
+        <CommunicationPanel
+          latestStatus="Communication follow-ups are tracked separately from controlled record actions."
+          nextFollowUp="Review notification readiness, contact gaps, and follow-up prompts before customer outreach."
+          blockers={0}
+          mode="review"
+          detail="Links only; no email, SMS, portal message, Facebook message, or provider call is triggered here."
         />
 
         <SectionNav

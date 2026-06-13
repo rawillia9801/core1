@@ -10,6 +10,7 @@ import {
 import { type KennelMediaRow, withKennelMediaSignedUrls } from "@/lib/kennel-media";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../../action-panel";
+import { CommunicationPanel } from "../../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -690,6 +691,14 @@ export default async function StaffPuppyDetailPage({
           mode={activeReservation ? "review-only" : "available"}
           href="/staff/actions#matching"
           detail="Puppy actions use existing reservation assignment, media, care, and detail workflows only."
+        />
+
+        <CommunicationPanel
+          latestStatus={activeReservation ? "Active reservation context available for follow-up review" : "No active reservation communication context"}
+          nextFollowUp={activeReservation ? "Review reservation, documents, balance, and go-home status before puppy-specific outreach." : "Review matching candidates before any customer follow-up."}
+          blockers={watchSignals.length}
+          mode={watchSignals.length > 0 ? "attention" : "review"}
+          detail="No puppy update, portal message, media publish, email, or SMS is sent from this panel."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

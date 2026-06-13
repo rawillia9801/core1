@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Production Action Workflow + Reliability Layer.
+- Current as of this documentation pass after the Communications + Notification Command Center.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -26,6 +26,7 @@ Core-native owner/operator operating system foundation
   -> internal matching / waitlist decision-support review
   -> document/message/payment/go-home readiness workspaces
   -> controlled action command center and proposed-action review foundation
+  -> communications / notification / follow-up command center
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -180,6 +181,12 @@ Core-native owner/operator operating system foundation
 - [x] Document readiness remains internal visibility only and does not generate documents, request signatures, upload files, create buckets/policies, expose public URLs, update portal visibility, send messages, process payments, or call external providers.
 - [x] `/staff/messages` exists as owner/admin communications readiness workspace.
 - [x] `/staff/notifications` exists as notification preview/templates/attempt-log workspace.
+- [x] `/staff/communications` exists as the internal Communications / Follow-Ups Command Center.
+- [x] Communications Command Center reads existing `core_conversations`, `core_messages`, `core_message_templates`, `core_notifications`, `core_notification_delivery_attempts`, `core_events`, applications, buyers, families, reservations, and document metadata.
+- [x] Communications readiness shows open/unresolved metadata, queued/pending/sent notification states, recent queued notifications, failed/blocked/skipped attempt states, missing recipient/template review states, template safety, recent activity, and source-record links.
+- [x] Communications follow-up prompts cover application review, missing follow-up signal, approved-without-reservation review, buyer/family contact gaps, document signature/review, payment owner review, go-home communication readiness, matching review, and reservation blockers.
+- [x] Compact communication/follow-up panels appear on command, actions, application list/detail, buyer/family detail, matching, reservation detail, payments, payment plans, documents, go-home, go-home handoff, and puppy detail pages.
+- [x] `/staff/messages` and `/staff/notifications` link back to the Communications Command Center, with notification read failures classified without raw REST/provider error text on screen.
 - [x] Notification queue and template foundations exist.
 - [x] Delivery attempt logging foundation exists.
 - [x] Warm draft customer-facing template copy exists.

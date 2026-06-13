@@ -5,6 +5,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import { upsertGoHomeChecklistItem } from "./actions";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -595,6 +596,14 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           mode={canViewSensitive ? "available" : "review-only"}
           href="/staff/actions#go-home"
           detail="Go-home actions route through existing schedule/detail and checklist controls only; no messages, payments, documents, portal, or provider calls are connected."
+        />
+
+        <CommunicationPanel
+          latestStatus={`${blockedCount} go-home record(s) blocked or incomplete`}
+          nextFollowUp="Review schedule, contact, balance, document, and checklist readiness before go-home outreach."
+          blockers={missingPaymentCount + missingDocumentCount + incompleteChecklistCount + missingDetailCount}
+          mode={blockedCount > 0 || setupCount > 0 ? "attention" : "review"}
+          detail="No go-home reminder, customer update, payment request, or portal message is sent from this panel."
         />
 
         <SectionNav

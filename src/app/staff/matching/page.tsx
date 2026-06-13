@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -556,6 +557,14 @@ export default async function MatchingPage() {
           mode="review-only"
           href="/staff/actions#matching"
           detail="Matching actions remain review-only; reservation creation stays in existing operator-confirmed workflows."
+        />
+
+        <CommunicationPanel
+          latestStatus={`${reservationReady.length} reservation-ready candidate(s) may need owner follow-up`}
+          nextFollowUp="Review applicant fit, reservation blockers, and contact readiness before any customer communication."
+          blockers={blockedMatches.length}
+          mode={blockedMatches.length > 0 ? "attention" : "review"}
+          detail="No puppy assignment, reservation, or customer message is created from matching readiness."
         />
 
         <SectionNav

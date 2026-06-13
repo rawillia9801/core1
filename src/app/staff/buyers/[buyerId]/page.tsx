@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
+import { CommunicationPanel } from "../../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -201,6 +202,14 @@ export default async function Buyer360Page({ params }: { params: Promise<{ buyer
             { label: "Reservations", value: reservationsResult.rows.length, note: `${activeReservationCount} active/open` },
             { label: "Balance due", value: formatMoney(balanceDue), note: "Ledger-derived" },
           ]}
+        />
+
+        <CommunicationPanel
+          latestStatus={buyer.email || buyer.phone ? "Buyer contact detail is available for review" : "Buyer is missing email and phone"}
+          nextFollowUp={applicationsResult.rows.length > 0 ? "Review linked application/reservation context before customer outreach." : "Review buyer contact and family links before outreach."}
+          blockers={buyer.email || buyer.phone ? 0 : 1}
+          mode={buyer.email || buyer.phone ? "review" : "blocked"}
+          detail="This panel links to readiness only; it does not invite portal users or send messages."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

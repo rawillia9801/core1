@@ -8,6 +8,7 @@ import {
 import type { ReactNode } from "react";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -1411,6 +1412,14 @@ export default async function StaffCommandPage() {
           mode="review-only"
           href="/staff/actions"
           detail="Action Command Center consolidates existing safe actions and review-only links across Core."
+        />
+
+        <CommunicationPanel
+          latestStatus={`${queuedNotificationCount} queued notification record(s) visible`}
+          nextFollowUp={communicationCards[0]?.title ?? "Review communication and notification readiness"}
+          blockers={unsentNotificationCount}
+          mode={unsentNotificationCount > 0 ? "attention" : "review"}
+          detail="Communication follow-ups are review links only; no customer message is sent from Command."
         />
 
         <SectionNav

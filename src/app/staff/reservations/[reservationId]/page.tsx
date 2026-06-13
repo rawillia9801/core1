@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { SectionNav, SummaryStrip } from "../../operator-ui";
 import { ActionPanel } from "../../action-panel";
+import { CommunicationPanel } from "../../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -828,6 +829,14 @@ export default async function ReservationDetailPage({
           mode={canViewSensitive ? "available" : "review-only"}
           href="/staff/actions#reservations"
           detail="Reservation actions route through existing payment, document, go-home, and handoff workspaces."
+        />
+
+        <CommunicationPanel
+          latestStatus={summary.buyer_email || summary.buyer_phone ? "Reservation contact detail is available for review" : "Reservation is missing buyer contact detail"}
+          nextFollowUp={blockers.length > 0 ? "Resolve reservation blockers before customer communication." : "Review payment, document, and go-home context before outreach."}
+          blockers={summary.buyer_email || summary.buyer_phone ? blockers.length : blockers.length + 1}
+          mode={blockers.length > 0 || (!summary.buyer_email && !summary.buyer_phone) ? "attention" : "review"}
+          detail="No payment request, document link, email, SMS, or portal message is sent from this panel."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

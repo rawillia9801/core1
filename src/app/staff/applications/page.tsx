@@ -4,6 +4,7 @@ import { getDashboardData } from "../../dashboard-data";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -286,6 +287,14 @@ export default async function StaffApplicationsPage({
           mode={isOwnerOrAdmin && receivedCount > 0 ? "available" : "review-only"}
           href="/staff/actions#applications"
           detail="Application actions use existing approval and reservation workflows only where they are already available."
+        />
+
+        <CommunicationPanel
+          latestStatus={`${receivedCount} application(s) may need review follow-up`}
+          nextFollowUp={receivedCount > 0 ? "Review applicant contact and application status before any outreach." : "Review application communication history and notification readiness as needed."}
+          blockers={receivedCount}
+          mode={receivedCount > 0 ? "attention" : "review"}
+          detail="Application communication prompts are review-only and do not send customer messages."
         />
 
         <SummaryStrip

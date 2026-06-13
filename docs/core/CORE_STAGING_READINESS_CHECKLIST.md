@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Production Action Workflow + Reliability Layer.
+- Current as of this documentation pass after the Communications + Notification Command Center.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -118,6 +118,15 @@ Checks:
 - [ ] Staff/helper users cannot see owner/admin-only sensitive panels.
 - [ ] Dashboard reads require authenticated profile context.
 - [ ] Service-role read/write paths remain server-side only.
+
+## Internal Communications Readiness
+
+- [ ] `/staff/communications` is protected and redirects cleanly when unauthenticated.
+- [ ] `/staff/messages` and `/staff/notifications` remain protected and link back to `/staff/communications`.
+- [ ] Queued, pending, sent, failed, skipped, missing recipient, missing template, config missing, and review-required states display as operator-safe classifications.
+- [ ] Notification and delivery attempt views do not expose SMTP credentials, service-role errors, raw provider request bodies, or raw provider response bodies.
+- [ ] Follow-up prompts remain owner/operator review prompts only.
+- [ ] No email, SMS, Facebook, portal message, phone call, document link, payment reminder, or provider request can be sent from the communications center.
 
 ## Action Authorization Readiness
 

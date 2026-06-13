@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../action-panel";
+import { CommunicationPanel } from "../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -753,6 +754,14 @@ export default async function StaffDocumentsPage() {
           mode="review-only"
           href="/staff/actions#documents"
           detail="Document actions are metadata review links only; no generation, upload, signing, email, or provider workflow is connected."
+        />
+
+        <CommunicationPanel
+          latestStatus={`${pendingSignatureCount} document item(s) pending signature/review`}
+          nextFollowUp="Review document metadata, recipient context, and reservation blockers before follow-up."
+          blockers={missingRequirementCount + pendingSignatureCount + reservationBlockerCount + goHomeBlockerCount}
+          mode={pendingSignatureCount > 0 || reservationBlockerCount > 0 || goHomeBlockerCount > 0 ? "attention" : "review"}
+          detail="No document generation, signing request, email, upload, or customer portal update is triggered here."
         />
 
         <nav className="operator-section-nav" aria-label="Document readiness sections">

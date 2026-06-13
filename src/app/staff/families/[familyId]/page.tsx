@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { OperatorHeader, SectionNav, SummaryStrip } from "../../operator-ui";
+import { CommunicationPanel } from "../../communication-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -181,6 +182,14 @@ export default async function Family360Page({ params }: { params: Promise<{ fami
             { label: "Reservations", value: reservationsResult.rows.length, note: `${activeReservationCount} active/open` },
             { label: "Balance due", value: formatMoney(balanceDue), note: "Ledger-derived" },
           ]}
+        />
+
+        <CommunicationPanel
+          latestStatus={`${conversationsResult.rows.length} family conversation record(s) visible`}
+          nextFollowUp={applicationsResult.rows.length > 0 ? "Review family applications, contact history, and reservation context before outreach." : "Review family members and contact context before outreach."}
+          blockers={membersResult.rows.length === 0 ? 1 : 0}
+          mode={membersResult.rows.length === 0 ? "attention" : "review"}
+          detail="This panel uses existing communication metadata only and does not send messages."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
