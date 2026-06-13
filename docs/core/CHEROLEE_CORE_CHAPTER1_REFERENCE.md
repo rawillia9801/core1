@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the Core Intelligence / Readiness Rules / Proposed Action Engine work landed.
+Reference document for Codex and developer work. This file captures the controlling Chapter 1 alignment review and has been updated after the Breeding Program / Kennel Care / Puppy Growth Command Center work landed.
 
 Read this before work that touches Core architecture, build order, application review, auth, RLS, email, route structure, controlled RPCs, public application intake, or owner/operator workflow.
 
@@ -48,8 +48,11 @@ Since the original Chapter 1 review, these additional pieces have landed:
 - `/staff/communications` Communications / Follow-Ups Command Center with existing message, notification, template, delivery-attempt, event, and source-record readiness only.
 - `/staff/proposed-actions` Core Intelligence / Readiness Rules workspace with deterministic dynamic readiness rows plus persisted proposal review records.
 - `/staff/portal` Core-to-Buyer Portal Bridge / Portal Readiness Command Center for existing portal table readiness.
+- `/staff/breeding` Breeding Program / Kennel Care / Puppy Growth Command Center with focused internal routes for dogs, pairings, pregnancies, whelping, litters, puppy growth/care, calendar, tasks, and alerts.
 
 These additions do not change the Core authority model. Application submission creates records and acknowledgements only. Matching scores, action queues, communication follow-up prompts, and Core Intelligence readiness rows are advisory or operator-confirmed only. Core must not approve, deny, reserve, assign puppies, create payments, create documents, invite portal users, send messages, or make placement decisions automatically.
+
+Breeding/care readiness is also advisory and internal only. It reads existing Core and legacy breeding/care tables where available, but it must not automate breeding decisions, diagnose animals, publish puppies, update portal visibility, create schema, connect devices, send messages, or call providers.
 
 ## Urgent And High-Priority Risks
 
@@ -122,11 +125,11 @@ Smart kennel monitoring remains future work. Software must not pretend sensors o
 
 | Document | Current Status | Notes |
 | --- | --- | --- |
-| `CURRENT_STATUS.md` | Updated | Central current-state truth after internal matching/waitlist decision-support work. |
-| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, payment plan, media, document, communications, notification readiness, and deterministic Core Intelligence work. |
+| `CURRENT_STATUS.md` | Updated | Central current-state truth after breeding/care command center work. |
+| `IMPLEMENTATION_CHECKLIST.md` | Updated | Checklist now reflects public/embedded application, SMTP receipt, handoff, payment plan, media, document, communications, notification readiness, deterministic Core Intelligence, portal bridge, and breeding/care readiness work. |
 | `CORE_BUILD_ORDER.md` | Needs refresh when next build plan changes | Build order should now put public form validation, SMTP logging, duplicate handling, and application detail review at top. |
-| `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application, SMTP receipt, and internal matching/waitlist readiness gates. |
-| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects internal matching/waitlist decision-support plus blocked automated assignment behavior. |
+| `CORE_STAGING_READINESS_CHECKLIST.md` | Updated | Now includes public application, SMTP receipt, internal matching/waitlist, portal bridge, and breeding/care readiness gates. |
+| `CHEROLEE_CORE_OS_MANUAL_REFERENCE.md` | Updated | Manual reference now reflects internal breeding/care readiness plus blocked automated breeding/device/provider behavior. |
 | `CHEROLEE_CORE_CHAPTER1_REFERENCE.md` | Updated | This file now reflects the current post-matching reality. |
 | `CORE_PROJECT_REVIEW_AND_COMPLETION_ESTIMATE.md` | Needs refresh when estimates are next reviewed | Should recognize Phase 4A has begun but remains unverified/hardening. |
 | `CODEX_TASK_RUNBOOK.md` | Needs path correction only if missing docs are referenced | It currently points to this Chapter 1 reference under `docs/core/`. |

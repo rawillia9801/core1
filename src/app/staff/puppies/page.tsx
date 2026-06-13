@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../action-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -239,6 +240,11 @@ export default async function StaffPuppiesPage({ searchParams }: { searchParams:
           mode={assignmentReadyCount > 0 ? "review-only" : "available"}
           href="/staff/actions#matching"
           detail="Puppy actions link to existing create/edit/detail and matching review workflows only; no automatic assignment, public publishing, messaging, documents, or payments are connected."
+        />
+        <BreedingCarePanel
+          puppyCareSignals={attentionCount}
+          href="/staff/breeding/puppy-care"
+          detail="Puppy growth readiness centralizes weight, feeding, medication, health status, and care-event review using existing records only."
         />
         {puppyResult.warning || reservationResult.warning ? <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">{puppyResult.warning ?? reservationResult.warning}</section> : null}
 

@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Core-to-Buyer Portal Bridge / Puppy Portal readiness layer.
+- Current as of this documentation pass after the Breeding Program / Kennel Care / Puppy Growth Command Center.
 - This file remains the gate before staging selected real Core data or expanding customer-facing behavior.
 - `CURRENT_STATUS.md` owns current implementation state; this file owns staging/production readiness gates.
 
@@ -140,6 +140,15 @@ Checks:
 - [ ] Missing links display as `Portal link not established` or `Core record not connected to portal record`.
 - [ ] Portal bridge does not create portal accounts, invite emails, customer messages, payment links, document generation, signature requests, storage URLs, or customer-visible changes.
 - [ ] Buyer/family/application/reservation/puppy/detail and documents/payments/go-home/actions/command pages show compact Portal Readiness panels without exposing private portal data to public routes.
+
+## Internal Breeding / Kennel Care Readiness
+
+- [ ] `/staff/breeding` is protected and redirects cleanly when unauthenticated.
+- [ ] `/staff/breeding/dogs`, `/staff/breeding/pairings`, `/staff/breeding/pregnancies`, `/staff/breeding/whelping`, `/staff/breeding/litters`, `/staff/breeding/puppy-care`, `/staff/breeding/calendar`, `/staff/breeding/tasks`, and `/staff/breeding/alerts` are protected and redirect cleanly when unauthenticated.
+- [ ] Breeding/care pages read existing Core and legacy breeding/care tables only and tolerate missing legacy tables with operator-safe warnings.
+- [ ] Puppy growth/care readiness uses existing puppy, litter, weight, feeding, medication, event, and private media rows only.
+- [ ] Breeding/care pages do not create schema, automate breeding decisions, diagnose animals, publish puppies, update customer portal visibility, message customers, process payments, generate documents, call AI/providers, connect Twilio/SMS/Facebook, or control kennel devices.
+- [ ] Command, actions, proposed-actions, dog, litter, puppy, media, and go-home pages show compact Breeding / Care panels linking back to the protected command center.
 
 ## Staff Access Readiness
 

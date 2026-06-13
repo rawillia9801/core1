@@ -19,6 +19,7 @@ const primaryNavigation = [
       { href: "/staff/puppies", label: "Puppies", ready: true },
       { href: "/staff/dogs", label: "Dogs", ready: true },
       { href: "/staff/litters", label: "Litters", ready: true },
+      { href: "/staff/breeding", label: "Breeding / Care", ready: true },
       { href: "/staff/media", label: "Media Center", ready: true },
       { href: "/staff/portal", label: "Portal Readiness", ready: true },
       { href: "/staff/go-home", label: "Go-Home", ready: true },

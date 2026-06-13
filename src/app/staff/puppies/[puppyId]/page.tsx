@@ -10,6 +10,7 @@ import {
 import { type KennelMediaRow, withKennelMediaSignedUrls } from "@/lib/kennel-media";
 import { requireStaffProfile } from "@/lib/staff-auth";
 import { ActionPanel } from "../../action-panel";
+import { BreedingCarePanel } from "../../breeding-care-panel";
 import { CommunicationPanel } from "../../communication-panel";
 import { ProposedActionPanel } from "../../proposed-action-panel";
 import { PortalStatusPanel } from "../../portal-status-panel";
@@ -717,6 +718,14 @@ export default async function StaffPuppyDetailPage({
           documentTotalCount={documentResult.rows.length}
           goHomeReady={activeReservation ? ["scheduled", "ready", "complete", "completed"].includes((activeReservation.go_home_status ?? "").toLowerCase()) : false}
           detail="Puppy portal visibility remains gated by a linked buyer portal account and customer-safe reservation context."
+        />
+
+        <BreedingCarePanel
+          title="Puppy Growth / Care"
+          litterSignals={litter ? 0 : 1}
+          puppyCareSignals={watchSignals.length + (weights.length ? 0 : 1)}
+          href="/staff/breeding/puppy-care"
+          detail="Puppy growth signals use existing puppy, litter, weight, care-event, and internal media rows only."
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

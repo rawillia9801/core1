@@ -10,6 +10,7 @@ import {
   updateDogProfileMetadata,
   uploadDogDocumentFile,
 } from "./actions";
+import { BreedingCarePanel } from "../../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -438,6 +439,15 @@ export default async function DogProfilePage({
           <InfoCard label="Documents" value={documentsResult.rows.length} note="Metadata-only records" />
           <InfoCard label="Photos" value={mediaPreviews.length} note="Private kennel-media only" />
         </section>
+
+        <BreedingCarePanel
+          title="Breeding Dog Readiness"
+          dogSignals={attentionFlags.length + mediaBlockers.length}
+          litterSignals={litters.length}
+          puppyCareSignals={puppies.length}
+          href="/staff/breeding/dogs"
+          detail="Dog detail contributes registry, health, media, and dam/sire litter context to the breeding center."
+        />
 
         <section className="grid gap-6 xl:grid-cols-[1fr_0.85fr]">
           <div className="space-y-6">

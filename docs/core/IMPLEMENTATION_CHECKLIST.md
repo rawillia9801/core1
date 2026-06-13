@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Core-to-Buyer Portal Bridge / Puppy Portal readiness layer.
+- Current as of this documentation pass after the Breeding Program / Kennel Care / Puppy Growth Command Center.
 - Central current truth: this file plus `docs/core/CURRENT_STATUS.md`.
 - This checklist tracks actual completed work, partially complete work, blocked work, and next work. It must be updated whenever implementation changes land.
 
@@ -30,6 +30,7 @@ Core-native owner/operator operating system foundation
   -> deterministic Core intelligence / readiness rules / proposed action engine
   -> buyer portal / my puppy portal readiness foundation with unlinked safe states
   -> core-to-buyer portal bridge / puppy portal readiness layer
+  -> breeding program / kennel care / puppy growth command center
   -> public/embedded website application intake
   -> conditional SMTP receipt alerts for application intake
   -> next: verify public application submissions, SMTP logging, duplicate handling, and internal application detail visibility
@@ -42,6 +43,7 @@ Core-native owner/operator operating system foundation
 - Public website/application pages must not expose internal Core/admin/staff wording.
 - Buyer portal pages must stay placeholder/customer-safe until secure account linking and access policies exist.
 - Internal portal bridge pages may read existing portal tables for owner/operator readiness only; they must not create portal accounts, messages, payments, document actions, or customer visibility.
+- Internal breeding/care pages may read existing Core and legacy breeding/care tables only; they must not create schema, automate breeding decisions, diagnose animals, message customers, publish puppies, or connect devices/providers.
 - No payment processor is connected.
 - No portal account is created from application submission.
 - No application approval, denial, waitlist decision, reservation, puppy assignment, or payment happens automatically.
@@ -158,6 +160,11 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/dogs/[dogId]` and `/staff/puppies/[puppyId]` include media readiness summaries, primary-photo status, gallery counts, missing-media blockers, and links to the Media Command Center while preserving existing private upload/delete behavior.
 - [x] `/staff/litters` includes litter media readiness derived from linked puppy media rows, dam/sire context, missing litter gallery signals, and missing puppy photo/primary blockers.
 - [x] `/staff/litters/[litterId]` exists as a read-only internal litter media readiness detail page. Direct litter uploads remain unavailable because the current media table supports dog and puppy entity types only.
+- [x] `/staff/breeding` exists as the internal Breeding Program / Kennel Care / Puppy Growth Command Center.
+- [x] `/staff/breeding/dogs`, `/staff/breeding/pairings`, `/staff/breeding/pregnancies`, `/staff/breeding/whelping`, `/staff/breeding/litters`, `/staff/breeding/puppy-care`, `/staff/breeding/calendar`, `/staff/breeding/tasks`, and `/staff/breeding/alerts` exist.
+- [x] Breeding/care readiness reads existing Core dog, litter, puppy, private media, weight, feeding, medication, and puppy event rows plus existing legacy breeding/care tables where present.
+- [x] Breeding/care readiness shows active dams/sires, pairings, pregnancy due/overdue signals, whelping rows, litter roster readiness, puppy growth/care status, latest weight/feeding/medication/event signals, tasks, alerts, calendar rows, and source-record links.
+- [x] Compact Breeding / Care panels appear on command, actions, proposed-actions, dogs, dog detail, litters, litter detail, puppies, puppy detail, media, and go-home pages.
 - [x] Puppy, litter, and reservation detail pages include compact matching/assignment context and links to `/staff/matching` without changing reservation or assignment behavior.
 - [x] Kennel workflows remain internal only and do not diagnose animals, publish puppies, message customers, update a portal, process payments, generate documents, call AI/providers, or control devices.
 
@@ -212,6 +219,7 @@ Core-native owner/operator operating system foundation
 - [x] `/staff/actions` exists as the Controlled Action Command Center.
 - [x] `/staff/actions` consolidates existing safe action entry points and review-only links across application review, matching, reservation readiness, payment ledger review, payment plans, documents, media, go-home, handoff, puppy detail, and proposed-action review.
 - [x] `/staff/actions` also shows buyer/family cleanup rows and litter gallery/media readiness rows using existing data only.
+- [x] `/staff/actions` and `/staff/proposed-actions` now surface compact breeding/care readiness links without adding automatic execution or new mutation workflows.
 - [x] Shared compact Action panels link major internal command/readiness pages back to `/staff/actions` with next-action, blocker, mode, and safety-boundary context, including command, actions, application list/new/detail, matching, reservation detail, payments, payment plans, documents, media, go-home, handoff, puppies, puppy detail, litters, and litter detail.
 - [x] `/staff/proposed-actions` exists as owner/admin proposal queue.
 - [x] `/staff/proposed-actions` is upgraded as the Core Intelligence / Readiness Rules / Proposed Actions workspace.

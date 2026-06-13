@@ -6,6 +6,7 @@ import {
   rejectProposedAction,
 } from "./actions";
 import { ActionPanel } from "../action-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import {
   OperatorHeader,
@@ -1303,6 +1304,16 @@ export default async function ProposedActionsPage({
           blockers={urgentRows.length}
           priority={urgentRows.length > 0 ? "urgent" : sortedRuleActions.length > 0 ? "normal" : "watch"}
           detail="Rule-based intelligence uses existing Core data only and does not create records or execute decisions."
+        />
+
+        <BreedingCarePanel
+          title="Breeding / Care Rule Signals"
+          dogSignals={categoryRows("Kennel / Care").length}
+          litterSignals={categoryRows("Media").length}
+          puppyCareSignals={categoryRows("Kennel / Care").length}
+          taskSignals={urgentRows.length}
+          href="/staff/breeding"
+          detail="Proposed-action integration stays deterministic and review-only; kennel/care rows link back to the breeding center."
         />
 
         <SummaryStrip

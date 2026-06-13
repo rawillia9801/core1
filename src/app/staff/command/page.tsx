@@ -11,6 +11,7 @@ import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -1441,6 +1442,15 @@ export default async function StaffCommandPage() {
           goHomeReady={goHomeBlockerCount === 0 && goHomeUnscheduledCount === 0}
           href="/staff/portal"
           detail="Portal bridge overview shows whether existing Core buyer, puppy, document, payment, message, update, and go-home records are connected to existing portal tables."
+        />
+
+        <BreedingCarePanel
+          dogSignals={dogs.length}
+          litterSignals={goHomeUnscheduledCount}
+          puppyCareSignals={assignmentCards.length}
+          taskSignals={priorityCards.length}
+          href="/staff/breeding"
+          detail="Breeding/care overview links Command Center dog, litter, puppy growth, task, and care-readiness signals to the dedicated breeding command center."
         />
 
         <SectionNav

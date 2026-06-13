@@ -5,6 +5,7 @@ import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -569,6 +570,14 @@ export default async function StaffActionsPage() {
           goHomeReady={goHomeActions.every((row) => row.blockers.length === 0)}
           href="/staff/portal"
           detail="Portal bridge readiness is review-only and links existing Core action lanes to existing buyer/puppy portal records."
+        />
+
+        <BreedingCarePanel
+          dogSignals={mediaActions.length}
+          litterSignals={mediaActions.length}
+          puppyCareSignals={matchingActions.length}
+          href="/staff/breeding"
+          detail="Breeding/care action queues stay review-only unless an existing protected dog, litter, puppy, weight, or care action already exists."
         />
 
         <SectionNav

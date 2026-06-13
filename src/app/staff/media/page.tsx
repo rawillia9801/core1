@@ -12,6 +12,7 @@ import {
 } from "../operator-ui";
 import { ActionPanel } from "../action-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -253,6 +254,14 @@ export default async function StaffMediaPage() {
           blockers={attentionCount}
           priority={attentionCount > 0 ? "high" : "watch"}
           detail="Media intelligence uses existing private metadata only and cannot upload, publish, or change storage policy."
+        />
+
+        <BreedingCarePanel
+          dogSignals={dogsMissingPrimary.length}
+          litterSignals={littersMissingGallery.length}
+          puppyCareSignals={puppiesMissingPrimary.length}
+          href="/staff/breeding"
+          detail="Breeding care media readiness connects dog, litter, and puppy photo gaps to the broader kennel-care command center."
         />
 
         <SectionNav

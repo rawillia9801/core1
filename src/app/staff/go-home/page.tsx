@@ -8,6 +8,7 @@ import { ActionPanel } from "../action-panel";
 import { CommunicationPanel } from "../communication-panel";
 import { ProposedActionPanel } from "../proposed-action-panel";
 import { PortalStatusPanel } from "../portal-status-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -622,6 +623,12 @@ export default async function StaffGoHomePage({ searchParams }: { searchParams: 
           goHomeReady={blockedCount === 0 && setupCount === 0}
           href="/staff/portal#transport"
           detail="Portal go-home bridge compares Core schedule/checklist readiness with existing transportation portal records."
+        />
+
+        <BreedingCarePanel
+          puppyCareSignals={blockedCount + setupCount}
+          href="/staff/breeding/puppy-care"
+          detail="Go-home readiness is connected back to puppy growth and care review so handoff stays grounded in existing care records."
         />
 
         <SectionNav

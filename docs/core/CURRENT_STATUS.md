@@ -2,7 +2,7 @@
 
 ## Status Note
 
-- Current as of this documentation pass after the Core-to-Buyer Portal Bridge / Puppy Portal readiness layer.
+- Current as of this documentation pass after the Breeding Program / Kennel Care / Puppy Growth Command Center.
 - This file is the primary current-state checkpoint for what is implemented, what is deployed, what is conditional, and what remains blocked.
 - Active repository: `rawillia9801/core1`
 - Active branch: `main`
@@ -16,6 +16,18 @@ Cherolee Core OS is the active operating system and daily command layer for Sout
 Zoho One is cancelled and historical reference only. Zoho must not be treated as an import source, migration source, bridge, compatibility workflow, sync target, writeback target, dry-run import lane, planned dependency, future dependency, or active operating workflow.
 
 ## Most Recent Implemented Work
+
+### Breeding Program / Kennel Care / Puppy Growth Command Center
+
+Implemented and pushed:
+
+- `/staff/breeding` was added as the internal Breeding Program / Kennel Care / Puppy Growth Command Center.
+- Internal breeding/care subroutes now exist for `/staff/breeding/dogs`, `/staff/breeding/pairings`, `/staff/breeding/pregnancies`, `/staff/breeding/whelping`, `/staff/breeding/litters`, `/staff/breeding/puppy-care`, `/staff/breeding/calendar`, `/staff/breeding/tasks`, and `/staff/breeding/alerts`.
+- The center reads existing Core dog/litter/puppy, private media, weight, feeding, medication, and puppy event rows, plus existing legacy breeding/care tables where available: `breeding_dogs`, `breeding_health_records`, `breeding_genetic_records`, `breeding_pedigree_notes`, `breeding_heat_cycles`, `breeding_pairings`, `breeding_pairing_reviews`, `breeding_pairing_notes`, `breeding_pregnancies`, `breeding_whelping_events`, `litters`, `puppies`, `breeding_calendar_events`, `breeding_tasks`, `breeding_alerts`, `breeding_program_notes`, `breeder_tasks`, and `breeder_events`.
+- Readiness now shows active dams/sires, pairing rows, pregnancy due/overdue signals, whelping rows, litter roster readiness, puppy growth/care status, latest weight/feeding/medication/event signals, open tasks, open alerts, upcoming calendar rows, and attention links back to source records.
+- Compact Breeding / Care panels now appear on command, actions, proposed-actions, dogs, dog detail, litters, litter detail, puppies, puppy detail, media, and go-home pages.
+- Internal navigation now includes `Breeding / Care`.
+- This pass did not add migrations, tables, schema changes, auth changes, environment changes, Supabase config changes, local Supabase commands, storage buckets/policies, media upload behavior, document generation, signing providers, customer portal behavior, public/customer-facing behavior, automatic messaging, payment processor behavior, Twilio/SMS/Facebook behavior, AI/provider calls, or device/smart-home behavior.
 
 ### Core-to-Buyer Portal Bridge / Puppy Portal Readiness Layer
 

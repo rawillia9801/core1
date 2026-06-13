@@ -2,7 +2,7 @@
 
 ## Status
 
-Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the Core Intelligence / Readiness Rules / Proposed Action Engine work.
+Reference document for Codex and developer work. This file captures the controlling business and technical direction from the owner-facing Cherolee Core OS Manual and is updated after the Breeding Program / Kennel Care / Puppy Growth Command Center work.
 
 This is not a replacement for implementation docs. It explains what Core is, what it must eventually do, and the real-world assumptions that must control build decisions.
 
@@ -54,8 +54,8 @@ Screens only matter if they read and write the correct source of truth.
 | Application Management | Receive, review, approve, deny, waitlist, and convert applicants with audit trail. | Private entry, public/embedded intake, application review, classified action outcomes, and internal matching decision-support exist; review validation/hardening still needed. |
 | Buyer & Family CRM | Track households, history, preferences, puppies, payments, and conversations. | Buyer/Family 360 workspaces exist internally. |
 | Waitlist Management | Capture timing, preferences, fee status, priority, renewal, and expiration. | Internal matching/waitlist readiness view exists; dedicated write workflow still future. |
-| Dog Records | Sire/dam profiles, registry, DNA status, health notes, retirement, and pedigree. | Internal dog profile and document vault exist. |
-| Litter & Puppy Tracking | Lifecycle from planned litter to placed puppy, with weights and milestones. | Internal kennel, litter, puppy, neonatal and media workflows exist. |
+| Dog Records | Sire/dam profiles, registry, DNA status, health notes, retirement, and pedigree. | Internal dog profile, document vault, media readiness, and breeding dog readiness views exist. |
+| Litter & Puppy Tracking | Lifecycle from planned litter to placed puppy, with weights and milestones. | Internal breeding/care command center, kennel, litter, puppy, neonatal, growth/care, and media workflows exist. |
 | Payments & Financing | Ledger truth, payment plans, deposits, refunds, reminders. | Internal ledger/payment plan readiness exists; no processor. |
 | Document Management | Deposit agreements, bills of sale, health guarantees, financing addenda, transport agreements. | Internal Document Command Center and metadata detail route exist; no generation/signature provider. |
 | Automated Email / SMTP | Application confirmations, approval notices, reminders, owner alerts. | Conditional SMTP only for application receipt owner/customer alerts. Broader email remains blocked. |
@@ -92,6 +92,8 @@ No interface gets to make the final decision. The dashboard, public forms, porta
 ```
 
 Current Core Intelligence status: `/staff/proposed-actions` now combines persisted `core_proposed_actions` review records with deterministic readiness rules derived from existing Core data. These rules explain attention, blockers, urgency, related records, and next workspace links. They are not AI and do not execute business decisions.
+
+Current breeding/care status: `/staff/breeding` and its subroutes provide an internal owner/operator command center for breeding dogs, pairings, pregnancies, whelping, litters, puppy growth, feeding, medication, tasks, alerts, and calendar readiness using existing Core and legacy breeding/care tables only. It is not a breeding automation engine, veterinary diagnosis tool, customer messaging system, public publishing path, device-control surface, or external-provider integration.
 
 ## Source Of Truth Domains
 

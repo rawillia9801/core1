@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireStaffProfile } from "@/lib/staff-auth";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,12 @@ export default async function StaffDogsPage({ searchParams }: { searchParams: Pr
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Females</p><p className="mt-3 text-3xl font-bold">{females}</p><p className="mt-2 text-sm text-slate-500">Recorded female</p></div>
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Males</p><p className="mt-3 text-3xl font-bold">{males}</p><p className="mt-2 text-sm text-slate-500">Recorded male</p></div>
         </section>
+
+        <BreedingCarePanel
+          dogSignals={dogs.filter((row) => !row.sex || !row.status).length}
+          href="/staff/breeding/dogs"
+          detail="Breeding dog readiness reviews dam/sire roles, health/genetic record coverage, heat-cycle signals, litter links, and open care tasks from existing tables."
+        />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Dog Records</h2>

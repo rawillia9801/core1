@@ -4,6 +4,7 @@ import { requireStaffProfile } from "@/lib/staff-auth";
 import type { KennelMediaRow } from "@/lib/kennel-media";
 import { recordPuppyCareObservation, recordPuppyWeight } from "./actions";
 import { ActionPanel } from "../action-panel";
+import { BreedingCarePanel } from "../breeding-care-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -610,6 +611,14 @@ export default async function StaffLittersPage({ searchParams }: { searchParams:
           mode={canLogCare ? "available" : "review-only"}
           href="/staff/actions#media"
           detail="Litter actions use existing litter, puppy care, and media-readiness workflows only; direct litter uploads, public publishing, messaging, payments, documents, and provider calls remain disconnected."
+        />
+
+        <BreedingCarePanel
+          title="Breeding / Litter Care"
+          litterSignals={missingDueDateCount + littersMissingMedia.length}
+          puppyCareSignals={puppyWatchRows.length + puppiesMissingMedia.length}
+          href="/staff/breeding/litters"
+          detail="Litter-level breeding and puppy growth signals mirror existing Core litter, puppy, weight, care, and private media rows."
         />
 
         {litterResult.warning || dogResult.warning || puppyResult.warning || weightResult.warning || puppyEventResult.warning || mediaResult.warning ? (
